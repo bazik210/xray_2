@@ -1,0 +1,68 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 14.05.2009
+//	Author		: Armen Abroyan
+//	Copyright (C) GSC Game World - 2009
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef GUI_BINDER_H_INCLUDED
+#define GUI_BINDER_H_INCLUDED
+
+namespace xray {	
+namespace editor_base {
+
+ref class input_engine;
+
+public ref class gui_binder
+{
+	typedef System::Windows::Forms::ToolStripMenuItem ToolStripMenuItem;
+	typedef System::Windows::Forms::ToolStripButton ToolStripButton;
+	typedef System::Windows::Forms::MenuStrip MenuStrip;
+
+public:
+
+	gui_binder( input_engine^ input_engine );
+
+	void			add_action_menu_item	(	MenuStrip^ menuStrip, 
+												System::String^ action_name, 
+												System::String^ strip_key, 
+												int prio );
+	void			remove_action_menu_item	(	MenuStrip^ menuStrip, 
+												System::String^ action_name, 
+												System::String^ strip_key );
+
+	void			add_menu_item			(	MenuStrip^ strip, 
+												System::String^ strip_key, 
+												System::String^ text, 
+												int prio );
+
+	void			bind					( ToolStripMenuItem^ menu_item, System::String^ action_name  );
+	void			bind					( ToolStripButton^ control, System::String^ action_name  );
+	void			unbind					( ToolStripMenuItem^ menu_item );
+	void			unbind					( ToolStripButton^ control );
+	void			update_menu_item		( ToolStripMenuItem^ item );
+	void			update_button			( ToolStripButton^ item );
+	void			update_button			( ToolStripButton^ button_item, System::String^ action_name );
+	void			update_items			( );
+	void			gui_menu_drop_down		( System::Object^  sender, System::EventArgs^  e );
+	System::Drawing::Image^ get_image		( System::String^ key );
+	void			set_image_list			( System::String^ list_id, System::Windows::Forms::ImageList^ l );
+	void			register_image			( System::String^ lmage_list_key, System::String^ image_key, int image_index );
+private:
+
+	void			gui_control_click		( System::Object^  sender, System::EventArgs^  e );
+	void			gui_menu_item_paint		( System::Object^  sender, System::Windows::Forms::PaintEventArgs^ e );
+
+	System::Drawing::Image^ get_image_internal( System::String^ key );
+
+	input_engine^						m_input_engine;
+	System::Collections::Hashtable		m_menu_items;
+	System::Collections::Hashtable		m_buttons;
+
+	System::Collections::Generic::Dictionary<System::String^, System::Windows::Forms::ImageList^>	m_images;
+	System::Collections::Generic::Dictionary<System::String^, System::String^>	m_image_key_aliases;
+}; // class gui_binder
+
+} // namespace editor_base	
+} // namespace xray
+
+#endif // #ifndef GUI_BINDER_H_INCLUDED

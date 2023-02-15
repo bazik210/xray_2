@@ -1,0 +1,144 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 11.03.2011
+//	Author		: Andrew Kolomiets
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "model_collector.h"
+#include "surface.h"
+
+namespace xray{
+namespace maya{
+
+MStatus model_collector::find_surface( MString const& sg_name, u32& surf_idx )
+{
+	u32 count = get_surfaces_count();
+	
+	for( surf_idx=0; surf_idx<count; ++surf_idx )
+	{
+		surface const* s	= get_surface(surf_idx);
+		if(s->m_full_)
+			continue;
+
+		if(s->m_sg_name == sg_name)
+			return MStatus::kSuccess;
+	}
+	return MStatus::kFailure;
+}
+
+struct geometry_collector_internal
+{
+	typedef vector< u32 >				geom_indices_type;
+	typedef vector< math::float3 >		geom_vertices_type;
+
+	struct lookup_item
+	{
+		float		square_magnitude;
+		u32			vertex_id;
+
+		inline bool operator < (lookup_item const& other)	const	{ return square_magnitude<other.square_magnitude; }
+		inline bool operator < (float const& sqm)			const	{ return square_magnitude<sqm; }
+	};
+
+	typedef vector<lookup_item>		lookup_table;
+	lookup_table					m_lookup;
+
+	int								find_vertex			( float3 const& pos ) const;
+	void							add_vertex			( float3 const& pos );
+
+	geom_indices_type				m_indices;
+	geom_vertices_type				m_vertices;
+};
+
+geometry_collector::geometry_collector( )
+:m_data		( NEW(geometry_collector_internal)() )
+{}
+geometry_collector::~geometry_collector( )
+{
+	DELETE( m_data );
+}
+
+bool geometry_collector::save_vertices( memory::writer& F) const
+{
+	// collision
+	F.open_chunk		( xray::render::model_chunk_collision_v );
+	F.write				( &m_data->m_vertices[0], m_data->m_vertices.size()*sizeof(float3) );
+    F.close_chunk		( );
+
+	return true;
+}
+
+bool geometry_collector::save_indices( memory::writer& F) const
+{
+	F.open_chunk		( xray::render::model_chunk_collision_i );
+	F.write				(&m_data->m_indices[0], m_data->m_indices.size()*sizeof(u32));
+	F.close_chunk		( );
+
+	return true;
+}
+
+u32 geometry_collector::vertices_count( ) const				
+{ 
+	return m_data->m_vertices.size(); 
+}
+
+u32 geometry_collector::indices_count( ) const				
+{ 
+	return m_data->m_indices.size(); 
+}
+
+void geometry_collector::clear( )
+{
+	m_data->m_vertices.clear	( );
+	m_data->m_indices.clear		( );
+	m_data->m_lookup.clear		( );
+}
+
+int geometry_collector_internal::find_vertex(	float3 const& position ) const
+{
+	float const sqm	= position.squared_length();
+
+	lookup_table::const_iterator it		= std::lower_bound(m_lookup.begin(), m_lookup.end(), sqm);
+	lookup_table::const_iterator it_e	= m_lookup.end();
+	for( ; it!=it_e; ++it)
+	{
+		lookup_item const& rec	= *it;
+		if(rec.square_magnitude > sqm+0.1f)
+			break;
+
+		float3 const& p		= m_vertices[rec.vertex_id];
+		if(p.is_similar(position))
+			return rec.vertex_id;
+	}
+	return -1;
+}
+
+void geometry_collector_internal::add_vertex(	float3 const& position )
+{
+	int idx = find_vertex( position );
+
+	if(-1==idx)
+	{
+		idx						= m_vertices.size();
+		m_vertices.push_back	( position );
+		
+		lookup_item				rec;
+		rec.square_magnitude	= position.squared_length();
+		rec.vertex_id			= idx;
+
+		lookup_table::iterator it = std::lower_bound(m_lookup.begin(), m_lookup.end(), rec);
+		m_lookup.insert			( it, rec );
+	}
+
+	m_indices.push_back		( idx );
+}
+
+void geometry_collector::add_vertex(	float3 const& position )
+{
+	m_data->add_vertex( position );
+}
+
+
+}// namespace maya
+}// namespace xray

@@ -1,0 +1,48 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created 	: 28.10.2008
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2009
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef PCH_H_INCLUDED
+#define PCH_H_INCLUDED
+
+#ifndef XRAY_STATIC_LIBRARIES
+#	define XRAY_ENGINE_BUILDING
+#endif // #ifndef XRAY_STATIC_LIBRARIES
+
+#ifdef SN_TARGET_PS3
+#	define XRAY_LOG_MODULE_INITIATOR		"render_ps3"
+#elif defined( _XBOX ) // #ifdef SN_TARGET_PS3
+#	define XRAY_LOG_MODULE_INITIATOR		"render_xbox360"
+#elif defined( WIN32 ) || defined( WIN64 ) // #elif _XBOX
+#	define USE_DX10	0
+#	if USE_DX10
+#		define XRAY_LOG_MODULE_INITIATOR	"render_dx10"
+#	else // #if USE_DX10
+#		define XRAY_LOG_MODULE_INITIATOR	"render_dx11"
+#	endif // #if USE_DX10
+#else // #elif WIN32 || WIN64
+#	error define your platform!
+#endif // #ifdef SN_TARGET_PS3
+
+#include <xray/extensions.h>
+
+#define XRAY_RENDER_ENGINE_BUILDING
+
+#if defined( WIN32 ) || defined( WIN64 )
+#include <speedtree/core/core.h>
+#include <speedtree/core/array.h>
+#include <speedtree/core/memory.h>
+#include <speedtree/forest/forest.h>
+#include <speedtree/forest/grass.h>
+#endif // if defined( WIN32 ) || defined( WIN64 )
+
+#include <xray/render/core/render_include.h>
+#include <xray/render/core/memory.h>
+
+#include <xray/render/core/res_effect.h>
+#include <xray/render/core/res_geometry.h>
+#include <xray/render/core/custom_config.h>
+
+#endif // #ifndef PCH_H_INCLUDED

@@ -1,0 +1,91 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 15.07.2011
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+
+#include <xray/ai/search/search_restrictor_planner_forward.h>
+
+namespace xray {
+namespace ai {
+namespace search_restrictor {
+
+typedef planner_forward::impl									restrictor;
+typedef planning::world_state::properties_type::const_iterator	const_iterator;
+
+bool restrictor::target_reached		( planner_forward::vertex_id_type const& vertex_id )
+{
+	graph_type& graph				= m_wrapper.graph();
+	const_iterator iter_vertex		= vertex_id.properties().begin();
+	const_iterator iter_end_vertex	= vertex_id.properties().end();
+	const_iterator iter_graph		= graph.target().properties().begin();
+	const_iterator iter_end_graph	= graph.target().properties().end();
+	const_iterator iter_current		= graph.current().properties().begin();
+	const_iterator iter_end_current	= graph.current().properties().end();
+	
+	for ( ; ( iter_graph != iter_end_graph ) && ( iter_vertex != iter_end_vertex ); )
+	{
+		if ( (*iter_vertex).id() < (*iter_graph).id() )
+		{
+			++iter_vertex;
+			continue;
+		}
+
+		if ( (*iter_vertex).id() <= (*iter_graph).id() )
+		{
+			if ( (*iter_vertex).value() != (*iter_graph).value() )
+				return				false;
+
+			++iter_vertex;
+			++iter_graph;
+			continue;
+		}
+
+		for ( ; ( iter_current != iter_end_current ) && ( (*iter_current).id() < (*iter_graph).id() ); )
+			++iter_current;
+
+		if ( ( iter_current == iter_end_current ) || ( (*iter_current).id() > (*iter_graph).id() ) )
+			graph.evaluate			( iter_current, iter_end_current, (*iter_graph).id() );
+
+		if ( (*iter_current).value() != (*iter_graph).value() )
+			return					false;
+
+		++iter_current;
+		++iter_graph;
+	}
+
+	if ( iter_vertex != iter_end_vertex )
+		return						true;
+
+	iter_vertex						= iter_current;
+	iter_end_vertex					= iter_end_current;
+
+	for ( ; iter_graph != iter_end_graph; )
+	{
+		if ( ( iter_vertex == iter_end_vertex ) || ( (*iter_vertex).id() > (*iter_graph).id() ) )
+			graph.evaluate			( iter_vertex, iter_end_vertex, (*iter_graph).id() );
+
+		if ( (*iter_vertex).id() < (*iter_graph).id() )
+		{
+			++iter_vertex;
+			continue;
+		}
+
+		R_ASSERT					( (*iter_vertex).id() == (*iter_graph).id(), "error in algorithm" );
+
+		if ( (*iter_vertex).value() != (*iter_graph).value() )
+			return					false;
+
+		++iter_vertex;
+		++iter_graph;
+	}
+
+	return							true;
+}
+
+} // namespace search_restrictor
+} // namespace ai
+} // namespace xray
+

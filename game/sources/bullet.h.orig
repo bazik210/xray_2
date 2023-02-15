@@ -1,0 +1,156 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 20.07.2011
+//	Author		: Evgeniy Obertyukh
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef BULLET_H_INCLUDED
+#define BULLET_H_INCLUDED
+
+#define		STRICT_FOLLOW_TRAJECTORY
+
+namespace xray{
+	namespace collision{
+		struct	ray_triangle_result;
+		class	object;
+	} // namespace xray
+}// namespace collision
+
+namespace stalker2
+{
+	class	bullet_manager;
+	enum	bullet_state;
+	enum	collision_result;
+	enum	triangle_orientation;
+
+	class bullet
+	{
+	public:
+		bullet				( bullet_manager& bullet_manager, float3 position, float3 velocity, float born_time, float air_resistance );
+		bullet				( const bullet& other );
+		~bullet				( );
+
+	private:
+		bullet_manager&		m_bullet_manager;
+
+		float				m_gravity_const;			//9.8f;
+		float3				m_gravity;					//= float3( 0, -m_gravity_const, 0 );
+		float				m_air_resistance_epsilon;	//= .1f;
+		u16					m_importance;				//=0;
+		u16					m_change_rajectory_count;	//=0;
+
+		float3				m_position;
+		float3				m_velocity;
+		float3				m_start_position;
+		float3				m_start_velocity;
+
+		float				m_born_time;
+		float				m_life_time;
+		float				m_air_resistance;
+		float				m_current_resistance;
+		float				m_max_distance;
+		float				m_fly_distance;
+
+		typedef collision::object object;
+		const object*		m_inside_collision_object;
+		float3				m_enter_collision_point;
+
+		struct collision_point
+		{
+			collision_point( object const* obj, float d, bool is_back ):
+				object			( obj ),
+				distance		( d ),
+				is_back_face	( is_back ){}
+
+			object const*	object;
+			float	distance;
+			bool	is_back_face;
+		};
+
+	public:
+		bullet*				next;
+		
+	private:
+		void				operator =						( bullet const& other );
+
+	private:
+		float3				compute_parabolic_velocity		( float time );
+		float3				compute_trajectory_velocity		( float time );
+		float3				compute_parabolic_position		( float time );
+		float3				compute_trajectory_position		( float time );
+		float				get_parabolic_time				( );
+
+	public:
+		float				pick_next_permissible_time		( float const low_time, float high_time	);
+
+	private:
+		bool				pick_permissible_range			( float& result, float const low_time, float const high_time );
+		float				get_check_time					( float const start_low_time, float high_time );
+		float				get_check_time_in_vacuum		( float start_low_time, float const high_time );
+		float				compute_max_error				( float const low_time, float const high_time );
+		collision_result	check_collision					( float3 start_position, float start_time, float current_time );
+		void				fix_collision_point_and_time	(	float3& collide_point,
+																float& collision_time,
+																float const start_time,
+																float const current_time,
+																triangle_orientation const orientation,
+																float3 const& triangle_normal
+															);
+		void				collide_front_face				(	float3 const& collide_point,
+																float3 const& direction,
+																float3 const& triangle_normal,
+																float const speed,
+																float const collision_time,
+																float3& start_position,
+																float& start_time,
+																float& current_time,
+																collision::ray_triangle_result const& triangle
+															);
+		bool				try_reflect						(	float3 const& collide_point,
+																float3 direction,
+																float3 const& triangle_normal,
+																float speed,
+																float const collision_time,
+																float3& start_position,
+																float& start_time,
+																float& current_time,
+																float const cos_alpha																
+															);
+		bool				try_to_pierce					(	float3 const& collide_point,
+																float3 const& direction,
+																float3 const& triangle_normal,
+																float speed,
+																float const collision_time,
+																float3& start_position,
+																float& start_time,
+																float& current_time																
+															);
+		void				change_trajectory				( float3 const& new_position, float3 const& new_velocity, float const collision_time );
+		bool				collision_predicate				( xray::collision::ray_triangle_result const& result );
+		bool				update_bullet_position			( float const time );
+
+	public:
+		bullet_state		tick							( float elapsed_game_seconds );
+		
+		float3 const&		get_start_position				( ) const;
+		float3 const&		get_start_velocity				( ) const;
+
+		float3 const&		get_position					( ) const;
+		float3 const&		get_velocity					( ) const;
+		
+		float3				evaluate_position				( float time, float& fall_down_time );
+		float				get_max_time					( );
+
+	}; // class bullet
+
+	typedef intrusive_list< bullet, bullet*, &bullet::next, threading::single_threading_policy >	bullets_list;
+
+	enum bullet_state
+	{
+		bullet_still_flying,
+		bullet_finish_flying
+	}; // enum bullet_state
+
+} // namespace stalker2
+
+#endif // #ifndef BULLET_H_INCLUDED

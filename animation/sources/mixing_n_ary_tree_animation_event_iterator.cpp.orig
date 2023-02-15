@@ -1,0 +1,268 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 26.09.2011
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "mixing_n_ary_tree_animation_event_iterator.h"
+#include "mixing_n_ary_tree_time_in_ms_calculator.h"
+#include <xray/animation/animation_interval.h>
+#include "mixing_n_ary_tree_time_scale_calculator.h"
+#include <xray/animation/mixing_animation_state.h>
+
+using xray::animation::mixing::n_ary_tree_animation_event_iterator;
+using xray::animation::mixing::n_ary_tree_node_animation_interval;
+using xray::animation::mixing::animation_state;
+using xray::animation::mixing::n_ary_tree_animation_node;
+using xray::animation::mixing::channel_event_callback_base;
+
+n_ary_tree_animation_event_iterator::n_ary_tree_animation_event_iterator	(
+		animation_state& animation_state,
+		n_ary_tree_animation_node& animation_node,
+		u32 const start_time_in_ms,
+		u32 const event_types
+	) :
+	m_animation							( &animation_node ),
+	m_value								(
+		animation_state.animation_interval_id,
+		animation_state.animation_interval_time,
+		start_time_in_ms,
+		event_types
+	)
+{
+	advance								( event_types );
+}
+
+void n_ary_tree_animation_event_iterator::dispatch_callback			(
+		channel_event_callback_base const& callback,
+		u8 const domain_data
+	) const
+{
+	channel_event_callback_params		parameters;
+	parameters.domain_data				= domain_data;
+	callback.call						( parameters  );
+}
+
+void n_ary_tree_animation_event_iterator::dispatch_callbacks		(
+		n_ary_tree_node_animation_interval const& interval,
+		float const target_time
+	) const
+{
+	cubic_spline_skeleton_animation_pinned animation_pinned( interval.animation() );
+	float const target_animation_time	= interval.time_offset() + target_time;
+	u32 const channels_count			= animation_pinned->event_channels().channels_count();
+	R_ASSERT							( channels_count );
+
+	// WTF?? why callback stores information about channels it is subscribed on?
+	// Why not vice versa?
+#pragma message( XRAY_TODO("Dima to Dima: change channel callbacks storage scheme") )
+	u32 const buffer_size				= channels_count * sizeof(u32);
+	u32* const processed_channels		= static_cast<u32*>( ALLOCA( buffer_size ) );
+	memory::fill32						( processed_channels, buffer_size, u32(-1), channels_count );
+
+	channel_event_callback_base const* i		= interval.callbacks( );
+	channel_event_callback_base const* const e = i + interval.callbacks_count( );
+	for ( ; i != e; ++i ) {
+		u32 const channel_id			= (*i).channel_id( );
+		R_ASSERT_CMP					( channel_id, <, channels_count );
+		
+		event_channel const& channel	= animation_pinned->event_channels().channel( channel_id );
+		u32 const knots_count			= channel.knots_count( );
+		if ( processed_channels[ channel_id ] == knots_count )
+			continue;
+
+		if ( processed_channels[ channel_id ] == u32(-1) ) {
+			float const* const found	= std::lower_bound( channel.knots(), channel.knots() + knots_count, target_animation_time*default_fps );
+			if ( found )
+				processed_channels[ channel_id ]	= u32( found - channel.knots() );
+			else {
+				processed_channels[ channel_id ]	= knots_count;
+				continue;
+			}
+		}
+
+		R_ASSERT_CMP					( processed_channels[ channel_id ], <, knots_count );
+		dispatch_callback				( *i, channel.domain( processed_channels[ channel_id ] ).data );
+	}
+}
+
+void n_ary_tree_animation_event_iterator::dispatch_callbacks		( ) const
+{
+	R_ASSERT							( m_value.event_type & time_event_channel_callback_should_be_fired );
+	n_ary_tree_node_animation_interval const* current_animation_interval	= animation_intervals_begin( *m_animation ) + m_value.animation_interval_id;
+	dispatch_callbacks					( *current_animation_interval, m_value.animation_interval_time );
+}
+
+float n_ary_tree_animation_event_iterator::get_nearest_animation_interval_event_time	(
+		n_ary_tree_node_animation_interval const& interval,
+		float const start_time,
+		float const target_time
+	)
+{
+	int const time_direction			= start_time <= target_time ? 1 : -1;
+
+	cubic_spline_skeleton_animation_pinned animation_pinned( interval.animation() );
+	float const start_animation_time	= interval.time_offset() + start_time;
+	float const target_animation_time	= interval.time_offset() + target_time;
+	float result_animation_time			= target_animation_time;
+
+	u32 const channels_count			= animation_pinned->event_channels().channels_count();
+	if ( !channels_count )
+		return							result_animation_time;
+
+	// WTF?? why callback stores information about channels it is subscribed on?
+	// Why not vice versa?
+#pragma message( XRAY_TODO("Dima to Dima: change channel callbacks storage scheme") )
+	u32 const buffer_size				= channels_count * sizeof(u8);
+	pbyte const processed_channels		= static_cast<pbyte>( ALLOCA( buffer_size ) );
+	memory::fill8						( processed_channels, buffer_size, 0, channels_count );
+
+	channel_event_callback_base const* i		= interval.callbacks( );
+	channel_event_callback_base const* const e = i + interval.callbacks_count( );
+	for ( ; i != e; ++i ) {
+		u32 const channel_id			= (*i).channel_id( );
+		R_ASSERT_CMP					( channel_id, <, channels_count );
+		
+		event_channel const& channel	= animation_pinned->event_channels().channel( channel_id );
+		if ( processed_channels[ channel_id ] )
+			continue;
+
+		processed_channels[ channel_id ] = 1;
+
+		u32 const knots_count			= channel.knots_count( );
+		float const* current_knot		= time_direction == 1 ? channel.knots() : (channel.knots() + knots_count - 1);
+		float const* const knots_end	= time_direction == 1 ? (channel.knots() + knots_count) : (channel.knots() - 1);
+		for ( ; current_knot != knots_end; current_knot += time_direction ) {
+			float const knot_time		=  (*current_knot) / default_fps;
+			R_ASSERT_CMP				( knot_time, >=, 0.f);
+			if ( knot_time * time_direction < start_animation_time * time_direction )
+				continue;
+
+			if ( knot_time * time_direction > target_animation_time * time_direction  )
+				break;
+
+			if ( knot_time * time_direction >= result_animation_time * time_direction )
+				break;
+
+			result_animation_time		= knot_time;
+			break;
+		}
+	}
+
+	return								result_animation_time;
+}
+
+u32 n_ary_tree_animation_event_iterator::get_time_in_ms				(
+		u32 const start_time_in_ms,
+		float const time_from_interval_start,
+		float& event_time,
+		u32& event_type
+	)
+{
+	xray::animation::mixing::n_ary_tree_time_in_ms_calculator time_in_ms_calculator(
+		*(m_animation->animation_to_synchronize_with() ? m_animation->animation_to_synchronize_with() : m_animation),
+		start_time_in_ms,
+		time_from_interval_start,
+		event_time,
+		event_type
+	);
+	u32 const result					= time_in_ms_calculator.time_in_ms( );
+	event_type							= time_in_ms_calculator.event_type( );
+	event_time							= time_in_ms_calculator.event_time( );
+	return								result;
+}
+
+void n_ary_tree_animation_event_iterator::advance					( u32 const initial_event_types )
+{
+	n_ary_tree_node_animation_interval const* current_interval	= animation_intervals_begin( *m_animation ) + m_value.animation_interval_id;
+	R_ASSERT_CMP						( (*current_interval).length(), >=, m_value.animation_interval_time );
+
+	xray::animation::mixing::n_ary_tree_time_scale_calculator time_scale_calculator(
+		m_value.event_time_in_ms,
+		m_value.animation_interval_time,
+		m_value.event_time_in_ms,
+		xray::animation::mixing::n_ary_tree_time_scale_calculator::forbid_transitions_destroying
+	);
+	n_ary_tree_animation_node& driving_animation = *(m_animation->animation_to_synchronize_with() ? m_animation->animation_to_synchronize_with() : m_animation);
+	R_ASSERT							( !driving_animation.animation_to_synchronize_with() );
+	(*driving_animation.operands( sizeof(n_ary_tree_animation_node) ))->accept	( time_scale_calculator );
+	float time_scale					= time_scale_calculator.time_scale();
+	// check if we start at the time moment, where time scale is 0,
+	// but it changes over time
+	// (it is possible to have animation with time scale = 0 as a constant)
+	if ( !initial_event_types && (time_scale == 0.f) ) {
+		xray::animation::mixing::n_ary_tree_time_scale_calculator time_scale_calculator(
+			m_value.event_time_in_ms + 1,
+			m_value.animation_interval_time,
+			m_value.event_time_in_ms + 1,
+			xray::animation::mixing::n_ary_tree_time_scale_calculator::forbid_transitions_destroying
+		);
+		(*driving_animation.operands( sizeof(n_ary_tree_animation_node) ))->accept	( time_scale_calculator );
+		time_scale						= time_scale_calculator.time_scale();
+	}
+
+	if ( !initial_event_types && (time_scale == 0.f) ) {
+		m_animation						= 0;
+		m_value							= animation_event( u32(-1), 0 );
+		return;
+	}
+
+	// here we assume, that driving and driven animations must have the same interval ids and interval cycles
+	n_ary_tree_node_animation_interval const* current_driving_interval	= animation_intervals_begin( *(m_animation->animation_to_synchronize_with() ? m_animation->animation_to_synchronize_with() : m_animation )) + m_value.animation_interval_id;
+	float const driving_animation_factor = current_driving_interval->length() / current_interval->length();
+	m_value.event_type					= initial_event_types;
+	if ( time_scale >= 0.f ) {
+		float const channel_event_time	= get_nearest_animation_interval_event_time( *current_interval, m_value.animation_interval_time, (*current_interval).length() );
+		float const event_time			= xray::math::min( channel_event_time, (*current_interval).length() );
+		u32 event_type					= 0;
+		event_type						|= channel_event_time == event_time ? time_event_channel_callback_should_be_fired : 0;
+		event_type						|= (*current_interval).length() == event_time ? time_event_animation_interval_ended : 0;
+		float new_event_time			= event_time*driving_animation_factor;
+		u32 const new_event_time_in_ms	= get_time_in_ms( m_value.event_time_in_ms, m_value.animation_interval_time*driving_animation_factor, new_event_time, event_type );
+		if ( initial_event_types && (new_event_time_in_ms != m_value.event_time_in_ms) )
+			return;
+
+		new_event_time					/= driving_animation_factor;
+		R_ASSERT_CMP					( m_value.event_time_in_ms, <=, new_event_time_in_ms );
+		m_value.event_time_in_ms		= new_event_time_in_ms;
+		m_value.animation_interval_time	= new_event_time;
+		m_value.event_type				|= event_type;
+
+		if ( new_event_time == (*current_interval).length() ) {
+			m_value.animation_interval_time	= 0;
+			if ( ++m_value.animation_interval_id == m_animation->intervals_count() )
+				m_value.animation_interval_id	= m_animation->cycle_from_interval( );
+		}
+	}
+	else {
+		float const channel_event_time	= get_nearest_animation_interval_event_time( *current_interval, m_value.animation_interval_time, 0.f );
+		float const event_time			= xray::math::max( channel_event_time, 0.f );
+		u32 event_type					= 0;
+		event_type						|= channel_event_time == event_time ? time_event_channel_callback_should_be_fired : 0;
+		event_type						|= event_time == 0.f ? time_event_animation_interval_ended : 0;
+		float new_event_time			= event_time*driving_animation_factor;
+		u32 const new_event_time_in_ms	= get_time_in_ms( m_value.event_time_in_ms, m_value.animation_interval_time*driving_animation_factor, new_event_time, event_type );
+		if ( initial_event_types && (new_event_time_in_ms != m_value.event_time_in_ms) )
+			return;
+
+		new_event_time					/= driving_animation_factor;
+		R_ASSERT_CMP					( m_value.event_time_in_ms, <=, new_event_time_in_ms );
+		m_value.event_time_in_ms		= new_event_time_in_ms;
+		m_value.animation_interval_time	= new_event_time;
+		m_value.event_type				|= event_type;
+
+		if ( new_event_time == 0.f ) {
+			if ( !m_value.animation_interval_id || (--m_value.animation_interval_id < m_animation->cycle_from_interval()) )
+				m_value.animation_interval_id	= m_animation->intervals_count() - 1;
+
+			m_value.animation_interval_time	= animation_intervals_begin( *m_animation )[m_value.animation_interval_id].length( );
+		}
+	}
+}
+
+n_ary_tree_animation_event_iterator& n_ary_tree_animation_event_iterator::operator ++	( )
+{
+	advance								( 0 );
+	return								*this;
+}

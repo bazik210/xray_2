@@ -1,0 +1,197 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 02.09.2011
+//	Author		: Nikolay Partas
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "editor_world.h"
+#include "render_options_editor_resource.h"
+
+#include "render_options_editor_source.h"
+#include "render_options_editor.h"
+
+using xray::editor::wpf_controls::property_editors::attributes::combo_box_items_attribute;
+using xray::editor::wpf_controls::property_editors::attributes::external_editor_attribute;
+using xray::editor::wpf_controls::property_editors::attributes::external_editor_event_handler;
+using xray::editor::wpf_controls::i_property_value;
+
+#pragma managed( push, off )
+#	include <xray/render/engine/base_classes.h>
+#	include <xray/render/facade/editor_renderer.h>
+#pragma managed( pop )
+
+namespace xray {
+namespace editor {
+
+render_options_editor_resource::render_options_editor_resource( editor_world& in_editor_world, System::String^ resource_name, resource_changed_delegate^ changed_delegate, resource_load_delegate^ loaded_delegate ):
+	m_editor_world(in_editor_world)
+{
+	m_name					= resource_name;
+	
+	subscribe_on_changed	( changed_delegate );
+	subscribe_on_loaded		( loaded_delegate );
+	m_options_config		= NEW(configs::lua_config_ptr)();
+	m_options_config_backup	= NEW(configs::lua_config_ptr)(configs::create_lua_config());
+	init					( );
+	
+	m_load_query			= NEW(query_result_delegate)(gcnew query_result_delegate::Delegate( this, &render_options_editor_resource::options_loaded), g_allocator);
+	
+	System::String^	req_name = "resources/render/" + resource_name + ".cfg";
+	
+	resources::query_resource(
+					unmanaged_string(req_name).c_str(),
+					resources::lua_config_class,
+					boost::bind(&query_result_delegate::callback, m_load_query, _1),
+					g_allocator
+				);
+}
+
+void render_options_editor_resource::init( )
+{
+	if(m_type_list.Count!=0)
+		return;
+}
+
+void render_options_editor_resource::load_internal( )
+{
+	m_load_query			= nullptr;
+	
+	loaded					= true;
+	(*m_options_config_backup)->get_root().assign_lua_value( (*m_options_config)->get_root().copy() );
+	
+	//pcstr property_id		= "r_enabled_g_stage";
+	configs::lua_config_value const& options_table = (*m_options_config)->get_root()["options"];
+	//bool test_bool			= bool(options_table["r_enabled_g_stage"]);
+	
+	for (configs::lua_config_value::iterator it = options_table.begin(); it != options_table.end(); ++it)
+	{
+		pcstr	property_id									= it.key();
+		
+		configs::lua_config_value& value					= (*it);
+		
+		xray::configs::enum_types property_type				= (*it)["value"].get_type();
+		
+		switch (property_type)
+		{
+		case xray::configs::t_boolean:
+			{
+				lua_property_value_bool^					prop;
+				System::String^ property_name				= gcnew System::String(property_id);
+				prop										= gcnew lua_property_value_bool		( value, "value" );
+				m_properties.Add							( property_name, prop );
+			}
+			break;
+		case xray::configs::t_float:
+		case xray::configs::t_integer:
+			{
+				lua_property_value_float^					prop;
+				System::String^ property_name				= gcnew System::String(property_id);
+				prop										= gcnew lua_property_value_float	( value, "value" );
+				m_properties.Add							( property_name, prop );
+			}
+			break;
+		default:
+			NODEFAULT();
+			break;
+		}
+	}
+	
+	properties_changed		( );
+	m_loaded_delegate		( this, true );
+}
+
+void render_options_editor_resource::options_loaded( resources::queries_result& data )
+{
+	if (!data.is_successful())
+		return;
+	
+	(*m_options_config)		= static_cast_resource_ptr<configs::lua_config_ptr>(data[0].get_unmanaged_resource());
+	
+	load_internal			();
+}
+
+render_options_editor_resource::~render_options_editor_resource( )
+{
+	DELETE			( m_options_config );
+	DELETE			( m_options_config_backup );
+	if(m_load_query)
+		m_load_query->m_rejected = true;
+	for each (xray::editor::wpf_controls::i_property_value^ p in m_properties.Values)
+		delete p;
+}
+
+void render_options_editor_resource::apply_changes( )
+{
+	if(loaded)
+		(*m_options_config_backup)->get_root().assign_lua_value( (*m_options_config)->get_root().copy() );
+}
+
+void render_options_editor_resource::copy_from( resource_editor_resource^ other )
+{
+	render_options_editor_resource^ other_resource			= safe_cast<render_options_editor_resource^>( other );
+	m_options_config					= NEW( configs::lua_config_ptr )( configs::create_lua_config() );
+	( *m_options_config )->get_root( )	= ( *other_resource->m_options_config )->get_root( ).copy( );
+	store_backup_config					( );
+	load_internal						( );
+}
+
+void render_options_editor_resource::store_backup_config( )
+{
+	//save default config
+	(*m_options_config_backup)->get_root().assign_lua_value( (*m_options_config)->get_root().copy() );
+}
+
+void render_options_editor_resource::reset_to_default( )
+{
+	if(loaded)
+		(*m_options_config)->get_root().assign_lua_value( (*m_options_config_backup)->get_root().copy() );
+}
+
+void render_options_editor_resource::save( )
+{
+//	if(loaded)
+//		(*m_options_config)->save();
+	
+	if (loaded)
+	{
+		configs::lua_config_ptr config_ptr		= configs::create_lua_config( unmanaged_string( resource_name(m_name)).c_str() );
+		config_ptr->get_root().assign_lua_value	( ( *m_options_config )->get_root() );
+		config_ptr->save						( );	
+		
+		m_old_name					= m_name;	
+		if (m_editor_world.get_selected_renderer_configuration() == unmanaged_string(name).c_str())
+			m_editor_world.engine().get_renderer_world().editor_renderer().set_renderer_configuration(unmanaged_string(name).c_str());
+		
+		m_editor_world.updated_render_options_list();
+	}
+};
+
+wpf_property_container^ render_options_editor_resource::get_property_container( bool )
+{
+	unmanaged_string s(m_name);
+	
+	wpf_property_container^ cont	= gcnew wpf_property_container;
+	
+//	property_descriptor^ desc		= nullptr;
+	
+	cont->properties->add_from_obj( this, "name" );
+	
+	if( m_properties.Count !=0 )
+	{
+		for each( KeyValuePair<String^, i_property_value^>^ p in m_properties )
+		{
+			cont->properties->add( gcnew property_descriptor( p->Key, p->Value ) );
+		}
+	}
+	
+	return cont;
+}
+
+System::String^ render_options_editor_resource::name::get( )
+{
+	return m_name;
+}
+
+} // namespace editor
+} // namespace xray

@@ -1,0 +1,189 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 13.08.2010
+//	Author		: Andrew Kolomiets
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "render_model_user.h"
+#include <xray/render/core/decl_utils.h>
+#include <xray/render/core/utils.h>
+#include <xray/render/engine/model_format.h>
+#include <xray/render/core/resource_manager.h>
+#include <xray/render/core/effect_manager.h>
+#include <xray/render/core/untyped_buffer.h>
+#include "material.h"
+#include <xray/render/core/res_effect.h>
+#include <xray/render/core/res_geometry.h>
+#include <xray/render/core/custom_config.h>
+
+#pragma warning( push )
+#pragma warning( disable : 4995 )
+#include <d3dx9mesh.h>
+#pragma warning( pop )
+
+namespace xray {
+namespace render {
+
+void user_render_surface::material_ready( resources::queries_result& data, render::material_effects_instance_cook_data* cook_data  )
+{
+	DELETE						( cook_data );
+	
+	if(data.is_successful())
+		m_materail_effects_instance = static_cast_resource_ptr<material_effects_instance_ptr>(data[0].get_unmanaged_resource());
+}
+
+void user_render_model_instance::assign_surface( user_render_surface* surface )
+{ 
+	m_surface							= surface;
+	m_surface_instance.m_render_surface = surface;
+	m_surface_instance.m_transform		= &m_transform;
+	m_surface_instance.m_parent			= this;
+	m_surface_instance.m_visible		= true;
+
+} 
+
+void user_render_model_instance::get_surfaces( render_surface_instances& dest, bool visible_only )
+{
+	XRAY_UNREFERENCED_PARAMETER	( visible_only );
+	dest.push_back				( &m_surface_instance );
+};
+
+
+
+const D3D_INPUT_ELEMENT_DESC layout_editable[] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,  D3D_INPUT_PER_VERTEX_DATA, 0 }, // pos.xyz
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 12, D3D_INPUT_PER_VERTEX_DATA, 0 },
+};
+struct vertex_editable
+{
+	float3 position;
+	float2 uv;
+};
+
+void user_render_surface_editable::load_from_chunk_data( memory::chunk_reader& chunk )
+{
+	m_vertex_input_type			= render::null_vertex_input_type;
+	m_aabbox.min				= float3(-10.0f, -10.0f, -10.0f);
+	m_aabbox.max				= float3(10.0f, 10.0f, 10.0f);
+	memory::reader reader		= chunk.open_reader( model_texture);
+	
+	fixed_string<256> material_name	= reader.r_string();
+	
+	reader						= chunk.open_reader( model_chunk_vertices);
+
+
+	// The visuals are create with dynamic usage temporary.
+	bool dynamic		= true;
+
+	m_render_geometry.vertex_count		= reader.r_u32				();
+	u32 stride							= sizeof(vertex_editable);
+	untyped_buffer_ptr vb				= resource_manager::ref().create_buffer( 
+		m_render_geometry.vertex_count*stride, 
+		reader.pointer(), 
+		enum_buffer_type_vertex, 
+		dynamic);
+
+//--- read indices here
+
+	reader								= chunk.open_reader( model_chunk_indices);
+	m_render_geometry.index_count		= reader.r_u32();
+	m_render_geometry.primitive_count	= m_render_geometry.index_count/3;
+
+	untyped_buffer_ptr ib				= resource_manager::ref().create_buffer( m_render_geometry.index_count*2, reader.pointer(), enum_buffer_type_index, false);
+
+	ref_declaration decl				= resource_manager::ref().create_declaration( layout_editable );
+	m_render_geometry.geom				= resource_manager::ref().create_geometry( &*decl, stride, *vb, *ib);
+
+	m_vb								= &*vb;
+
+	render::material_effects_instance_cook_data* cook_data = 
+		NEW(render::material_effects_instance_cook_data)(render::null_vertex_input_type, NULL, false);
+	
+	resources::user_data_variant		user_data;
+	user_data.set						(cook_data);
+	
+	resources::query_resource			(
+		material_name.c_str(), 
+		resources::material_effects_instance_class, 
+		boost::bind(
+			&user_render_surface_editable::material_ready, 
+			this, 
+			_1,
+			cook_data
+		),
+		g_allocator,
+		&user_data
+	);
+}
+
+const D3D_INPUT_ELEMENT_DESC layout_wire[] =
+{
+	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,	0, 0,  D3D_INPUT_PER_VERTEX_DATA, 0 }, // pos.xyz
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,		0, 12, D3D_INPUT_PER_VERTEX_DATA, 0 },
+};
+
+struct vertex_wire
+{
+	float3 position;
+	float2 uv;
+};
+
+
+void user_render_surface_wire::load_from_chunk_data( memory::chunk_reader& chunk )
+{
+	//m_vertex_input_type			= render::null_vertex_input_type;
+
+	//memory::reader reader		= chunk.open_reader( model_texture);
+	//
+	//fixed_string<256> material_name	= reader.r_string();
+	//
+	//reader						= chunk.open_reader( model_chunk_vertices);
+
+
+	//m_aabbox.min				= ;//we need to calculate aabb while vertex loading
+	//m_aabbox.max				= ;
+
+	//// The visuals are create with dynamic usage temporary.
+	//bool dynamic		= true;
+
+	//m_render_geometry.vertex_count		= reader.r_u32				();
+	//u32 stride							= sizeof(vertex_wire);
+	//untyped_buffer_ptr vb				= resource_manager::ref().create_buffer( 
+	//	m_render_geometry.vertex_count*stride, 
+	//	reader.pointer(), 
+	//	enum_buffer_type_vertex, 
+	//	dynamic);
+
+	//reader								= chunk.open_reader( model_chunk_indices);
+	//m_render_geometry.index_count		= reader.r_u32();
+	//m_render_geometry.primitive_count	= m_render_geometry.index_count/3;
+
+	//untyped_buffer_ptr ib				= resource_manager::ref().create_buffer( m_render_geometry.index_count*2, reader.pointer(), enum_buffer_type_index, false);
+
+	//ref_declaration decl				= resource_manager::ref().create_declaration( layout_wire );
+	//m_render_geometry.geom				= resource_manager::ref().create_geometry( &*decl, stride, *vb, *ib);
+
+	//render::material_effects_instance_cook_data* cook_data = 
+	//	NEW(render::material_effects_instance_cook_data)(render::null_vertex_input_type, NULL, false);
+	//
+	//resources::user_data_variant		user_data;
+	//user_data.set						(cook_data);
+	//
+	//resources::query_resource			(
+	//	material_name.c_str(), 
+	//	resources::material_effects_instance_class, 
+	//	boost::bind(
+	//		&user_render_surface_editable::material_ready, 
+	//		this, 
+	//		_1,
+	//		cook_data
+	//	),
+	//	g_allocator,
+	//	&user_data
+	//);
+}
+
+} // namespace render 
+} // namespace xray 

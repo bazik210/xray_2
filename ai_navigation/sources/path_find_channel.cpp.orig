@@ -1,0 +1,336 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 08.09.2011
+//	Author		: Sergey Lozinski
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "path_find_channel.h"
+#include <xray/ai/search/vertex_allocator_fixed_count.h>
+#include <xray/ai/search/vertex_manager_fixed_count_hash.h>
+#include <xray/ai/search/priority_queue_binary_heap.h>
+#include <xray/ai/search/path_constructor_vertex.h>
+#include <xray/ai/search/a_star.h>
+#include <xray/ai/search/search_restrictor_generic.h>
+
+using xray::ai::navigation::path_find_channel;
+using xray::ai::navigation::triangles_mesh_type;
+using xray::ai::navigation::path_find_funnel;
+using xray::math::float3;
+
+typedef u32	vertex_id_type;
+typedef u32	edge_id_type;
+typedef float distance_type;
+
+class triangles_mesh_graph_wrapper : private boost::noncopyable {
+public:
+	struct vertex_impl {};
+	struct look_up_cell_impl {};
+	typedef edge_id_type const* const_edge_iterator;
+
+public:
+	inline			triangles_mesh_graph_wrapper( triangles_mesh_type const& graph ) :
+		m_graph				( graph )
+	{
+	}
+
+	inline	void	on_before_search			( )
+	{
+	}
+
+	inline	void	on_after_search				( bool const success )
+	{
+		XRAY_UNREFERENCED_PARAMETER	( success );
+	}
+
+	inline	void	edge_iterators				( vertex_id_type const vertex_id, const_edge_iterator& begin, const_edge_iterator& end ) const
+	{
+		begin				= &m_graph.data[ vertex_id ].neighbours[0];
+		end					= begin + 3;
+	}
+
+	inline	vertex_id_type	vertex_id			( const_edge_iterator const iterator ) const
+	{
+		return				*iterator;
+	}
+
+	inline	edge_id_type	edge_id				( const_edge_iterator const iterator ) const
+	{
+		// since we do not build edge paths,
+		// we can omit edge id by iterator computation
+		XRAY_UNREFERENCED_PARAMETER	( iterator );
+		return				0;
+	}
+
+private:
+	triangles_mesh_type const&	m_graph;
+}; // class triangles_mesh_graph_wrapper
+
+class euclidian_distance_heuristics : private boost::noncopyable {
+public:
+	inline	euclidian_distance_heuristics		(
+			triangles_mesh_type const& graph,
+			vertex_id_type const start_vertex_id,
+			vertex_id_type const target_vertex_id,
+			float3 const& start_position,
+			float3 const& target_position
+		) :
+		m_graph				( graph ),
+		m_start_vertex_id	( start_vertex_id ),
+		m_start_position	( start_position ),
+		m_target_position	( target_position )
+	{
+		XRAY_UNREFERENCED_PARAMETER	( target_vertex_id );
+	}
+
+	inline	float3	triangle_center				( vertex_id_type const vertex_id ) const
+	{
+		return				( m_graph.vertices[m_graph.indices[ 3*vertex_id + 0]] + m_graph.vertices[ m_graph.indices[ 3*vertex_id + 1] ] + m_graph.vertices[m_graph.indices[ 3*vertex_id + 2]] ) / 3.f;
+	}
+
+	inline	void	on_before_search			( )
+	{
+	}
+
+	inline	void	on_after_search				( bool const success )
+	{
+		XRAY_UNREFERENCED_PARAMETER	( success );
+	}
+
+	inline	void	on_start_iteration			( vertex_id_type const vertex_id )
+	{
+		m_current_triangle_center	= m_start_vertex_id == vertex_id ? triangle_center( vertex_id ) : m_start_position;
+	}
+
+	inline	float	estimate					( vertex_id_type const vertex_id ) const
+	{
+		return				length( triangle_center(vertex_id) - m_target_position );
+	}
+
+	inline	float	evaluate					( vertex_id_type const current_vertex_id, vertex_id_type const neighbour_vertex_id, triangles_mesh_graph_wrapper::const_edge_iterator const iterator ) const
+	{
+		XRAY_UNREFERENCED_PARAMETERS( iterator, current_vertex_id );
+		return				length( m_current_triangle_center - triangle_center(neighbour_vertex_id) );
+	}
+
+	static inline bool metric_euclidian			( )
+	{
+		return				true;
+	}
+
+private:
+	triangles_mesh_type const&	m_graph;
+	u32 const					m_start_vertex_id;
+	float3 const&				m_start_position;
+	float3 const&				m_target_position;
+	float3						m_current_triangle_center;
+}; // class euclidian_distance_heuristics
+
+class triangles_mesh_search_restrictor :
+	public xray::ai::search_restrictor::generic <
+		vertex_id_type,
+		triangles_mesh_graph_wrapper::const_edge_iterator,
+		distance_type
+	>
+{
+private:
+	typedef xray::ai::search_restrictor::generic <
+		vertex_id_type,
+		triangles_mesh_graph_wrapper::const_edge_iterator,
+		distance_type
+	> super;
+
+public:
+	inline			triangles_mesh_search_restrictor	(
+						triangles_mesh_type const& graph,
+						vertex_id_type const& start_vertex_id,
+						vertex_id_type const& target_vertex_id,
+						distance_type const& max_range = std::numeric_limits< distance_type >::max(),
+						u32 const max_iteration_count = u32(-1),
+						u32 const max_visited_vertex_count = u32(-1)
+					) :
+		super	(
+			start_vertex_id,
+			target_vertex_id,
+			max_range,
+			max_iteration_count,
+			max_visited_vertex_count
+		),
+		m_graph				( graph )
+	{
+	}
+
+	inline	bool	accessible	( vertex_id_type const& neighbour_vertex_id, vertex_id_type const& current_vertex_id, triangles_mesh_graph_wrapper::const_edge_iterator const& edge_iterator ) const
+	{
+		if ( neighbour_vertex_id == u32(-1) )
+			return							false;
+
+		xray::ai::navigation::navigation_triangle const& triangle = m_graph.data[ current_vertex_id ];
+		u32 const edge_id					= u32(edge_iterator - &triangle.neighbours[0]);
+		return								triangle.obstructions[ edge_id ] == 0.f;
+	}
+
+private:
+	triangles_mesh_type const&	m_graph;
+}; // struct triangles_mesh_search_restrictor
+
+
+namespace xray {
+namespace ai {
+namespace vertex_manager {
+
+inline	u32	hash_value	( vertex_id_type const vertex_id )
+{
+	return					vertex_id;
+}
+
+} // namespace vertex_manager
+} // namespace ai
+} // namespace xray
+
+class search_service {
+public:
+	typedef distance_type									distance_type;
+	typedef vertex_id_type									vertex_id_type;
+	typedef edge_id_type									edge_id_type;
+	typedef xray::ai::vertex_allocator::fixed_count			vertex_allocator_type;
+	typedef xray::ai::vertex_manager::fixed_count_hash		vertex_manager_type;
+	typedef xray::ai::priority_queue::binary_heap			priority_queue_type;
+	typedef triangles_mesh_graph_wrapper					graph_wrapper_type;
+	typedef xray::ai::path_constructor::vertex				path_constructor_helper_type;
+	typedef xray::ai::a_star								algorithm_type;
+
+	struct vertex_type : 
+		public algorithm_type::vertex_helper< distance_type >::vertex_impl,
+		public graph_wrapper_type::vertex_impl,
+		public path_constructor_helper_type::vertex_impl< vertex_type >,
+		public priority_queue_type::vertex_impl,
+		public vertex_manager_type::vertex_helper< vertex_id_type >::vertex_impl,
+		public vertex_allocator_type::vertex_impl
+	{};
+
+	struct look_up_cell_type :
+		public algorithm_type::look_up_cell_impl,
+		public graph_wrapper_type::look_up_cell_impl,
+		public path_constructor_helper_type::look_up_cell_impl,
+		public priority_queue_type::look_up_cell_impl,
+		public vertex_manager_type::look_up_cell_helper< vertex_type >::look_up_cell_impl< look_up_cell_type >,
+		public vertex_allocator_type::look_up_cell_impl
+	{};
+
+	struct vertex_allocator_impl_type : public vertex_allocator_type::impl< vertex_type >
+	{
+		typedef vertex_allocator_type::impl< vertex_type >	super;
+		inline vertex_allocator_impl_type	( u32 const max_vertex_count ) :
+			super							( max_vertex_count )
+		{
+		}
+	};
+
+	struct vertex_manager_impl_type : public 
+		vertex_manager_type::impl<
+			vertex_allocator_impl_type,
+			look_up_cell_type
+		>
+	{
+		typedef vertex_manager_type::impl< vertex_allocator_impl_type, look_up_cell_type >	super;
+		inline vertex_manager_impl_type		(
+			vertex_allocator_impl_type& allocator,
+			u32 const hash_size,
+			u32 const fix_size
+		) : super							( allocator, hash_size, fix_size )
+		{
+		}
+	};
+
+	struct priority_queue_impl_type : public priority_queue_type::impl< vertex_manager_impl_type >
+	{
+		typedef priority_queue_type::impl< vertex_manager_impl_type >	super;
+		inline priority_queue_impl_type		( vertex_manager_type& vertex_manager, u32 const vertex_count ) :
+			super							( vertex_manager, vertex_count )
+		{
+		}
+	};
+
+	typedef xray::debug::vector< vertex_id_type >				path_type;
+	typedef path_constructor_helper_type::impl<
+				vertex_type,
+				path_type
+			> path_constructor_type;
+	typedef euclidian_distance_heuristics						path_heuristics_type;
+	typedef triangles_mesh_search_restrictor					search_restrictor_type;
+	typedef path_constructor_type::path_type					path_type;
+
+private:
+	enum {
+		max_branching_factor	= 3,
+		max_vertex_count		= 4*1024,
+		hash_size				= 256,
+	};
+
+public:
+			search_service		( ) :
+		m_vertex_allocator	( max_vertex_count ),
+		m_vertex_manager	( m_vertex_allocator, hash_size, max_vertex_count ),
+		m_priority_queue	( m_vertex_manager, max_vertex_count )
+	{
+	}
+
+	bool	search				(
+			triangles_mesh_type const& graph,
+			path_type* path,
+			vertex_id_type const start_vertex_id,
+			vertex_id_type const target_vertex_id,
+			float3 const& start_position,
+			float3 const& target_position
+		)
+	{
+		graph_wrapper_type graph_wrapper			= graph_wrapper_type( graph );
+		path_constructor_type path_constructor		= path_constructor_type( path );
+		path_heuristics_type path_heuristics		= path_heuristics_type( graph, start_vertex_id, target_vertex_id, start_position, target_position );
+		search_restrictor_type search_restrictor	= search_restrictor_type(
+			graph,
+			start_vertex_id,
+			target_vertex_id,
+			std::numeric_limits< distance_type >::max( ),
+			u32(-1),
+			max_vertex_count - max_branching_factor
+		);
+
+		return
+			algorithm_type::find		(
+				m_priority_queue,
+				graph_wrapper,
+				path_constructor,
+				path_heuristics,
+				search_restrictor
+			);
+	}
+
+public:
+	vertex_allocator_impl_type	m_vertex_allocator;
+	vertex_manager_impl_type	m_vertex_manager;
+	priority_queue_impl_type	m_priority_queue;
+}; // class search_service
+
+path_find_channel::path_find_channel (
+		triangles_mesh_type const& triangles_mesh,
+		path_find_funnel::channel_type& channel,
+		u32 const start_vertex_id,
+		u32 const target_vertex_id,
+		float3 const& start_position,
+		float3 const& target_position
+	) :
+		m_triangles_mesh( triangles_mesh )	
+{
+	search_service service;
+	search_service::path_type path;
+	service.search		(
+		triangles_mesh,
+		&channel,
+		start_vertex_id,
+		target_vertex_id,
+		start_position,
+		target_position
+	);
+}

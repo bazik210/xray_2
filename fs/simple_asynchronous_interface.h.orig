@@ -1,0 +1,51 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.11.2011
+//	Author		: 
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_FS_SIMPLE_ASYNCHRONOUS_INTERFACE_H_INCLUDED
+#define XRAY_FS_SIMPLE_ASYNCHRONOUS_INTERFACE_H_INCLUDED
+
+#include <xray/threading_active_object.h>
+#include <xray/fs/fs_asynchronous_device_interface.h>
+#include <xray/fs/fs_windows_hdd_file_system.h>
+
+namespace xray {
+namespace fs_new {
+
+class device_thread : public threading::active_object
+{
+public:
+	device_thread	(asynchronous_device_interface * device, pcstr thread_name, pcstr thread_log_name)
+		:	m_device(device), active_object (thread_name, thread_log_name) {}
+
+	void	tick_impl	()	{	m_device->tick(true);	}
+private:
+	asynchronous_device_interface *		m_device;
+}; // device_thread
+
+class simple_asynchronous_interface 
+{
+public:
+	simple_asynchronous_interface			(watcher_enabled_bool);
+
+	// order of member is important due to construction
+private:
+	windows_hdd_file_system					hdd_device;
+	windows_hdd_file_system					dvd_device;
+
+public:
+	asynchronous_device_interface			hdd_async;
+	asynchronous_device_interface			dvd_async;
+
+private:
+	device_thread							hdd_thread;
+	device_thread							dvd_thread;
+
+}; // class simple_asynchronous_interface
+
+} // namespace fs_new
+} // namespace xray
+
+#endif // #ifndef XRAY_FS_SIMPLE_ASYNCHRONOUS_INTERFACE_H_INCLUDED

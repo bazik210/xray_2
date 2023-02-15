@@ -1,0 +1,148 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 27.04.2010
+//	Author		: Armen Abroyan
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_RENDER_CORE_EFFECT_MANAGER_INLINE_H_INCLUDED
+#define XRAY_RENDER_CORE_EFFECT_MANAGER_INLINE_H_INCLUDED
+
+namespace xray {
+namespace render {
+
+template<class shader_data>
+inline void effect_manager::recompile_effects(render::vector< res_xs_hw<shader_data>* > const& in_shaders)
+{
+#ifndef MASTER_GOLD
+	effects_to_recompile_type					effects_to_recompile(xray::debug::g_mt_allocator);
+	
+	for (effects_vector_type::iterator it=m_effects.begin(); it!=m_effects.end(); ++it)
+	{
+		ref_effect current_effect = it->second;
+		
+		bool found = false;
+		for (res_effect::techniques_array_type::const_iterator tech_it=current_effect->m_techniques.begin(); tech_it!=current_effect->m_techniques.end(); ++tech_it)
+		{
+			for (res_shader_technique::passes_array_type::const_iterator pass_it=(*tech_it)->m_passes.begin(); pass_it!=(*tech_it)->m_passes.end(); ++pass_it)
+			{
+				res_xs_hw<shader_data> const* hw_shd_ps = (res_xs_hw<shader_data> const*)(*pass_it)->get_ps()->hardware_shader();
+				res_xs_hw<shader_data> const* hw_shd_vs = (res_xs_hw<shader_data> const*)(*pass_it)->get_vs()->hardware_shader();
+				//res_xs_hw<shader_data> const* hw_shd_gs = (res_xs_hw<shader_data> const*)(*pass_it)->get_gs()->hardware_shader();
+				
+				if (
+					std::find(in_shaders.begin(), in_shaders.end(),	hw_shd_ps)	!=	in_shaders.end()
+					|| std::find(in_shaders.begin(), in_shaders.end(),	hw_shd_vs)	!=	in_shaders.end()
+					//|| std::find(in_shaders.begin(), in_shaders.end(),	hw_shd_gs)	!=	in_shaders.end()
+					)
+				{
+					found = true;
+					break;
+				}
+			}
+			if (found)
+				break;
+		}
+		
+		if (!found)
+			continue;
+		
+		effects_to_recompile.push_back( effect_to_recompile_struct( current_effect, it->first.descriptor, it->first.config ) );
+	}
+	
+	if (!effects_to_recompile.size())
+		return;
+	
+	u32 const						num_requests			= effects_to_recompile.size();
+	resources::user_data_variant**	user_data_variants_ptr	= (resources::user_data_variant**)ALLOCA(sizeof(resources::user_data_variant*) * num_requests);
+	resources::user_data_variant*	user_data_variants		= (resources::user_data_variant*)ALLOCA(sizeof(resources::user_data_variant) * num_requests);
+	resources::creation_request*	requests				= (resources::creation_request*)ALLOCA(sizeof(resources::creation_request) * num_requests);
+	
+	u32 request_index = 0;
+	for (effects_to_recompile_type::iterator it = effects_to_recompile.begin(); it != effects_to_recompile.end(); ++it)
+	{
+		resources::user_data_variant* variant	= new(&user_data_variants[request_index])resources::user_data_variant;
+		variant->set							(NEW(effect_compile_data)(it->descriptor, it->config));
+		user_data_variants_ptr[request_index]	= variant;
+		
+		new(&requests[request_index])			resources::creation_request(
+			"", 
+			xray::const_buffer("", 1), 
+			resources::render_effect_class
+		);
+		request_index++;
+	}
+	LOG_INFO									("Shaders reloading started.");
+	// Must be query_create_resources_and_wait!
+	resources::query_create_resources_and_wait	(
+		requests, 
+		num_requests, 
+		boost::bind(&effect_manager::on_effects_recompiled, this, &effects_to_recompile, _1),
+		&xray::debug::g_mt_allocator,
+		(resources::user_data_variant const**)user_data_variants_ptr
+	);
+	LOG_INFO									("Shaders reloading finished.");
+
+#else
+	XRAY_UNREFERENCED_PARAMETER					(in_shaders);
+#endif // #ifndef MASTER_GOLD
+}
+
+template<class effect_descriptor_class> 
+inline ref_effect effect_manager::create_effect()
+{
+	pcvoid					  mem = ALLOCA(Kb);
+	effect_options_descriptor empty_desc(mem, Kb);
+	
+	return create_effect<effect_descriptor_class>(empty_desc);
+}
+
+template<class effect_descriptor_class> 
+inline ref_effect effect_manager::create_effect( render::effect_options_descriptor const& desc)
+{
+	static effect_descriptor_class descriptor_object;
+	
+	u32 crc = desc.get_crc();
+	
+	effect_key_type key(crc,0,&descriptor_object);
+	
+	effects_vector_type::const_iterator found = m_effects.find( effect_key_type(crc, 0, &descriptor_object) );
+	if (found!=m_effects.end())
+	{
+		return found->second;
+	}
+	else
+	{
+		key.config				= render::create_custom_config(desc, crc, false);
+		ref_effect new_effect	= create_new_effect(descriptor_object, key.config, crc);
+		m_effects[key]			= new_effect;
+		
+		return new_effect;
+	}
+}
+
+template<class effect_descriptor_class> 
+inline void effect_manager::create_effect( ref_effect* out_effect, render::effect_options_descriptor const& desc)
+{
+	static effect_descriptor_class descriptor_object;
+	
+	u32 crc = desc.get_crc();
+	
+	effect_key_type key(crc,0,&descriptor_object);
+	
+	effects_vector_type::const_iterator found = m_effects.find( effect_key_type(crc, 0, &descriptor_object) );
+	if (found!=m_effects.end())
+	{
+		*out_effect = found->second;
+	}
+	else
+	{
+		key.config				= render::create_custom_config(desc, crc, false);
+		key.crc					= crc;
+		create_new_effect		(out_effect, key);
+	}
+}
+
+} // namespace render
+} // namespace xray
+
+#endif // #ifndef XRAY_RENDER_CORE_EFFECT_MANAGER_INLINE_H_INCLUDED

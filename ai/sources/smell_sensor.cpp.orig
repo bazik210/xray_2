@@ -1,0 +1,54 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 23.11.2010
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+
+#include "smell_sensor.h"
+
+namespace xray {
+namespace ai {
+namespace sensors {
+
+smell_sensor::smell_sensor			( npc& npc, ai_world& world, brain_unit& brain, configs::binary_config_value const& options )
+	:	passive_sensor_base			( npc, world, brain ),
+		m_max_smells_count			( memory::uninitialized_value<u32>() ),
+		m_max_smelling_distance		( memory::uninitialized_value<float>() ),
+		m_min_intensity				( memory::uninitialized_value<float>() ),
+		m_max_intensity				( memory::uninitialized_value<float>() ),		
+		m_always_recognized_distance( memory::uninitialized_value<float>() ),
+		m_decreasing_time_quant		( memory::uninitialized_value<float>() ),
+		m_decrease_factor			( memory::uninitialized_value<float>() ),
+		m_last_smell_time			( memory::uninitialized_value<float>() )
+{
+	set_parameters					( options );
+}
+
+void smell_sensor::set_parameters	( configs::binary_config_value const& options )
+{
+	if ( options.value_exists( "smell_sensor_parameters" ) )
+	{
+		configs::binary_config_value const& smell_parameters	= options["smell_sensor_parameters"];
+		
+		m_enabled						= smell_parameters["enabled"];
+		m_max_smells_count				= smell_parameters["max_smells_count"];
+		m_max_smelling_distance			= smell_parameters["max_smelling_distance"];
+		m_min_intensity					= smell_parameters["min_intensity"];
+		m_max_intensity					= smell_parameters["max_intensity"];
+		m_always_recognized_distance	= smell_parameters["always_recognized_distance"];
+		m_decreasing_time_quant			= smell_parameters["decreasing_time_quant"];
+		m_decrease_factor				= smell_parameters["decrease_factor"];
+		m_last_smell_time				= smell_parameters["last_smell_time"];
+	}
+}
+
+void smell_sensor::dump_state		( npc_statistics& stats ) const
+{
+	XRAY_UNREFERENCED_PARAMETER		( stats );
+}
+
+} // namespace sensors
+} // namespace ai
+} // namespace xray

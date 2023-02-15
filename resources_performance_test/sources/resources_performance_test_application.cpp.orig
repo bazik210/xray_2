@@ -1,0 +1,61 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.11.2011
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "resources_performance_test_application.h"
+#include "resources_performance_test_memory.h"
+#include <xray/core/core.h>
+#include <xray/core/simple_engine.h>
+#include <xray/os_include.h>		// for GetCommandLine
+
+using xray::resources_performance_test::application;
+
+xray::memory::doug_lea_allocator_type	xray::resources_performance_test::g_allocator;
+
+typedef xray::core::simple_engine							core_engine_type;
+static xray::uninitialized_reference< core_engine_type >	s_core_engine;
+
+void application::initialize( )
+{
+	m_exit_code				= 0;
+
+	XRAY_CONSTRUCT_REFERENCE( s_core_engine, core_engine_type );
+
+	core::preinitialize		(
+		&*s_core_engine,
+		logging::create_log,
+		GetCommandLine(), 
+		command_line::contains_application_true,
+		"resources_performance_test",
+		__DATE__ 
+	);
+
+	g_allocator.do_register	( 4*1024*1024, "resources_performance_test" );
+
+	memory::allocate_region	( );
+
+	core::initialize		( "../../resources/sources", "resources_performance_test", core::perform_debug_initialization );
+
+	XRAY_CONSTRUCT_REFERENCE				( m_fs_devices, fs_new::simple_asynchronous_interface )(fs_new::watcher_enabled_false);
+	xray::core::initialize_resources		( m_fs_devices->hdd_async, m_fs_devices->dvd_async );
+}
+
+void application::finalize	( )
+{
+	core::finalize			( );
+
+	xray::core::finalize_resources	( );
+	XRAY_DESTROY_REFERENCE	( m_fs_devices );
+
+	XRAY_DESTROY_REFERENCE	( s_core_engine );
+}
+
+void application::execute	( )
+{
+	#pragma message( XRAY_TODO("place your code here") )
+
+	m_exit_code				= s_core_engine->get_exit_code();
+}

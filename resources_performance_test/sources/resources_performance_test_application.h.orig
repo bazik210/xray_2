@@ -1,0 +1,32 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.11.2011
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef RESOURCES_PERFORMANCE_TEST_APPLICATION_H_INCLUDED
+#define RESOURCES_PERFORMANCE_TEST_APPLICATION_H_INCLUDED
+
+#include <xray/fs/simple_asynchronous_interface.h>
+
+namespace xray {
+namespace resources_performance_test {
+
+class application {
+public:
+			void	initialize		( );
+			void	execute			( );
+			void	finalize		( );
+	inline	u32		get_exit_code	( ) const	{ return m_exit_code; }
+
+private:
+
+	uninitialized_reference< fs_new::simple_asynchronous_interface >	m_fs_devices;
+
+	u32		m_exit_code;
+}; // class application
+
+} // namespace resources_performance_test
+} // namespace xray
+
+#endif // #ifndef RESOURCES_PERFORMANCE_TEST_APPLICATION_H_INCLUDED

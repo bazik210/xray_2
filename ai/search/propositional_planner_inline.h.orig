@@ -1,0 +1,63 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 13.07.2011
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_AI_SEARCH_PROPOSITIONAL_PLANNER_INLINE_H_INCLUDED
+#define XRAY_AI_SEARCH_PROPOSITIONAL_PLANNER_INLINE_H_INCLUDED
+
+namespace xray {
+namespace ai {
+namespace planning {
+
+#define THE_PLANNER	planning::propositional_planner
+
+inline THE_PLANNER::state_type const& THE_PLANNER::current	( ) const
+{
+	return				m_current_state;
+}
+
+inline propositional_planner* THE_PLANNER::return_this		( )
+{
+	return this;
+}
+
+inline THE_PLANNER::state_type const& THE_PLANNER::target	( ) const
+{
+	return				m_target_state;
+}
+
+inline void THE_PLANNER::target	( state_type const& target )
+{
+	m_actual			= m_actual && ( m_target_state == target );
+	m_target_state		= target;
+}
+
+inline bool  THE_PLANNER::failed( ) const
+{
+	return				m_failed;
+}
+
+inline pcstr THE_PLANNER::id	( ) const
+{
+	return				m_current_id.c_str();
+}
+
+inline void THE_PLANNER::forward_search	( bool const forward_search )
+{
+	m_forward_search	= forward_search;
+}
+
+inline bool THE_PLANNER::forward_search( ) const
+{
+	return				m_forward_search;
+}
+
+#undef THE_PLANNER
+
+} // namespace planning
+} // namespace ai
+} // namespace xray
+
+#endif // #ifndef XRAY_AI_SEARCH_PROPOSITIONAL_PLANNER_INLINE_H_INCLUDED

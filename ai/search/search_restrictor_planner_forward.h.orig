@@ -1,0 +1,43 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 15.07.2011
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_AI_SEARCH_SEARCH_RESTRICTOR_PLANNER_FORWARD_H_INCLUDED
+#define XRAY_AI_SEARCH_SEARCH_RESTRICTOR_PLANNER_FORWARD_H_INCLUDED
+
+#include <xray/ai/search/search_restrictor_planner_base.h>
+
+namespace xray {
+namespace ai {
+namespace search_restrictor {
+
+struct planner_forward : public propositional_planner_base
+{
+	typedef propositional_planner_base				super;
+
+	class impl : public super::impl
+	{
+		typedef propositional_planner_base::impl		super;
+
+	public:
+		inline			impl			(
+							graph_wrapper_type const& wrapper,
+							vertex_id_type const& start_vertex_id,
+							vertex_id_type const& target_vertex_id,
+							distance_type const& max_range = std::numeric_limits< distance_type >::max(),
+							u32 const max_iteration_count = u32(-1),
+							u32 const max_visited_vertex_count = u32(-1)
+						);
+				bool	target_reached	( vertex_id_type const& vertex_id );
+	}; // class impl
+}; // struct planner_forward
+
+} // namespace search_restrictor
+} // namespace ai
+} // namespace xray
+
+#include <xray/ai/search/search_restrictor_planner_forward_inline.h>
+
+#endif // #ifndef XRAY_AI_SEARCH_SEARCH_RESTRICTOR_PLANNER_FORWARD_H_INCLUDED

@@ -1,0 +1,53 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 23.11.2010
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef HEARING_SENSOR_H_INCLUDED
+#define HEARING_SENSOR_H_INCLUDED
+
+#include "passive_sensor_base.h"
+#include "sound_subscriber.h"
+
+namespace xray {
+namespace ai {
+namespace sensors {
+
+class hearing_sensor : public passive_sensor_base
+{
+public:
+						hearing_sensor	(
+							npc& npc,
+							ai_world& world,
+							brain_unit& brain,
+							configs::binary_config_value const& options
+						);
+	virtual				~hearing_sensor	( );
+	
+	virtual void		set_parameters	( configs::binary_config_value const& options );
+	virtual void		dump_state		( npc_statistics& stats ) const;
+
+private:
+	inline hearing_sensor* return_this	( );
+
+			void	on_perceive_sound	( sensed_sound_object const& perceived_sound ) const;
+
+private:
+	u32									m_max_sounds_count;
+	float								m_max_sound_distance;
+	float								m_min_sound_threshold;
+	float								m_always_recognized_distance;
+	float								m_decreasing_time_quant;
+	float								m_decrease_factor;
+	float								m_last_sound_time;
+
+private:
+	sound_subscriber					m_subscription;
+}; // class hearing_sensor
+
+} // namespace sensors
+} // namespace ai
+} // namespace xray
+
+#endif // #ifndef HEARING_SENSOR_H_INCLUDED

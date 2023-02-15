@@ -1,0 +1,82 @@
+﻿////////////////////////////////////////////////////////////////////////////
+//	Created		: 09.12.2010
+//	Author		: Evgeniy Obertyukh
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Media3D;
+using xray.editor.wpf_controls.property_editors.attributes;
+using xray.editor.wpf_controls.property_editors.item;
+using xray.editor.wpf_controls.property_editors.value;
+using xray.editor.wpf_controls.visual_curve;
+
+namespace xray.editor.wpf_controls.property_editors
+{
+	internal static class default_editors_lists
+	{
+		static	default_editors_lists	( )		
+		{
+			m_item_editors	= new List<editor>
+	  		{
+	  			new type_editor( typeof( Color ), typeof( color_editor ) ),
+	  			new attribute_editor( typeof( data_source_attribute ), typeof( data_source_editor ) ){ make_expandable = true },
+	  			new attribute_editor( typeof( special_attribute ),o => ( (special_attribute)o ).value == "color_curve_holder",typeof( color_range_editor ) ),
+	  			new attribute_editor( typeof( special_attribute ),o => ( (special_attribute)o ).value == "float_curve_holder",typeof( item.float_curve_editor ) ),
+	  			new attribute_editor( typeof( special_attribute ),o => ( (special_attribute)o ).value == "material_stage_holder",typeof( material_stage_editor ) ),
+	  			new attribute_editor( typeof( material_stage_effect_holder_attribute ),typeof( material_stage_effect_editor ) ),
+	  			new type_editor( typeof( i_property_container ), typeof( property_container_editor ) ){ can_edit_multiple_values = true },
+	  			new assignable_type_editor( typeof( i_property_container ), typeof( property_container_editor ) ){ can_edit_multiple_values = true },
+	  			new type_editor( typeof( Vector3D ), typeof( Vector3D_editor ) ) { make_expandable = true }
+	  		};
+
+			m_editors		= new List<editor>
+		  	{
+				new type_editor( typeof( float_curve ), typeof( value.float_curve_editor ) ),
+				new type_editor( typeof( range_curves_container ), typeof( value.float_curve_editor ) ),
+				new type_editor( typeof( List<float_curve> ), typeof( value.float_curve_editor ) ),
+				new assignable_type_editor( typeof( i_curve_container ), typeof( value.float_curve_editor ) ),
+				new type_editor( typeof( List<i_curve_container> ), typeof( value.float_curve_editor ) ),
+				new type_editor( typeof( List<range_curves_container> ), typeof( value.float_curve_editor ) ),
+				new type_editor( typeof( List<single_curve_container> ), typeof( value.float_curve_editor ) ),
+
+		  		new assignable_type_editor( typeof( ICollection ), typeof( IList_collection_editor ), true ),
+		  		new attribute_editor( typeof( collection_attribute ), typeof( properties_collection_editor ) ),
+		  		new attribute_editor( typeof( combo_box_items_attribute ), typeof( combo_box_editor ) ){ can_edit_multiple_values = true },
+		  		new attribute_editor( typeof( external_editor_attribute ), typeof( external_editor ) ){ can_edit_multiple_values = true },
+		  		new attribute_editor( typeof( string_select_file_editor_attribute ),typeof( string_select_file_editor ) ),
+		  		new attribute_editor( typeof( button_editor_attribute ), typeof( button_editor ) ){ can_edit_multiple_values = true },
+		  		new type_editor( typeof( Boolean ), typeof( Boolean_editor ) ) { can_edit_multiple_values = true },
+				new type_editor( typeof( color_curve ), typeof( color_curve_editor ) ),
+		  		new type_editor( typeof( Int32 ), typeof( Int32_editor ) ),
+		  		new type_editor( typeof( UInt32 ), typeof( Int32_editor ) ),
+		  		new type_editor( typeof( String ), typeof( String_editor ) ),
+		  		new type_editor( typeof( Single ), typeof( Single_editor ) ),
+		  		new type_editor( typeof( Double ), typeof( Single_editor ) ),
+		  		new assignable_type_editor( typeof( Enum ), typeof( Enum_editor ) )
+		  	};
+		}
+
+		private static readonly List<editor>		m_editors;
+		private static readonly List<editor>		m_item_editors;
+
+		public static			List<editor>		editors				
+		{
+			get{ return m_editors; }
+		}
+		public static			List<editor>		item_editors		
+		{
+			get{ return m_item_editors; }
+		}
+
+		public static			void				set_default_editors	( FrameworkElement element )	
+		{
+			element.SetValue( editor_selector.EditorSelectorProperty, new editor_selector( m_editors ) );
+			element.SetValue( item_editor_selector.ItemEditorSelectorProperty, new item_editor_selector( m_item_editors ) );
+		}
+	}
+}

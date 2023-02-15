@@ -1,0 +1,50 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.07.2011
+//	Author		: Alexander Stupakov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+#ifndef BSP_TREE_H_INCLUDED
+#define BSP_TREE_H_INCLUDED
+#include "indexed_polygon.h"
+#include "bsp_tree_triangle.h"
+namespace xray {
+
+namespace render {
+namespace debug {
+	class renderer;
+} //namespace debug
+} // namespace render
+namespace model_editor {
+
+class bsp_tree_node;
+class bsp_tree {
+public:
+							bsp_tree				( );
+							~bsp_tree				( );
+	void					generate_bsp_tree		( math::float3 const* vertices, u32 vertex_count, u32 const* indices, u32 index_count );
+	bool					is_created				() const { return m_created; }
+	void					generate_portals		( );
+	bool					are_portals_generated	() const { return m_portals_generated; }
+	void					fill_tree_view			( System::Windows::Forms::TreeView^ tree_view );
+	void					set_selected_node		( bsp_tree_node const* selected_node );
+	void					render					( render::scene_ptr const& scene, render::debug::renderer& r ) const;
+	math::aabb				get_aabb				() const;
+	void					serialise_selected_node ( configs::lua_config_ptr ) const;
+	void					serialise_whole_tree	( configs::lua_config_ptr ) const;
+	void					restore					( configs::lua_config_ptr );
+private:
+	void					reset					();
+	bsp_tree_node*			m_root;
+	bsp_tree_node const*	m_selected_node;
+	math::aabb				m_aabb;
+	vector<math::float3>	m_vertices;
+	vector<u32>				m_indices;
+	bool					m_edge_mode;
+	bool					m_created;
+	bool					m_portals_generated;
+	triangles_mesh_type	m_triangle_mesh;
+}; // class bsp_tree
+} // namespace model_editor
+} // namespace xray
+
+#endif // #ifndef BSP_TREE_H_INCLUDED

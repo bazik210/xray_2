@@ -1,0 +1,361 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 26.03.2010
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef N_ARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED
+#define N_ARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED
+
+#include <xray/animation/animation_interval.h>
+#include <xray/animation/i_editor_mixer.h>
+
+namespace xray {
+namespace animation {
+namespace mixing {
+
+inline n_ary_tree_animation_node::n_ary_tree_animation_node	(
+		bool const override_existing_animation,
+		animation_clip const& animation,
+		float const animation_time_offset,
+		clip_mix_self mix_self,
+		int const synchronization_group_id,
+		u32 const operands_count,
+		u32 const start_time_in_ms,
+		bool const is_on_zero_cycle,
+		bool const is_transitting_to_zero,
+		bool const is_playing,
+		bool const is_new,
+		u32 intervals_count,
+		u32 current_interval_id,
+		u32 current_interval_start_time_in_ms,
+		u32 cycle_from_interval
+	) :
+	n_ary_tree_n_ary_operation_node		( operands_count ),
+	m_animation							( animation ),
+	m_animation_state					( 0 ),
+	m_next_animation					( 0 ),
+	m_animation_to_synchronize_with 	( 0 ),
+	m_animation_time_offset				( animation_time_offset ),
+	m_mix_self							( mix_self ),
+	m_synchronization_group_id			( synchronization_group_id ),
+	m_is_driving						( true ),
+	m_start_time_in_ms					( start_time_in_ms ),
+	m_is_on_zero_cycle					( is_on_zero_cycle ),
+	m_is_transiting_to_zero				( is_transitting_to_zero ),
+	m_is_playing						( is_playing ),
+	m_is_new							( is_new ),
+	m_intervals_count					( intervals_count ),
+	m_current_interval_id				( current_interval_id ),
+	m_current_interval_start_time_in_ms	( current_interval_start_time_in_ms ),
+	m_cycle_from_interval				( cycle_from_interval ),
+	m_bone_mixer_data					( false ),
+	m_override_existing_animation		( override_existing_animation ),
+	m_additivity_priority				( 0 )
+{
+	R_ASSERT_CMP						( animation.type(), ==, animation_type_full );
+	R_ASSERT_CMP						( m_current_interval_id, <, m_intervals_count );
+	assign_uninitialized_user_data		( );
+}
+
+inline n_ary_tree_animation_node::n_ary_tree_animation_node	(
+		bool const override_existing_animation,
+		animation_clip const& animation,
+		animation::bone_mixer_data const& bone_mixer_data, 
+		float const animation_time_offset,
+		clip_mix_self mix_self,
+		int const synchronization_group_id,
+		u32 const operands_count,
+		u32 const start_time_in_ms,
+		bool const is_on_zero_cycle,
+		bool const is_transitting_to_zero,
+		bool const is_playing,
+		bool const is_new,
+		u32 const intervals_count,
+		u32 current_interval_id,
+		u32 current_interval_start_time_in_ms,
+		u32 cycle_from_interval
+	) :
+	n_ary_tree_n_ary_operation_node		( operands_count ),
+	m_bone_mixer_data					( bone_mixer_data ),
+	m_animation							( animation ),
+	m_animation_state					( 0 ),
+	m_animation_to_synchronize_with		( 0 ),
+	m_next_animation					( 0 ),
+	m_animation_time_offset				( animation_time_offset ),
+	m_mix_self							( mix_self ),
+	m_synchronization_group_id			( synchronization_group_id ),
+	m_is_driving						( true ),
+	m_start_time_in_ms					( start_time_in_ms ),
+	m_is_on_zero_cycle					( is_on_zero_cycle ),
+	m_is_transiting_to_zero				( is_transitting_to_zero ),
+	m_is_playing						( is_playing ),
+	m_is_new							( is_new ),
+	m_intervals_count					( intervals_count ),
+	m_current_interval_id				( current_interval_id ),
+	m_current_interval_start_time_in_ms	( current_interval_start_time_in_ms ),
+	m_cycle_from_interval				( cycle_from_interval ),
+	m_override_existing_animation		( override_existing_animation ),
+	m_additivity_priority				( 0 )
+{
+	R_ASSERT_CMP						( animation.type(), ==, animation_type_full );
+	R_ASSERT_CMP						( m_current_interval_id, <, m_intervals_count );
+	assign_uninitialized_user_data		( );
+}
+
+inline n_ary_tree_animation_node::n_ary_tree_animation_node	(
+		u32 const additivity_priority,
+		bool const override_existing_animation,
+		animation_clip const& animation,
+		n_ary_tree_animation_node& animation_to_synchronize_with,
+		float const animation_time_offset,
+		bool const is_on_zero_cycle,
+		u32 const operands_count,
+		u32 const intervals_count,
+		bool const is_transitting_to_zero,
+		bool const is_playing,
+		bool const is_new,
+		u32 current_interval_id,
+		u32 current_interval_start_time_in_ms,
+		u32 cycle_from_interval
+	) :
+	n_ary_tree_n_ary_operation_node		( operands_count ),
+	m_animation							( animation ),
+	m_animation_state					( 0 ),
+	m_animation_to_synchronize_with		( &animation_to_synchronize_with ),
+	m_next_animation					( 0 ),
+	m_animation_time_offset				( animation_time_offset ),
+	m_mix_self							( clip_mix_self_dummy ),
+	m_synchronization_group_id			( animation_to_synchronize_with.synchronization_group_id() ),
+	m_is_driving						( false ),
+	m_start_time_in_ms					( u32(-1) ),
+	m_is_on_zero_cycle					( is_on_zero_cycle ),
+	m_is_transiting_to_zero				( is_transitting_to_zero ),
+	m_is_playing						( is_playing ),
+	m_is_new							( is_new ),
+	m_intervals_count					( intervals_count ),
+	m_current_interval_id				( current_interval_id ),
+	m_current_interval_start_time_in_ms	( current_interval_start_time_in_ms ),
+	m_cycle_from_interval				( cycle_from_interval ),
+	m_bone_mixer_data					( true ),
+	m_override_existing_animation		( override_existing_animation ),
+	m_additivity_priority				( (animation.type() == animation_type_additive) ? (additivity_priority + 1) : 0 )
+{
+	R_ASSERT							( (animation.type() != animation_type_additive) || (additivity_priority != u32(-1)) );
+	R_ASSERT							( (animation.type() != animation_type_full) || (additivity_priority == u32(-1)) );
+	R_ASSERT_CMP						( m_current_interval_id, <, m_intervals_count );
+	assign_uninitialized_user_data		( );
+}
+
+inline n_ary_tree_animation_node::n_ary_tree_animation_node	( n_ary_tree_animation_node const& other ) :
+	n_ary_tree_n_ary_operation_node		( other ),
+	m_bone_mixer_data					( other.m_bone_mixer_data ),
+	m_animation							( other.m_animation ),
+	m_animation_state					( 0 ),
+	m_animation_to_synchronize_with		( other.m_animation_to_synchronize_with ),
+	m_next_animation					( 0 ),
+	m_animation_time_offset				( other.m_animation_time_offset ),
+	m_mix_self							( other.m_mix_self ),
+	m_synchronization_group_id			( other.synchronization_group_id() ),
+	m_is_driving						( other.is_driving() ),
+	m_start_time_in_ms					( other.m_start_time_in_ms ),
+	m_is_on_zero_cycle					( other.m_is_on_zero_cycle ),
+	m_is_transiting_to_zero				( other.m_is_transiting_to_zero ),
+	m_is_playing						( other.m_is_playing ),
+	m_is_new							( other.m_is_new ),
+	m_intervals_count					( other.m_intervals_count ),
+	m_current_interval_id				( other.m_current_interval_id ),
+	m_current_interval_start_time_in_ms	( other.m_current_interval_start_time_in_ms ),
+	m_cycle_from_interval				( other.m_cycle_from_interval ),
+	m_override_existing_animation		( other.m_override_existing_animation ),
+	m_additivity_priority				( other.m_additivity_priority )
+{
+	R_ASSERT							( (m_animation.type() != animation_type_additive) || (m_additivity_priority != 0) );
+	R_ASSERT							( (m_animation.type() != animation_type_full) || (m_additivity_priority == 0) );
+
+#ifndef MASTER_GOLD
+	user_data							= other.user_data;
+#endif // #ifndef MASTER_GOLD
+
+	R_ASSERT							( m_current_interval_id < m_intervals_count );
+
+//?	R_ASSERT							( !m_animation_to_synchronize_with );
+}
+
+inline animation_clip const& n_ary_tree_animation_node::animation	( ) const
+{
+	return								m_animation;
+}
+
+inline animation_state&	n_ary_tree_animation_node::animation_state	( ) const
+{
+	R_ASSERT							( m_animation_state );
+	return								*m_animation_state;
+}
+
+inline void n_ary_tree_animation_node::set_animation_state			( mixing::animation_state& animation_state )
+{
+	R_ASSERT							( !m_animation_state );
+	m_animation_state					= &animation_state;
+}
+
+inline n_ary_tree_animation_node* n_ary_tree_animation_node::animation_to_synchronize_with( ) const
+{
+	return								m_animation_to_synchronize_with;
+}
+
+inline animation::bone_mixer_data& n_ary_tree_animation_node::bone_mixer_data	( )
+{
+	return								m_bone_mixer_data;
+}
+
+inline	float n_ary_tree_animation_node::animation_time_offset		( ) const
+{
+	return								m_animation_time_offset;
+}
+
+inline	float	n_ary_tree_animation_node::full_animation_time_offset	( ) const
+{
+	return								current_interval( *this ).time_offset() + animation_time_offset( );
+}
+
+inline u32 n_ary_tree_animation_node::start_time_in_ms				( ) const
+{
+	ASSERT								( m_start_time_in_ms != u32(-1) );
+	return								m_start_time_in_ms;
+}
+
+inline bool	n_ary_tree_animation_node::is_on_zero_cycle			( ) const 
+{ 
+	return								m_is_on_zero_cycle; 
+}
+
+inline void n_ary_tree_animation_node::set_start_time_in_ms			( u32 const new_start_time_in_ms, bool const is_on_zero_cycle )
+{
+	R_ASSERT							( new_start_time_in_ms != u32(-1) );
+	R_ASSERT_CMP						( m_start_time_in_ms, <=, new_start_time_in_ms );
+	m_start_time_in_ms					= new_start_time_in_ms;
+
+//	R_ASSERT_CMP						( m_full_cycles_count, <=, new_full_cycles_count );
+	//m_full_cycles_count				= new_full_cycles_count;
+	
+	m_is_on_zero_cycle					= is_on_zero_cycle; // we will never be on zero cycle again!
+}
+
+inline clip_mix_self n_ary_tree_animation_node::mix_self			( ) const
+{
+	return								m_mix_self;
+}
+
+inline int n_ary_tree_animation_node::synchronization_group_id		( ) const
+{
+	return								m_synchronization_group_id;
+}
+
+inline u32 n_ary_tree_animation_node::additivity_priority			( ) const
+{
+	return								m_additivity_priority;
+}
+
+inline bool n_ary_tree_animation_node::is_driving					( ) const
+{
+	R_ASSERT							( m_is_driving || (m_synchronization_group_id != -1) );
+	return								m_is_driving;
+}
+
+inline void	n_ary_tree_animation_node::set_is_driving				( bool const value )
+{
+	m_is_driving						= value;
+}
+
+inline bool n_ary_tree_animation_node::is_transitting_to_zero		( ) const
+{
+	return								m_is_transiting_to_zero;
+}
+
+inline bool n_ary_tree_animation_node::is_playing					( ) const
+{
+	return								m_is_playing;
+}
+
+inline	bool	n_ary_tree_animation_node::is_new					( ) const
+{
+	return								m_is_new;
+}
+
+inline void n_ary_tree_animation_node::set_current_interval			( u32 current_interval_start_time_in_ms, u32 current_interval_id )
+{ 
+	R_ASSERT_CMP						( current_interval_id, <, intervals_count() );
+	m_current_interval_id				= current_interval_id;
+	m_current_interval_start_time_in_ms	= current_interval_start_time_in_ms;
+}
+
+inline size_t n_ary_tree_animation_node::callbacks_memory_size		( )const
+{
+	u32 mem_size						= 0;
+	u32 const count						= intervals_count();
+	n_ary_tree_node_animation_interval const* const	intervals	= animation_intervals_begin( *this );
+	for ( u32 i = 0; i < count; ++i )
+		mem_size						+= intervals[ i ].callbacks_memory_size( );
+
+	return								mem_size;
+}
+
+inline u32 n_ary_tree_animation_node::callbacks_count				( )const
+{
+	u32 callbacks_count					= 0;
+	n_ary_tree_node_animation_interval*	intervals	= animation_intervals_begin( *this );
+	u32 const count						= intervals_count();
+	for ( u32 i = 0; i < count; ++ i )
+		callbacks_count					+= intervals[ i ].callbacks_count();
+
+	return								callbacks_count;
+}
+
+inline	size_t		n_ary_tree_animation_node::intervals_memory_size	( )const
+{
+	u32 mem_size						= 0;
+	u32 const count						= intervals_count();
+	n_ary_tree_node_animation_interval const* const	intervals	= animation_intervals_begin( *this );
+	for ( u32 i = 0; i < count; ++i )
+		mem_size						+= intervals[ i ].memory_size( );
+
+	return								mem_size;
+}
+
+inline void n_ary_tree_animation_node::assign_uninitialized_user_data	( )
+{
+#ifndef MASTER_GOLD
+	user_data							= memory::uninitialized_value<u32>( );
+#endif // #ifndef MASTER_GOLD
+}
+
+inline float n_ary_tree_animation_node::length							( ) const
+{
+	return								mixing::length( animation_intervals_begin( *this ), intervals_count() );
+}
+
+inline float n_ary_tree_animation_node::cycle_length					( ) const
+{
+	R_ASSERT_CMP						( cycle_from_interval(), <, intervals_count() ) ;
+	float const result					= mixing::length( animation_intervals_begin( *this ) + cycle_from_interval(), intervals_count() - cycle_from_interval() );
+	R_ASSERT							( math::valid( result ) );
+	return								result;
+}
+
+
+inline u32 n_ary_tree_animation_node::cycle_from_interval				( ) const
+{ 
+	return								m_cycle_from_interval; 
+}
+
+inline bool	n_ary_tree_animation_node::has_events						( ) const
+{
+	return								callbacks_count() > 0;
+}
+
+} // namespace mixing
+} // namespace animation
+} // namespace xray
+
+#endif // #ifndef N_ARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED

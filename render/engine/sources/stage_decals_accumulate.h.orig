@@ -1,0 +1,45 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 05.07.2011
+//	Author		: Nikolay Partas
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef STAGE_DECALS_ACCUMULATE_H_INCLUDED
+#define STAGE_DECALS_ACCUMULATE_H_INCLUDED
+
+#include "stage.h"
+#include "render_model.h"
+#include <xray/render/core/shader_constant_host.h>
+
+namespace xray {
+namespace render {
+
+class res_geometry;
+typedef	intrusive_ptr<res_geometry, resource_intrusive_base, threading::single_threading_policy>	ref_geometry;
+
+class stage_decals_accumulate: public stage
+{
+public:
+					stage_decals_accumulate		(renderer_context* context);
+					~stage_decals_accumulate	();
+	virtual void	execute						();
+	
+private:
+			void	create_decal_geometry		();
+	render_surface_instances								m_dynamic_visuals;
+	shader_constant_host*						m_world_to_decal_parameter;
+	shader_constant_host*						m_eye_ray_corner_parameter;
+	shader_constant_host*						m_decal_tangent_to_view_space_matrix_parameter;
+	shader_constant_host*						m_decal_angle_parameters;
+	untyped_buffer_ptr							m_decal_vertex_buffer;
+	untyped_buffer_ptr							m_decal_index_buffer;
+	ref_geometry								m_decal_geometry;
+
+	ref_effect									m_opaque_geometry_mask_effect;
+
+}; // class stage_decals_accumulate
+
+} // namespace render
+} // namespace xray
+
+#endif // #ifndef STAGE_DECALS_ACCUMULATE_H_INCLUDED

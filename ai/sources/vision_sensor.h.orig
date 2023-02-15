@@ -1,0 +1,102 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 23.11.2010
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef VISION_SENSOR_H_INCLUDED
+#define VISION_SENSOR_H_INCLUDED
+
+#include "active_sensor_base.h"
+#include <xray/ai/sensed_visual_object.h>
+#include "game_object_subscriber.h"
+
+namespace xray {
+namespace ai {
+
+typedef vectora< game_object const* > ai_objects_type;
+
+namespace sensors {
+
+class vision_sensor : public active_sensor_base
+{
+public:
+	typedef intrusive_list< sensed_visual_object,
+							sensed_visual_object*,
+							&sensed_visual_object::next,
+							threading::single_threading_policy,
+							size_policy
+						  > visible_objects;
+
+public:
+						vision_sensor	(
+							npc& npc,
+							ai_world& world,
+							brain_unit& brain,
+							configs::binary_config_value const& options
+						);
+	virtual				~vision_sensor	( );
+
+	virtual	void		tick			( );	
+	virtual void		set_parameters	( configs::binary_config_value const& options );
+	virtual	void		dump_state		( npc_statistics& stats ) const;
+
+			void		add_fact		( sensed_visual_object* visual_object ) const;
+
+			void		on_visible_object_destruction	( game_object const& destroyed_object );
+
+	static	bool		is_object_visible		(
+							game_object const* const ai_game_object,
+							visible_objects& objects_list
+						);
+	static	bool		is_object_in_frustum	(
+							sensed_visual_object const* visual_object,
+							ai_objects_type const& objects_in_frustum
+						);
+	static	float		get_visibility_value	( sensed_visual_object const* visual_object );
+
+private:
+			void		add_new_visible_object	( game_object const* const ai_game_object );
+			void		update_visible_objects	( );
+			void		update_visibility		( );
+			void		check_frustum			( ai_objects_type& objects_in_frustum );
+			void		delete_not_in_frustum 	( ai_objects_type const& objects_in_frustum );
+			void		add_objects_from_frustum( ai_objects_type const& objects_in_frustum );
+			void		update_perceptors		( ) const;
+
+	static	sensed_visual_object*	find_visual_object_in_list	(
+										game_object const* const ai_game_object,
+										visible_objects& objects_list
+									);
+	inline vision_sensor*			return_this					( );
+
+private:
+	visible_objects					m_visible_objects;
+	
+	float							m_fov;
+	u32								m_max_objects_count;
+	float							m_min_indirect_view_factor;
+	float							m_max_indirect_view_factor;
+	float							m_far_plane_distance;
+	float							m_near_plane_distance;
+	float							m_aspect_ratio;
+	float							m_time_quant;
+	float							m_decrease_factor;
+	float							m_velocity_factor;
+	float							m_transparency_threshold;
+	float							m_luminosity_factor;
+	u32								m_visibility_inertia;
+	float							m_max_visibility;
+	float							m_min_visibility;
+
+	u32								m_last_tick;
+
+private:
+	game_object_subscriber			m_subscription;
+}; // class vision_sensor
+
+} // namespace sensors
+} // namespace ai
+} // namespace xray
+
+#endif // #ifndef VISION_SENSOR_H_INCLUDED

@@ -1,0 +1,247 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.07.2011
+//	Author		: Alexander Stupakov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "bsp_tree.h"
+#include "bsp_tree_node.h"
+#include "bsp_tree_polygon.h"
+#include "bsp_tree_utilities.h"
+#include <xray\ai_navigation\sources\graph_generator_adjacency_builder.h>
+
+namespace xray {
+namespace model_editor {
+
+struct parallel_and_near_plane : public std::binary_function< indexed_polygon const*, indexed_polygon const*, bool >
+{
+	parallel_and_near_plane( float max_distance, float precision ):
+		m_max_distance( max_distance ), m_precision( precision ){}
+
+	bool operator()( indexed_polygon const* first, indexed_polygon const* second ) const
+	{
+		if ( math::is_similar( first->get_plane().normal, second->get_plane().normal, m_precision ) )
+		{
+			float const dist = math::abs( first->get_plane().d - second->get_plane().d );
+			return dist <= m_max_distance;
+		}
+		else if ( math::is_similar( math::float3( first->get_plane().normal ), -second->get_plane().normal , m_precision ) )
+		{		
+			float const dist = math::abs( first->get_plane().d + second->get_plane().d );
+			return dist <= m_max_distance;
+		}
+		return false;
+	};
+private:
+	float m_max_distance;
+	float m_precision;
+};
+
+struct indexed_polygon_square_less : public std::binary_function< indexed_polygon const*, indexed_polygon const*, bool >
+{
+	bool operator()( indexed_polygon const* first, indexed_polygon const* second ) const
+	{
+		return first->get_square() < second->get_square();
+	}
+};
+
+struct indexed_polygon_projection_inside : public std::binary_function< indexed_polygon const*, indexed_polygon const*, bool >
+{
+	bool operator()( indexed_polygon const* larger_polygon, indexed_polygon const* polygon_to_check ) const
+	{
+		for ( u32 i = 0; i < polygon_to_check->get_vertices_count(); ++i )
+		{
+			if ( !is_point_inside_polygon( *larger_polygon, larger_polygon->get_plane().project( polygon_to_check->vertex( i ) ) ) )
+				return false;
+		}
+		return true;
+	}
+};
+
+//static void remove_parallel_portals( polygon_vector& portals )
+//{
+//	polygon_vector result_portals;
+//	parallel_and_near_plane criteria( 0.2f, 1e-2f );
+//	while ( !portals.empty() )
+//	{
+//		indexed_polygon* current = portals.front();
+//		polygon_vector parallel_portals;
+//		std::remove_copy_if( portals.begin(), portals.end(), std::back_inserter( parallel_portals ), std::not1( std::bind2nd( criteria, current ) ) );
+//		portals.erase( std::remove_if( portals.begin(), portals.end(), std::bind2nd( criteria, current ) ), portals.end() );
+//		if ( parallel_portals.size() < 2 )
+//			continue;
+//		std::sort( parallel_portals.begin(), parallel_portals.end(), indexed_polygon_square_less() );
+//		
+//		while ( !parallel_portals.empty() )
+//		{
+//			result_portals.push_back( parallel_portals.back() );
+//			parallel_portals.pop_back();
+//			parallel_portals.erase( 
+//				std::remove_if( parallel_portals.begin(), parallel_portals.end(), std::bind1st( indexed_polygon_projection_inside(), result_portals.back() ) ),
+//				parallel_portals.end()
+//			);
+//		}
+//	}
+//	result_portals = result_portals;
+//}
+
+bsp_tree::bsp_tree(  ):
+m_root( NULL ),
+m_selected_node( NULL ),
+m_created( false ),
+m_portals_generated( false )
+{
+	m_aabb.identity();
+}
+
+bsp_tree::~bsp_tree(  )
+{
+	this->reset();
+}
+
+void bsp_tree::generate_bsp_tree( math::float3 const* vertices, u32 vertex_count, u32 const* indices, u32 index_count )
+{
+	m_triangle_mesh.indices.resize( index_count );
+	std::copy( indices, indices + index_count, m_triangle_mesh.indices.begin() );
+	m_triangle_mesh.vertices.resize( vertex_count );
+	std::copy( vertices, vertices + vertex_count, m_triangle_mesh.vertices.begin() );
+	m_triangle_mesh.data.resize( index_count / 3 );
+
+	u32 index = 0;
+	triangles_mesh_type::data_type::iterator const triangle_end_it = m_triangle_mesh.data.end();
+	for ( triangles_mesh_type::data_type::iterator it = m_triangle_mesh.data.begin(); it != triangle_end_it; ++it )
+	{
+		math::float3 const& first	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ index++ ] ];
+		math::float3 const& second	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ index++ ] ];
+		math::float3 const& third	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ index++ ] ];
+		it->plane = math::create_plane( first, second, third );
+		it->square = triangle_square( first, second, third );
+	}
+	remove_duplicates( m_triangle_mesh );
+	ai::navigation::graph_generator_adjacency_builder ( m_triangle_mesh.indices, m_triangle_mesh.data );
+	math::aabb initial_aabb = math::create_aabb_min_max( m_triangle_mesh.vertices.front(), m_triangle_mesh.vertices.front() );
+	triangles_mesh_type::vertices_type::const_iterator vertices_end_it = m_triangle_mesh.vertices.end();
+	for ( triangles_mesh_type::vertices_type::const_iterator it = m_triangle_mesh.vertices.begin(); it != vertices_end_it; ++it )
+	{
+		initial_aabb.modify( *it );
+	}
+	math::convex initial_convex( initial_aabb );
+	m_triangle_mesh.build_spatial_tree();
+	triangle_ids_type triangle_ids;
+	u32 const triangle_count = m_triangle_mesh.data.size();
+	triangle_ids.reserve( triangle_count );
+	for ( u32 i = 0; i < triangle_count; ++i )
+	{
+		triangle_ids.push_back( i );
+	}
+	m_root = NEW( bsp_tree_node )( m_triangle_mesh, triangle_ids, initial_convex );
+	m_root->build_bsp();
+	m_created = true;
+}
+
+void bsp_tree::fill_tree_view( System::Windows::Forms::TreeView^ tree_view )
+{
+	XRAY_UNREFERENCED_PARAMETER( tree_view );
+	System::Windows::Forms::TreeNode^ root_node = gcnew System::Windows::Forms::TreeNode("RootNode");
+	tree_view->Nodes->Add( root_node );
+	root_node->Tag = bsp_tree_node_wrapper( m_root );
+	m_root->fill_tree_view_node( root_node );
+	tree_view->ExpandAll();
+}
+
+void bsp_tree::set_selected_node( bsp_tree_node const* selected_node )
+{
+	m_selected_node = selected_node;
+}
+
+void bsp_tree::render( render::scene_ptr const& scene, render::debug::renderer& r ) const
+{
+	if ( !m_root )
+		return;
+	if ( m_selected_node )
+		m_selected_node->render( scene, r );
+	else
+		m_root->render( scene, r );
+}
+
+void bsp_tree::serialise_selected_node ( configs::lua_config_ptr config ) const
+{
+	configs::lua_config_value vertices_cfg = (*config)["vertices"];
+	for ( u32 i = 0; i < m_vertices.size(); ++i )
+	{
+		vertices_cfg[i] = m_vertices[i];
+	}
+
+	if ( m_selected_node )
+	{
+		configs::lua_config_value root_cfg = (*config)["root"];
+		m_selected_node->serialise( root_cfg );
+	}
+}
+
+void bsp_tree::serialise_whole_tree( configs::lua_config_ptr config ) const
+{
+	configs::lua_config_value vertices_cfg = (*config)["vertices"];
+	for ( u32 i = 0; i < m_vertices.size(); ++i )
+	{
+		vertices_cfg[i] = m_vertices[i];
+	}
+
+	if ( m_root )
+	{
+		configs::lua_config_value root_cfg = (*config)["root"];
+		m_root->serialise( root_cfg );
+	}
+}
+
+void bsp_tree::restore( configs::lua_config_ptr config )
+{
+	this->reset();
+	//configs::lua_config_value const& root = config->get_root();
+	//R_ASSERT( root.value_exists( "vertices" ) );
+	//R_ASSERT( root.value_exists( "root"		) );
+
+	//configs::lua_config_value const& vertices_cfg		= root[ "vertices" ];
+	//configs::lua_config::const_iterator vertex_it		= vertices_cfg.begin( );
+	//configs::lua_config::const_iterator vertex_end_it	= vertices_cfg.end( );
+	//for ( ; vertex_it != vertex_end_it; ++vertex_it )
+	//{
+	//	m_vertices.push_back( static_cast<math::float3>( *vertex_it ) );
+	//}
+	//
+	//m_root = NEW( bsp_tree_node )( m_vertices, m_indices );
+	//m_root->restore( root[ "root" ] );
+	m_created = true;
+}
+
+void bsp_tree::reset()
+{
+	m_selected_node = NULL;
+	m_aabb.zero();
+	m_vertices.clear();
+	m_indices.clear();
+	m_edge_mode = false;
+	m_created = false;
+	m_portals_generated = false;
+	DELETE( m_root );
+	m_root = NULL;
+}
+
+math::aabb bsp_tree::get_aabb () const
+{
+	if ( m_selected_node )
+		return m_selected_node->get_aabb();
+	return math::aabb().identity();
+}
+
+void bsp_tree::generate_portals( )
+{
+	if ( m_root )
+		m_root->generate_portals( bsp_tree_node::portal_blanks_type() );
+	m_portals_generated = true;
+}
+
+
+} // namespace model_editor
+} // namespace xray

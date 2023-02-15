@@ -1,0 +1,196 @@
+
+//	Created		: 03.03.2010
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef N_ARY_TREE_ANIMATION_NODE_H_INCLUDED
+#define N_ARY_TREE_ANIMATION_NODE_H_INCLUDED
+
+#include "mixing_n_ary_tree_n_ary_operation_node.h"
+#include <xray/animation/mixing_animation_clip.h>
+#include <xray/animation/mixing.h>
+#include <xray/animation/bone_mixer_data.h>
+
+namespace xray {
+namespace animation {
+
+struct bone_mixer_data;
+
+namespace mixing {
+
+class animation_interval_base;
+struct animation_state;
+
+class n_ary_tree_animation_node : public n_ary_tree_n_ary_operation_node {
+public:
+	inline			n_ary_tree_animation_node	(
+						bool override_existing_animation,
+						animation_clip const& animation,
+						float const animation_time_offset,
+						clip_mix_self const mix_self,
+						int const synchronization_group_id,
+						u32 const operands_count,
+						u32 const start_time_in_ms,
+						bool const is_on_zero_cycle,
+						bool const is_transitting_to_zero,
+						bool const is_playing,
+						bool const is_new,
+						u32 intervals_count,
+						u32 current_interval_id,
+						u32 current_interval_start_time_in_ms,
+						u32 cycle_from_interval
+					);
+	inline			n_ary_tree_animation_node	(
+						bool override_existing_animation,
+						animation_clip const& animation,
+						bone_mixer_data const& bone_mixer_data,
+						float const animation_time_offset,
+						clip_mix_self mix_self,
+						int const synchronization_group_id,
+						u32 const operands_count,
+						u32 const start_time_in_ms,
+						bool const is_on_zero_cycle,
+						bool const is_transitting_to_zero,
+						bool const is_playing,
+						bool const is_new,
+						u32 intervals_count,
+						u32 current_interval_id,
+						u32 current_interval_start_time_in_ms,
+						u32 cycle_from_interval
+					);
+	inline			n_ary_tree_animation_node	(
+						u32 const additivity_priority,
+						bool override_existing_animation,
+						animation_clip const& animation,
+						n_ary_tree_animation_node& animation_to_synchronize_with,
+						float const animation_time_offset,
+						bool const is_on_zero_cycle,
+						u32 const operands_count,
+						u32 intervals_count,
+						bool const is_transitting_to_zero,
+						bool const is_playing,
+						bool const is_new,
+						u32 current_interval_id,
+						u32 current_interval_start_time_in_ms,
+						u32 cycle_from_interval
+					);
+	inline			n_ary_tree_animation_node	(
+						n_ary_tree_animation_node const& other 
+					);
+
+public:
+	inline	animation_clip const&	animation	( ) const;
+	inline	animation_state&	animation_state	( ) const;
+	inline	void			set_animation_state	( mixing::animation_state& animation_state );
+
+	inline	n_ary_tree_animation_node* animation_to_synchronize_with	( ) const;
+	inline	bone_mixer_data& bone_mixer_data	( );
+
+	inline	float	animation_time_offset		( ) const;
+	inline	float	full_animation_time_offset	( ) const;
+	inline	u32		start_time_in_ms			( ) const;
+	inline	bool	is_on_zero_cycle			( ) const;
+	inline	void	set_start_time_in_ms		( u32 const new_start_time_in_ms, bool const is_on_zero_cycle );
+
+	inline	float	length						( ) const;
+	inline	float	cycle_length				( ) const;
+
+	inline	bool	is_driving					( ) const;
+	inline	void	set_is_driving				( bool const value );
+	inline	bool	is_transitting_to_zero		( ) const;
+	inline	clip_mix_self mix_self				( ) const;
+	inline	int		synchronization_group_id	( ) const;
+	inline	u32		additivity_priority			( ) const;
+	inline	bool	is_playing					( ) const;
+	inline	bool	is_new						( ) const;
+
+	inline	void	set_processed				( )	{ m_is_new = false; }
+	virtual	void	accept						( n_ary_tree_visitor& visitor );
+	virtual void	accept						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_base_node& node );
+
+	inline	u32		callbacks_count				( )const;
+			void	copy_callbacks				( n_ary_tree_animation_node const& from );
+	
+	inline	size_t	intervals_memory_size		( )const;
+	inline	size_t	callbacks_memory_size		( )const;
+
+	inline	u32		intervals_count				( )const{ return m_intervals_count; }
+	inline	u32		current_interval_id			( )const{ return m_current_interval_id; }
+
+	inline	u32		current_interval_start_time_in_ms	( )const{ return m_current_interval_start_time_in_ms; }
+	inline	void	set_current_interval		( u32 current_interval_start_time_in_ms, u32 current_interval_id );
+	inline	u32		cycle_from_interval			( ) const;
+	inline	bool	has_events					( ) const;
+	inline	void	set_new						( ) { m_is_new = true; }
+	inline	bool does_override_existing_animation ( ) const { return m_override_existing_animation; }
+
+private:
+	n_ary_tree_animation_node& operator=		( n_ary_tree_animation_node const& other);
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_animation_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_weight_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_time_scale_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_addition_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_subtraction_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_multiplication_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_weight_transition_node& node );
+	virtual void	visit						( n_ary_tree_double_dispatcher& dispatcher, n_ary_tree_time_scale_transition_node& node );
+
+private:
+	inline	void assign_uninitialized_user_data	( );
+
+private:
+	animation::bone_mixer_data	m_bone_mixer_data;
+	animation_clip const&		m_animation;
+	mixing::animation_state*	m_animation_state;
+	n_ary_tree_animation_node*	m_animation_to_synchronize_with;
+
+public:
+	n_ary_tree_animation_node*	m_next_animation;
+
+private:
+	u32							m_start_time_in_ms;
+	int const					m_synchronization_group_id;
+	float const					m_animation_time_offset;
+
+	// next 6 members should be removed after refactoring
+private:
+	u32	const					m_intervals_count;
+	clip_mix_self const			m_mix_self;
+	u32							m_current_interval_id;
+	u32							m_current_interval_start_time_in_ms;
+	u32	const					m_cycle_from_interval;
+	u32 const					m_additivity_priority;
+
+#ifndef MASTER_GOLD
+public:
+	u32							user_data;
+#endif // #ifndef MASTER_GOLD
+
+private:
+	bool						m_is_driving;
+	bool const					m_is_transiting_to_zero;
+
+	// next 3 members should be removed after refactoring
+private:
+	bool						m_is_playing;
+	bool						m_is_new;
+	bool						m_is_on_zero_cycle;
+	bool const					m_override_existing_animation;
+
+private:
+#ifdef DEBUG
+#pragma warning(push)
+#pragma warning(disable:4200)
+	n_ary_tree_base_node*		m_operands[];
+#pragma warning(pop)
+#endif // #ifdef DEBUG
+}; // class n_ary_tree_animation_node
+
+} // namespace mixing
+} // namespace animation
+} // namespace xray
+
+#include "mixing_n_ary_tree_animation_node_inline.h"
+
+#endif // #ifndef N_ARY_TREE_ANIMATION_NODE_H_INCLUDED

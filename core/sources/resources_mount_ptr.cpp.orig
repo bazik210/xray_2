@@ -1,0 +1,39 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 09.09.2011
+//	Author		: Sergey Chechin
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include <xray/resources_mount_ptr.h>
+#include "resources_manager.h"
+
+namespace xray {
+namespace resources {
+
+void   intrusive_fs_task_unmount_base::destroy	(fs_task_unmount * object) const
+{
+	LOGI_TRACE								("resources", "adding unmount task: '%s' on '%s'", 
+											 object->m_mount_ptr->get_physical_path(), 
+											 object->m_mount_ptr->get_virtual_path());
+
+	g_resources_manager->change_count_of_pending_mount_operations	(+1);
+	g_resources_manager->add_fs_task		(object);
+}
+
+fs_task_unmount::fs_task_unmount		(vfs::vfs_mount_ptr const & mount_ptr) 
+	:	fs_task			(type_unmount, NULL),
+		m_mount_ptr		(mount_ptr) 
+{
+}
+
+void   fs_task_unmount::execute_may_destroy_this	()
+{
+	m_mount_ptr							=	NULL;
+
+	fs_task_unmount * this_ptr			=	this;
+	XRAY_DELETE_IMPL						(helper_allocator(), this_ptr);
+}
+
+} // namespace resources
+} // namespace xray

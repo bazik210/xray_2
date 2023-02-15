@@ -1,0 +1,81 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.12.2009
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2009
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_ANIMATION_SKELETON_H_INCLUDED
+#define XRAY_ANIMATION_SKELETON_H_INCLUDED
+
+#include <xray/animation/type_definitions.h>
+#include <xray/animation/api.h>
+
+namespace xray {
+
+namespace configs {
+	class lua_config_value;
+} // namespace configs
+
+namespace animation {
+
+class bone : private boost::noncopyable {
+
+public:
+			bone			(
+				pcstr const id,
+				bone const* const parent,
+				bone const* const children_begin,
+				bone const* const children_end,
+				bone_index_type const index
+			);
+
+
+	inline		bone_index_type index			( )const  { return m_index; }
+	inline		pcstr const		id				( )const  { return m_id; }
+	inline		bone const*		parent			( )const  { return m_parent; }
+	
+	inline		bone const*		children_begin	( )const  { return m_children_begin; }
+	inline		bone const*		children_end	( )const  { return m_children_end; }
+
+private:
+	pcstr const				m_id;
+	bone const* const		m_parent;
+	bone const* const		m_children_begin;
+	bone const* const		m_children_end;
+#ifdef DEBUG
+	bone_index_type	const	m_count;
+#endif // #ifdef DEBUG
+	bone_index_type	const	m_index; // do we really need it?
+}; // class bone
+
+class XRAY_ANIMATION_API skeleton : public resources::unmanaged_resource {
+public:
+								skeleton		( configs::binary_config_ptr config );
+								~skeleton		( );
+			pcstr				get_bone_name	( bone_index_type index ) const;
+
+public:
+			bone_index_type		get_bone_index	( pcstr name ) const;
+	inline	u32					get_bones_count	( ) const	{ return m_bone_count; }
+	inline	bone const&			get_bone		( bone_index_type index ) const;
+	inline	bool				is_root_bone	( bone_index_type index ) const;
+
+private:
+	bone*						m_bones;
+	bone_index_type				m_bone_count;
+	configs::binary_config_ptr	m_config;
+}; // class skeleton
+
+typedef	resources::resource_ptr<
+	skeleton,
+	resources::unmanaged_intrusive_base
+> skeleton_ptr;
+
+	bone_index_type			skeleton_bone_index	( skeleton const& skeleton, pcstr bone_name );
+
+} // namespace animation
+} // namespace xray
+
+#include <xray/animation/skeleton_inline.h>
+
+#endif // #ifndef XRAY_ANIMATION_SKELETON_H_INCLUDED

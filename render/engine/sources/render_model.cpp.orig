@@ -1,0 +1,143 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 13.08.2010
+//	Author		: Andrew Kolomiets
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "render_model.h"
+#include <xray/render/engine/model_format.h>
+#include "material_manager.h"
+#include <xray/render/core/res_texture.h>
+#include <xray/render/core/res_effect.h>
+#include <xray/render/core/res_geometry.h>
+
+namespace xray {
+namespace render {
+
+render_model::render_model( )
+{
+	m_aabbox.identity();
+}
+
+void render_model::load( memory::chunk_reader& chunk )
+{
+	if (!chunk.chunk_exists(model_chunk_header))
+		return;
+
+	//ASSERT( chunk.chunk_exists( model_chunk_header));
+	memory::reader reader = chunk.open_reader( model_chunk_header);
+	
+	model_header	hdr;
+	reader.r		( &hdr, sizeof( hdr), sizeof( hdr));
+	m_aabbox		= hdr.bb;
+}
+
+void render_model::load_properties( configs::binary_config_value const& properties )
+{
+	m_aabbox.max			= xray::math::float3(properties["bounding_box"]["max"]);
+	m_aabbox.min			= xray::math::float3(properties["bounding_box"]["min"]);
+}
+
+void render_surface::load( memory::chunk_reader& chunk )
+{
+	if (!chunk.chunk_exists(model_chunk_header))
+		return;
+	
+	memory::reader reader = chunk.open_reader( model_chunk_header);
+	model_header	hdr;
+	reader.r	( &hdr, sizeof( hdr), sizeof( hdr));
+	m_aabbox			= hdr.bb;
+	
+	R_ASSERT( hdr.platform_id==platform_windows_dx11 );
+}
+
+void render_surface::set_default_material( )
+{
+	m_material_effects = material::nomaterial_material( get_vertex_input_type() );
+}
+
+void render_surface::set_material( material_ptr mtl_ptr)
+{
+	material_manager::ref().initialize_material_effects(m_material_effects, mtl_ptr, get_vertex_input_type(), false);
+}
+
+void render_surface::set_material_effects( material_effects_instance_ptr mtl_instance_ptr )
+{
+	if (mtl_instance_ptr)
+	{
+		m_materail_effects_instance	= mtl_instance_ptr;
+		m_material_effects			= mtl_instance_ptr->get_material_effects();
+//.		material_manager::ref().add_material_effects(m_material_effects, m_material_effects.m_material);
+	}
+}
+
+void render_surface::load( configs::binary_config_value const& properties, memory::chunk_reader& chunk )
+{
+	(void)&chunk;
+	
+	m_aabbox.max			= xray::math::float3(properties["bounding_box"]["max"]);
+	m_aabbox.min			= xray::math::float3(properties["bounding_box"]["min"]);
+}
+
+void render_surface_instance::set_constants( )
+{
+	m_parent->set_constants	( );
+}
+
+//render_model_instance::render_model_instance( composite_render_model_instance& parent, 
+//											 render_model* original, 
+//											 material_effects* parent_material_effects )
+//{
+//	m_parent_			= &parent;
+//	m_transform			= &m_parent_->m_transform;
+//	m_original			= original;
+//	m_visible			= true;
+//	m_material_effects	= parent_material_effects;
+//}
+//
+//render_model_instance::~render_model_instance()
+//{
+//}
+//
+//void render_model_instance::set_constants	( ) const
+//{
+//	if ( !m_parent_ )
+//		return;
+//
+//	m_parent_->set_constants	( );
+//}
+//
+//void render_model_instance::set_material(material_ptr mtl_ptr)
+//{
+//	// TODO: render_model_instance has self materials?
+//	ASSERT(m_material_effects);
+//	
+//	material_manager::ref().initialize_material_effects(
+//		*m_material_effects, 
+//		mtl_ptr, 
+//		(m_original ? m_original->get_vertex_input_type() : static_mesh_vertex_input_type),
+//		true);
+//}
+//
+//void render_model_instance::set_default_material()
+//{
+//	ASSERT(m_material_effects);
+//	*m_material_effects = material::nomaterial_material( (m_original ? m_original->get_vertex_input_type() : static_mesh_vertex_input_type) );
+//}
+//
+//void render_model_instance::initialize_material_effects(bool force_recompile)
+//{
+//	XRAY_UNREFERENCED_PARAMETER(force_recompile);
+//}
+
+#pragma warning(push)
+#pragma warning(disable:4355)
+render_model_instance_impl::render_model_instance_impl( )
+:m_collision_object	(this)
+{}
+#pragma warning(pop)
+
+
+} // namespace render 
+} // namespace xray 

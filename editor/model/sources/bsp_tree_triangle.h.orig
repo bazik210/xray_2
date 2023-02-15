@@ -1,0 +1,59 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 23.08.2011
+//	Author		: Alexander Stupakov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef BSP_TREE_TRIANGLE_H_INCLUDED
+#define BSP_TREE_TRIANGLE_H_INCLUDED
+#include <xray\ai_navigation\sources\triangles_mesh.h>
+
+namespace xray {
+namespace model_editor {
+
+class bsp_tree_triangle {
+public:
+	static u32 const msc_empty_triangle_id = u32( -1 );
+	enum side { front, back, coincident, spanning };
+	math::plane	plane;
+	u32		neighbours[3];
+	bool	divider;
+	bool	is_marked;
+	float	square;
+public:
+	bsp_tree_triangle():
+	divider( false ),
+	is_marked( false ),
+	square( 0.0f )
+	{
+		for ( u32 i = 0; i < 3; ++i )
+			neighbours[i] = msc_empty_triangle_id;
+	}
+	
+	explicit bsp_tree_triangle( math::plane const& p ):
+	plane( p ),
+	divider( false ),
+	is_marked( false ),
+	square( 0.0f )
+	{
+		for ( u32 i = 0; i < 3; ++i )
+			neighbours[i] = msc_empty_triangle_id;
+	}
+
+	bool is_coplanar( math::plane const& p, float normal_epsilon = math::epsilon_3, float distance_epsilon = 1e-2f ) const
+	{
+		return math::is_similar( p.normal | plane.normal, 1.0f, normal_epsilon) && math::is_similar( p.d, plane.d, distance_epsilon );
+	}
+}; // class bsp_tree_triangle
+
+typedef ai::navigation::triangles_mesh< bsp_tree_triangle >	triangles_mesh_type;
+typedef vector<u32> triangle_ids_type;   
+bsp_tree_triangle::side		calculate_side				( math::plane const& p, u32 triangle_id, triangles_mesh_type const& mesh );
+void						split_triangle				( math::plane const& p, u32 triangle_id, triangles_mesh_type& mesh, triangle_ids_type& positive_ids, triangle_ids_type& negative_ids );
+void						remove_duplicates			( triangles_mesh_type& triangles_mesh );
+bool						is_convex_polygon_set		( triangle_ids_type const& triangle_ids, triangles_mesh_type const& mesh );
+
+} // namespace model_editor
+} // namespace xray
+
+#endif // #ifndef BSP_TREE_TRIANGLE_H_INCLUDED

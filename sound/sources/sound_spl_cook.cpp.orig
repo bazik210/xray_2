@@ -1,0 +1,91 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 20.05.2011
+//	Author		: Dmitry Kulikov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "sound_spl_cook.h"
+#include <xray/sound/spl_utils.h>
+#include <xray/sound/sound_spl.h>
+#include <xray/resources_fs.h>
+
+namespace xray {
+namespace sound {
+
+using namespace resources;
+
+//static pcstr resources_converted_string	=	"resources.converted/sounds/";
+static pcstr resources					=	"resources/sounds/single/";
+
+sound_spl_cook::sound_spl_cook			( ) : 
+	super	( sound_spl_class, reuse_true, use_resource_manager_thread_id )
+{
+
+}
+
+sound_spl_cook::~sound_spl_cook			( )
+{
+
+}
+
+void sound_spl_cook::translate_query	( query_result_for_cook& parent )
+{
+	fs_new::virtual_path_string	source_path		= resources;
+	source_path.append					( parent.get_requested_path( ) );
+
+#ifndef MASTER_GOLD
+
+	fs_new::physical_path_info const spl_file_info	=	resources::get_physical_path_info(source_path, resources::sources_mount);
+
+	if ( !spl_file_info.is_file( ) )
+	{
+
+		// creating default spl confug
+		fs_new::native_path_string spl_file_name_disk_path;
+		if ( !resources::convert_virtual_to_physical_path( &spl_file_name_disk_path, source_path.c_str(), resources::sources_mount ))
+		{
+			parent.finish_query			( result_error );
+			return;
+		}
+
+		create_default_spl_config		( spl_file_name_disk_path.c_str(), resources::unmanaged_allocator( ) ); 
+	}
+#endif // #ifndef MASTER_GOLD
+
+	resources::query_resource(
+		source_path.c_str( ),
+		resources::binary_config_class,
+		boost::bind(&sound_spl_cook::on_config_loaded, this, _1 ),
+		resources::unmanaged_allocator( ),
+		0,
+		&parent
+		);
+}
+
+void sound_spl_cook::delete_resource	( resource_base* res )
+{
+	UNMANAGED_DELETE				( res );
+}
+
+void sound_spl_cook::on_config_loaded	( queries_result& data )
+{
+	resources::query_result_for_cook* parent_query	= data.get_parent_query();
+	if( !data.is_successful() )
+	{
+		parent_query->finish_query					( result_error );
+		return;
+	}
+
+	configs::binary_config_ptr config				= static_cast_resource_ptr<configs::binary_config_ptr>( data[0].get_unmanaged_resource() );
+
+	sound_spl_ptr spl								= XRAY_NEW_IMPL( resources::unmanaged_allocator( ), sound_spl) ( );
+	spl->load										( config->get_root( )["spl"] );
+	//spl->get_curve()->calc_tangents();
+	parent_query->set_unmanaged_resource			( spl.c_ptr(), resources::memory_type_non_cacheable_resource, sizeof( sound_spl ));
+	parent_query->finish_query						( result_success );
+}
+
+
+} // namespace sound
+} // namespace xray

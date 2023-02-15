@@ -1,0 +1,270 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 14.05.2009
+//	Author		: Armen Abroyan
+//	Copyright (C) GSC Game World - 2009
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "gui_binder.h"
+#include "input_engine.h"
+#include "action.h"
+
+using namespace System;
+using namespace System::Windows::Forms;
+using namespace System::Collections;
+using System::Windows::Forms::ImageList;
+
+namespace xray {	
+namespace editor_base {
+
+gui_binder::gui_binder	( input_engine^ input_engine):
+m_input_engine			( input_engine )
+{
+	ASSERT( m_input_engine != nullptr );
+}
+
+void gui_binder::unbind( System::Windows::Forms::ToolStripMenuItem^ menu_item )
+{
+	menu_item->Click	-= gcnew System::EventHandler(this, &gui_binder::gui_control_click);
+	menu_item->Paint	-= gcnew System::Windows::Forms::PaintEventHandler(this, &gui_binder::gui_menu_item_paint);
+	m_menu_items.Remove	( menu_item );
+}
+
+Void gui_binder::bind( ToolStripMenuItem^ menu_item, String^ action_name )
+{
+	action^ a = m_input_engine->get_action( action_name );
+	if( a == nullptr )
+	{
+		ASSERT( false );
+		return;
+	}
+	menu_item->Text		= a->text();
+	menu_item->Click	+= gcnew System::EventHandler(this, &gui_binder::gui_control_click);
+	menu_item->Paint	+= gcnew System::Windows::Forms::PaintEventHandler(this, &gui_binder::gui_menu_item_paint);
+	m_menu_items.Add	( menu_item, action_name );
+}
+
+void gui_binder::unbind( System::Windows::Forms::ToolStripButton^ button )
+{
+	button->Click -= gcnew System::EventHandler(this, &gui_binder::gui_control_click);
+	m_buttons.Remove( button );
+}
+
+void gui_binder::bind( System::Windows::Forms::ToolStripButton^ button, System::String^ action_name  )
+{
+	action^ a = m_input_engine->get_action( action_name );
+	if( a == nullptr )
+	{
+		ASSERT( false );
+		return;
+	}
+	
+	button->Text			= a->text();
+	button->Click += gcnew System::EventHandler(this, &gui_binder::gui_control_click);
+
+	m_buttons.Add( button, action_name );
+}
+
+void gui_binder::gui_menu_drop_down(System::Object^ sender, System::EventArgs^)
+{
+	ToolStripMenuItem^ parent_item = safe_cast<ToolStripMenuItem^>(sender);
+	
+	for each (ToolStripItem^ sub_item in parent_item->DropDownItems)
+	{
+		if(sub_item->GetType()==ToolStripMenuItem::typeid)
+		if(m_menu_items.Contains(sub_item))
+			update_menu_item ( safe_cast<ToolStripMenuItem^>(sub_item) );
+	}
+}
+
+void gui_binder::gui_control_click(System::Object^ sender, System::EventArgs^)
+{
+	 if(m_menu_items.Contains(sender))
+		 m_input_engine->execute_action( safe_cast<System::String^>(m_menu_items[sender]) );
+	 else
+	 if(m_buttons.Contains(sender))
+		 m_input_engine->execute_action( safe_cast<System::String^>(m_buttons[sender]) );
+	 else
+		 ASSERT(false, "unregistered control click");
+}
+
+void gui_binder::gui_menu_item_paint(System::Object^  sender, System::Windows::Forms::PaintEventArgs^)
+{
+	ToolStripMenuItem^ item = safe_cast<ToolStripMenuItem^>(sender);
+
+	String^ action_name = dynamic_cast<String^>(m_menu_items[item]);
+	ASSERT( action_name != nullptr );
+
+	action^ action = m_input_engine->get_action(action_name);
+
+	item->Enabled = action->enabled();
+ 
+	Generic::List<String^>^ shortcuts = m_input_engine->get_action_keys_list( action_name );
+ 	if( shortcuts->Count > 0 )
+ 	{
+		item->ShortcutKeyDisplayString = shortcuts[0];
+	}
+	else
+		item->ShortcutKeyDisplayString = "";
+}
+
+void gui_binder::update_menu_item(ToolStripMenuItem^ menu_item)
+{
+	ASSERT					(m_menu_items.Contains(menu_item));
+	String^ action_name		= safe_cast<String^>(m_menu_items[menu_item]);
+	action^ action			= m_input_engine->get_action(action_name);
+
+	menu_item->Enabled		= action->enabled();
+
+	xray::editor_base::checked_state item_check_state	= action->checked_state();
+	menu_item->Checked		= (item_check_state!=xray::editor_base::checked_state::uncheckable);
+
+	if(item_check_state!=xray::editor_base::checked_state::uncheckable)
+	{
+		menu_item->Checked		= true;
+		menu_item->CheckState	= (item_check_state==xray::editor_base::checked_state::checked)	?
+									System::Windows::Forms::CheckState::Checked : 
+									System::Windows::Forms::CheckState::Unchecked; 
+	}else
+		menu_item->Checked		= false;
+}
+
+void gui_binder::update_button(ToolStripButton^ button_item)
+{
+	ASSERT					(m_buttons.Contains(button_item));
+	String^ action_name		= safe_cast<String^>(m_buttons[button_item]);
+	update_button			(button_item, action_name);
+}
+
+void gui_binder::update_button(ToolStripButton^ button_item, System::String^ action_name)
+{
+	action^ action			= m_input_engine->get_action(action_name);
+
+	button_item->Enabled	= action->enabled();
+	xray::editor_base::checked_state item_check_state	= action->checked_state();
+	button_item->Checked	= (item_check_state==xray::editor_base::checked_state::checked);
+}
+
+void gui_binder::update_items()
+{
+	for each (System::Collections::DictionaryEntry^ i in m_buttons) 
+	{
+		System::String^ action_name		= safe_cast<System::String^>	(i->Value);
+		ToolStripButton^ button			= safe_cast<ToolStripButton^>	(i->Key);
+		update_button					(button, action_name);
+	}
+}
+
+System::Drawing::Image^ gui_binder::get_image( System::String^ key )
+{
+	if(m_image_key_aliases.ContainsKey(key))
+		return get_image_internal(m_image_key_aliases[key]);
+	else
+		return get_image_internal(key);
+}
+
+System::Drawing::Image^ gui_binder::get_image_internal( System::String^ key )
+{
+	for each(ImageList^ list in m_images.Values)
+	{
+		if(list->Images->ContainsKey(key))
+			return list->Images[key];
+	}
+	return nullptr;
+}
+
+void gui_binder::set_image_list( System::String^ list_id, System::Windows::Forms::ImageList^ list )
+{
+	m_images[list_id] = list;
+}
+
+void gui_binder::register_image( System::String^ image_list_key, System::String^ image_key, int image_index )
+{
+	if(get_image(image_key))
+		return;// already registered
+	
+	R_ASSERT(m_images.ContainsKey(image_list_key));
+
+	for each (System::String^ k in m_images[image_list_key]->Images->Keys)
+	{
+		if(image_index == m_images[image_list_key]->Images->IndexOfKey(k))
+		{
+			m_image_key_aliases.Add(image_key, k);
+			return;
+		}
+	}
+
+	// first 
+	m_images[image_list_key]->Images->SetKeyName(image_index, image_key);
+}
+
+void add_item_to_collection(ToolStripItemCollection^ collection, ToolStripItem^ item, int item_prio)
+{
+	item->Tag = item_prio;
+	for each(ToolStripItem^ itm in collection)
+	{
+		int prio = System::Convert::ToInt32(itm->Tag->ToString());
+		if(prio > item_prio)
+		{
+			int idx = collection->IndexOf(itm);
+			collection->Insert(idx, item);
+			return;
+		}
+	}
+	collection->Add(item); // add to tail
+}
+
+ToolStripMenuItem^ get_parent_menu_item(MenuStrip^ strip, System::String^ key)
+{
+	ToolStripMenuItem^ item		= nullptr;
+	int idx						= strip->Items->IndexOfKey(key);
+	ASSERT						(idx!=-1, "menu item not found %s", unmanaged_string(key).c_str());
+	item						= safe_cast<ToolStripMenuItem^>(strip->Items[idx]);
+	return						item;
+}
+
+void gui_binder::add_menu_item(	MenuStrip^ strip, 
+								System::String^ strip_key, 
+								System::String^ text, 
+								int prio )
+{
+	int idx						= strip->Items->IndexOfKey(strip_key);
+	ASSERT_U					(idx==-1, "menu item already exist %s", unmanaged_string(strip_key).c_str());
+
+	ToolStripMenuItem^ menu_item= nullptr;
+	menu_item					= gcnew ToolStripMenuItem;
+	menu_item->Name				= strip_key;
+	menu_item->Text				= text;
+	add_item_to_collection		( strip->Items, menu_item, prio );
+}
+
+void gui_binder::add_action_menu_item(	MenuStrip^ strip, 
+										System::String^ action_name, 
+										System::String^ strip_key, 
+										int prio )
+{
+	ToolStripMenuItem^ parent_menu_item = get_parent_menu_item( strip, strip_key );
+
+	ToolStripMenuItem^ menu_item		= gcnew ToolStripMenuItem;
+	menu_item->Name						= action_name;
+	add_item_to_collection				( parent_menu_item->DropDownItems, menu_item, prio);
+	parent_menu_item->DropDownOpening	-= gcnew System::EventHandler(this, &gui_binder::gui_menu_drop_down);
+	parent_menu_item->DropDownOpening	+= gcnew System::EventHandler(this, &gui_binder::gui_menu_drop_down);
+	bind								( menu_item, action_name );
+}
+
+void gui_binder::remove_action_menu_item(	MenuStrip^ strip, 
+											System::String^ action_name, 
+											System::String^ strip_key )
+{
+	ToolStripMenuItem^ parent_menu_item = get_parent_menu_item( strip, strip_key );
+
+	int menu_item_index					= parent_menu_item->DropDownItems->IndexOfKey(action_name);
+	ToolStripMenuItem^ menu_item		= safe_cast<ToolStripMenuItem^>(parent_menu_item->DropDownItems[menu_item_index]);
+
+	unbind								( menu_item );
+	parent_menu_item->DropDownItems->Remove(menu_item);
+}
+
+} // namespace editor_base	
+} // namespace xray

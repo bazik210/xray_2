@@ -1,0 +1,26 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 27.01.2010
+//	Author		: Konstantin Slipchenko
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+#ifndef XRAY_ANIMATION_SKELETON_INLINE_H_INCLUDED
+#define XRAY_ANIMATION_SKELETON_INLINE_H_INCLUDED
+
+namespace xray {
+namespace animation {
+
+inline bone	const& skeleton::get_bone	( bone_index_type index ) const
+{
+	R_ASSERT_CMP	( index, <, m_bone_count );
+	return			m_bones[ index ];
+}
+
+inline bool skeleton::is_root_bone		( bone_index_type index ) const
+{
+	return			u32(m_bones[0].children_begin() - m_bones) > index;
+}
+
+} // namespace animation
+} // namespace xray
+
+#endif // #ifndef XRAY_ANIMATION_SKELETON_INLINE_H_INCLUDED

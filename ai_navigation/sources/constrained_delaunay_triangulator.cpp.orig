@@ -1,0 +1,238 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 13.07.2011
+//	Author		: Sergey Lozinski
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "constrained_delaunay_triangulator.h"
+#include <xray/linkage_helper.h>
+
+XRAY_DECLARE_LINKAGE_ID( constrained_delaunay_triangulator )
+
+using xray::ai::navigation::delaunay_triangulator;
+using xray::ai::navigation::constrained_delaunay_triangulator;
+using xray::ai::navigation::triangles_mesh_type;
+using xray::math::float3;
+
+u32 segment_intersects_triangle	(
+		float3 const& normal,
+		float3 const& segment0,
+		float3 const& segment1,
+		float3 const& vertex0,
+		float3 const& vertex1,
+		float3 const& vertex2,
+		float3 (&intersections)[2]
+	);
+
+typedef xray::buffer_vector< bool > markers_type;
+
+struct is_marked_in_buffer_predicate3 {
+	inline			is_marked_in_buffer_predicate3	( delaunay_triangulator::indices_type const& indices, markers_type const& markers ) :
+		m_indices	( &indices ),
+		m_markers	( &markers )
+	{
+	}
+
+	inline	bool	operator()			( u32 const& vertex_id ) const
+	{
+		size_t const vertex_id_index	= &vertex_id - m_indices->begin( );
+		return							(*m_markers)[ vertex_id_index / 3 ];
+	}
+
+private:
+	delaunay_triangulator::indices_type const* m_indices;
+	markers_type const*	m_markers;
+}; // struct is_marked_in_buffer_predicate
+
+
+static inline bool is_right_side ( float3 const& p, float3 const& b, float3 const& c, float3 const& n)
+{
+	return ( ((b - c) ^ (p - c)) | n ) >= 0.f;
+}
+
+bool constrained_delaunay_triangulator::is_triangle_vertex(
+		float3 const& testee,
+		float3 const& v0,
+		float3 const& v1,
+		float3 const& v2
+	)
+{
+	if ( testee.is_similar( v0 ) ) {
+		R_ASSERT( testee.is_similar( v1 ) );
+		R_ASSERT( testee.is_similar( v2 ) );
+		return true;
+	}
+
+	if ( testee.is_similar( v1 ) ) {
+		R_ASSERT( testee.is_similar( v2 ) );
+		return true;
+	}
+
+	if ( testee.is_similar( v2 ) )
+		return true;
+
+	return false;
+}
+
+bool is_on_segment	(
+		xray::math::float3 const& testee,				// t
+		xray::math::float3 const& first_segment_vertex,	// v0
+		xray::math::float3 const& second_segment_vertex	// v1
+	);
+
+void fill_coordinate_indices	( float3 const& normal, u32 (&coordinate_indices)[2] );
+
+u32 segment_intersects_segment	(
+		u32 const (&coordinate_indices)[2],
+		float3 const& v0,
+		float3 const& v1,
+		float3 const& u0,
+		float3 const& u1,
+		float3& result0,
+		float3& result1,
+		bool& are_on_the_same_line
+	);
+
+bool constrained_delaunay_triangulator::remove_triangles ( 
+			polygon_indices_type& right_polygon_indices, 
+			polygon_indices_type& left_polygon_indices, 
+			u32 const segment_vertex_index0, 
+			u32 const segment_vertex_index1
+		)
+{
+	u32 const	triangles_count	= m_indices.size() / 3;
+
+	markers_type markers (
+		ALLOCA( sizeof(bool) * triangles_count ),
+		triangles_count,
+		triangles_count,
+		false
+	);
+	
+	float3 const& segment_vertex0 = m_vertices[ segment_vertex_index0 ];
+	float3 const& segment_vertex1 = m_vertices[ segment_vertex_index1 ];
+	for ( u32 i = 0; i < triangles_count; ++i ) {
+		
+		u32 equal_vertex_count = 0;
+		for ( u32 j = 0; j < 3; ++j ) {
+			if ( segment_vertex_index0 == m_indices[3*i+j] )
+				++equal_vertex_count;
+			if ( segment_vertex_index1 == m_indices[3*i+j] )
+				++equal_vertex_count;
+		}
+
+		if ( equal_vertex_count >= 2 ) {
+			return false;
+		}
+	}
+
+	for ( u32 i = 0; i < triangles_count; ++i ) {
+		float3 intersections[2];
+		u32 const intersections_count = segment_intersects_triangle( m_normal, segment_vertex0, segment_vertex1, m_vertices[m_indices[3*i+0]], m_vertices[m_indices[3*i+1]], m_vertices[m_indices[3*i+2]], intersections );
+		
+		/*
+		float3 const* vertices[] = {
+			&m_vertices[ m_indices[3*i+0] ],
+			&m_vertices[ m_indices[3*i+1] ],
+			&m_vertices[ m_indices[3*i+2] ],
+		};
+
+		for ( u32 k = 0; k < intersections_count; ++k ) {
+			if ( is_similar( intersections[k], segment_vertex0 ) || is_similar( intersections[k], segment_vertex1 ) )
+				continue;
+			for ( u32 l = 0; l < 3; ++l ) {
+				R_ASSERT_U ( !is_similar( intersections[k], *vertices[l] ), "Constraint can't cross triangulation vertices" );
+				R_ASSERT   ( (&segment_vertex0 == vertices[l]) || (&segment_vertex1 == vertices[l]) || !is_on_segment( *vertices[l], segment_vertex0, segment_vertex1) );
+				static bool test_more = false;
+				if ( test_more ) {
+					u32 coordinate_indices[2];
+					fill_coordinate_indices( m_normal, coordinate_indices );
+					float3 result0, result1;
+					bool are_on_the_same_line;
+					R_ASSERT   ( (&segment_vertex0 == vertices[0]) || (&segment_vertex1 == vertices[0]) || (&segment_vertex0 == vertices[1]) || (&segment_vertex1 == vertices[1]) || !segment_intersects_segment( coordinate_indices, *vertices[0], *vertices[1], segment_vertex0, segment_vertex1, result0, result1, are_on_the_same_line) );
+					R_ASSERT   ( (&segment_vertex0 == vertices[1]) || (&segment_vertex1 == vertices[1]) || (&segment_vertex0 == vertices[2]) || (&segment_vertex1 == vertices[2]) || !segment_intersects_segment( coordinate_indices, *vertices[1], *vertices[2], segment_vertex0, segment_vertex1, result0, result1, are_on_the_same_line) );
+					R_ASSERT   ( (&segment_vertex0 == vertices[2]) || (&segment_vertex1 == vertices[2]) || (&segment_vertex0 == vertices[0]) || (&segment_vertex1 == vertices[0]) || !segment_intersects_segment( coordinate_indices, *vertices[2], *vertices[0], segment_vertex0, segment_vertex1, result0, result1, are_on_the_same_line) );
+				}
+			}
+		}
+		*/
+
+		R_ASSERT		( intersections_count <= 2 );
+		if ( intersections_count > 1 ) {
+			for ( u32 j = 0; j < 3; ++j ) {
+				if ( is_right_side( m_vertices[m_indices[3*i+j]], segment_vertex0, segment_vertex1, m_normal) )
+					right_polygon_indices.push_back( m_indices[3*i+j] );
+				else
+					left_polygon_indices.push_back( m_indices[3*i+j] );
+			}
+			markers[i] = true;
+		}
+	}
+	
+	m_indices.erase (
+		std::remove_if (
+			m_indices.begin(),
+			m_indices.end(),
+			is_marked_in_buffer_predicate3( m_indices, markers )
+		),
+		m_indices.end()
+	);
+
+	right_polygon_indices.push_back( segment_vertex_index0 );
+	right_polygon_indices.push_back( segment_vertex_index1 );
+	std::sort ( right_polygon_indices.begin(), right_polygon_indices.end() );
+	right_polygon_indices.erase (
+		std::unique (
+			right_polygon_indices.begin(),
+			right_polygon_indices.end()
+		),
+		right_polygon_indices.end()
+	);
+
+	left_polygon_indices.push_back( segment_vertex_index0 );
+	left_polygon_indices.push_back( segment_vertex_index1 );
+	std::sort ( left_polygon_indices.begin(), left_polygon_indices.end() );
+	left_polygon_indices.erase (
+		std::unique (
+			left_polygon_indices.begin(),
+			left_polygon_indices.end()
+		),
+		left_polygon_indices.end()
+	);
+
+	return true;
+}
+
+void constrained_delaunay_triangulator::triangulate_polygon_side ( polygon_indices_type const& polygon_indices )
+{
+
+	u32 const max_vertices_count		= polygon_indices.size() + delaunay_triangulator::get_additional_vertex_count();
+	delaunay_triangulator::vertices_type vertices(
+		ALLOCA( max_vertices_count * sizeof( delaunay_triangulator::vertices_type::value_type) ),
+		max_vertices_count
+	);
+	
+	u32 const polygon_indices_count	= polygon_indices.size();
+	for ( u32 i = 0; i < polygon_indices_count; ++i ) {
+		vertices.push_back( m_vertices[polygon_indices[i]] );
+	}
+
+	u32 const max_indices_count = 3*delaunay_triangulator::get_maximum_triangle_count_in_triangulation( vertices.size() );
+	delaunay_triangulator::indices_type indices (
+		ALLOCA( max_indices_count * sizeof(delaunay_triangulator::indices_type::value_type) ),
+		max_indices_count
+	);
+
+	R_ASSERT( vertices.size() >= 3 );
+
+	delaunay_triangulator ( vertices, indices, m_normal );
+	
+	delaunay_triangulator::indices_type::iterator i = indices.begin();
+	delaunay_triangulator::indices_type::iterator const e = indices.end();
+	for ( ; i != e; ++i )
+		m_indices.push_back( polygon_indices[*i] );
+	
+	R_ASSERT_CMP ( m_indices.size() % 3, ==, 0 );
+	
+}

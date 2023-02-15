@@ -1,0 +1,27 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 05.07.2011
+//	Author		: Nikolay Partas
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef XRAY_RENDER_FACADE_H_INCLUDED
+#define XRAY_RENDER_FACADE_H_INCLUDED
+
+namespace xray {
+namespace render {
+
+struct decal_properties 
+{
+	math::float4x4						transform;
+	resources::unmanaged_resource_ptr	material; // material_effects_instance_ptr
+	float								alpha_angle;
+	float								clip_angle;
+	bool								projection_on_static_geometry;
+	bool								projection_on_skeletal_geometry;
+	bool								projection_on_terrain;
+}; // struct decal_properties
+
+} // namespace render
+} // namespace xray
+
+#endif // #ifndef XRAY_RENDER_FACADE_H_INCLUDED

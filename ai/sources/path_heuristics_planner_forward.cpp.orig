@@ -1,0 +1,126 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 15.07.2011
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+
+#include <xray/ai/search/path_heuristics_planner_forward.h>
+
+namespace xray {
+namespace ai {
+namespace path_heuristics {
+
+typedef planner_forward::impl									heuristics;
+typedef planning::world_state::properties_type::const_iterator	const_iterator;
+
+#if 1//ndef UPLAN_BUILD
+heuristics::edge_weight_type heuristics::estimate	( vertex_id_type const& vertex_id ) const
+{
+	edge_value_type result			= 0;
+	const_iterator iter_graph		= m_graph.target().properties().begin();
+	const_iterator iter_end_graph	= m_graph.target().properties().end();
+	const_iterator iter_vertex		= vertex_id.properties().begin();
+	const_iterator iter_end_vertex	= vertex_id.properties().end();
+	
+	for ( ; ( iter_graph != iter_end_graph ) && ( iter_vertex != iter_end_vertex ); )
+	{
+		if ( (*iter_graph).id() < (*iter_vertex).id() )
+		{
+			++result;
+			++iter_graph;
+			continue;
+		}
+
+		if ( (*iter_graph).id() > (*iter_vertex).id() )
+		{
+			++iter_vertex;
+			continue;
+		}
+
+		if ( (*iter_graph).value() != (*iter_vertex).value() )
+			++result;
+
+		++iter_graph;
+		++iter_vertex;
+	}
+
+	return						result + edge_value_type( iter_end_graph - iter_graph );
+}
+
+#else // UPLAN_BUILD
+heuristics::edge_weight_type heuristics::estimate	( vertex_id_type const& vertex_id ) const
+{
+	edge_value_type result			= 0;
+	const_iterator iter_vertex		= vertex_id.properties().begin();
+	const_iterator iter_end_vertex	= vertex_id.properties().end();
+	const_iterator iter_graph		= m_graph.target().properties().begin();
+	const_iterator iter_end_graph	= m_graph.target().properties().end();
+	const_iterator iter_current		= m_graph.current().properties().begin();
+	const_iterator iter_end_current	= m_graph.current().properties().end();
+	
+	for ( ; ( iter_graph != iter_end_graph ) && ( iter_vertex != iter_end_vertex ); )
+	{
+		if ( (*iter_vertex).id() < (*iter_graph).id() )
+		{
+			++iter_vertex;
+			continue;
+		}
+
+		if ( (*iter_vertex).id() == (*iter_graph).id() )
+		{
+			if ( (*iter_vertex).value() != (*iter_graph).value() )
+				++result;
+
+			++iter_vertex;
+			++iter_graph;
+			continue;
+		}
+
+		for ( ; ( iter_current != iter_end_current ) && ( (*iter_current).id() < (*iter_graph).id() ); )
+			++iter_current;
+		
+		if ( ( iter_current == iter_end_current ) || ( (*iter_current).id() > (*iter_graph).id() ) )
+			m_graph.evaluate	( iter_current, iter_end_current, (*iter_graph).id() );
+		
+		if ( (*iter_current).value() != (*iter_graph).value() )
+			++result;
+
+		++iter_current;
+		++iter_graph;
+	}
+
+	if ( iter_vertex != iter_end_vertex )
+		return					result;
+
+	iter_vertex					= iter_current;
+	iter_end_vertex				= iter_end_current;
+
+	for ( ; iter_graph != iter_end_graph; )
+	{
+		if ( ( iter_vertex == iter_end_vertex ) || ( (*iter_vertex).id() > (*iter_graph).id() ) )
+			m_graph.evaluate	( iter_vertex, iter_end_vertex, (*iter_graph).id() );
+
+		if ( (*iter_vertex).id() < (*iter_graph).id() )
+		{
+			++iter_vertex;
+			continue;
+		}
+
+		R_ASSERT				( (*iter_vertex).id() == (*iter_graph).id(), "error in algorithm" );
+
+		if ( (*iter_vertex).value() != (*iter_graph).value() )
+			++result;
+
+		++iter_vertex;
+		++iter_graph;
+	}
+
+	return						result;
+}
+#endif // #ifdef UPLAN_BUILD
+
+} // namespace path_heuristics
+} // namespace ai
+} // namespace xray

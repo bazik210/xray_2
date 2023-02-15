@@ -1,0 +1,38 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 06.12.2011
+//	Author		: Evgeniy Obertyukh
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef OBJECT_ENVIRONMENT_SETTINGS_KEY_H_INCLUDED
+#define OBJECT_ENVIRONMENT_SETTINGS_KEY_H_INCLUDED
+
+using namespace System;
+
+namespace xray
+{
+	namespace editor
+	{
+		ref class object_environment_settings;
+
+		ref class object_environment_settings_key: xray::editor::wpf_controls::i_environment_key
+		{
+		public:
+			object_environment_settings_key	( object_environment_settings^ parent );
+
+		public:
+			virtual property		Single				key_time;
+
+		internal:
+			void					save		( configs::lua_config_value data_value );
+			void					load		( configs::lua_config_value data_value );
+
+		private:
+			object_environment_settings^		m_parent;
+
+		}; // class object_environment_settings_key
+
+	} // namespace editor
+} // namespace xray
+
+#endif // #ifndef OBJECT_ENVIRONMENT_SETTINGS_KEY_H_INCLUDED

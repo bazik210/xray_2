@@ -1,0 +1,238 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 19.02.2010
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef BINARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED
+#define BINARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED
+
+#include <xray/animation/mixing_animation_clip.h>
+
+namespace xray {
+namespace animation {
+namespace mixing {
+
+
+inline binary_tree_animation_node::binary_tree_animation_node		(
+		mutable_buffer& buffer,
+		animation_clip const* const animation,
+		float const time_scale,
+		base_interpolator const* const time_scale_interpolator,
+		float const first_interval_time_offset,
+		float const time_offset,
+		float const length,
+		clip_mix_self const mix_self,
+		int const synchronization_group_id,
+		bool const override_existing_animation,
+		u32 const additivity_priority 
+	) :
+	m_buffer								( &buffer ),
+	m_animation								( animation ),
+	m_next_animation						( 0 ),
+	m_animation_to_synchronize_with			( 0 ),
+	m_n_ary_animation_to_synchronize_with	( 0 ),
+	m_unique_weights_count					( 0 ),
+	m_time_scale							( time_scale ),
+	m_time_scale_interpolator				( time_scale_interpolator ),
+	m_time_offset							( time_offset ),
+	m_cycle_from_interval					( 0 ),
+	m_null_weight_found						( false ),
+	m_mix_self								( mix_self ),
+	m_synchronization_group_id				( synchronization_group_id ),
+	m_override_existing_animation			( override_existing_animation ),
+	m_additivity_priority					( additivity_priority )
+{
+	assign_uninitialized_user_data			( );
+	R_ASSERT								( animation );
+	R_ASSERT								( m_time_scale_interpolator );
+	add_interval							( animation->animation	( ), first_interval_time_offset, length );
+
+}
+
+inline binary_tree_animation_node::binary_tree_animation_node		(
+		mutable_buffer& buffer,
+		animation_clip const* const animation,
+		binary_tree_animation_node* const animation_to_synchronize_with,
+		bool const override_existing_animation,
+		u32 const additivity_priority 
+	) :
+	m_buffer								( &buffer ),
+	m_animation								( animation ),
+	m_animation_to_synchronize_with			( animation_to_synchronize_with ),
+	m_n_ary_animation_to_synchronize_with	( 0 ),
+	m_next_animation						( 0 ),
+	m_unique_weights_count					( 0 ),
+	m_time_scale							( 0.f ),
+	m_time_scale_interpolator				( 0 ),
+	m_time_offset							( 0.f ),
+	m_cycle_from_interval					( 0 ),
+	m_mix_self								( clip_mix_self_dummy ),
+	m_null_weight_found						( false ),
+	m_synchronization_group_id				( animation_to_synchronize_with->synchronization_group_id() ),
+	m_override_existing_animation			( override_existing_animation ),
+	m_additivity_priority					( additivity_priority )
+{
+	assign_uninitialized_user_data			( );
+	R_ASSERT								( animation_to_synchronize_with );
+	add_interval							( animation->animation( ), 0, animation->length() );
+}
+
+inline binary_tree_animation_node::binary_tree_animation_node		( binary_tree_animation_node const& other ) :
+	m_buffer								( other.m_buffer ),
+	m_animation								( other.m_animation ),
+	m_next_animation						( other.m_next_animation ),
+	m_animation_to_synchronize_with			( other.m_animation_to_synchronize_with ),
+	m_n_ary_animation_to_synchronize_with	( other.m_n_ary_animation_to_synchronize_with ),
+	m_unique_weights_count					( other.m_unique_weights_count ),
+	m_time_scale							( other.m_time_scale ),
+	m_time_scale_interpolator				( other.m_time_scale_interpolator ),
+	m_time_offset							( other.m_time_offset ),
+	m_cycle_from_interval					( other.m_cycle_from_interval ),
+	m_mix_self								( other.m_mix_self ),
+	m_null_weight_found						( other.m_null_weight_found ),
+	m_synchronization_group_id				( other.synchronization_group_id() ),
+	m_override_existing_animation			( other.m_override_existing_animation ),
+	m_additivity_priority					( other.m_additivity_priority )
+{
+#ifndef MASTER_GOLD
+	user_data											= other.user_data;
+#endif // #ifndef MASTER_GOLD
+
+	ASSERT												( m_buffer );
+	copy_animation_intervals							( m_intervals, *m_buffer, other.m_intervals );
+}
+
+inline binary_tree_animation_node::~binary_tree_animation_node		( )
+{
+	for ( ; m_intervals.size() > 0; )
+		m_intervals.pop_front()-> ~animation_interval();
+}
+
+inline	void	binary_tree_animation_node::add_interval			( skeleton_animation_ptr const &animation, float time_offset, float length )
+{
+	if ( m_animation_to_synchronize_with && m_intervals.size() != 0 )
+	{
+		LOG_ERROR( "additional intervals is not currently supported for synchronized animations" );
+		NOT_IMPLEMENTED(return);
+	}
+	
+	animation_interval* const interval = new ( m_buffer->c_ptr() )animation_interval( m_buffer, animation, time_offset, length );
+	*m_buffer				+= sizeof( animation_interval );
+	m_intervals.push_back	( interval );
+}
+
+struct subscribe_channel_predicate{
+	subscribe_channel_predicate( pcstr const channel, on_channel_event_function_type const& callback_function ):
+		m_channel			( channel ),
+		m_callback_function	( &callback_function )
+	{}
+	
+	void operator () ( animation_interval *interval )
+	{
+		interval->subscribe_channel( m_channel, *m_callback_function );
+	}
+
+private:
+	subscribe_channel_predicate & operator = (subscribe_channel_predicate &)
+	{
+		NODEFAULT();
+		return *this;
+	}
+
+	skeleton_animation_ptr const*			m_animation;
+	pcstr const								m_channel; 
+	on_channel_event_function_type const*	m_callback_function;
+
+}; // struct subscribe_channel_predicate
+
+inline void binary_tree_animation_node::subscribe_channel			( pcstr const channel, on_channel_event_function_type const& callback_function )
+{
+	ASSERT					( m_buffer );
+	ASSERT					( m_animation );
+	
+	subscribe_channel_predicate subsribe_p( channel, callback_function );
+	m_intervals.for_each( subsribe_p );
+
+}
+
+inline animation_clip const* binary_tree_animation_node::animation	( ) const
+{
+	ASSERT					( m_animation );
+	return					m_animation;
+}
+
+inline float binary_tree_animation_node::time_scale					( ) const
+{
+	return					m_time_scale;
+}
+
+inline float binary_tree_animation_node::animation_time_offset		( ) const
+{
+	return					m_time_offset;
+}
+
+inline clip_mix_self binary_tree_animation_node::mix_self			( ) const
+{
+	return					m_mix_self;
+}
+
+inline int binary_tree_animation_node::synchronization_group_id		( ) const
+{
+	return					m_synchronization_group_id;
+}
+
+inline u32 binary_tree_animation_node::additivity_priority			( ) const
+{
+	return					m_additivity_priority;
+}
+
+inline binary_tree_animation_node_ptr binary_tree_animation_node::animation_to_synchronize_with	( ) const
+{
+	return					m_animation_to_synchronize_with;
+}
+
+inline n_ary_tree_animation_node* binary_tree_animation_node::n_ary_animation_to_synchronize_with( ) const
+{
+	return					m_n_ary_animation_to_synchronize_with;
+}
+
+inline void binary_tree_animation_node::set_n_ary_animation_to_synchronize_with	( n_ary_tree_animation_node* animation )
+{
+	// this is possible when single lexeme is used in several set_target function calls 
+//	R_ASSERT				( !m_n_ary_animation_to_synchronize_with );
+	R_ASSERT				( animation );
+	m_n_ary_animation_to_synchronize_with	= animation;
+}
+
+inline void binary_tree_animation_node::set_animation_to_synchronize_with	( binary_tree_animation_node* animation_to_synchronize_with )
+{
+	// this is possible when single lexeme is used in several set_target function calls 
+//	R_ASSERT				( !m_animation_to_synchronize_with );
+	R_ASSERT				( animation_to_synchronize_with );
+	m_animation_to_synchronize_with	= animation_to_synchronize_with;
+}
+
+inline	void	binary_tree_animation_node::set_cycle_to_interval	( u32 interval_id )
+{
+	R_ASSERT( interval_id	< m_intervals.size() );
+	m_cycle_from_interval = interval_id;
+}
+
+inline	u32	binary_tree_animation_node::cycle_to_interval	( )
+{
+	return m_cycle_from_interval;
+}
+
+inline void binary_tree_animation_node::assign_uninitialized_user_data	( )
+{
+#ifndef MASTER_GOLD
+	user_data				= xray::memory::uninitialized_value<u32>( );
+#endif // #ifndef MASTER_GOLD
+}
+
+} // namespace mixing
+} // namespace animation
+} // namespace xray
+
+#endif // #ifndef BINARY_TREE_ANIMATION_NODE_INLINE_H_INCLUDED

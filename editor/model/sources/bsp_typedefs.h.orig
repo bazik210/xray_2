@@ -1,0 +1,20 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 04.08.2011
+//	Author		: Alexander Stupakov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef BSP_TYPEDEFS_H_INCLUDED
+#define BSP_TYPEDEFS_H_INCLUDED
+
+namespace xray {
+namespace model_editor {
+
+
+typedef vector<u32> index_vector;
+typedef vector<math::float3> coord_vector;
+
+} // namespace model_editor
+} // namespace xray
+
+#endif // #ifndef BSP_TYPEDEFS_H_INCLUDED

@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.11.2011
+//	Author		: 
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include <xray/fs/simple_asynchronous_interface.h>
+
+namespace xray {
+namespace fs_new {
+
+simple_asynchronous_interface::simple_asynchronous_interface	(watcher_enabled_bool watcher_enabled)
+	:	hdd_async	(& hdd_device, watcher_enabled),
+		dvd_async	(& dvd_device, watcher_enabled),
+		hdd_thread	(& hdd_async, "hdd", "hdd"),
+		dvd_thread	(& dvd_async, "dvd", "dvd")
+{
+}
+
+} // namespace fs_new {
+} // namespace xray {

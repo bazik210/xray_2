@@ -1,0 +1,121 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 13.07.2011
+//	Author		: Sergey Lozinski
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef CONSTRAINED_DELAUNAY_TRIANGULATOR_H_INCLUDED
+#define CONSTRAINED_DELAUNAY_TRIANGULATOR_H_INCLUDED
+
+#include "graph_generator_types.h"
+#include "delaunay_triangulator.h"
+
+namespace xray {
+namespace ai {
+namespace navigation {
+
+class XRAY_AI_NAVIGATION_API constrained_delaunay_triangulator : private core::noncopyable {
+public:
+
+	struct constraint_edge {
+		constraint_edge () {}
+		constraint_edge ( u32 const index0, u32 const index1 ) :
+			vertex_index0 (index0),
+			vertex_index1 (index1)
+		{
+		}
+
+		u32		vertex_index0;
+		u32		vertex_index1;
+	}; // struct constraint_edge
+	typedef debug::vector< constraint_edge >	constraint_edges_type;
+	typedef delaunay_triangulator::indices_type indices_type;
+	typedef  delaunay_triangulator::input_indices_type input_indices_type;
+
+private:
+	typedef debug::vector< u32 > polygon_indices_type;
+
+public:
+	template< typename ContainerType >
+	constrained_delaunay_triangulator	( 
+			triangles_mesh_type::vertices_type& vertices,
+			input_indices_type const& input_indices,
+			indices_type& output_indices,
+			float3 const& normal,
+			ContainerType const& constraint_edges,
+			u32 const max_delaunay_operation_id = u32(-1)
+		);
+
+private:
+
+			void			triangulate_polygon_side ( polygon_indices_type const& polygon_indices );
+			bool			is_triangle_vertex(
+				float3 const& testee,
+				float3 const& v0,
+				float3 const& v1,
+				float3 const& v2
+			);
+			bool			remove_triangles		( 
+				polygon_indices_type& right_polygon_indices, 
+				polygon_indices_type& left_polygon_indices, 
+				u32 const segment_vertex_index0, 
+				u32 const segment_vertex_index1
+			);
+
+private:
+	float3	const&							m_normal;
+	float3	const*							m_vertices;
+	indices_type&							m_indices;
+	
+}; // class constraint_delaunay_triangulator
+
+template< typename ContainerType >
+constrained_delaunay_triangulator::constrained_delaunay_triangulator ( 
+		triangles_mesh_type::vertices_type& vertices,
+		input_indices_type const& input_indices,
+		indices_type& output_indices,
+		float3 const& normal,
+		ContainerType const& constraint_edges,
+		u32 const max_delaunay_operation_id
+	)  :
+		m_normal			( normal ),
+		m_indices			( output_indices )
+{
+	delaunay_triangulator	( vertices, input_indices, output_indices, m_normal);
+
+	m_vertices				= &*vertices.begin();
+
+	polygon_indices_type	left_polygon_indices;
+	polygon_indices_type	right_polygon_indices;
+
+	u32 current_delaunay_operation_id = 0; 
+	ContainerType::const_iterator	i			= constraint_edges.begin();
+	ContainerType::const_iterator const	e		= constraint_edges.end();
+	for ( ; i != e; ++i )  {
+		
+		if ( current_delaunay_operation_id++ >= max_delaunay_operation_id )
+			break;
+
+		left_polygon_indices.clear();
+		right_polygon_indices.clear();
+
+		if ( !remove_triangles ( right_polygon_indices, left_polygon_indices, (*i).vertex_index0, (*i).vertex_index1 ) ) {
+			continue;
+		}
+
+		if  ( right_polygon_indices.size() >= 3 )
+			triangulate_polygon_side		( right_polygon_indices );
+
+		if  ( left_polygon_indices.size() >= 3 )
+			triangulate_polygon_side		( left_polygon_indices );
+
+	}
+
+	R_ASSERT_CMP ( m_indices.size() % 3, ==, 0);
+}
+
+} // namespace navigation
+} // namespace ai
+} // namespace xray
+
+#endif // #ifndef CONSTRAINED_DELAUNAY_TRIANGULATOR_H_INCLUDED

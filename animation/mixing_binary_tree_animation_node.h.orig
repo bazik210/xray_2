@@ -1,0 +1,143 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 19.02.2010
+//	Author		: Dmitriy Iassenev
+//	Copyright (C) GSC Game World - 2010
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef BINARY_TREE_ANIMATION_NODE_H_INCLUDED
+#define BINARY_TREE_ANIMATION_NODE_H_INCLUDED
+
+#include <xray/animation/mixing_binary_tree_base_node.h>
+#include <xray/animation/mixing.h>
+#include <xray/animation/channel_event_callbacks.h>
+#include <xray/animation/animation_interval.h>
+
+namespace xray {
+namespace animation {
+namespace mixing {
+
+class channel_event_callback;
+class animation_clip;
+
+class binary_tree_animation_node;
+
+} // namespace mixing
+} // namespace animation
+
+#pragma warning( push )
+#pragma warning( disable : 4231 )
+template class XRAY_ANIMATION_API
+	intrusive_ptr<
+		animation::mixing::binary_tree_animation_node,
+		animation::mixing::binary_tree_base_node,
+		threading::single_threading_policy
+	>;
+#pragma warning( pop )
+
+namespace animation {
+namespace mixing {
+
+typedef intrusive_ptr<
+		binary_tree_animation_node,
+		binary_tree_base_node,
+		threading::single_threading_policy
+	> binary_tree_animation_node_ptr;
+
+class XRAY_ANIMATION_API binary_tree_animation_node : public binary_tree_base_node {
+
+public:
+	inline						binary_tree_animation_node		(
+									mutable_buffer& buffer,
+									animation_clip const* const animation,
+									float const time_scale,
+									base_interpolator const* const time_scale_interpolator,
+									float const first_interval_time_offset,
+									float const time_offset,
+									float const length,
+									clip_mix_self const mix_self,
+									int const synchronization_group_id,
+									bool const override_existing_animation,
+									u32 const additivity_priority 
+								);
+	inline						binary_tree_animation_node		(
+									mutable_buffer& buffer,
+									animation_clip const* const animation,
+									binary_tree_animation_node* const animation_to_synchronize_with,
+									bool const override_existing_animation,
+									u32 const additivity_priority 
+								);
+	inline						binary_tree_animation_node		( binary_tree_animation_node const& other );
+	inline						~binary_tree_animation_node		( );
+
+	inline	animation_clip	const* animation					( ) const;
+	inline	float				time_scale						( ) const;
+	inline	float				animation_time_offset			( ) const;
+	inline	clip_mix_self		mix_self						( ) const;
+	inline	int					synchronization_group_id		( ) const;
+	inline	u32					additivity_priority				( ) const;
+	inline	binary_tree_animation_node_ptr animation_to_synchronize_with( ) const;
+	inline	n_ary_tree_animation_node* n_ary_animation_to_synchronize_with( ) const;
+	inline	void			set_animation_to_synchronize_with	( binary_tree_animation_node* animation_to_syynchronize_with );
+	inline	void		set_n_ary_animation_to_synchronize_with	( n_ary_tree_animation_node* animation );
+
+	inline	void				set_cycle_to_interval			( u32 interval_id );
+	inline	u32					cycle_to_interval				( );
+
+	inline	bool				does_override_existing_animation( ) const { return m_override_existing_animation; }
+
+public:
+	inline	void				subscribe_channel				( pcstr channel, on_channel_event_function_type const& callback_function );
+		
+public:
+	inline	animation_intervals_type	 const&	intervals		( )	const { return m_intervals; }
+	inline	void				add_interval					( skeleton_animation_ptr const &animation, float time_offset, float length );
+
+public:
+	virtual	void				accept							( binary_tree_visitor& visitor );
+	virtual	base_interpolator const* interpolator				( ) const;
+
+private:
+	inline	binary_tree_animation_node& operator=				( binary_tree_animation_node const& other );
+
+private:
+	inline	void				assign_uninitialized_user_data	( );
+
+private:
+	mutable_buffer*					m_buffer;
+	animation_clip const*			m_animation;
+	base_interpolator const*		m_time_scale_interpolator;
+	binary_tree_animation_node*		m_animation_to_synchronize_with;
+	n_ary_tree_animation_node*		m_n_ary_animation_to_synchronize_with;
+
+public:
+	binary_tree_animation_node_ptr	m_next_animation;
+	u32								m_unique_weights_count;
+	
+private:
+	animation_intervals_type		m_intervals;
+	u32								m_cycle_from_interval;
+	float const						m_time_offset;
+	float const						m_time_scale;
+	clip_mix_self const				m_mix_self;
+	int const						m_synchronization_group_id;
+	u32 const						m_additivity_priority;
+
+public:
+	bool							m_null_weight_found;
+
+private:
+	bool const						m_override_existing_animation;
+
+#ifndef MASTER_GOLD
+public:
+	u32								user_data;
+#endif // #ifndef MASTER_GOLD
+}; // class binary_tree_animation_node
+
+} // namespace mixing
+} // namespace animation
+} // namespace xray
+
+#include <xray/animation/mixing_binary_tree_animation_node_inline.h>
+
+#endif // #ifndef BINARY_TREE_ANIMATION_NODE_H_INCLUDED

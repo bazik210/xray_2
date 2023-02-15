@@ -1,0 +1,141 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 24.03.2011
+//	Author		: Evgeniy Obertyukh
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#ifndef OBJECT_PATROL_GRAPH_H_INCLUDED
+#define OBJECT_PATROL_GRAPH_H_INCLUDED
+
+#include "object_base.h"
+#include <xray/collision/collision_object.h>
+
+using namespace System;
+using namespace System::Collections::Generic;
+
+namespace xray 
+{
+	namespace editor 
+	{
+		typedef System::ComponentModel::BrowsableAttribute		BrowsableAttribute;
+		typedef System::Windows::Media::Media3D::Vector3D		Vector3D;	
+		typedef wpf_controls::property_container				property_container;
+		typedef wpf_controls::float_curve						float_curve;
+		typedef wpf_controls::float_curve_key					float_curve_key;
+		typedef wpf_controls::float_curve_key_type				curve_key_type;
+		typedef wpf_controls::curve_editor::visual_curve		visual_curve;
+		typedef wpf_controls::curve_editor::visual_curve_key	visual_curve_key;
+		typedef	wpf_controls::graph<Vector3D>					weypoints_graph;
+		typedef	wpf_controls::graph_node<Vector3D>				weypoint_node;
+		typedef	wpf_controls::graph_link<Vector3D>				weypoint_link;
+
+		ref class	tool_misc;
+		class		collision_object_patrol_graph_key;
+
+		public ref class object_patrol_graph: object_base
+		{
+		
+		#pragma region | Initialize |
+
+
+		private:
+			typedef object_base		super;
+
+		public:
+						object_patrol_graph			( tool_misc^ t );
+			virtual		~object_patrol_graph		( );
+
+		private:
+			ref class	curve_to_channel_binder;
+
+
+		#pragma endregion
+
+		#pragma region |   Fields   |
+
+
+		private:
+			tool_misc^										m_tool_misc;
+			property_container^								m_temp_container;
+			vectora<collision_object_patrol_graph_key*>*	m_keys_collision;
+
+			weypoints_graph^								m_graph;
+			Int32											m_selected_node_index;
+	
+
+		#pragma endregion
+
+		#pragma region | Properties |
+
+
+		public:
+			[System::ComponentModel::DisplayNameAttribute("Selected Key"), DescriptionAttribute("Currently selected key"), CategoryAttribute("General")]
+			property		Int32				selected_node_index
+			{
+				Int32					get		( )							{ return m_selected_node_index; }
+				void					set		( Int32 node_index );
+			}
+
+
+		#pragma endregion
+
+		#pragma region |   Methods  |
+
+
+		private:
+			void			init_collision					( );
+			void			init_keys_collision				( );
+			void			update_collisions				( );
+			void			destroy_keys_collision			( );
+			void			insert_collision_in_tree		( collision::object* collision, float4x4 tranform );
+			math::float3	get_node_position				( weypoint_node^ node );
+
+		public:
+			virtual		void				load_contents			( )										override;
+			virtual		void				unload_contents			( bool bdestroy )						override;
+			virtual		void				destroy_collision		( )										override;
+			virtual		void				load_props				( configs::lua_config_value const& t )	override;
+			virtual		void				save					( configs::lua_config_value t )			override;
+
+			virtual		void				set_transform			( float4x4 const& transform )			override;
+						math::float4x4		get_node_transform		( int idx );
+						void				set_node_transform		( int idx, math::float4x4 const& t );
+						float3				get_node_position		( int idx );
+
+						u32					add_key					( float3 position );
+						u32					insert_key				( float3 position );
+						void				remove_key				( int index );
+
+			virtual		void				render					( )										override;
+			virtual		aabb				get_aabb				( )										override;
+
+			virtual		property_container^	get_property_container	( )										override;
+			virtual		void				on_selected				( bool bselected )						override;
+
+
+		#pragma endregion
+
+		}; // class object_patrol_graph
+
+		class collision_object_patrol_graph_key: public collision::collision_object
+		{
+		private:
+			typedef collision::collision_object	super;
+
+		public:
+			collision_object_patrol_graph_key		( collision::geometry_instance* geometry, object_patrol_graph^ o, int key_idx );
+
+		private:
+			int								m_key_idx;
+			gcroot<object_patrol_graph^>	m_owner;
+
+		public:
+			void					set_key_index	( int new_key_index );
+			virtual bool			touch			( ) const;
+		
+		}; //collision_object_track_key
+
+	} // namespace editor
+} // namespace xray
+
+#endif // #ifndef OBJECT_PATROL_GRAPH_H_INCLUDED

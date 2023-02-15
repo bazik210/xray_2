@@ -1,0 +1,679 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: 07.07.2011
+//	Author		: Alexander Stupakov
+//	Copyright (C) GSC Game World - 2011
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include "bsp_tree_node.h"
+#include "bsp_tree_polygon.h"
+#include "bsp_portal_blank.h"
+#include "bsp_tree_utilities.h"
+#pragma managed(push, off)
+#include <xray/render/facade/debug_renderer.h>
+#include "indexed_edge.h"
+#include "indexed_polygon_renderable.h"
+#include <xray\collision\geometry.h>
+#include <xray\ai_navigation\sources\graph_generator_adjacency_builder.h>
+//#pragma warning ( push )
+//#pragma warning ( disable:4275 )
+#include <xray\ai_navigation\sources\constrained_delaunay_triangulator.h>
+//#pragma warning ( pop )
+#pragma managed(pop)
+
+namespace xray {
+namespace model_editor {
+
+struct separation_result
+{
+	separation_result( u32 polygon_id, float  rel, u32 split, u32 coincident, float square )
+		:id( polygon_id ), relation( rel ), split_count( split ), coincident_count(coincident), coincident_square( square ){}
+	float get_rating() const
+	{
+		return coincident_square * relation;
+	}
+	u32					id;
+	float				relation;
+	u32					split_count;
+	u32					coincident_count;
+	float				coincident_square;
+};
+
+struct separation_result_better : public std::binary_function<separation_result const&, separation_result const&, bool>
+{
+	bool operator() ( separation_result const& first, separation_result const& second ) const
+	{
+		return first.split_count <= second.split_count && first.get_rating() > second.get_rating();
+	}
+};
+
+typedef set<u32> triangle_ids_set_type;
+void get_adjacent_coincident_triangles( u32 triangle_id, triangles_mesh_type const& triangle_mesh, math::convex const& bounding_convex, triangle_ids_set_type& coincident_triangles )
+{
+	math::float3 const& v0 = triangle_mesh.vertices[ triangle_mesh.indices[ triangle_id * 3 ] ];
+	math::float3 const& v1 = triangle_mesh.vertices[ triangle_mesh.indices[ triangle_id * 3 + 1] ];
+	math::float3 const& v2 = triangle_mesh.vertices[ triangle_mesh.indices[ triangle_id * 3 + 2] ];
+	if ( !bounding_convex.inside( v0 ) && !bounding_convex.inside( v1 ) && !bounding_convex.inside( v2 ) )
+		return;
+	static u32 const c_neihbours_count = 3;
+	coincident_triangles.insert( triangle_id );
+	bsp_tree_triangle const& current = triangle_mesh.data[ triangle_id ];
+	for ( u32 i = 0; i < c_neihbours_count; ++i )
+	{
+		u32 const neighbour_id = current.neighbours[ i ];
+		if ( neighbour_id == bsp_tree_triangle::msc_empty_triangle_id || coincident_triangles.find( neighbour_id ) != coincident_triangles.end() )
+			continue;
+		bsp_tree_triangle const& neighbour = triangle_mesh.data[ neighbour_id ];
+		if ( neighbour.is_coplanar( current.plane ) )
+			get_adjacent_coincident_triangles( neighbour_id, triangle_mesh, bounding_convex, coincident_triangles );
+	}
+}
+
+void simplified_get_adjacent_coincident_triangles( u32 triangle_id, triangles_mesh_type const& triangle_mesh, triangle_ids_set_type& coincident_triangles )
+{
+	static u32 const c_neihbours_count = 3;
+	coincident_triangles.insert( triangle_id );
+	bsp_tree_triangle const& current = triangle_mesh.data[ triangle_id ];
+	for ( u32 i = 0; i < c_neihbours_count; ++i )
+	{
+		u32 const neighbour_id = current.neighbours[ i ];
+		if ( neighbour_id == bsp_tree_triangle::msc_empty_triangle_id || coincident_triangles.find( neighbour_id ) != coincident_triangles.end() )
+			continue;
+		bsp_tree_triangle const& neighbour = triangle_mesh.data[ neighbour_id ];
+		if ( neighbour.is_coplanar( current.plane ) )
+			simplified_get_adjacent_coincident_triangles( neighbour_id, triangle_mesh, coincident_triangles );
+	}
+}
+
+void get_triangles_coincident_to_plane( triangles_mesh_type const& triangle_mesh, math::plane const& p, triangle_ids_set_type& coincident_triangles )
+{
+	u32 const triangle_count = triangle_mesh.data.size();
+	for ( u32 i = 0; i < triangle_count; ++i )
+	{
+		if ( coincident_triangles.find( i ) == coincident_triangles.end() && triangle_mesh.data[ i ].is_coplanar( p ) )
+		{
+			if ( !coincident_triangles.empty() )
+				coincident_triangles.insert( i );
+			else
+				simplified_get_adjacent_coincident_triangles( i, triangle_mesh, coincident_triangles );
+		}
+	}
+}
+
+void get_outer_edges( triangles_mesh_type const& triangle_mesh, triangle_ids_set_type const& coincident_triangles, edges_type& edges )
+{
+	triangle_ids_set_type::const_iterator const triangle_end_it = coincident_triangles.end();
+	for ( triangle_ids_set_type::const_iterator triangle_it = coincident_triangles.begin(); triangle_it != triangle_end_it; ++triangle_it )
+	{
+		u32 const current_id				= *triangle_it;
+		bsp_tree_triangle const& current	= triangle_mesh.data[ current_id ];
+		u32 const first_neighbour_id		= current.neighbours[ 0 ];
+		u32 const second_neighbour_id		= current.neighbours[ 1 ];
+		u32 const third_neighbour_id		= current.neighbours[ 2 ];
+		u32 const first_index				= triangle_mesh.indices[ current_id * 3 ];
+		u32 const second_index				= triangle_mesh.indices[ current_id * 3 + 1 ];
+		u32 const third_index				= triangle_mesh.indices[ current_id * 3 + 2 ];
+		
+		if ( first_neighbour_id == bsp_tree_triangle::msc_empty_triangle_id || !triangle_mesh.data[ first_neighbour_id ].is_coplanar( current.plane ) )
+			edges.push_back( edge( first_index, second_index ) );
+
+		if ( second_neighbour_id == bsp_tree_triangle::msc_empty_triangle_id || !triangle_mesh.data[ second_neighbour_id ].is_coplanar( current.plane )	)
+			edges.push_back( edge( second_index, third_index ) );
+
+		if ( third_neighbour_id == bsp_tree_triangle::msc_empty_triangle_id || !triangle_mesh.data[ third_neighbour_id ].is_coplanar( current.plane )	)
+			edges.push_back( edge( third_index, first_index ) );	
+	}
+}
+
+typedef	xray::ai::navigation::constrained_delaunay_triangulator::input_indices_type input_indices_type;
+void get_vertex_indices_of_triangles( triangles_mesh_type const& triangle_mesh, triangle_ids_set_type const& triangles, input_indices_type& indices )
+{
+	indices.reserve( triangles.size() );
+	triangle_ids_set_type::const_iterator const end_it = triangles.end();
+	for ( triangle_ids_set_type::const_iterator it = triangles.begin(); it != end_it; ++it )
+	{
+		u32 const triangle_id = *it;
+		indices.push_back( triangle_mesh.indices[ triangle_id * 3 ] );
+		indices.push_back( triangle_mesh.indices[ triangle_id * 3 + 1 ] );
+		indices.push_back( triangle_mesh.indices[ triangle_id * 3 + 2 ] );
+	}
+	std::sort( indices.begin(), indices.end() );
+	indices.erase( std::unique( indices.begin(), indices.end() ), indices.end() );
+}
+//---------------------------------------------------------------------------------------------------
+float bsp_tree_node::ms_min_portal_square = 0.0f;
+float bsp_tree_node::ms_slimness_threshold = 0.0f;
+bool bsp_tree_node::ms_draw_solid = false;
+bool bsp_tree_node::ms_draw_aabb = true;
+bool bsp_tree_node::ms_draw_double_sided = false;
+bool bsp_tree_node::ms_draw_divider = false;
+bool bsp_tree_node::ms_draw_geometry = true;
+bool bsp_tree_node::ms_draw_splitted_geometry = false;
+bool bsp_tree_node::ms_draw_portal_blanks = false;
+bool bsp_tree_node::ms_draw_splitted_portal_blanks = false;
+bool bsp_tree_node::ms_draw_portal = false;
+bool bsp_tree_node::ms_draw_outer_edges = false;
+
+bsp_tree_node::bsp_tree_node( triangles_mesh_type& triangle_mesh, triangle_ids_type const& triangle_ids, math::convex const& bounding_convex  ):
+m_positive(NULL),
+m_negative(NULL),
+m_triangle_mesh( triangle_mesh ),
+m_triangle_ids( triangle_ids ),
+m_broken( false ),
+m_convex( bounding_convex ),
+m_divider_id( bsp_tree_triangle::msc_empty_triangle_id ),
+m_predicted_spanning( 0 ),
+m_real_spanning( 0 )
+{
+	m_convex.fill_cache( m_convex_cache );
+}
+
+bsp_tree_node::~bsp_tree_node( )
+{
+	DELETE ( m_negative );
+	DELETE ( m_positive );
+}
+
+u32 bsp_tree_node::choose_dividing_polygon()
+{
+	u32 const total_triangles = m_triangle_mesh.spatial_tree->get_triangles_count( m_convex );
+	math::convex positive_convex, negative_convex;
+	typedef std::vector<separation_result> separation_results_type;
+	separation_results_type results;
+	triangle_ids_set_type processed; 
+	triangle_ids_type::const_iterator const id_end_it = m_triangle_ids.end();
+	for ( triangle_ids_type::const_iterator id_it = m_triangle_ids.begin(); id_it != id_end_it; ++id_it )
+	{
+		if ( m_triangle_mesh.data[ *id_it ].divider || processed.find( *id_it ) != processed.end() )
+			continue;
+		u32 const id = *id_it;
+		triangle_ids_set_type coincident_triangles; 
+		get_adjacent_coincident_triangles( id, m_triangle_mesh, m_convex, coincident_triangles );
+		processed.insert( coincident_triangles.begin(), coincident_triangles.end() );
+		u32 const coincident_count = coincident_triangles.size();
+		float coincident_square = 0.0f;
+		triangle_ids_set_type::const_iterator const end_it = coincident_triangles.end();
+		for ( triangle_ids_set_type::const_iterator it = coincident_triangles.begin(); it != end_it; ++it )
+		{
+			math::float3 const& first	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 ] ];
+			math::float3 const& second	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 + 1 ] ];
+			math::float3 const& third	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 + 2 ] ];
+			coincident_square += ( ( second - first ) ^ ( third - first ) ).length() * 0.5f;
+		}
+		math::plane const& divider = m_triangle_mesh.data[ id ].plane;
+		m_convex.split( divider, m_convex_cache, positive_convex, negative_convex );
+		
+		if ( negative_convex.empty() )
+		{
+			triangle_ids_set_type::const_iterator const end_it = coincident_triangles.end();
+			for ( triangle_ids_set_type::const_iterator it = coincident_triangles.begin(); it != end_it; ++it )
+			{
+				m_triangle_mesh.data[ *it ].divider = true;
+			}
+			continue;
+		}
+		
+		u32 positive_count = 0, negative_count = 0, split_count = 0;
+		if ( positive_convex.empty() )
+		{
+			R_ASSERT( !negative_convex.empty() );
+			positive_count	= coincident_count;
+			negative_count	= total_triangles - coincident_count;
+			split_count		= 0;
+		}
+		else
+		{
+			//TODO: split_count somtimes is calculated incorrect, this couses suboptimal partitioning
+			//R_ASSERT( m_triangle_mesh.spatial_tree->get_triangles_count( positive_convex ) <= total_triangles );
+			//R_ASSERT( m_triangle_mesh.spatial_tree->get_triangles_count( negative_convex ) <= total_triangles );
+
+			u32 const inside_positive_convex = std::max( m_triangle_mesh.spatial_tree->get_triangles_count( positive_convex ), coincident_count );
+			u32 const inside_negative_convex = std::max( m_triangle_mesh.spatial_tree->get_triangles_count( negative_convex ), coincident_count );
+			//R_ASSERT( inside_positive_convex + inside_negative_convex >= total_triangles + coincident_count );
+			split_count		= ( inside_positive_convex + inside_negative_convex - total_triangles - coincident_count ) / 2;
+			positive_count	= inside_positive_convex - split_count;
+			negative_count	= inside_negative_convex - coincident_count - split_count;
+			//R_ASSERT( positive_count );
+		}
+		float const relation = std::min( positive_count, negative_count ) / static_cast<float>( std::max ( positive_count, negative_count ) );
+		results.push_back( separation_result( id, relation, split_count, coincident_count, coincident_square ) );
+	}
+	separation_results_type::const_iterator result_it = std::min_element( results.begin(), results.end(), separation_result_better() );
+	if ( result_it != results.end() )
+	{
+		m_predicted_spanning = result_it->split_count;
+		return result_it->id;
+	}
+	return bsp_tree_triangle::msc_empty_triangle_id;
+}
+
+void bsp_tree_node::build_bsp()
+{
+	if ( is_convex_polygon_set( m_triangle_ids, m_triangle_mesh ) || m_convex.empty() )
+		return;
+	static u32 const c_empty_divider = bsp_tree_triangle::msc_empty_triangle_id;
+	m_divider_id = this->choose_dividing_polygon();
+	if ( m_divider_id == c_empty_divider )
+	{
+		m_broken = true;
+		return;
+	}
+	R_ASSERT( !m_convex.empty() );
+	m_triangle_mesh.data[ m_divider_id ].divider = true;
+	triangle_ids_set_type coincident_set;
+	get_adjacent_coincident_triangles( m_divider_id, m_triangle_mesh, m_convex, coincident_set );
+	triangle_ids_type positive_ids, negative_ids;
+	math::plane const divider = m_triangle_mesh.data[ m_divider_id ].plane;
+	R_ASSERT( divider.valid() );
+	triangle_ids_type::const_iterator const end_it = m_triangle_ids.end();
+	for ( triangle_ids_type::const_iterator it = m_triangle_ids.begin(); it != end_it; ++it )
+	{
+		if ( coincident_set.find( *it ) != coincident_set.end() )
+		{
+			positive_ids.push_back( *it );
+			m_triangle_mesh.data[ *it ].divider = true;
+			continue;
+		}
+		bsp_tree_triangle::side side = calculate_side( divider, *it, m_triangle_mesh );
+		switch ( side )
+		{
+		case bsp_tree_triangle::front:
+			positive_ids.push_back( *it );
+			break;
+		case bsp_tree_triangle::back:
+			negative_ids.push_back( *it );
+			break;
+		case bsp_tree_triangle::coincident:
+			positive_ids.push_back( *it );
+			m_triangle_mesh.data[ *it ].divider = true;
+			break;
+		case bsp_tree_triangle::spanning:
+			//TODO: adjacent to coincindent triangle does not have to be splitted
+			split_triangle( divider, *it, m_triangle_mesh, positive_ids, negative_ids );
+			++m_real_spanning;
+			break;
+		default:
+			XRAY_UNREACHABLE_CODE( "No default" );
+		}
+	}
+	math::convex positive_convex, negative_convex;
+	m_convex.split( divider, m_convex_cache, positive_convex, negative_convex );
+	if ( !negative_ids.empty() )
+	{
+		m_negative = NEW ( bsp_tree_node ) ( m_triangle_mesh, negative_ids, negative_convex );
+		m_negative->build_bsp();
+	}
+	
+	if ( !positive_ids.empty() )
+	{
+		m_positive = NEW ( bsp_tree_node ) ( m_triangle_mesh, positive_ids, positive_convex );
+		m_positive->build_bsp();
+	}
+}
+
+
+bool bsp_tree_node::is_leaf( ) const
+{
+	return m_positive == NULL && m_negative == NULL;
+}
+
+void bsp_tree_node::fill_tree_view_node( System::Windows::Forms::TreeNode^ node )
+{
+	node->Tag = bsp_tree_node_wrapper( this );
+	if ( m_positive )
+	{
+		System::String^ label = "pos:";
+		if ( m_positive->is_leaf() )
+			label += System::String::Format( "Triangles - {0}", m_positive->m_triangle_ids.size() );
+		else
+		{
+			label += System::String::Format( "Spanning: {0} - {1}", m_positive->m_predicted_spanning, m_positive->m_real_spanning );
+		}
+		System::Windows::Forms::TreeNode^ positive_node = gcnew System::Windows::Forms::TreeNode( label );
+		node->Nodes->Add( positive_node );
+		m_positive->fill_tree_view_node( positive_node );
+	}
+	if ( m_negative )
+	{
+		System::String^ label = "neg: ";
+		if ( m_negative->is_leaf() )
+			label += System::String::Format( "Triangles - {0}", m_negative->m_triangle_ids.size() );
+		else
+		{
+			label += System::String::Format( "Spanning: {0} - {1}", m_negative->m_predicted_spanning, m_negative->m_real_spanning );
+		}
+		System::Windows::Forms::TreeNode^ negative_node = gcnew System::Windows::Forms::TreeNode( label );
+		node->Nodes->Add( negative_node );
+		m_negative->fill_tree_view_node( negative_node );
+	}
+	if ( m_broken )
+		node->BackColor = System::Drawing::Color::Gray;
+}
+
+
+void bsp_tree_node::render( render::scene_ptr const& scene, render::debug::renderer& r ) const
+{
+	if ( ms_draw_aabb )
+		this->draw_bounding_convex( scene, r );
+
+	if ( this->is_leaf() )
+	{
+		if ( ms_draw_geometry )
+			this->draw_polygons( scene, r, math::color( 0, 255, 0 ), ms_draw_solid, ms_draw_double_sided );
+		if ( ms_draw_outer_edges )
+			this->draw_outer_edges( scene, r );
+		if ( ms_draw_portal )
+			this->draw_portals( scene, r );
+	}
+	else
+	{
+		if ( ms_draw_geometry )
+			this->draw_divider_triangle( scene, r );
+		if ( ms_draw_divider )
+			draw_portal_blank( scene, r, m_poratal_blank, math::color( 128, 128, 200 ) );
+		if ( m_positive )
+			m_positive->render( scene, r, math::color( 255, 0, 0 ) );
+		if ( m_negative )
+			m_negative->render( scene, r, math::color( 0, 0, 255 ) );
+	}
+	if ( ms_draw_portal_blanks )
+		this->draw_portal_blanks( scene, r );
+}
+
+void bsp_tree_node::render( render::scene_ptr const& scene, render::debug::renderer& r, math::color const& c ) const
+{
+	if ( this->is_leaf() )
+	{
+		if ( ms_draw_geometry )
+		{
+			this->draw_polygons( scene, r, c, ms_draw_solid, ms_draw_double_sided );
+		}
+		if ( ms_draw_outer_edges )
+			this->draw_outer_edges( scene, r );
+		if ( ms_draw_portal )
+			this->draw_portals( scene, r );
+	}
+	else
+	{
+		if ( m_positive )
+			m_positive->render( scene, r, c );
+		if ( m_negative )
+			m_negative->render( scene, r, c );
+	}
+}
+
+void bsp_tree_node::draw_polygons( render::scene_ptr const& scene, render::debug::renderer& r, math::color const& c, bool solid, bool double_sided ) const
+{
+	math::color const triangle_color ( c.r, c.g, c.b, 128 );
+	triangle_ids_type::const_iterator const end_it = m_triangle_ids.end();
+	for ( triangle_ids_type::const_iterator it = m_triangle_ids.begin(); it != end_it; ++it )
+	{
+		math::float3 const& first	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 ] ];
+		math::float3 const& second	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 + 1 ] ];
+		math::float3 const& third	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ ( *it ) * 3 + 2 ] ];
+		r.draw_line( scene, first,	second,	c );
+		r.draw_line( scene, second, third,	c );
+		r.draw_line( scene, third,	first,	c );
+		if ( solid )
+		{
+			r.draw_triangle( scene, first, second, third, triangle_color );
+			if ( double_sided )
+				r.draw_triangle( scene, third, first, second, triangle_color );
+		}
+	}
+}
+
+void bsp_tree_node::draw_portal_blanks( render::scene_ptr const& scene, render::debug::renderer& r  ) const
+{
+	portal_blanks_type::const_iterator const end_it = m_blanks_from_parent.end();
+	for ( portal_blanks_type::const_iterator it = m_blanks_from_parent.begin(); it != end_it; ++it )
+	{
+		draw_portal_blank( scene, r, *it, math::color( 164, 128, 164 ) );
+	}
+}
+
+
+void bsp_tree_node::draw_bounding_convex( render::scene_ptr const& scene, render::debug::renderer& r ) const
+{
+	math::color const convex_color( 255, 255, 255 );
+	math::convex::cache::edges_type::const_iterator const end_it = m_convex_cache.edges.end();
+	for ( math::convex::cache::edges_type::const_iterator it = m_convex_cache.edges.begin(); it != end_it; ++it )
+	{
+		math::float3 const& first	= m_convex_cache.vertices[ it->first ];
+		math::float3 const& second	= m_convex_cache.vertices[ it->second ];
+		r.draw_line( scene, first, second, convex_color );
+	}
+}
+
+void bsp_tree_node::draw_divider_triangle( render::scene_ptr const& scene, render::debug::renderer& r  ) const
+{
+	if ( m_divider_id != bsp_tree_triangle::msc_empty_triangle_id )
+	{
+		math::color const divider_color( 255, 255, 255 );
+		math::float3 const& first	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ m_divider_id * 3 ] ];
+		math::float3 const& second	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ m_divider_id * 3 + 1 ] ];
+		math::float3 const& third	= m_triangle_mesh.vertices[ m_triangle_mesh.indices[ m_divider_id * 3 + 2 ] ];
+		r.draw_line( scene, first,	second,	divider_color);
+		r.draw_line( scene, second, third,	divider_color );
+		r.draw_line( scene, third,	first,	divider_color );
+		r.draw_triangle( scene, first, second, third, divider_color );
+		r.draw_triangle( scene, third, first, second, divider_color );
+	}
+}
+
+void bsp_tree_node::draw_portals( render::scene_ptr const& scene, render::debug::renderer& r ) const
+{
+	math::color const triangle_color ( 0, 0, 255, 128 );
+	math::color const line_color ( 0, 0, 255 );
+	u32 const triangle_count = m_portal_indices.size() / 3;
+	for ( u32 i = 0; i < triangle_count; ++ i )
+	{
+		math::float3 const& first	= m_leaf_mesh.vertices[ m_portal_indices[ i * 3 ] ];
+		math::float3 const& second	= m_leaf_mesh.vertices[ m_portal_indices[ i * 3 + 1 ] ];
+		math::float3 const& third	= m_leaf_mesh.vertices[ m_portal_indices[ i * 3 + 2 ] ];
+		r.draw_line( scene, first,	second,	line_color );
+		r.draw_line( scene, second, third,	line_color );
+		r.draw_line( scene, third,	first,	line_color );
+		r.draw_triangle( scene, first, second, third, triangle_color );
+		//typedef xray::render::vertex_colored colored;
+		//r.draw_triangle( scene, 
+		//	colored( first, math::color( 255, 0, 0, 128 ) ), 
+		//	colored( second, math::color( 0, 255, 0, 128 ) ), 
+		//	colored( third, math::color( 0, 0, 255, 128 ) )
+		//);
+	}
+}
+
+void bsp_tree_node::serialise( configs::lua_config_value& node_config ) const
+{
+	XRAY_UNREFERENCED_PARAMETER(node_config);
+	//save_polygons_to_lua_config( node_config, "polygons", m_polygons );
+	//if ( !m_leaf_vertices.empty() )
+	//{
+	//	configs::lua_config_value vertices_cfg		= node_config[ "leaf_vertices" ];
+	//	for ( u32 i = 0; i < m_leaf_vertices.size(); ++i )
+	//	{
+	//		vertices_cfg[ i ] = m_leaf_vertices[ i ];
+	//	}
+	//	save_polygons_to_lua_config( node_config, "portals", m_generated_portals );
+	//}
+
+	//R_ASSERT( m_divider_plane.vector.valid() );
+	//node_config[ "divider" ] = m_divider_plane.vector;
+
+	//if ( m_positive )
+	//{
+	//	configs::lua_config_value positive_config = node_config[ "positive" ];
+	//	m_positive->serialise( positive_config );
+	//}
+	//if ( m_negative )
+	//{
+	//	configs::lua_config_value negative_config = node_config[ "negative" ];
+	//	m_negative->serialise( negative_config );
+	//}
+}
+
+void bsp_tree_node::restore( configs::lua_config_value const& node_config )
+{
+	XRAY_UNREFERENCED_PARAMETER(node_config);
+	//bool aabb_initialised = false;
+	//if ( load_polygons_from_lua_config( node_config, "polygons", m_polygons, m_vertices, m_indices ) )
+	//{
+	//	this->build_aabb_from_own_polygons();
+	//	aabb_initialised = true;
+	//}
+	//if ( node_config.value_exists( "leaf_vertices" ) )
+	//{
+	//	configs::lua_config_value const& vertices_cfg		= node_config[ "leaf_vertices" ];
+	//	configs::lua_config::const_iterator vertex_it		= vertices_cfg.begin( );
+	//	configs::lua_config::const_iterator vertex_end_it	= vertices_cfg.end( );
+	//	for ( ; vertex_it != vertex_end_it; ++vertex_it )
+	//	{
+	//		m_leaf_vertices.push_back( static_cast<math::float3>( *vertex_it ) );
+	//	}
+	//	load_polygons_from_lua_config( node_config, "portals", m_generated_portals, m_leaf_vertices, m_leaf_indices );
+	//}
+
+	//R_ASSERT( node_config.value_exists( "divider" ) );
+	//m_divider_plane.vector = static_cast<math::float4>( node_config[ "divider" ] );
+
+	//if ( node_config.value_exists( "positive" ) )
+	//{
+	//	m_positive = NEW (bsp_tree_node)( m_vertices, m_indices, m_triangle_mesh );
+	//	m_positive->restore( node_config["positive"] );
+	//	if ( !aabb_initialised )
+	//	{
+	//		m_aabb = m_positive->get_aabb();
+	//		aabb_initialised = true;
+	//	}
+	//	else
+	//		m_aabb.modify( m_positive->get_aabb() );
+	//}
+	//if ( node_config.value_exists( "negative" ) )
+	//{
+	//	m_negative = NEW (bsp_tree_node)( m_vertices, m_indices, m_triangle_mesh );
+	//	m_negative->restore( node_config["negative"] );
+	//	if ( !aabb_initialised )
+	//		m_aabb = m_negative->get_aabb();
+	//	else
+	//		m_aabb.modify( m_negative->get_aabb() );
+	//}
+}
+
+math::aabb bsp_tree_node::get_aabb() const
+{
+	if ( m_convex_cache.vertices.empty() )
+		return math::aabb().identity();
+	math::aabb result = math::create_aabb_min_max( m_convex_cache.vertices.front(), m_convex_cache.vertices.back() );
+	for ( math::convex::cache::vertices_type::const_iterator it = m_convex_cache.vertices.begin(); it != m_convex_cache.vertices.end(); ++it )
+		result.modify( *it );
+	return result;
+}
+
+void bsp_tree_node::generate_portals( portal_blanks_type const& blanks )
+{
+	m_blanks_from_parent = blanks;
+	if ( !this->is_leaf() )
+	{
+		math::plane const& divider = m_triangle_mesh.data[ m_divider_id ].plane;
+		portal_blanks_type positive_blanks, negative_blanks;
+		const portal_blanks_type::const_iterator end_it = blanks.end();
+		for ( portal_blanks_type::const_iterator it = blanks.begin(); it != end_it; ++it )
+		{
+			bsp_portal_blank positive_blank, negative_blank;
+			it->split( divider, positive_blank, negative_blank );
+			if ( positive_blank.get_vertices().size() >= 3 )
+				positive_blanks.push_back( positive_blank );
+			if ( negative_blank.get_vertices().size() >= 3 )
+				negative_blanks.push_back( negative_blank );
+		}
+		m_poratal_blank.initialize( m_convex, m_convex_cache, m_triangle_mesh.data[ m_divider_id ].plane );
+		positive_blanks.push_back( m_poratal_blank );
+		negative_blanks.push_back( m_poratal_blank );
+		if ( m_positive )
+			m_positive->generate_portals( positive_blanks );
+		if ( m_negative )
+			m_negative->generate_portals( negative_blanks );
+	}
+	else
+	{
+		this->initialize_leaf_mesh( m_leaf_mesh );
+		portal_blanks_type::const_iterator const blank_end_it = blanks.end();
+		for ( portal_blanks_type::const_iterator it = blanks.begin(); it != blank_end_it; ++it )
+		{
+			triangle_ids_set_type coincident_triangles; 
+			get_triangles_coincident_to_plane( m_leaf_mesh, it->get_plane(), coincident_triangles );
+			if ( coincident_triangles.empty() )
+				continue;
+			edges_type edges;
+			get_outer_edges( m_leaf_mesh, coincident_triangles, edges );
+			R_ASSERT( !edges.empty() );
+			m_outer_edges.insert( m_outer_edges.end(), edges.begin(), edges.end() );
+			input_indices_type input_indices;
+			get_vertex_indices_of_triangles( m_leaf_mesh, coincident_triangles, input_indices );
+			if ( input_indices.size() < 3 )
+				continue;
+			typedef	xray::ai::navigation::constrained_delaunay_triangulator::indices_type indices_type;
+			typedef xray::ai::navigation::delaunay_triangulator delaunay_triangulator;
+			u32 const max_triangle_count = delaunay_triangulator::get_maximum_triangle_count_in_triangulation( m_leaf_mesh.vertices.size() );
+			indices_type output_indices ( ALLOCA( max_triangle_count * 3 * sizeof( indices_type::value_type ) ), max_triangle_count, 0 );
+			xray::ai::navigation::constrained_delaunay_triangulator( m_leaf_mesh.vertices, input_indices, output_indices, it->get_plane().normal, edges, u32( -1 ) );
+			u32 const triangle_count = output_indices.size() / 3;
+			R_ASSERT( output_indices.size() % 3 == 0 );
+			edges_type::const_iterator const edge_end_it = edges.end();
+			for ( u32 i = 0; i < triangle_count; ++i )
+			{
+				u32 const first		= output_indices[ i * 3 ];
+				u32 const second	= output_indices[ i * 3 + 1 ];
+				u32 const third		= output_indices[ i * 3 + 2 ];
+				for ( edges_type::const_iterator edge_it = edges.begin(); edge_it != edge_end_it; ++edge_it )
+				{
+					if ( ( edge_it->vertex_index0 == second	) && ( edge_it->vertex_index1 == first	) ||
+						 ( edge_it->vertex_index0 == third	) && ( edge_it->vertex_index1 == second	) ||
+						 ( edge_it->vertex_index0 == first	) && ( edge_it->vertex_index1 == third	) )
+					{
+						indices_type::const_iterator const first_it = output_indices.begin() + i * 3;
+						m_portal_indices.insert( m_portal_indices.end(), first_it, first_it + 3 );
+						break;
+					}
+				}
+			}
+			//m_portal_indices.insert( m_portal_indices.end(), output_indices.begin(), output_indices.end() );
+		}
+	}
+}
+
+void bsp_tree_node::initialize_leaf_mesh	( triangles_mesh_type& local_mesh ) const
+{
+	R_ASSERT( this->is_leaf() );
+	u32 index_counter = 0;
+	triangle_ids_type::const_iterator const id_end_it = m_triangle_ids.end();
+	for ( triangle_ids_type::const_iterator it = m_triangle_ids.begin(); it != id_end_it; ++it )
+	{
+		math::float3 const& first	=	m_triangle_mesh.vertices[ m_triangle_mesh.indices[ (*it) * 3 ] ];
+		math::float3 const& second	=	m_triangle_mesh.vertices[ m_triangle_mesh.indices[ (*it) * 3 + 1] ];
+		math::float3 const& third	=	m_triangle_mesh.vertices[ m_triangle_mesh.indices[ (*it) * 3 + 2] ];
+		local_mesh.vertices.push_back( first );
+		local_mesh.vertices.push_back( second );
+		local_mesh.vertices.push_back( third );
+		local_mesh.indices.push_back( index_counter++ );
+		local_mesh.indices.push_back( index_counter++ );
+		local_mesh.indices.push_back( index_counter++ );
+		local_mesh.data.push_back( bsp_tree_triangle( m_triangle_mesh.data[ *it ].plane ) );
+	}
+	remove_duplicates( local_mesh );
+	ai::navigation::graph_generator_adjacency_builder ( local_mesh.indices, local_mesh.data );
+}
+
+void bsp_tree_node::draw_outer_edges( render::scene_ptr const& scene, render::debug::renderer& r ) const
+{
+	math::color const edeges_color( 255, 255, 0 );
+	edges_type::const_iterator const end_it = m_outer_edges.end();
+	for ( edges_type::const_iterator it = m_outer_edges.begin(); it != end_it; ++it )
+	{
+		r.draw_line( scene, m_leaf_mesh.vertices[ it->vertex_index0 ], m_leaf_mesh.vertices[ it->vertex_index1 ], edeges_color );
+		//r.draw_arrow(  scene, m_leaf_mesh.vertices[ it->vertex_index0 ], m_leaf_mesh.vertices[ it->vertex_index1 ], edeges_color, edeges_color );
+	}
+}
+} // namespace model_editor
+} // namespace xray
