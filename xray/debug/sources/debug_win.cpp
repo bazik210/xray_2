@@ -14,9 +14,6 @@
 #include "utils.h"
 #include "call_stack.h"
 
-#include <dxerr.h>
-#pragma comment( lib, "dxerr.lib" )
-
 static pcstr s_full_call_stack_line_format	= "%-60s(%-3d) : %-70s : %-36s : 0x%08x";
 static pcstr s_call_stack_line_format		= "%-60s       : %-70s : 0x%08x";
 
@@ -292,7 +289,8 @@ void xray::debug::platform::free_format_message	( pstr const buffer )
 
 pcstr xray::debug::platform::get_graphics_api_error_description	( int const error_code )
 {
-	return							DXGetErrorDescription( error_code );
+	// #TODO: Uhh...
+	return							"Don't have odd DXERR";
 }
 
 bool xray::debug::is_debugger_present( )
