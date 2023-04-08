@@ -7,9 +7,9 @@
 #ifndef XRAY_MACRO_EXTENSIONS_H_INCLUDED
 #define XRAY_MACRO_EXTENSIONS_H_INCLUDED
 
-#if defined( _CPPUNWIND ) && !defined( _MANAGED )
-#	error please disable exceptions
-#endif // #if defined( _CPPUNWIND ) && !defined( _MANAGED )
+//#if defined( _CPPUNWIND ) && !defined( _MANAGED )
+//#	error please disable exceptions
+//#endif // #if defined( _CPPUNWIND ) && !defined( _MANAGED )
 
 #ifndef NDEBUG
 #	define DEBUG
