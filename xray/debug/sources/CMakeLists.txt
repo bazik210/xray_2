@@ -1,3 +1,5 @@
+project(debug LANGUAGES CXX)
+
 add_library(debug STATIC
 	# core
 	"${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp"
@@ -41,9 +43,6 @@ add_library(debug STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/platform.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils.h"
 )
-
-# Put library to xray namespace
-add_library(xray::debug ALIAS debug)
 
 target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
 target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../")
