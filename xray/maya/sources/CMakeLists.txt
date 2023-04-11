@@ -59,7 +59,7 @@ add_library(maya2011 SHARED
 						"${CMAKE_CURRENT_SOURCE_DIR}/NvMender2003/NVMeshMender.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/NvMender2003/NVMeshMender.h"
 						# Tootle
-						"${CMAKE_CURRENT_SOURCE_DIR}/../../../amd/tootle/tootlelib.h"
+						"${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/amd/tootle/tootlelib.h"
 						# maya_engine
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_engine.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_engine.h"
@@ -105,7 +105,7 @@ add_library(maya2011 SHARED
 						"${CMAKE_CURRENT_SOURCE_DIR}/xray_material_hw.cpp"
 						# ./
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_entry_point.cpp"
-						"${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/maya_menu/xray_brdf.cgfx"
+						"${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/tools/maya_menu/xray_brdf.cgfx"
 )
 
 set_target_properties(maya2011 PROPERTIES FOLDER "engine/plugins")
@@ -174,7 +174,7 @@ add_library(maya2012 SHARED
 						"${CMAKE_CURRENT_SOURCE_DIR}/NvMender2003/NVMeshMender.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/NvMender2003/NVMeshMender.h"
 						# Tootle
-						"${CMAKE_CURRENT_SOURCE_DIR}/../../../amd/tootle/tootlelib.h"
+						"${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/amd/tootle/tootlelib.h"
 						# maya_engine
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_engine.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_engine.h"

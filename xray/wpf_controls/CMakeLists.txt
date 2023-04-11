@@ -341,7 +341,7 @@ add_library(wpf_controls SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/icons/snaptonodes.png"
 					"${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/icons/togglerange0.png"
 					"${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/icons/togglerange1.png"
-					"${CMAKE_CURRENT_SOURCE_DIR}/../../WPFToolkit.Extended/WPFToolkit.Extended.csproj"
+					"${CMAKE_CURRENT_SOURCE_DIR}/../../third_party/WPFToolkit.Extended/WPFToolkit.Extended.csproj"
 					"${CMAKE_CURRENT_SOURCE_DIR}/controls/panels/centralized_scroll_panel.cs"
 					"${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node/node.cs"
 					"${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node/properties_control.cs"

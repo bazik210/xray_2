@@ -29,12 +29,15 @@ endif()
 # Solution directory
 set(SOLUTION_DIR_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
+# Third party directory
+set(THIRDPARTY_DIR_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/")
+
 # Boost
-set(BOOST_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/boost/")
+set(BOOST_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/boost/")
 # FastDelegate
-set(FASTDELEGATE_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/fastdelegate/")
+set(FASTDELEGATE_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/fastdelegate/")
 # Stlport
-set(STLPORT_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/stlport/")
+set(STLPORT_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/")
 
 
 
@@ -64,26 +67,7 @@ endforeach()
 add_subdirectory(xray)
 
 # 3rd party libraries
-add_subdirectory(amd)
-add_subdirectory(BugTrap)
-add_subdirectory(minizip)
-add_subdirectory(zlib)
-add_subdirectory(cs)
-add_subdirectory(freeimage)
-add_subdirectory(nvidia)
-add_subdirectory(vorbis)
-add_subdirectory(bullet)
-add_subdirectory(WildMagic)
-add_subdirectory(lua)
-add_subdirectory(luabind)
-add_subdirectory(ode)
-add_subdirectory(ogg)
-add_subdirectory(opcode)
-add_subdirectory(theora)
-
-# C# project directories
-add_subdirectory(WeifenLuo.WinFormsUI.Docking)
-add_subdirectory(WPFToolkit.Extended)
+add_subdirectory(third_party)
 
 # Enable folder hierarchy view
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -296,15 +280,15 @@ function(xr_setup_plugins)
         SUFFIX ".mll"
 	)
     target_include_directories(maya2011 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/maya2011
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
     )
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${SOLUTION_DIR_INCLUDE_PATH}/stlport/libraries/x64
-        ${SOLUTION_DIR_INCLUDE_PATH}/maya2011/lib64
-        ${SOLUTION_DIR_INCLUDE_PATH}/amd/tootle/libraries
-        ${SOLUTION_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-        ${SOLUTION_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/libraries/x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
     )
 
     set_target_properties(maya_animation PROPERTIES
@@ -316,13 +300,13 @@ function(xr_setup_plugins)
         SUFFIX ".mll"
 	)
     target_include_directories(maya2012 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/maya2012
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012
     )
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${SOLUTION_DIR_INCLUDE_PATH}/maya2012/lib64
-        ${SOLUTION_DIR_INCLUDE_PATH}/amd/tootle/libraries
-        ${SOLUTION_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
 endfunction()
 
@@ -334,8 +318,8 @@ function(xr_setup_renderers)
     xr_set_target_defaults_static_lib(renderer_facade)
 
     target_include_directories(renderer_engine_pc_dx11 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/scaleform/Include
-        ${SOLUTION_DIR_INCLUDE_PATH}/scaleform/Src
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
     )
 
 endfunction()
@@ -364,7 +348,7 @@ function(xr_setup_sdk)
     # TODO finish individual project setup
     target_link_directories(texture_compressor PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${SOLUTION_DIR_INCLUDE_PATH}/stlport/libraries/x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/libraries/x64
     )
 
     target_compile_definitions(bugtrapN PRIVATE
@@ -413,10 +397,10 @@ function(xr_setup_sdk)
     )
 
     target_include_directories(FreeImage PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/OpenEXR/IlmImf
-        ${SOLUTION_DIR_INCLUDE_PATH}/OpenEXR/Imath
-        ${SOLUTION_DIR_INCLUDE_PATH}/OpenEXR/Iex
-        ${SOLUTION_DIR_INCLUDE_PATH}/OpenEXR/Half
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/OpenEXR/IlmImf
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/OpenEXR/Imath
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/OpenEXR/Iex
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/OpenEXR/Half
     )
     target_compile_definitions(FreeImage PRIVATE
         OPJ_STATIC
@@ -428,7 +412,7 @@ function(xr_setup_sdk)
     )
 
     target_include_directories(LibJPEG PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/zlib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/zlib
     )
     target_compile_definitions(LibJPEG PRIVATE
         _LIB
@@ -537,6 +521,7 @@ function(xr_set_target_defaults_static_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
@@ -582,6 +567,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
@@ -643,6 +629,7 @@ function(xr_set_target_defaults_editor TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
@@ -712,6 +699,7 @@ function(xr_set_target_defaults_network_32 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
@@ -766,6 +754,7 @@ function(xr_set_target_defaults_network_64 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
@@ -818,6 +807,7 @@ function(xr_set_target_defaults_plugin TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
         ${STLPORT_INCLUDE_PATH}
     )
 
