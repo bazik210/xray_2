@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 
 # Leave uncommented to enable Parallel Compilation in projects that don't have settings yet
 add_compile_options(/MP)
