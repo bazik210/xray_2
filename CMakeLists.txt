@@ -654,7 +654,7 @@ function(xr_set_target_defaults_editor TARGET)
 	
 	# Visual Studio 17 (2022) and above require a flag to indicate .DLLs for CLR
 	if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
-        set_target_properties(${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
+        set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
 	endif()
 
     # Set dependencies
