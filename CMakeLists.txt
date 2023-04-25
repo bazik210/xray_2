@@ -52,15 +52,15 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
-foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT)
-        string(REGEX REPLACE "/EH[a-z]+" " " ${var} "${${var}}")
-        string(REPLACE "/EHa" " " ${var} "${${var}}")
-        string(REPLACE "/EHsc" " " ${var} "${${var}}")
-		string(REGEX REPLACE "/RTC[a-z0-9]+" " " ${var} "${${var}}")
-		string(REPLACE "/RTCc" " " ${var} "${${var}}")
-		string(REPLACE "/RTCs" " " ${var} "${${var}}")
-		string(REPLACE "/RTCu" " " ${var} "${${var}}")
-		string(REPLACE "/RTC1" " " ${var} "${${var}}")
+foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_INIT)
+        string(REGEX REPLACE "/EH[a-z]+" "" ${var} "${${var}}")
+        string(REPLACE "/EHa" "" ${var} "${${var}}")
+        string(REPLACE "/EHsc" "" ${var} "${${var}}")
+		string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${var} "${${var}}")
+		string(REPLACE "/RTCc" "" ${var} "${${var}}")
+		string(REPLACE "/RTCs" "" ${var} "${${var}}")
+		string(REPLACE "/RTCu" "" ${var} "${${var}}")
+		string(REPLACE "/RTC1" "" ${var} "${${var}}")
 endforeach()
 
 # Main engine directory
@@ -81,14 +81,14 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 function(xr_disable_target_exception_handling TARGET)
     # "Wanna see me do it again?"
     get_target_property(TARGET_COMPILE_FLAGS ${TARGET} COMPILE_OPTIONS )
-    string(REGEX REPLACE "/EH[a-z]+" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-    string(REPLACE "/EHa" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-    string(REPLACE "/EHsc" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REGEX REPLACE "/RTC[a-z0-9]+" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCc" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCs" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCu" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTC1" " " ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REGEX REPLACE "/EH[a-z]+" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/EHa" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/EHsc" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+	string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+	string(REPLACE "/RTCc" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+	string(REPLACE "/RTCs" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+	string(REPLACE "/RTCu" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+	string(REPLACE "/RTC1" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${TARGET_COMPILE_FLAGS}")
 endfunction()
 
@@ -330,18 +330,18 @@ function(xr_setup_sdk)
     xr_set_target_defaults_shared_lib(texture_compressor)
     xr_set_target_defaults_shared_lib(bugtrap)
     xr_set_target_defaults_shared_lib(bugtrapN)
-    xr_set_target_defaults_static_lib(minizip)
-    xr_set_target_defaults_static_lib(minizipN)
-    xr_set_target_defaults_static_lib(zlib)
-    xr_set_target_defaults_static_lib(zlibN)
+    xr_set_target_defaults_static_lib_C(minizip)
+    xr_set_target_defaults_static_lib_C(minizipN)
+    xr_set_target_defaults_static_lib_C(zlib)
+    xr_set_target_defaults_static_lib_C(zlibN)
     xr_set_target_defaults_static_lib(core_cs)
     xr_set_target_defaults_static_lib(script_cs)
     xr_set_target_defaults_shared_lib(FreeImage)
-    xr_set_target_defaults_static_lib(LibJPEG)
-    xr_set_target_defaults_static_lib(LibMNG)
-    xr_set_target_defaults_static_lib(LibOpenJPEG)
-    xr_set_target_defaults_static_lib(LibPNG)
-    xr_set_target_defaults_static_lib(LibTIFF)
+    xr_set_target_defaults_static_lib_C(LibJPEG)
+    xr_set_target_defaults_static_lib_C(LibMNG)
+    xr_set_target_defaults_static_lib_C(LibOpenJPEG)
+    xr_set_target_defaults_static_lib_C(LibPNG)
+    xr_set_target_defaults_static_lib_C(LibTIFF)
     xr_set_target_defaults_static_lib(OpenEXR)
 
     # Set individual configs IF needed
@@ -497,6 +497,49 @@ function(xr_set_target_defaults_static_lib TARGET)
 	# set properties for CLR
 	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
 	set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
+
+    # set compiler flags
+    target_compile_options(${TARGET} PRIVATE
+        /W4
+        /Zi
+        /Ox
+        /Ob2
+        /Oi
+        /Ot
+        /Oy
+        /GT
+        /GF
+        /MD
+        /GS-
+        /fp:fast
+        /Y-
+        /MP
+    )
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${STLPORT_INCLUDE_PATH}
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_static_lib_C TARGET)
+	# set output file name
+    xr_set_lib_name(${TARGET})
+
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN64
+        WIN64
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+    )
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
