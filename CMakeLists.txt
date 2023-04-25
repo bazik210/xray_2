@@ -29,6 +29,9 @@ endif()
 # Solution directory
 set(SOLUTION_DIR_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
+# X-Ray directory (xray includes use <xray/...> notation)
+set(XRAY_DIR_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../")
+
 # Third party directory
 set(THIRDPARTY_DIR_INCLUDE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/third_party/")
 
@@ -111,22 +114,22 @@ endfunction()
 #########################
 # Called at the bottom of this CMakeLists
 function(xr_setup_static_libs)
-    xr_set_target_defaults_static_lib(ai)
-    xr_set_target_defaults_static_lib(ai_navigation)
-    xr_set_target_defaults_static_lib(animation)
-    xr_set_target_defaults_static_lib(rtp)
-    xr_set_target_defaults_static_lib(core)
-    xr_set_target_defaults_static_lib(debug)
-    xr_set_target_defaults_static_lib(fs)
-    xr_set_target_defaults_static_lib(logging)
-    xr_set_target_defaults_static_lib(vfs)
-    xr_set_target_defaults_static_lib(collision)
-    xr_set_target_defaults_static_lib(engine)
-    xr_set_target_defaults_static_lib(input)
-    xr_set_target_defaults_static_lib(particle)
-    xr_set_target_defaults_static_lib(physics)
-    xr_set_target_defaults_static_lib(sound)
-    xr_set_target_defaults_static_lib(ui)
+    xr_set_target_defaults_static_lib_CPP(ai)
+    xr_set_target_defaults_static_lib_CPP(ai_navigation)
+    xr_set_target_defaults_static_lib_CPP(animation)
+    xr_set_target_defaults_static_lib_CPP(rtp)
+    xr_set_target_defaults_static_lib_CPP(core)
+    xr_set_target_defaults_static_lib_CPP(debug)
+    xr_set_target_defaults_static_lib_CPP(fs)
+    xr_set_target_defaults_static_lib_CPP(logging)
+    xr_set_target_defaults_static_lib_CPP(vfs)
+    xr_set_target_defaults_static_lib_CPP(collision)
+    xr_set_target_defaults_static_lib_CPP(engine)
+    xr_set_target_defaults_static_lib_CPP(input)
+    xr_set_target_defaults_static_lib_CPP(particle)
+    xr_set_target_defaults_static_lib_CPP(physics)
+    xr_set_target_defaults_static_lib_CPP(sound)
+    xr_set_target_defaults_static_lib_CPP(ui)
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -256,7 +259,7 @@ endfunction()
 # Called at the bottom of this CMakeLists
 function(xr_setup_network)
     # network is a x64 .lib
-    xr_set_target_defaults_static_lib(network)
+    xr_set_target_defaults_static_lib_CPP(network)
 
     # some network clients are x64 (64bit), some other are x86 (32bit)
     # x86
@@ -284,7 +287,6 @@ function(xr_setup_plugins)
     )
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/libraries/x64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
@@ -312,10 +314,10 @@ endfunction()
 
 # Called at the bottom of this CMakeLists
 function(xr_setup_renderers)
-    xr_set_target_defaults_static_lib(renderer_engine_pc_dx11)
-    xr_set_target_defaults_static_lib(renderer_core_pc_dx11)
-    xr_set_target_defaults_static_lib(renderer_engine_pc_opengl)
-    xr_set_target_defaults_static_lib(renderer_facade)
+    xr_set_target_defaults_static_lib_CPP(renderer_engine_pc_dx11)
+    xr_set_target_defaults_static_lib_CPP(renderer_core_pc_dx11)
+    xr_set_target_defaults_static_lib_CPP(renderer_engine_pc_opengl)
+    xr_set_target_defaults_static_lib_CPP(renderer_facade)
 
     target_include_directories(renderer_engine_pc_dx11 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
@@ -334,21 +336,20 @@ function(xr_setup_sdk)
     xr_set_target_defaults_static_lib_C(minizipN)
     xr_set_target_defaults_static_lib_C(zlib)
     xr_set_target_defaults_static_lib_C(zlibN)
-    xr_set_target_defaults_static_lib(core_cs)
-    xr_set_target_defaults_static_lib(script_cs)
+    xr_set_target_defaults_static_lib_CPP(core_cs)
+    xr_set_target_defaults_static_lib_CPP(script_cs)
     xr_set_target_defaults_shared_lib(FreeImage)
     xr_set_target_defaults_static_lib_C(LibJPEG)
     xr_set_target_defaults_static_lib_C(LibMNG)
     xr_set_target_defaults_static_lib_C(LibOpenJPEG)
     xr_set_target_defaults_static_lib_C(LibPNG)
     xr_set_target_defaults_static_lib_C(LibTIFF)
-    xr_set_target_defaults_static_lib(OpenEXR)
+    xr_set_target_defaults_static_lib_CPP(OpenEXR)
 
     # Set individual configs IF needed
     # TODO finish individual project setup
     target_link_directories(texture_compressor PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/libraries/x64
     )
 
     target_compile_definitions(bugtrapN PRIVATE
@@ -482,7 +483,7 @@ endfunction()
 # TODO check if CLR has to be enabled in C++/CLI Properties tab in Visual Studio as well
 #      see example in function xr_set_target_defaults_editor
 # TODO check if .NET version has to be specified as well (related to TODO above)
-function(xr_set_target_defaults_static_lib TARGET)
+function(xr_set_target_defaults_static_lib_CLR TARGET)
 	# set output file name
     xr_set_lib_name(${TARGET})
 
@@ -521,8 +522,8 @@ function(xr_set_target_defaults_static_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     # list all Target properties
@@ -564,8 +565,52 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_static_lib_CPP TARGET)
+	# set output file name
+    xr_set_lib_name(${TARGET})
+
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN64
+        WIN64
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+        XRAY_STATIC_LIBRARIES
+    )
+
+    # set compiler flags
+    target_compile_options(${TARGET} PRIVATE
+        /W4
+        /Zi
+        /Ox
+        /Ob2
+        /Oi
+        /Ot
+        /Oy
+        /GT
+        /GF
+        /MD
+        /GS-
+        /fp:fast
+        /Y-
+        /MP
+    )
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
     # list all Target properties
@@ -610,8 +655,8 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     # list all Target properties
@@ -672,8 +717,8 @@ function(xr_set_target_defaults_editor TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     # disable Warning 4945
@@ -742,8 +787,8 @@ function(xr_set_target_defaults_network_32 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     xr_print_target_compile_flags(${TARGET})
@@ -797,8 +842,8 @@ function(xr_set_target_defaults_network_64 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     xr_print_target_compile_flags(${TARGET})
@@ -850,8 +895,8 @@ function(xr_set_target_defaults_plugin TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
-        ${STLPORT_INCLUDE_PATH}
     )
 
     xr_print_target_compile_flags(${TARGET})
