@@ -203,6 +203,11 @@ function(xr_setup_editors)
     set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
 
+    # Set Default Namespace
+    set_property(TARGET WeifenLuo.WinFormsUI.Docking PROPERTY VS_GLOBAL_RootNamespace "WeifenLuo.WinFormsUI")
+    set_property(TARGET WPFToolkit.Extended PROPERTY VS_GLOBAL_RootNamespace "Microsoft.Windows.Controls")
+    set_property(TARGET wpf_controls PROPERTY VS_GLOBAL_RootNamespace "xray.editor.wpf_controls")
+
     # Specify DOTNET assembly references
     # TODO check if this works for Local assemblies i.e. WeifenLuo that we compile on our own
     #      assemblies appear in Object Browser so maybe this is the rootNamespace problem?
