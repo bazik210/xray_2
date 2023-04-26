@@ -139,8 +139,6 @@ function(xr_setup_shared_libs)
 endfunction()
 
 # Called at the bottom of this CMakeLists
-# TODO set target rootNamespace for proper assembly set_property(TARGET yourTargetName PROPERTY VS_GLOBAL_RootNamespace yourRootNamespace)
-# TODO set WPF settings for wpf_controls: https://stackoverflow.com/questions/2074144/generate-c-sharp-project-using-cmake/46247927#46247927
 function(xr_setup_editors)
     xr_set_target_defaults_editor(animation_editor)
     xr_set_target_defaults_editor(dialog_editor)
