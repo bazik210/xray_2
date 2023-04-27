@@ -775,7 +775,7 @@ csharp_set_windows_forms_properties(
 )
 
 # List of all files that require Build Action equal Resource
-set(WPF_CONTROLS_BUILD_ACTION_RESOURCES
+set(WPF_CONTROLS_BUILD_ACTION_RESOURCE
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/HueCircle.png"
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/Saturation.png"
 	"${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/icons/addkey.png"
@@ -797,7 +797,7 @@ set(WPF_CONTROLS_BUILD_ACTION_RESOURCES
 )
 
 # Set Build Action to Resource for sources
-SET_SOURCE_FILES_PROPERTIES(${WPF_CONTROLS_BUILD_ACTION_RESOURCES} PROPERTIES VS_TOOL_OVERRIDE "Resource")
+SET_SOURCE_FILES_PROPERTIES(${WPF_CONTROLS_BUILD_ACTION_RESOURCE} PROPERTIES VS_TOOL_OVERRIDE "Resource")
 
 # Setup Designer sources
 csharp_set_designer_cs_properties(
