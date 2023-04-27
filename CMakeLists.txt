@@ -159,7 +159,6 @@ function(xr_setup_editors)
     target_link_libraries(wpf_controls WeifenLuo.WinFormsUI.Docking)
 
     # Set directories for #using directive
-    # TODO check if this works at all
     target_compile_options(animation_editor PRIVATE
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
@@ -207,8 +206,6 @@ function(xr_setup_editors)
     set_property(TARGET wpf_controls PROPERTY VS_GLOBAL_RootNamespace "xray.editor.wpf_controls")
 
     # Specify DOTNET assembly references
-    # TODO check if this works for Local assemblies i.e. WeifenLuo that we compile on our own
-    #      assemblies appear in Object Browser so maybe this is the rootNamespace problem?
     set_target_properties(animation_editor PROPERTIES VS_DOTNET_REFERENCES
         "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
     )
