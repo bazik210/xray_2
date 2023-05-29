@@ -105,6 +105,8 @@ void convex::split( plane const& p, cache const& c, convex& positive, convex& ne
 	negative.m_adjacency.clear();
 	positive.m_planes.clear();
 	negative.m_planes.clear();
+	// std::bind2nd is deprecated!
+	/*
 	if ( std::find_if( m_planes.begin(), m_planes.end(), std::bind2nd( plane_similar(), p ) ) != m_planes.end() )
 	{
 		negative = *this;
@@ -115,6 +117,19 @@ void convex::split( plane const& p, cache const& c, convex& positive, convex& ne
 		positive = *this;
 		return;
 	}
+	*/
+	// re-written with std::bind
+	if (std::find_if(m_planes.begin(), m_planes.end(), std::bind(plane_similar(), std::placeholders::_1, p)) != m_planes.end())
+	{
+		negative = *this;
+		return;
+	}
+	if (std::find_if(m_planes.begin(), m_planes.end(), std::bind(plane_similar(), std::placeholders::_1, math::plane(-p.normal, -p.d))) != m_planes.end())
+	{
+		positive = *this;
+		return;
+	}
+
 	R_ASSERT( m_adjacency.size() == c.vertices.size() );
 	R_ASSERT( sizeof( vertex_flags ) * CHAR_BIT >= m_adjacency.max_size() );
 	vertex_flags pos_vertex_flags = 0;
