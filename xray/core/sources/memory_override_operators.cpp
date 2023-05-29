@@ -170,6 +170,7 @@ pvoid malloc					( size_t size )
 #endif // #ifdef DEBUG
 }
 
+/*
 pvoid calloc					( size_t count, size_t element_size )
 {
 	pvoid const result			= malloc( count*element_size );
@@ -255,7 +256,7 @@ pvoid _aligned_offset_realloc	( pvoid ptr, size_t size, size_t alignment, size_t
 	XRAY_UNREFERENCED_PARAMETERS( ptr, size, alignment, offset );
 	NOT_IMPLEMENTED				( return 0 );
 }
-
+*/
 } // extern "C"
 
 #endif // #if defined(_MSC_VER) && !defined(_DLL)
