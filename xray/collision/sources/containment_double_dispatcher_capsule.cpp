@@ -73,12 +73,12 @@ void containment_double_dispatcher::dispatch	( sphere_geometry_instance const& b
 
 void containment_double_dispatcher::dispatch	( cylinder_geometry_instance const& bounding_volume,			capsule_geometry_instance const& testee )
 {
-	XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
+	//XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
 }
 
 void containment_double_dispatcher::dispatch	( capsule_geometry_instance const& bounding_volume,				capsule_geometry_instance const& testee )
 {
-	XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
+	//XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
 }
 
 void containment_double_dispatcher::dispatch	( truncated_sphere_geometry_instance const& bounding_volume,	capsule_geometry_instance const& testee )

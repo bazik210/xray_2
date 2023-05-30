@@ -51,7 +51,7 @@ void intersection_double_dispatcher::dispatch	( capsule_geometry_instance const&
 
 void intersection_double_dispatcher::dispatch	( truncated_sphere_geometry_instance const& bounding_volume,	truncated_sphere_geometry_instance const& testee )
 {
-	XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
+	//XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
 	NOT_IMPLEMENTED( );
 }
 

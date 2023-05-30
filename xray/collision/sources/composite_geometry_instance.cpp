@@ -61,7 +61,8 @@ void composite_geometry_instance::destroy	( memory::base_allocator* allocator )
 bool composite_geometry_instance::aabb_query		( object const* object, math::aabb const& aabb, triangles_type& triangles ) const
 {
 	bool res = false;
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	math::cuboid local_cuboid( aabb, m_inverted_matrix );
 	for ( ; i != e; ++i )
 		res = (*i)->cuboid_query( object, local_cuboid, triangles ) || res;
@@ -72,7 +73,8 @@ bool composite_geometry_instance::aabb_query		( object const* object, math::aabb
 bool composite_geometry_instance::cuboid_query		( object const* object, math::cuboid const& cuboid, triangles_type& triangles ) const
 {
 	bool res = false;
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	math::cuboid local_cuboid( cuboid, m_inverted_matrix );
 	for ( ; i != e; ++i )
 		res = (*i)->cuboid_query( object, local_cuboid, triangles ) || res;
@@ -89,7 +91,8 @@ bool composite_geometry_instance::ray_query			( object const* object, math::floa
 	composite_ray_query_helper			helper(max_distance/new_max_distance, predicate );
 
 	bool res = false;
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		res = (*i)->ray_query	( object, new_origin, new_direction, max_distance, new_max_distance, triangles, triangles_predicate_type( &helper, &composite_ray_query_helper::predicate) ) || res;
 	
@@ -99,7 +102,8 @@ bool composite_geometry_instance::ray_query			( object const* object, math::floa
 
 bool composite_geometry_instance::aabb_test			( math::aabb const& aabb ) const
 {
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		if ( (*i)->aabb_test( aabb ) )
 			return true;
@@ -109,7 +113,8 @@ bool composite_geometry_instance::aabb_test			( math::aabb const& aabb ) const
 
 bool composite_geometry_instance::cuboid_test		( math::cuboid const& cuboid ) const
 {
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 
 	math::cuboid local_cuboid( cuboid, m_inverted_matrix );
 	for ( ; i != e; ++i )
@@ -124,7 +129,8 @@ bool composite_geometry_instance::ray_test			( math::float3 const& origin, math:
 	float3 const new_origin		= m_inverted_matrix.transform_position(origin);
 	float3 const new_direction	= m_inverted_matrix.transform_direction(direction);
 	float new_max_distance		= length(m_inverted_matrix.transform_position(origin + direction*max_distance) - new_origin);
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		if ( (*i)->ray_test( new_origin, new_direction, new_max_distance, distance ) ) {
 			distance			*= max_distance/new_max_distance;
@@ -137,7 +143,8 @@ bool composite_geometry_instance::ray_test			( math::float3 const& origin, math:
 math::aabb composite_geometry_instance::get_aabb	( ) const
 {
 	math::aabb result = math::create_zero_aabb();
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		result.modify( (*i)->get_aabb() );
 	
@@ -147,7 +154,8 @@ math::aabb composite_geometry_instance::get_aabb	( ) const
 math::aabb composite_geometry_instance::get_geometry_aabb	( ) const
 {
 	math::aabb result = math::create_zero_aabb();
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		result.modify( (*i)->get_aabb( ) );
 	
@@ -157,7 +165,8 @@ math::aabb composite_geometry_instance::get_geometry_aabb	( ) const
 
 bool composite_geometry_instance::is_valid			( ) const
 {
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 	{
 		if ( !(*i)->is_valid( ) )
@@ -174,7 +183,8 @@ void composite_geometry_instance::render			( render::scene_ptr const& scene, ren
 
 void composite_geometry_instance::render	( render::scene_ptr const& scene, render::debug::renderer& renderer, float4x4 const& transform ) const
 {
-	vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 	{
 		float4x4 m = (*i)->get_matrix() * transform;
@@ -184,14 +194,16 @@ void composite_geometry_instance::render	( render::scene_ptr const& scene, rende
 
 void composite_geometry_instance::enumerate_primitives( enumerate_primitives_callback& cb ) const
 {
-	vectora< geometry_instance const* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance const* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		(*i)->enumerate_primitives( float4x4().identity(), cb );
 }
 
 void composite_geometry_instance::enumerate_primitives( float4x4 const& transform, enumerate_primitives_callback& cb ) const
 {
-	vectora< geometry_instance const* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	//vectora< geometry_instance const* >::const_iterator i = m_geometry->begin(), e = m_geometry->end();
+	auto i = m_geometry->begin(), e = m_geometry->end();
 	for ( ; i != e; ++i )
 		(*i)->enumerate_primitives( transform, cb );
 }
