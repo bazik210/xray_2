@@ -77,6 +77,9 @@ inline bool INTRUSIVE_PTR::operator!	( ) const
 	return			( !m_object );
 }
 
+
+// TODO Remove or refactor
+/*
 TEMPLATE_SIGNATURE
 inline INTRUSIVE_PTR::operator typename INTRUSIVE_PTR::unspecified_bool_type	( ) const
 {
@@ -85,6 +88,7 @@ inline INTRUSIVE_PTR::operator typename INTRUSIVE_PTR::unspecified_bool_type	( )
 
 	return			( &intrusive_ptr::c_ptr );
 }
+*/
 
 TEMPLATE_SIGNATURE
 inline typename INTRUSIVE_PTR::self_type &INTRUSIVE_PTR::operator=				( object_type* const object )

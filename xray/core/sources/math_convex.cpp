@@ -23,7 +23,7 @@ using xray::math::float4;
 
 struct edge_less : public std::binary_function< convex::cache::edges_type::value_type const&, convex::cache::edges_type::value_type const&, bool >
 {
-	bool operator()( convex::cache::edges_type::value_type const& left, convex::cache::edges_type::value_type const& right )
+	bool operator()( convex::cache::edges_type::value_type const& left, convex::cache::edges_type::value_type const& right ) const
 	{
 		return left.first < right.first || ( left.first == right.first && left.second < right.second );
 	}

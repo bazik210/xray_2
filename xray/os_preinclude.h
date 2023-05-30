@@ -14,7 +14,9 @@
 #	include <crtdefs.h>	// for ptrdiff_t
 
 	enum {
-		INVALID_HANDLE_VALUE_fake_value = (ptrdiff_t)((unsigned int*)INVALID_HANDLE_VALUE),
+		// TODO Behaviour of Enum has changed and it's not guaranteed that it will be interpreted the same way on x86 as x64...
+		//INVALID_HANDLE_VALUE_fake_value = (ptrdiff_t)((unsigned int*)INVALID_HANDLE_VALUE),
+		INVALID_HANDLE_VALUE_fake_value = (ptrdiff_t)(reinterpret_cast<unsigned int*>(-1)),
 	};
 	typedef			HMODULE						HMODULE_fake_type;
 
