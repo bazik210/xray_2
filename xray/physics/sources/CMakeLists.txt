@@ -164,4 +164,8 @@ add_library(physics STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/physics_entry_point.cpp"
 )
 
+target_include_directories(physics PRIVATE
+    ${THIRDPARTY_DIR_INCLUDE_PATH}/bullet
+)
+
 set_target_properties(physics PROPERTIES FOLDER "engine")
