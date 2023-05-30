@@ -100,9 +100,13 @@ inline void delaunay_triangulator::add_bounding_triangle (
 	float3 min_position				= float3(  math::infinity,  math::infinity,  math::infinity );
 	float3 max_position				= float3( -math::infinity, -math::infinity, -math::infinity );
 	typedef typename IndicesContainerType::const_iterator const_iterator_type;
-	const_iterator_type const b		= indices.begin( );
-	const_iterator_type const e		= indices.end( );
-	for (indices_type::const_iterator i = b; i != e; ++i ) {
+//  const_iterator_type const b		= indices.begin( );
+// 	const_iterator_type const e		= indices.end( );
+	// Expecto Bugtrapum!!!
+	// I hope that whoever wrote this at GSC was sure it can be cast to u32 const* - happy debugging to me or someone else if it can't
+	void const* b = static_cast<void const*>(&(*indices.begin()));
+	void const* e = static_cast<void const*>(&(*indices.end()));
+	for (indices_type::const_iterator i = static_cast<u32 const*>(b); i != static_cast<u32 const*>(e); ++i/*indices_type::const_iterator i = b; i != e; ++i*/ ) {
 		float3 const& vertex		= vertices[*i];
 		min_position				= math::min( min_position, vertex );
 		max_position				= math::max( max_position, vertex );

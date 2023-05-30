@@ -48,7 +48,7 @@ using xray::ai::navigation::triangles_mesh_type;
 using xray::ai::navigation::distance_to_segment;
 using xray::math::float3;
 
-class triangles_mesh_graph_wrapper/* : private boost::noncopyable*/ {
+class triangles_mesh_graph_wrapper : private boost::noncopyable {
 public:
 	struct vertex_impl {};
 	struct look_up_cell_impl {};
@@ -626,10 +626,26 @@ bool search_service::search		(
 		}
 	}
 
-	graph_wrapper_type graph_wrapper			= graph_wrapper_type( graph, start_vertex_id );
-	path_constructor_type path_constructor		= path_constructor_type( graph, start_vertex_id, path );
-	path_heuristics_type path_heuristics		= path_heuristics_type( path_constructor, graph, start_vertex_id, target_vertex_id, start_position, target_position, agent_radius );
-	search_restrictor_type search_restrictor	= search_restrictor_type(
+// 	graph_wrapper_type graph_wrapper			= graph_wrapper_type( graph, start_vertex_id );
+// 	path_constructor_type path_constructor		= path_constructor_type( graph, start_vertex_id, path );
+// 	path_heuristics_type path_heuristics		= path_heuristics_type( path_constructor, graph, start_vertex_id, target_vertex_id, start_position, target_position, agent_radius );
+// 	search_restrictor_type search_restrictor	= search_restrictor_type(
+// 		graph,
+// 		agent_radius,
+// 		start_position,
+// 		target_position,
+// 		fake_start_vertex_id,
+// 		start_vertex_id,
+// 		target_vertex_id,
+// 		std::numeric_limits< distance_type >::max( ),
+// 		u32(-1),
+// 		max_vertex_count - max_branching_factor
+// 	);
+	// The noncopyable saga continues
+	graph_wrapper_type graph_wrapper(graph, start_vertex_id);
+	path_constructor_type path_constructor(graph, start_vertex_id, path);
+	path_heuristics_type path_heuristics(path_constructor, graph, start_vertex_id, target_vertex_id, start_position, target_position, agent_radius);
+	search_restrictor_type search_restrictor(
 		graph,
 		agent_radius,
 		start_position,
