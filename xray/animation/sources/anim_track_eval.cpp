@@ -754,9 +754,9 @@ static float evaluateInfinities (EtCurve *animCurve, float time, bool evalPre)
 {
 	float value = 0.0;
 	float	valueRange;
-	float	factoredTime, firstTime, lastTime, timeRange;
+	double	factoredTime, firstTime, lastTime, timeRange;
 	float	remainder, tanX, tanY;
-	float numCycles, notUsed;
+	double numCycles, notUsed;
 
 	/* make sure we have something to evaluate */
 	if ((animCurve == 0) || (animCurve->keyList.size() == 0)) 
@@ -790,7 +790,7 @@ static float evaluateInfinities (EtCurve *animCurve, float time, bool evalPre)
 		/* evaluate the pre-infinity */
 		if (animCurve->preInfinity == kInfinityOscillate) 
 		{
-			if ((remainder = modf (numCycles / 2.0f, &notUsed)) != 0.0f) 
+			if ((remainder = modf (numCycles / 2.0, &notUsed)) != 0.0) 
 				factoredTime = firstTime + factoredTime;
 			else 
 				factoredTime = lastTime - factoredTime;
