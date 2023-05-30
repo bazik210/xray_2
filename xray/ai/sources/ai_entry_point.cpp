@@ -341,7 +341,7 @@ inline operands_calculator operator +	( operands_calculator const& left, operand
 
 class base_lexeme_ptr;
 
-struct XRAY_NOVTABLE base_lexeme : private boost::noncopyable {
+struct XRAY_NOVTABLE base_lexeme/* : private boost::noncopyable*/ {
 	virtual						~base_lexeme			( ) { }
 	virtual	string_type			get_name				( ) const = 0;
 	virtual	void				invert_value			( ) const = 0;
