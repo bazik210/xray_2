@@ -356,6 +356,7 @@ function(xr_setup_sdk)
         _WINDOWS    
         _USRDLL
         BUGTRAP_EXPORT
+        _UNICODE
     )
     target_link_directories(bugtrapN PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
@@ -416,6 +417,32 @@ function(xr_setup_sdk)
         ${THIRDPARTY_DIR_INCLUDE_PATH}/zlib
     )
     target_compile_definitions(LibJPEG PRIVATE
+        _LIB
+        _CRT_SECURE_NO_DEPRECATE
+    )
+
+    target_include_directories(LibMNG PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/freeimage/LibJPEG
+    )
+    target_compile_definitions(LibMNG PRIVATE
+        _LIB
+        _CRT_SECURE_NO_DEPRECATE
+    )
+    target_link_directories(LibMNG PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
+	target_link_libraries(LibMNG PRIVATE
+		LibJPEG
+		zlib
+	)
+
+    target_compile_definitions(LibOpenJPEG PRIVATE
+        _LIB
+        _OPJ_STATIC
+        _CRT_SECURE_NO_DEPRECATE
+    )
+
+    target_compile_definitions(LibPNG PRIVATE
         _LIB
         _CRT_SECURE_NO_DEPRECATE
     )
