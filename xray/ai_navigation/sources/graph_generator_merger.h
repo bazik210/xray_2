@@ -185,9 +185,9 @@ private:
 		
 		inline bool operator() ( constraint_edge& edge )
 		{
-			u32 index = &edge - m_constraint_edges->begin();
+			u32 index = &edge - &(*m_constraint_edges->begin()); //&edge - m_constraint_edges->begin();
 			if ( index < m_markers->size() )
-				return (*m_markers)[ &edge - m_constraint_edges->begin() ];
+				return (*m_markers)[&edge - &(*m_constraint_edges->begin())]; //(*m_markers)[ &edge - m_constraint_edges->begin() ];
 			else
 				return false;
 		}
@@ -208,7 +208,7 @@ private:
 		}
 
 		inline bool operator() ( constraint_edge const& constraint_edge ) {
-			u32 const edge_id = &constraint_edge - m_constraint_edges->begin();
+			u32 const edge_id = &constraint_edge - &(*m_constraint_edges->begin());//&constraint_edge - m_constraint_edges->begin();
 			return (*m_edge_markers)[edge_id];
 		}
 	private:

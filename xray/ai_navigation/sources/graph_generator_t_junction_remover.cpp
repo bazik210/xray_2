@@ -172,7 +172,7 @@ bool graph_generator_t_junction_remover::remove_t_junctions (
 		edges_type& sorted_edges_by_second_index
 	)
 {
-	u32 const* indices = m_triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &m_triangles_mesh.indices[0 + triangle_id * 3];//m_triangles_mesh.indices.begin() + triangle_id * 3;
 
 	for ( u32 j = 0; j < 3; ++j ) {
 		

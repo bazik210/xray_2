@@ -556,8 +556,8 @@ void graph_generator_tessellator::get_colinear_edge(
 		u32& colinear_edge_id1
 	)
 {
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + triangle_id0 * 3;
-	u32 const* indices1 = m_triangles_mesh.indices.begin() + triangle_id1 * 3;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + triangle_id0 * 3]; //m_triangles_mesh.indices.begin() + triangle_id0 * 3;
+	u32 const* indices1 = &m_triangles_mesh.indices[0 + triangle_id1 * 3]; //m_triangles_mesh.indices.begin() + triangle_id1 * 3;
 	for ( u32 i = 0; i < 3; ++i ) {
 		float3 const& v0 = m_triangles_mesh.vertices[ indices0[ ( i + 0 ) % 3 ] ];
 		float3 const& v1 = m_triangles_mesh.vertices[ indices0[ ( i + 1 ) % 3 ] ];
@@ -1010,13 +1010,13 @@ bool graph_generator_tessellator::process_colinear_edge_tests (
 		vertices_type& vertices
 	)
 {
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + triangle_id0 * 3;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + triangle_id0 * 3];//m_triangles_mesh.indices.begin() + triangle_id0 * 3;
 	float3 const v0	= m_triangles_mesh.vertices[ indices0[0] ];
 	float3 const v1	= m_triangles_mesh.vertices[ indices0[1] ];
 	float3 const v2	= m_triangles_mesh.vertices[ indices0[2] ];
 	
 	
-	u32 const* indices1 = m_triangles_mesh.indices.begin() + triangle_id1 * 3;
+	u32 const* indices1 = &m_triangles_mesh.indices[0 + triangle_id1 * 3];//m_triangles_mesh.indices.begin() + triangle_id1 * 3;
 	float3 const u0	= m_triangles_mesh.vertices[ indices1[0] ];
 	float3 const u1	= m_triangles_mesh.vertices[ indices1[1] ];
 	float3 const u2	= m_triangles_mesh.vertices[ indices1[2] ];

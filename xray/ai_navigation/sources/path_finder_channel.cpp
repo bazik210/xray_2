@@ -48,7 +48,7 @@ using xray::ai::navigation::triangles_mesh_type;
 using xray::ai::navigation::distance_to_segment;
 using xray::math::float3;
 
-class triangles_mesh_graph_wrapper : private boost::noncopyable {
+class triangles_mesh_graph_wrapper/* : private boost::noncopyable*/ {
 public:
 	struct vertex_impl {};
 	struct look_up_cell_impl {};
@@ -103,7 +103,7 @@ private:
 
 static u32 get_closest_edge ( triangles_mesh_type const& graph, u32 const triangle_id, float3 const vertex )
 {
-	u32 const* indices = graph.indices.begin() + triangle_id * 3;
+	u32 const* indices = &graph.indices[0 + triangle_id * 3];//graph.indices.begin() + triangle_id * 3;
 	u32 closest_id = 0;
 	float closest_distance = distance_to_segment( vertex, graph.vertices[ indices[0] ], graph.vertices[ indices[1] ] );
 	for ( u32 i = 1; i < 3; ++i ) {
@@ -457,7 +457,7 @@ public:
 		u32 const current_vertex_id		= ( *current_vertex_id_ptr == vertex_id_type(-1) ) ? m_start_vertex_id : *current_vertex_id_ptr;
 		neighbour_vertex_id				= ( neighbour_vertex_id == vertex_id_type(-1) ) ? m_start_vertex_id : neighbour_vertex_id;
 
-		u32 const* const current_indices = m_graph.indices.begin() + current_vertex_id * 3;
+		u32 const* const current_indices = &m_graph.indices[0 + current_vertex_id * 3];//m_graph.indices.begin() + current_vertex_id * 3;
 
 		u32 const edge_id				= get_similar_edge ( m_graph, current_vertex_id, neighbour_vertex_id );
 
@@ -474,8 +474,8 @@ public:
 	{
 		R_ASSERT					( enter_edge_id != exit_edge_id );
 
-		float3 const* const vertices = m_graph.vertices.begin();
-		u32 const* const indices	= m_graph.indices.begin() + vertex_id * 3;
+		float3 const* const vertices = &m_graph.vertices[0];//m_graph.vertices.begin();
+		u32 const* const indices	= &m_graph.indices[0 + vertex_id * 3];//m_graph.indices.begin() + vertex_id * 3;
 		float3 const& u0			= vertices[ indices[ enter_edge_id ] ];
 		float3 const& u1			= vertices[ indices[ (enter_edge_id + 1) % 3 ] ];
 		float3 const& v0			= vertices[ indices[ exit_edge_id ] ];
@@ -528,7 +528,7 @@ public:
 
 		u32 const similar_edge			= u32(iterator - m_graph.data[current_vertex_id].neighbours);
 		R_ASSERT_CMP					( similar_edge, <, 3 );
-		u32 const* const indices		= m_graph.indices.begin() + current_vertex_id * 3;
+		u32 const* const indices		= &m_graph.indices[0 + current_vertex_id * 3];//m_graph.indices.begin() + current_vertex_id * 3;
 		float3 const& v0				= m_graph.vertices[ indices[ similar_edge ] ];
 		float3 const& v1				= m_graph.vertices[ indices[ (similar_edge+1) % 3 ] ];
 		float const heuristics0			= distance_to_segment( m_start_position, v0, v1 );
@@ -612,7 +612,7 @@ bool search_service::search		(
 			}
 		}
 
-		u32 const* indices = graph.indices.begin() + start_vertex_id * 3;
+		u32 const* indices = &graph.indices[0 + start_vertex_id * 3];//graph.indices.begin() + start_vertex_id * 3;
 		u32 const opposite_edge = get_third_edge ( closest_edge0, closest_edge1 );
 		float3 const& vertex = graph.vertices[ indices[ (opposite_edge + 2) % 3 ] ];
 		if ( calculate_triangle_width( graph, vertex, start_vertex_id, opposite_edge ) * 0.5f < agent_radius )

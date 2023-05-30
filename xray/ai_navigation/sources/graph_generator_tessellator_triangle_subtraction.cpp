@@ -80,7 +80,7 @@ inline bool graph_generator_tessellator::insert_edge ( edge_intersections_type& 
 
 bool graph_generator_tessellator::is_edge_endpoint( float3 vertex, u32 triangle_id, u32 edge_id )
 {
-	u32 const* indices = m_triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &m_triangles_mesh.indices[0 + triangle_id * 3];//m_triangles_mesh.indices.begin() + triangle_id * 3;
 	if ( is_similar( vertex, m_triangles_mesh.vertices[ indices[ edge_id ] ] )
 		|| is_similar( vertex, m_triangles_mesh.vertices[ indices[ (edge_id +1)%3] ] ) )
 	{
@@ -101,7 +101,7 @@ void graph_generator_tessellator::snap_to_edge ( float3& point, float3 const& ve
 
 void graph_generator_tessellator::try_snap_to_closest_edge ( float3& vertex, u32 const triangle_id )
 {
-	u32 const* indices = m_triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &m_triangles_mesh.indices[0 + triangle_id * 3];//m_triangles_mesh.indices.begin() + triangle_id * 3;
 	float distance = distance_to_edge( m_triangles_mesh.vertices[ indices[0] ], m_triangles_mesh.vertices[ indices[1] ], vertex );
 	u32 closest_id = 0;
 	for ( u32 i = 1; i < 3; ++i ) {

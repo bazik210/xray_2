@@ -31,7 +31,7 @@ float search_triangle_width (
 		bool check_angle = true
 	)
 {
-	u32 const* indices = triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &triangles_mesh.indices[0 + triangle_id * 3];//triangles_mesh.indices.begin() + triangle_id * 3;
 	float3 const u = triangles_mesh.vertices[ indices[ edge_id ] ];
 	float3 const v = triangles_mesh.vertices[ indices[ ( edge_id + 1 ) % 3 ] ];
 
@@ -84,7 +84,7 @@ float calculate_triangle_width (
 		bool check_angle
 	)
 {
-	u32 const* indices = triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &triangles_mesh.indices[0 + triangle_id * 3];//triangles_mesh.indices.begin() + triangle_id * 3;
 	float3 const& u0 = triangles_mesh.vertices[ indices[ edge_id ] ];
 	float3 const& u1 = triangles_mesh.vertices[ indices[ (edge_id+1)%3 ] ];
 

@@ -59,7 +59,7 @@ struct remove_vertices_by_unique_indices_predicate2 {
 
 		inline bool operator() ( xray::math::float3 const& vertex ) const
 	{
-		u32 const index = u32(&vertex - m_vertices_begin);
+		u32 const index = u32(&vertex - &(*m_vertices_begin));//u32(&vertex - m_vertices_begin);
 		return		(*m_unique_vertices_indices)[ index ] != index;
 	}
 

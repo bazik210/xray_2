@@ -43,7 +43,7 @@ graph_generator_disconnected_regions_remover::graph_generator_disconnected_regio
 float3 graph_generator_disconnected_regions_remover::calculate_triangle_center( u32 const triangle_id ) 
 {
 	R_ASSERT ( triangle_id < m_navigation_mesh.data.size() );
-	u32 const* indices = m_navigation_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices = &m_navigation_mesh.indices[0 + triangle_id * 3];//m_navigation_mesh.indices.begin() + triangle_id * 3;
 	return ( m_navigation_mesh.vertices[ indices[0] ] + m_navigation_mesh.vertices[ indices[1] ] + m_navigation_mesh.vertices[ indices[2] ] ) / 3.0f;
 }
 

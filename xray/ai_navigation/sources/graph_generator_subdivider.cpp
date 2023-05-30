@@ -270,7 +270,7 @@ void graph_generator_subdivider::correct_obstructed_edge  (
 			float3 const& vertex1
 		) 
 {
-	u32 const* indices  = m_triangles_mesh.indices.begin() + triangle_id * 3;
+	u32 const* indices  = &m_triangles_mesh.indices[0 + triangle_id * 3];//m_triangles_mesh.indices.begin() + triangle_id * 3;
 
 	if ( is_on_segment ( m_triangles_mesh.vertices[ indices[0] ], vertex0, vertex1 ) )
 		if ( is_on_segment ( m_triangles_mesh.vertices[ indices[1] ], vertex0, vertex1 ) ) {
@@ -409,8 +409,8 @@ float3 const* select_equal_vertices	(
 
 u32 graph_generator_subdivider::get_similar_edge_id ( u32 const triangle_id0, u32 const triangle_id1 )
 {
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + 3 * triangle_id0;
-	u32 const* indices1 = m_triangles_mesh.indices.begin() + 3 * triangle_id1;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + 3 * triangle_id0];//m_triangles_mesh.indices.begin() + 3 * triangle_id0;
+	u32 const* indices1 = &m_triangles_mesh.indices[0 + 3 * triangle_id1];//m_triangles_mesh.indices.begin() + 3 * triangle_id1;
 
 	for ( u32 i = 0; i < 3; ++i ) {
 		u32 const vertex_index0 = indices0[i];
@@ -426,7 +426,7 @@ u32 graph_generator_subdivider::get_similar_edge_id ( u32 const triangle_id0, u3
 
 void graph_generator_subdivider::correct_segment_vertex(float3& vertex, u32 const triangle_id )
 {
-	u32 const* indices = m_triangles_mesh.indices.begin() + 3 * triangle_id;
+	u32 const* indices = &m_triangles_mesh.indices[0 + 3 * triangle_id];//m_triangles_mesh.indices.begin() + 3 * triangle_id;
 
 	float3 projections[3];
 	u32 edge_id = u32(-1);

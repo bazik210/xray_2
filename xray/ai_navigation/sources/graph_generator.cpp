@@ -510,7 +510,7 @@ void graph_generator::tick					( )
 #endif
 
 	if ( m_show_triangle_id < m_input_triangles.data.size() ) {
-		u32 const* indices = m_input_triangles.indices.begin() + m_show_triangle_id * 3;
+		u32 const* indices = &m_input_triangles.indices[0 + m_show_triangle_id * 3];//m_input_triangles.indices.begin() + m_show_triangle_id * 3;
 		string256 str;
 		sprintf ( str, "triangle_id: %i\nVertex indices:\n(%i, %i, %i)\nVertices:\n(%f, %f, %f)\n(%f, %f, %f)\n(%f, %f, %f)\nAdjacency:\n(%i, %i, %i)\nObstruction:\n(%f, %f, %f)\nis marked = %i", 
 			m_show_triangle_id, 

@@ -142,7 +142,7 @@ struct remove_vertices_by_unique_indices_predicate {
 
 		inline bool operator() ( xray::math::float3 const& vertex ) const
 	{
-		u32 const index = u32(&vertex - m_vertices_begin);
+		u32 const index = u32(&vertex - &(*m_vertices_begin));//u32(&vertex - m_vertices_begin);
 		return		(*m_unique_vertices_indices)[ index ] != index;
 	}
 
@@ -335,7 +335,7 @@ void graph_generator::remove_duplicates ( triangles_mesh_type& triangles_mesh )
 		for ( u32 j = 0; j < 3; ++j )
 			triangles_mesh.indices[ 3*i+j ] = unique_vertices_indices[triangles_mesh.indices[ 3*i+j ]];
 		
-		u32* indices = triangles_mesh.indices.begin() + 3*i;
+		u32* indices = &triangles_mesh.indices[0 + 3 * i];//triangles_mesh.indices.begin() + 3*i;
 		u32 smallest_index			= 0;
 		if ( indices[1] < indices[0] )
 			smallest_index			= 1;
@@ -787,7 +787,7 @@ struct remove_vertices_if_unused {
 
 	bool operator() ( triangles_mesh_type::vertices_type::value_type const& v )
 	{
-		u32 const index = &v - m_begin;
+		u32 const index = &v - &(*m_begin);//&v - m_begin;
 		return (*m_vertices_indices)[ index ] == u32(-1);
 	}
 private:

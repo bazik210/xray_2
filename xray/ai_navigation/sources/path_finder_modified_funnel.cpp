@@ -317,7 +317,7 @@ path_finder_modified_funnel::path_finder_modified_funnel (
 	if ( m_channel.size() == 1 ) {
 		u32 const coordinate_indices[] = { 0, 2 };
 		u32 const node = m_channel[0];
-		u32 const* indices = triangles_mesh.indices.begin() + node*3;
+		u32 const* indices = &triangles_mesh.indices[0 + node * 3]; //triangles_mesh.indices.begin() + node*3;
 		for ( u32 i = 0; i < 3; ++i ) {
 			float3 const& vertex = triangles_mesh.vertices[ indices[i] ];
 			float distance = distance_to_segment( vertex, start, goal );
@@ -344,7 +344,7 @@ path_finder_modified_funnel::path_finder_modified_funnel (
 	m_intermediate_path.push_back( m_funnel_apex );
 
 	u32 similar_edge = get_similar_edge( m_channel[0], m_channel[1] );
-	u32 const* indices = m_triangles_mesh.indices.begin() + m_channel[0] * 3;
+	u32 const* indices = &m_triangles_mesh.indices[0 + m_channel[0] * 3];//m_triangles_mesh.indices.begin() + m_channel[0] * 3;
 	add( m_triangles_mesh.vertices[ indices[ similar_edge ] ], vertex_type_left );
 	add( m_triangles_mesh.vertices[ indices[ (similar_edge + 1) % 3] ], vertex_type_right );
 
@@ -354,7 +354,7 @@ path_finder_modified_funnel::path_finder_modified_funnel (
 	channel_type::const_iterator i = channel.begin() + 1; 
 	channel_type::const_iterator e = channel.end() - 1;
 	for ( ; i != e; ++i ) {
-		u32 const* indices = m_triangles_mesh.indices.begin() + (*i) * 3;
+		u32 const* indices = &m_triangles_mesh.indices[0 + (*i) * 3]; //m_triangles_mesh.indices.begin() + (*i) * 3;
 		u32 edge_id = get_similar_edge( (*i), *(i+1));
 		u32 u0 = indices[ edge_id ];
 		u32 u1 = indices[ ( edge_id + 1 ) % 3 ];
