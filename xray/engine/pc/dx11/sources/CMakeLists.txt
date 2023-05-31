@@ -8,4 +8,8 @@ add_library(engine_pc_dx11 STATIC
 							"${CMAKE_CURRENT_SOURCE_DIR}/../../linkage_resolver.h"
 )
 
+target_include_directories(engine_pc_dx11 PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}
+)
+
 set_target_properties(engine_pc_dx11 PROPERTIES FOLDER "engine")
