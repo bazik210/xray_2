@@ -331,7 +331,7 @@ endfunction()
 function(xr_setup_sdk)
     xr_set_target_defaults_shared_lib(texture_compressor)
     xr_set_target_defaults_shared_lib(bugtrap)
-    xr_set_target_defaults_shared_lib(bugtrapN)
+    xr_set_target_defaults_shared_lib_CLR(bugtrapN)
     xr_set_target_defaults_static_lib_C(minizip)
     xr_set_target_defaults_static_lib_C(minizipN)
     xr_set_target_defaults_static_lib_C(zlib)
@@ -552,6 +552,61 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
 endfunction()
 
 function(xr_set_target_defaults_shared_lib TARGET)
+	# set output file name
+    xr_set_lib_name(${TARGET})
+
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN64
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+    )
+
+    # set compiler flags
+    target_compile_options(${TARGET} PRIVATE
+        /W4
+        /Zi
+        /Ox
+        /Ob2
+        /Oi
+        /Ot
+        /Oy
+        /GT
+        /GF
+        /MD
+        /GS-
+        /fp:fast
+        /Y-
+        /MP
+    )
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${XRAY_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+
+    
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+        /DEBUG
+        /OPT:REF
+        /OPT:ICF
+        /DYNAMICBASE:NO
+        /FIXED:NO
+        /MACHINE:X64
+    )
+
+    xr_print_target_linker_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_shared_lib_CLR TARGET)
 	# set output file name
     xr_set_lib_name(${TARGET})
 

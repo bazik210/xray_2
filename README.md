@@ -8,7 +8,7 @@ X-Ray v2.0 was used to develop S.T.A.L.K.E.R. 2 until it got cancelled in 2011. 
 This project supports [**CMake v3.26 or higher**](https://cmake.org/) to build its project files on all platforms (currently only on Windows - time will tell if we can get support on others as well).
 
 ### Windows
-You should use **Visual Studio 2019** or **Visual Studio 2022** with **MSVC v142** build tools and **.NET 3.5 and .NET 2.0 targeting packs** to build the engine (they can be added to your Visual Studio installation using Get Tools and Features panel).  
+You should use **Visual Studio 2019** or **Visual Studio 2022** with **MSVC v142** build tools and **C++ MFC for latest v142 build tools (x86 & x64), .NET 3.5 and .NET 2.0 targeting packs** to build the engine (they can be added to your Visual Studio installation using Get Tools and Features panel).  
 If you don't have it you can download **Visual Studio 2022** [**here**](https://visualstudio.microsoft.com/). To acquire older versions of Visual Studio please refer to this [**this link**](https://visualstudio.microsoft.com/vs/older-downloads/).
 
 Additionally, you need .NET Framework v3.5 and v2.0 to run the SDK. Their installers can be found [**here**](https://dotnet.microsoft.com/en-us/download/dotnet-framework).

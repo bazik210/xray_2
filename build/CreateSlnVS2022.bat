@@ -13,6 +13,10 @@ START /B /WAIT cmake --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt"
 	exit
 ) || (
 	echo Removing Exception Handling from all generated projects...
-	START /B /WAIT RemoveExceptions.bat
+	CALL RemoveExceptions.bat
+	echo Replacing nothrownew.obj.lib with nothrownew.obj in BugTrap linkage settings...
+	CALL SetupBugTrap.bat
 	echo Done!
+	TIMEOUT /T 8
+	exit
 )
