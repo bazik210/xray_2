@@ -352,6 +352,7 @@ function(xr_setup_sdk)
 	xr_set_target_defaults_static_lib_CPP(LibFoundation)
 	xr_set_target_defaults_static_lib_CPP(ode)
 	xr_set_target_defaults_static_lib_C(ogg)
+	xr_set_target_defaults_static_lib_C(theora)
 endfunction()
 
 # Called at the bottom of this CMakeLists
