@@ -345,6 +345,13 @@ function(xr_setup_sdk)
     xr_set_target_defaults_static_lib_C(LibPNG)
     xr_set_target_defaults_static_lib_C(LibTIFF)
     xr_set_target_defaults_static_lib_CPP(OpenEXR)
+	xr_set_target_defaults_static_lib_CPP(nvcore)
+	xr_set_target_defaults_static_lib_CPP(nvimage)
+	xr_set_target_defaults_shared_lib(nvtt)
+	xr_set_target_defaults_static_lib_CPP(squish)
+	xr_set_target_defaults_static_lib_CPP(LibFoundation)
+	xr_set_target_defaults_static_lib_CPP(ode)
+	xr_set_target_defaults_static_lib_C(ogg)
 endfunction()
 
 # Called at the bottom of this CMakeLists
