@@ -83,7 +83,7 @@
 #	define			STRICT
 #elif XRAY_PLATFORM_PS3							// #ifdef XRAY_PLATFORM_PS3
 #else // #elif XRAY_PLATFORM_PS3
-#	error please define your platform
+//#	error please define your platform
 #endif // #elif XRAY_PLATFORM_PS3
 
 #endif // #ifndef XRAY_OS_PREINCLUDE_H_INCLUDED

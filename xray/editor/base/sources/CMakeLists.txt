@@ -279,4 +279,12 @@ add_library(editor_base SHARED
 					#"${CMAKE_CURRENT_SOURCE_DIR}/resource.h"
 )
 
+target_compile_options(editor_base PRIVATE
+    /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
+)
+set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
+    "PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;wpf_controls;WPFToolkit.Extended;xray_editor_controls;xray_engine_pc_dx11"
+)
+
 set_target_properties(editor_base PROPERTIES FOLDER "engine/editors")

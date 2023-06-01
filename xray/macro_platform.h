@@ -151,7 +151,7 @@
 #		error you cannot specify several target platforms
 #	endif // #if XRAY_PLATFORM_WINDOWS_32 | XRAY_PLATFORM_XBOX_360 | XRAY_PLATFORM_XBOX_360
 #else								// #elif XRAY_PLATFORM_PS3
-#		error unknown target platform!
+//#		error unknown target platform!
 #endif // #if XRAY_PLATFORM_WINDOWS_32
 
 #endif // #ifndef XRAY_MACRO_PLATFORM_H_INCLUDED

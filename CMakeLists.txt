@@ -168,9 +168,6 @@ function(xr_setup_editors)
     target_compile_options(editor PRIVATE
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
-    target_compile_options(editor_base PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
     target_compile_options(editor_controls PRIVATE
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
@@ -191,7 +188,6 @@ function(xr_setup_editors)
     set_target_properties(animation_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
@@ -216,10 +212,6 @@ function(xr_setup_editors)
 
     set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
         "bugtrapN-x64;Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_animation_editor;xray_dialog_editor;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11;xray_model_editor;xray_particle_editor;xray_sound_editor"
-    )
-
-    set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;wpf_controls;WPFToolkit.Extended;xray_editor_controls;xray_engine_pc_dx11"
     )
 
     set_target_properties(editor_controls PROPERTIES VS_DOTNET_REFERENCES
@@ -345,10 +337,10 @@ function(xr_setup_sdk)
     xr_set_target_defaults_static_lib_C(LibPNG)
     xr_set_target_defaults_static_lib_C(LibTIFF)
     xr_set_target_defaults_static_lib_CPP(OpenEXR)
-	xr_set_target_defaults_static_lib_CPP(nvcore)
-	xr_set_target_defaults_static_lib_CPP(nvimage)
-	xr_set_target_defaults_shared_lib(nvtt)
-	xr_set_target_defaults_static_lib_CPP(squish)
+	#xr_set_target_defaults_static_lib_CPP(nvcore)
+	#xr_set_target_defaults_static_lib_CPP(nvimage)
+	#xr_set_target_defaults_shared_lib(nvtt)
+	#xr_set_target_defaults_static_lib_CPP(squish)
 	xr_set_target_defaults_static_lib_CPP(LibFoundation)
 	xr_set_target_defaults_static_lib_CPP(ode)
 	xr_set_target_defaults_static_lib_C(ogg)
