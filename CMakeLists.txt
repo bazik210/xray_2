@@ -451,6 +451,9 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
         /MP
     )
 
+	# Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
+    set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
+
     xr_disable_target_exception_handling(${TARGET})
 
     # set Additional Include Directories
@@ -638,6 +641,9 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         /Y-
         /MP
     )
+
+	# Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
+    set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_disable_target_exception_handling(${TARGET})
 

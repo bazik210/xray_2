@@ -26,4 +26,4 @@ def findReplace(directory, find, replace, filePattern):
                 outputFile.write(line)
             tempFile.close()
 
-findReplace(os.getcwd(), 'nothrownew.obj.lib', 'nothrownew.obj', 'bugtrap.vcxproj')
+findReplace(os.getcwd(), 'nothrownew.obj.lib', 'nothrownew.obj', 'bugtrap*.vcxproj')
