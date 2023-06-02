@@ -217,4 +217,8 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_entry_point.cpp"
 )
 
+target_link_libraries(game PRIVATE
+	debugging
+)
+
 set_target_properties(game PROPERTIES FOLDER "stalker2")

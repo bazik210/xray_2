@@ -14,4 +14,8 @@ add_executable(test
 				"${CMAKE_CURRENT_SOURCE_DIR}/test_entry_point.cpp"
 )
 
+target_link_libraries(test PRIVATE
+	core
+)
+
 set_target_properties(test PROPERTIES FOLDER "engine/utilities")

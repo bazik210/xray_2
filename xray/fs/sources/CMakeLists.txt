@@ -78,7 +78,12 @@ add_library(fs STATIC
 				"${CMAKE_CURRENT_SOURCE_DIR}/synchronous_device_interface.cpp"
 )
 
+target_link_libraries(fs PRIVATE
+	core
+)
+
 target_include_directories(fs PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/xray/fs
     ${SOLUTION_DIR_INCLUDE_PATH}/xray/fs/sources
 )
 

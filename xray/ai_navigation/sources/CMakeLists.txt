@@ -84,4 +84,8 @@ add_library(ai_navigation STATIC
 							# ./
 )
 
+target_link_libraries(ai_navigation PRIVATE
+	core
+)
+
 set_target_properties(ai_navigation PROPERTIES FOLDER "engine/ai")

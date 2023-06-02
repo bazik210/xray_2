@@ -1,7 +1,7 @@
 # Set graph settings
 SET(GRAPHVIZ_GRAPH_HEADER "\
 rankdir=RL;\
-ranksep=\"0.1\";\
+ranksep=\"0.3\";\
 bgcolor=aliceblue;\
 graph [ nodesep=\"0.5\" ];\
 node [ width=\"1.2\", fontsize=\"15\", color=black, style=filled, fillcolor=azure2 ];\

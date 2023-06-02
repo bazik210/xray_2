@@ -25,4 +25,14 @@ add_executable(login_server
 					"${CMAKE_CURRENT_SOURCE_DIR}/entry_point.cpp"
 )
 
+target_link_libraries(login_server PRIVATE
+	odbc32.lib
+	odbcpp32.lib
+	libmysql.dll
+	ws2_32.dll
+	mswsock.dll
+	libeay32-vc90-mt-s.lib
+	ssleay32-vc90-mt-s.lib
+)
+
 set_target_properties(login_server PROPERTIES FOLDER "engine/network")

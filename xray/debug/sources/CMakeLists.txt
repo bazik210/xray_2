@@ -1,6 +1,6 @@
 project(debug LANGUAGES CXX)
 
-add_library(debug STATIC
+add_library(debugging STATIC
 	# core
 	"${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/pch.h"
@@ -44,8 +44,8 @@ add_library(debug STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils.h"
 )
 
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../")
+target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
+target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../")
+target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../")
 
-set_target_properties(debug PROPERTIES FOLDER "engine/core")
+set_target_properties(debugging PROPERTIES FOLDER "engine/core")

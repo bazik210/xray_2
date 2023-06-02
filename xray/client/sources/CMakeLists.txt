@@ -33,4 +33,11 @@ add_executable(client
 					"${CMAKE_CURRENT_SOURCE_DIR}/entry_point.cpp"
 )
 
+target_link_libraries(client PRIVATE
+	odbc32.lib
+	odbcpp32.lib
+	libeay32-vc90-mt-s.lib
+	ssleay32-vc90-mt-s.lib
+)
+
 set_target_properties(client PROPERTIES FOLDER "engine/network")

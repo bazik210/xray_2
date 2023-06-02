@@ -123,4 +123,8 @@ add_library(model_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/model_editor_entry_point.cpp"
 )
 
+target_link_libraries(model_editor PRIVATE
+	engine_pc_dx11
+)
+
 set_target_properties(model_editor PROPERTIES FOLDER "engine/editors")

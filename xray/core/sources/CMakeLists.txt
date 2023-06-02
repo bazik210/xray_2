@@ -805,4 +805,9 @@ add_library(core STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/core_entry_point_win_xbox360.cpp"
 )
 
+target_link_libraries(core PRIVATE
+	debugging
+	logging
+)
+
 set_target_properties(core PROPERTIES FOLDER "engine/core")

@@ -1,6 +1,6 @@
 project(stalker2 LANGUAGES CXX)
 
-add_executable(stalker2_pc_dx_11
+add_executable(stalker2_pc_dx11
 						# core
 						"${CMAKE_CURRENT_SOURCE_DIR}/../../finger_print.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/math_error_win.cpp"
@@ -28,7 +28,19 @@ add_executable(stalker2_pc_dx_11
 						"${CMAKE_CURRENT_SOURCE_DIR}/stalker2_pc_entry_point.cpp"
 )
 
-set_target_properties(stalker2_pc_dx_11 PROPERTIES FOLDER "stalker2")
+target_link_libraries(stalker2_pc_dx11 PRIVATE
+	renderer_engine_pc_dx11
+	game
+	engine
+	ogg
+	vorbis
+	ode
+	renderer_core_pc_dx11
+	sound
+	x3daudio.lib
+)
+
+set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")
 
 ############################
 
@@ -52,6 +64,18 @@ add_executable(stalker2_pc_opengl
 					"${CMAKE_CURRENT_SOURCE_DIR}/../../game_module_proxy.h"
 					# ./
 					"${CMAKE_CURRENT_SOURCE_DIR}/stalker2_pc_entry_point.cpp"
+)
+
+target_link_libraries(stalker2_pc_opengl PRIVATE
+	renderer_engine_pc_opengl
+	game
+	engine
+	ogg
+	vorbis
+	ode
+	renderer_core_pc_dx11
+	sound
+	x3daudio.lib
 )
 
 set_target_properties(stalker2_pc_opengl PROPERTIES FOLDER "stalker2")

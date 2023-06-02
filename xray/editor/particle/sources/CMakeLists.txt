@@ -121,4 +121,8 @@ add_library(particle_editor SHARED
 								"${CMAKE_CURRENT_SOURCE_DIR}/particle_editor_entry_point.cpp"
 )
 
+target_link_libraries(particle_editor PRIVATE
+	engine_pc_dx11
+)
+
 set_target_properties(particle_editor PROPERTIES FOLDER "engine/editors")

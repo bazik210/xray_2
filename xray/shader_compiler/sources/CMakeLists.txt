@@ -38,4 +38,9 @@ add_executable(shader_compiler
 				"${CMAKE_CURRENT_SOURCE_DIR}/shader_compiler_flags.txt"
 )
 
+target_link_libraries(shader_compiler PRIVATE
+	core
+	renderer_core_pc_dx11
+)
+
 set_target_properties(shader_compiler PROPERTIES FOLDER "engine/utilities")

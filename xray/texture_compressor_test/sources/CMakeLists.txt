@@ -18,4 +18,8 @@ add_executable(texture_compressor_test
 					"${CMAKE_CURRENT_SOURCE_DIR}/texture_compressor_test_entry_point.cpp"
 )
 
+target_link_libraries(texture_compressor_test PRIVATE
+	core
+)
+
 set_target_properties(texture_compressor_test PROPERTIES FOLDER "engine/utilities")

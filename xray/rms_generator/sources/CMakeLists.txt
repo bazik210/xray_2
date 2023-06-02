@@ -16,4 +16,10 @@ add_executable(rms_generator
 				"${CMAKE_CURRENT_SOURCE_DIR}/rms_generator_entry_point.cpp"
 )
 
+target_link_libraries(rms_generator PRIVATE
+	core
+	ogg
+	vorbis
+)
+
 set_target_properties(rms_generator PROPERTIES FOLDER "engine/utilities")

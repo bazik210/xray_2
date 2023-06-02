@@ -240,4 +240,8 @@ add_library(animation_editor SHARED
 								"${CMAKE_CURRENT_SOURCE_DIR}/animation_editor_entry_point.cpp"
 )
 
+target_link_libraries(animation_editor PRIVATE
+	engine_pc_dx11
+)
+
 set_target_properties(animation_editor PROPERTIES FOLDER "engine/editors")

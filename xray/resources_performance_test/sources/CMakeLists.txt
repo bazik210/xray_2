@@ -22,4 +22,12 @@ add_executable(resources_performance_test
 					"${CMAKE_CURRENT_SOURCE_DIR}/resources_performance_test_entry_point.cpp"
 )
 
+target_link_libraries(resources_performance_test PRIVATE
+	core
+	debugging
+	logging
+	fs
+	vfs
+)
+
 set_target_properties(resources_performance_test PROPERTIES FOLDER "engine/utilities")

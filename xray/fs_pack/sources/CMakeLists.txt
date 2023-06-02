@@ -13,4 +13,8 @@ add_executable(fs_pack
 				# ./
 )
 
+target_link_libraries(fs_pack PRIVATE
+	core
+)
+
 set_target_properties(fs_pack PROPERTIES FOLDER "engine/utilities")

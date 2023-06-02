@@ -17,4 +17,10 @@ add_executable(lobby_server
 					"${CMAKE_CURRENT_SOURCE_DIR}/entry_point.cpp"
 )
 
+target_link_libraries(lobby_server PRIVATE
+	odbc32.lib
+	odbcpp32.lib
+	libmysql.lib
+)
+
 set_target_properties(lobby_server PROPERTIES FOLDER "engine/network")

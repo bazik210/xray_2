@@ -56,4 +56,8 @@ add_executable(graphics_benchmark
 						"${CMAKE_CURRENT_SOURCE_DIR}/graphics_benchmark_entry_point.cpp"
 )
 
+target_link_libraries(graphics_benchmark PRIVATE
+	core
+)
+
 set_target_properties(graphics_benchmark PROPERTIES FOLDER "engine/utilities")

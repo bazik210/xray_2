@@ -168,4 +168,8 @@ add_library(dialog_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/dialog_editor_entry_point.cpp"
 )
 
+target_link_libraries(dialog_editor PRIVATE
+	engine_pc_dx11
+)
+
 set_target_properties(dialog_editor PROPERTIES FOLDER "engine/editors")

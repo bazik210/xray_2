@@ -15,4 +15,9 @@ add_executable(test_animations
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_animations_entry_point.cpp"
 )
 
+target_link_libraries(test_animations PRIVATE
+	core
+	animation
+)
+
 set_target_properties(test_animations PROPERTIES FOLDER "engine/utilities")

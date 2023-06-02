@@ -113,4 +113,8 @@ add_library(sound_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/sound_editor_entry_point.cpp"
 )
 
+target_link_libraries(sound_editor PRIVATE
+	engine_pc_dx11
+)
+
 set_target_properties(sound_editor PROPERTIES FOLDER "engine/editors")

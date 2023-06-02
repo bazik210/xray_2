@@ -18,4 +18,13 @@ add_executable(game_server
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_server_entry_point.cpp"
 )
 
+target_link_libraries(game_server PRIVATE
+	core
+	debugging
+	logging
+	fs
+	vfs
+	network
+)
+
 set_target_properties(game_server PROPERTIES FOLDER "engine/network")

@@ -167,4 +167,9 @@ add_library(vfs STATIC
 					# ./
 )
 
+target_link_libraries(vfs PRIVATE
+	core
+	fs
+)
+
 set_target_properties(vfs PROPERTIES FOLDER "engine/core")

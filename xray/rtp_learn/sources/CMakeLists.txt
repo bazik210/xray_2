@@ -18,4 +18,10 @@ add_executable(rtp_learn
 				"${CMAKE_CURRENT_SOURCE_DIR}/rtp_learn_entry_point.cpp"
 )
 
+target_link_libraries(rtp_learn PRIVATE
+	core
+	rtp
+	animation
+)
+
 set_target_properties(rtp_learn PROPERTIES FOLDER "engine/utilities")

@@ -396,4 +396,9 @@ add_library(animation STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/roadmap.cpp"
 )
 
+target_link_libraries(animation PRIVATE
+	core
+	maya_animation
+)
+
 set_target_properties(animation PROPERTIES FOLDER "engine/animation")

@@ -387,4 +387,8 @@ add_library(ai STATIC
                 "${CMAKE_CURRENT_SOURCE_DIR}/ai_entry_point.cpp"
 )
 
+target_link_libraries(ai PRIVATE
+	core
+)
+
 set_target_properties(ai PROPERTIES FOLDER "engine/ai")

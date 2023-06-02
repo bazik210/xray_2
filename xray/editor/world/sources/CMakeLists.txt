@@ -594,4 +594,9 @@ add_library(editor SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/editor_entry_point.cpp"
 )
 
+target_link_libraries(editor PRIVATE
+	engine_pc_dx11
+	dialog_editor
+)
+
 set_target_properties(editor PROPERTIES FOLDER "engine/editors")

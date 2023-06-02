@@ -119,7 +119,7 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(animation)
     xr_set_target_defaults_static_lib_CPP(rtp)
     xr_set_target_defaults_static_lib_CPP(core)
-    xr_set_target_defaults_static_lib_CPP(debug)
+    xr_set_target_defaults_static_lib_CPP(debugging)
     xr_set_target_defaults_static_lib_CPP(fs)
     xr_set_target_defaults_static_lib_CPP(logging)
     xr_set_target_defaults_static_lib_CPP(vfs)
@@ -151,12 +151,10 @@ function(xr_setup_editors)
 
     # This is a test C# project
     xr_set_target_defaults_editor(test_form)
-    target_link_libraries(test_form WPFToolkit.Extended)
-    target_link_libraries(test_form WeifenLuo.WinFormsUI.Docking)
 
     # Set dependencies of wpf_controls
-    target_link_libraries(wpf_controls WPFToolkit.Extended)
-    target_link_libraries(wpf_controls WeifenLuo.WinFormsUI.Docking)
+    target_link_libraries(wpf_controls PRIVATE WPFToolkit.Extended)
+    target_link_libraries(wpf_controls PRIVATE WeifenLuo.WinFormsUI.Docking)
 
     # Set directories for #using directive
     target_compile_options(animation_editor PRIVATE
@@ -733,9 +731,11 @@ function(xr_set_target_defaults_editor TARGET)
 	endif()
 
     # Set dependencies
-    target_link_libraries(${TARGET} WPFToolkit.Extended)
-    target_link_libraries(${TARGET} WeifenLuo.WinFormsUI.Docking)
-    target_link_libraries(${TARGET} wpf_controls)
+    target_link_libraries(${TARGET} PRIVATE 
+		WPFToolkit.Extended
+		WeifenLuo.WinFormsUI.Docking
+		wpf_controls
+	)
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()

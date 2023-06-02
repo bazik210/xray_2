@@ -174,4 +174,9 @@ add_library(sound STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/sound_entry_point.cpp"
 )
 
+target_link_libraries(sound PRIVATE
+	core
+	ogg
+)
+
 set_target_properties(sound PROPERTIES FOLDER "engine")

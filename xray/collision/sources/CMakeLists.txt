@@ -169,6 +169,11 @@ add_library(collision STATIC
                         "${CMAKE_CURRENT_SOURCE_DIR}/collision_object.cpp"
 )
 
+target_link_libraries(collision PRIVATE
+	core
+	opcode
+)
+
 # File grouping for Visual Studio Solution Explorer
 source_group("animated_object" FILES
                         "${CMAKE_CURRENT_SOURCE_DIR}/animated_object.cpp"

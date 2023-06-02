@@ -108,6 +108,30 @@ add_library(maya2011 SHARED
 						"${CMAKE_CURRENT_SOURCE_DIR}/../../../third_party/tools/maya_menu/xray_brdf.cgfx"
 )
 
+target_link_libraries(maya2011 PRIVATE
+	core
+	debugging
+	logging
+	fs
+	vfs
+	maya_animation
+	physics
+	animation
+	renderer_facade
+	renderer_engine_pc_dx11
+	renderer_core_pc_dx11
+	particle
+	collision
+	opengl32.lib
+	OpenMayaUI.lib
+	OpenMayaAnim.lib
+	OpenMaya.Render.lib
+	libgfx.lib
+	libgfx_zlib.lib
+	libgfx_libpng.lib
+	TootleSoftwareOnlyStatic_2k8_MTDLL64.lib
+)
+
 set_target_properties(maya2011 PROPERTIES FOLDER "engine/plugins")
 
 
@@ -220,6 +244,30 @@ add_library(maya2012 SHARED
 						"${CMAKE_CURRENT_SOURCE_DIR}/xray_material_hw.cpp"
 						# ./
 						"${CMAKE_CURRENT_SOURCE_DIR}/maya_entry_point.cpp"
+)
+
+target_link_libraries(maya2012 PRIVATE
+	core
+	debug
+	logging
+	fs
+	vfs
+	maya_animation
+	physics
+	animation
+	renderer_facade
+	renderer_engine_pc_dx11
+	renderer_core_pc_dx11
+	particle
+	collision
+	opengl32.lib
+	OpenMayaUI.lib
+	OpenMayaAnim.lib
+	OpenMaya.Render.lib
+	libgfx.lib
+	libgfx_zlib.lib
+	libgfx_libpng.lib
+	TootleSoftwareOnlyStatic_2k8_MTDLL64.lib
 )
 
 set_target_properties(maya2012 PROPERTIES FOLDER "engine/plugins")

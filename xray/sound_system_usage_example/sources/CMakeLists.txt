@@ -20,4 +20,22 @@ add_executable(sound_system_usage_example
 							"${CMAKE_CURRENT_SOURCE_DIR}/sound_system_usage_example_entry_point.cpp"
 )
 
+target_link_libraries(sound_system_usage_example PRIVATE
+	core
+	debugging
+	logging
+	fs
+	vfs
+	engine
+	ogg
+	vorbis
+	ode
+	render_core_pc_dx11
+	particle
+	maya_animation
+	sound
+	collision
+	animation
+)
+
 set_target_properties(sound_system_usage_example PROPERTIES FOLDER "engine/utilities")

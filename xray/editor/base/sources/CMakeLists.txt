@@ -279,6 +279,10 @@ add_library(editor_base SHARED
 					#"${CMAKE_CURRENT_SOURCE_DIR}/resource.h"
 )
 
+target_link_libraries(editor_base PRIVATE
+	engine_pc_dx11
+)
+
 target_compile_options(editor_base PRIVATE
     /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
 )

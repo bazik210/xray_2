@@ -86,4 +86,8 @@ add_library(particle STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/particle_entry_point.cpp"
 )
 
+target_link_libraries(particle PRIVATE
+	core
+)
+
 set_target_properties(particle PROPERTIES FOLDER "engine")
