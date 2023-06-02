@@ -2,20 +2,26 @@
 
 IF EXIST "CreateSln_Log.txt" (
 	CALL ClearSln.bat
+	IF ERRORLEVEL 100 (
+		TIMEOUT /T 8
+		exit
+	)
 )
 
 echo Generating Visual Studio Solution...
-START /B /WAIT cmake --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt" 2>&1
+START /B /WAIT cmake --graphviz=dependency_graph.dot --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt" 2>&1
 
 >nul findstr /c:"CMake Error" CreateSln_Log.txt && (
 	echo CMake couldn't generate the solution! Opening the log file...
 	CreateSln_Log.txt
 	exit
 ) || (
-	echo Removing Exception Handling from all generated projects...
+	echo CMake finished generation successfully! Running post-generation scripts...
+	CALL GenerateDependencyGraph.bat
 	CALL RemoveExceptions.bat
-	echo Replacing nothrownew.obj.lib with nothrownew.obj in BugTrap linkage settings...
 	CALL SetupBugTrap.bat
+	echo Cleaning up...
+	CALL RemoveTempFiles.bat
 	echo Done!
 	TIMEOUT /T 8
 	exit

@@ -7,12 +7,12 @@ def findReplace(directory, find, replace, filePattern):
             outputFile = open(filepath, 'r')
                     
             # Save existing lines to temp file
-            tempFile = open(filepath[:-8] + '.temp', 'w+')
+            tempFile = open(filepath[:-4] + '.temp', 'w+')
             for line in outputFile:
                 if find not in line:
                     tempFile.write(line)
                 else:
-                    replacedLine = re.sub(find, replace, line)
+                    replacedLine = re.sub(r'.:.+ATI_Compress_MT_DLL64\.lib?', replace, line)
                     tempFile.write(replacedLine)
             tempFile.close()
                         
@@ -21,9 +21,10 @@ def findReplace(directory, find, replace, filePattern):
             outputFile = open(filepath, 'w+')
                         
             # Open temp file to re-write it to output file
-            tempFile = open(filepath[:-8] + '.temp', 'r')
+            tempFile = open(filepath[:-4] + '.temp', 'r')
             for line in tempFile:
                 outputFile.write(line)
             tempFile.close()
 
-findReplace(os.getcwd(), 'nothrownew.obj.lib', 'nothrownew.obj', 'bugtrap*.vcxproj')
+# First argument is only for pattern matching inside the line, replacement is handled by regex
+findReplace(os.getcwd(), 'ATI_Compress_MT_DLL64.lib', 'ATI_Compress_MT_DLL64.lib', 'dependency_graph.dot')

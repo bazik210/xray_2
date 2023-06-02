@@ -7,7 +7,7 @@ def findReplace(directory, find, replace, filePattern):
             outputFile = open(filepath, 'r')
                     
             # Save existing lines to temp file
-            tempFile = open(filepath[:-7] + '_temp.vcxproj', 'w+')
+            tempFile = open(filepath[:-8] + '.temp', 'w+')
             for line in outputFile:
                 if find not in line:
                     tempFile.write(line)
@@ -20,7 +20,7 @@ def findReplace(directory, find, replace, filePattern):
             outputFile = open(filepath, 'w+')
                         
             # Open temp file to re-write it to output file
-            tempFile = open(filepath[:-7] + '_temp.vcxproj', 'r')
+            tempFile = open(filepath[:-8] + '.temp', 'r')
             for line in tempFile:
                 outputFile.write(line)
             tempFile.close()
