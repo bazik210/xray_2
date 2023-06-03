@@ -125,6 +125,9 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(vfs)
     xr_set_target_defaults_static_lib_CPP(collision)
     xr_set_target_defaults_static_lib_CPP(engine)
+	xr_set_target_defaults_static_lib_CPP(engine_pc)
+	xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
+	xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
     xr_set_target_defaults_static_lib_CPP(input)
     xr_set_target_defaults_static_lib_CPP(particle)
     xr_set_target_defaults_static_lib_CPP(physics)
@@ -153,39 +156,14 @@ function(xr_setup_editors)
     xr_set_target_defaults_editor(test_form)
 
     # Set dependencies of wpf_controls
-    target_link_libraries(wpf_controls PRIVATE WPFToolkit.Extended)
-    target_link_libraries(wpf_controls PRIVATE WeifenLuo.WinFormsUI.Docking)
+    target_link_libraries(wpf_controls PUBLIC WPFToolkit.Extended)
+    target_link_libraries(wpf_controls PUBLIC WeifenLuo.WinFormsUI.Docking)
 
     # Set directories for #using directive
-    target_compile_options(animation_editor PRIVATE
+    target_compile_options(wpf_controls PUBLIC
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
-    target_compile_options(dialog_editor PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(editor PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(editor_controls PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(model_editor PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(particle_editor PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(sound_editor PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-    target_compile_options(wpf_controls PRIVATE
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-
-    # Set DOTNET version for each project
-    set_target_properties(animation_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+	
     set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
     set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
@@ -200,17 +178,6 @@ function(xr_setup_editors)
     set_property(TARGET wpf_controls PROPERTY VS_GLOBAL_RootNamespace "xray.editor.wpf_controls")
 
     # Specify DOTNET assembly references
-    set_target_properties(animation_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
-    )
-
-    set_target_properties(dialog_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
-    )
-
-    set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
-        "bugtrapN-x64;Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_animation_editor;xray_dialog_editor;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11;xray_model_editor;xray_particle_editor;xray_sound_editor"
-    )
 
     set_target_properties(editor_controls PROPERTIES VS_DOTNET_REFERENCES
         "PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended"
@@ -731,9 +698,7 @@ function(xr_set_target_defaults_editor TARGET)
 	endif()
 
     # Set dependencies
-    target_link_libraries(${TARGET} PRIVATE 
-		WPFToolkit.Extended
-		WeifenLuo.WinFormsUI.Docking
+    target_link_libraries(${TARGET} PUBLIC 
 		wpf_controls
 	)
 
@@ -917,4 +882,4 @@ xr_setup_utilities()
 xr_setup_games()
 
 # Set startup project to Stk2 DX11
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT stalker2_pc_dx_11)
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT stalker2_pc_dx11)

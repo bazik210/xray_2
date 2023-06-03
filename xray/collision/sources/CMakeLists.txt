@@ -169,7 +169,7 @@ add_library(collision STATIC
                         "${CMAKE_CURRENT_SOURCE_DIR}/collision_object.cpp"
 )
 
-target_link_libraries(collision PRIVATE
+target_link_libraries(collision PUBLIC
 	core
 	opcode
 )

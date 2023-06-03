@@ -78,7 +78,7 @@ add_library(fs STATIC
 				"${CMAKE_CURRENT_SOURCE_DIR}/synchronous_device_interface.cpp"
 )
 
-target_link_libraries(fs PRIVATE
+target_link_libraries(fs PUBLIC
 	core
 )
 

@@ -522,6 +522,10 @@ add_library(renderer_engine_pc_dx11 STATIC
 									"${CMAKE_CURRENT_SOURCE_DIR}/render_engine_world_pc_dx11.cpp"
 )
 
+target_link_libraries(renderer_engine_pc_dx11 PUBLIC
+	renderer_core_pc_dx11
+)
+
 set_target_properties(renderer_engine_pc_dx11 PROPERTIES FOLDER "engine/renderers/pc/dx11")
 
 
@@ -551,6 +555,10 @@ add_library(renderer_engine_pc_opengl STATIC
 										# view
 										"${CMAKE_CURRENT_SOURCE_DIR}/scene_view.cpp"
 										# ./
+)
+
+target_link_libraries(renderer_engine_pc_opengl PUBLIC
+	renderer_core_pc_dx11
 )
 
 set_target_properties(renderer_engine_pc_opengl PROPERTIES FOLDER "engine/renderers/pc/opengl")

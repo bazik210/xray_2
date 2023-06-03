@@ -109,17 +109,11 @@ add_library(maya2011 SHARED
 )
 
 target_link_libraries(maya2011 PRIVATE
-	core
-	debugging
-	logging
-	fs
 	vfs
-	maya_animation
 	physics
 	animation
 	renderer_facade
 	renderer_engine_pc_dx11
-	renderer_core_pc_dx11
 	particle
 	collision
 	opengl32.lib
@@ -247,12 +241,7 @@ add_library(maya2012 SHARED
 )
 
 target_link_libraries(maya2012 PRIVATE
-	core
-	debug
-	logging
-	fs
 	vfs
-	maya_animation
 	physics
 	animation
 	renderer_facade

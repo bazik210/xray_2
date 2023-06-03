@@ -19,10 +19,6 @@ add_executable(game_server
 )
 
 target_link_libraries(game_server PRIVATE
-	core
-	debugging
-	logging
-	fs
 	vfs
 	network
 )

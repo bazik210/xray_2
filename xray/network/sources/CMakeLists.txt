@@ -56,10 +56,8 @@ add_library(network STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/network_entry_point.cpp"
 )
 
-target_link_libraries(network PRIVATE
+target_link_libraries(network PUBLIC
 	core
-	debugging
-	logging
 )
 
 set_target_properties(network PROPERTIES FOLDER "engine/network")

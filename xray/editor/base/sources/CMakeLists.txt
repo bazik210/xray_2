@@ -279,8 +279,9 @@ add_library(editor_base SHARED
 					#"${CMAKE_CURRENT_SOURCE_DIR}/resource.h"
 )
 
-target_link_libraries(editor_base PRIVATE
+target_link_libraries(editor_base PUBLIC
 	engine_pc_dx11
+	wpf_controls
 )
 
 target_compile_options(editor_base PRIVATE

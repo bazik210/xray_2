@@ -21,18 +21,12 @@ add_executable(sound_system_usage_example
 )
 
 target_link_libraries(sound_system_usage_example PRIVATE
-	core
-	debugging
-	logging
-	fs
 	vfs
 	engine
-	ogg
 	vorbis
 	ode
 	render_core_pc_dx11
 	particle
-	maya_animation
 	sound
 	collision
 	animation

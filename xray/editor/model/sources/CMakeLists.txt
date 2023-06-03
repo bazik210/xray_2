@@ -123,7 +123,7 @@ add_library(model_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/model_editor_entry_point.cpp"
 )
 
-target_link_libraries(model_editor PRIVATE
+target_link_libraries(model_editor PUBLIC
 	engine_pc_dx11
 )
 

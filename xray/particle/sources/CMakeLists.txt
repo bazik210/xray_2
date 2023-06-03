@@ -86,7 +86,7 @@ add_library(particle STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/particle_entry_point.cpp"
 )
 
-target_link_libraries(particle PRIVATE
+target_link_libraries(particle PUBLIC
 	core
 )
 

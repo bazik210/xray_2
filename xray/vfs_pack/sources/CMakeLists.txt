@@ -19,11 +19,8 @@ add_executable(vfs_pack
 )
 
 target_link_libraries(vfs_pack PRIVATE
-	core
-	debugging
-	logging
-	fs
 	vfs
+	script_cs
 )
 
 set_target_properties(vfs_pack PROPERTIES FOLDER "engine/utilities")

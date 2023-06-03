@@ -97,7 +97,7 @@ add_library(renderer_facade STATIC
 							"${CMAKE_CURRENT_SOURCE_DIR}/render_facade_entry_point.cpp"
 )
 
-target_link_libraries(renderer_facade PRIVATE
+target_link_libraries(renderer_facade PUBLIC
 	core
 )
 

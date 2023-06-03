@@ -60,7 +60,7 @@ add_library(ui STATIC
 				"${CMAKE_CURRENT_SOURCE_DIR}/ui_entry_point.cpp"
 )
 
-target_link_libraries(ui PRIVATE
+target_link_libraries(ui PUBLIC
 	engine_pc
 )
 

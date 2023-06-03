@@ -167,8 +167,7 @@ add_library(vfs STATIC
 					# ./
 )
 
-target_link_libraries(vfs PRIVATE
-	core
+target_link_libraries(vfs PUBLIC
 	fs
 )
 

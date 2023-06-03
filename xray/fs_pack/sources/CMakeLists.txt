@@ -14,7 +14,8 @@ add_executable(fs_pack
 )
 
 target_link_libraries(fs_pack PRIVATE
-	core
+	fs
+	script_cs
 )
 
 set_target_properties(fs_pack PROPERTIES FOLDER "engine/utilities")

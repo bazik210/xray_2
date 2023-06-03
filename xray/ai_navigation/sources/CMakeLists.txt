@@ -84,7 +84,7 @@ add_library(ai_navigation STATIC
 							# ./
 )
 
-target_link_libraries(ai_navigation PRIVATE
+target_link_libraries(ai_navigation PUBLIC
 	core
 )
 

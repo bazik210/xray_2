@@ -100,7 +100,7 @@ add_library(rtp STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/rtp_entry_point.cpp"
 )
 
-target_link_libraries(rtp PRIVATE
+target_link_libraries(rtp PUBLIC
 	engine_pc
 )
 

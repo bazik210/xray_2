@@ -36,7 +36,7 @@ add_library(input STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/input_entry_point.cpp"
 )
 
-target_link_libraries(input PRIVATE
+target_link_libraries(input PUBLIC
 	engine_pc
 	dxguid.lib
 	dinput8.lib

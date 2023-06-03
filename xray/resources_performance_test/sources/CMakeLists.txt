@@ -24,9 +24,6 @@ add_executable(resources_performance_test
 
 target_link_libraries(resources_performance_test PRIVATE
 	core
-	debugging
-	logging
-	fs
 	vfs
 )
 

@@ -396,7 +396,7 @@ add_library(animation STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/roadmap.cpp"
 )
 
-target_link_libraries(animation PRIVATE
+target_link_libraries(animation PUBLIC
 	core
 	maya_animation
 )

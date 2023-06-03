@@ -57,7 +57,9 @@ add_executable(graphics_benchmark
 )
 
 target_link_libraries(graphics_benchmark PRIVATE
-	core
+	script_cs
+	renderer_engine_pc_dx11
+	texture_compressor
 )
 
 set_target_properties(graphics_benchmark PROPERTIES FOLDER "engine/utilities")
