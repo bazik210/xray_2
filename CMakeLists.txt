@@ -133,6 +133,7 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(physics)
     xr_set_target_defaults_static_lib_CPP(sound)
     xr_set_target_defaults_static_lib_CPP(ui)
+	xr_set_target_defaults_static_lib_CPP(opcode)
 endfunction()
 
 # Called at the bottom of this CMakeLists
