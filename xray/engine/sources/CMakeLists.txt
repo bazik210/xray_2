@@ -42,4 +42,25 @@ add_library(engine STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/engine_entry_point.cpp"
 )
 
+target_include_directories(engine PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+	"${DXSDK_DIR_PATH}/Include"
+)
+
+target_link_directories(engine PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+	"${DXSDK_DIR_PATH}/Lib/x64"
+)
+
+target_link_libraries(engine PRIVATE
+	delayimp.lib
+	libgfx.lib
+	libgfx_zlib.lib
+	libgfx_libpng.lib
+	libgfx_as2.lib
+	libgfx_as3.lib
+	libgfx_libjpeg.lib
+)
+
 set_target_properties(engine PROPERTIES FOLDER "engine")

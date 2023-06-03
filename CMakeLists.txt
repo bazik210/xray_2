@@ -21,7 +21,12 @@ if(NOT CMAKE_CSharp_COMPILER)
     return()
 endif()
 
+############################
+# Set paths to Directories #
+############################
 
+# DirectX SDK 
+set(DXSDK_DIR_PATH "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)")
 
 ####################################
 # Set paths to Include Directories #
@@ -41,7 +46,6 @@ set(BOOST_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/boost/")
 set(FASTDELEGATE_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/fastdelegate/")
 # Stlport
 set(STLPORT_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/")
-
 
 
 #################################
