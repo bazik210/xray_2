@@ -13,7 +13,7 @@
 namespace xray {
 namespace fs_new {
 
-typedef	boost::crc_optimal<32, 0x04C11DB7, 0, 0, true, false>	crc_processor;
+typedef	::boost::crc_optimal<32, 0x04C11DB7, 0, 0, true, false>	crc_processor;
 
 u32   crc32								(pcstr const data, u32 const size, u32 const start_value)
 {

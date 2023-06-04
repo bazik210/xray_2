@@ -82,9 +82,9 @@ target_link_libraries(fs PUBLIC
 	core
 )
 
-target_include_directories(fs PRIVATE
-	${SOLUTION_DIR_INCLUDE_PATH}/xray/fs
-    ${SOLUTION_DIR_INCLUDE_PATH}/xray/fs/sources
-)
+#target_include_directories(fs PRIVATE
+#	${SOLUTION_DIR_INCLUDE_PATH}/xray/fs
+#    ${SOLUTION_DIR_INCLUDE_PATH}/xray/fs/sources
+#)
 
 set_target_properties(fs PROPERTIES FOLDER "engine/core")
