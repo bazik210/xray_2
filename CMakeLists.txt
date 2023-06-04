@@ -300,7 +300,8 @@ function(xr_setup_sdk)
     xr_set_target_defaults_static_lib_C(zlibN)
     xr_set_target_defaults_static_lib_CPP(core_cs)
     xr_set_target_defaults_static_lib_CPP(script_cs)
-    xr_set_target_defaults_shared_lib(FreeImage)
+    xr_set_target_defaults_static_lib_CPP(FreeImage)
+    xr_set_target_defaults_shared_lib(FreeImageDLL)
     xr_set_target_defaults_static_lib_C(LibJPEG)
     xr_set_target_defaults_static_lib_C(LibMNG)
     xr_set_target_defaults_static_lib_C(LibOpenJPEG)
@@ -315,6 +316,8 @@ function(xr_setup_sdk)
 	xr_set_target_defaults_static_lib_CPP(ode)
 	xr_set_target_defaults_static_lib_C(ogg)
 	xr_set_target_defaults_static_lib_C(theora)
+	xr_set_target_defaults_static_lib_C(vorbis)
+	xr_set_target_defaults_static_lib_C(vorbisfile)
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -424,6 +427,11 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -467,6 +475,11 @@ function(xr_set_target_defaults_static_lib_C TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -511,6 +524,11 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -553,6 +571,11 @@ function(xr_set_target_defaults_shared_lib TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -615,6 +638,11 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -677,6 +705,11 @@ function(xr_set_target_defaults_editor TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     # disable Warning 4945
     target_compile_options(${TARGET} PRIVATE
@@ -748,6 +781,11 @@ function(xr_set_target_defaults_network_32 TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
+
     xr_print_target_compile_flags(${TARGET})
 
     target_link_options(${TARGET} PRIVATE
@@ -803,6 +841,11 @@ function(xr_set_target_defaults_network_64 TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
+
     xr_print_target_compile_flags(${TARGET})
 
     target_link_options(${TARGET} PRIVATE
@@ -855,6 +898,11 @@ function(xr_set_target_defaults_plugin TARGET)
         ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
+	
+	# set Additional Library Directories
+	target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	)
 
     xr_print_target_compile_flags(${TARGET})
 

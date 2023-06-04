@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( ai_navigation, lib ) )
+#pragma comment(lib, "xray_ai_navigation.lib" )
 
 #endif // #ifndef XRAY_AI_NAVIGATION_LIBRARY_LINKAGE_H_INCLUDED

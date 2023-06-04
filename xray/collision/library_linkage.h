@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( collision, lib ) )
+#pragma comment(lib, "xray_collision.lib" )
 
 #endif // #ifndef XRAY_COLLISION_LIBRARY_LINKAGE_H_INCLUDED

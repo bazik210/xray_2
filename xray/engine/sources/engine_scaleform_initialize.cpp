@@ -12,12 +12,16 @@
 #include <xray/os_include.h>
 
 #include <GFx.h>
+// No 64bit versions of libgfx_zlib, libgfx_libpng and libgfc_libjpeg in our third party!
+// #pragma comment( lib, "libgfx.lib" )
+// #pragma comment( lib, "libgfx_zlib.lib" )
+// #pragma comment( lib, "libgfx_libpng.lib" )
+// #pragma comment ( lib,"libgfx_as2.lib")
+// #pragma comment ( lib,"libgfx_as3.lib")
+// #pragma comment ( lib,"libgfx_libjpeg.lib" )
 #pragma comment( lib, "libgfx.lib" )
-#pragma comment( lib, "libgfx_zlib.lib" )
-#pragma comment( lib, "libgfx_libpng.lib" )
 #pragma comment ( lib,"libgfx_as2.lib")
 #pragma comment ( lib,"libgfx_as3.lib")
-#pragma comment ( lib,"libgfx_libjpeg.lib" )
 
 using Scaleform::UPInt;
 

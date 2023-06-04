@@ -48,19 +48,16 @@ target_include_directories(engine PRIVATE
 	"${DXSDK_DIR_PATH}/Include"
 )
 
-target_link_directories(engine PRIVATE
+target_link_directories(engine PUBLIC
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	"${DXSDK_DIR_PATH}/Lib/x64"
 )
 
-target_link_libraries(engine PRIVATE
+target_link_libraries(engine PUBLIC
 	delayimp.lib
 	libgfx.lib
-	libgfx_zlib.lib
-	libgfx_libpng.lib
 	libgfx_as2.lib
 	libgfx_as3.lib
-	libgfx_libjpeg.lib
 )
 
 set_target_properties(engine PROPERTIES FOLDER "engine")

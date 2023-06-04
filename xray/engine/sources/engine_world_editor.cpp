@@ -45,10 +45,10 @@ void engine_world::try_load_editor			( )
 	CoInitializeEx		( 0, COINIT_APARTMENTTHREADED );
 
 	R_ASSERT			( !s_editor_module );
-	s_editor_module		= LoadLibrary( XRAY_EDITOR_FILE_NAME );
+	s_editor_module		= LoadLibrary( "xray_editor.dll" );
 
 	if (!s_editor_module) {
-		LOG_WARNING		( "cannot load library \"%s\"", XRAY_EDITOR_FILE_NAME );
+		LOG_WARNING		( "cannot load library \"%s\"", "xray_editor.dll" );
 		CHECK_OR_EXIT	( s_editor_module != 0, "Cannot load editor library - exiting.\r\nSee log file for details." );
 		return;
 	}

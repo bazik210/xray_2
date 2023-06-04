@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( editor_base, lib ) )
+#pragma comment(lib, "xray_editor_base.lib" )
 
 #endif // #ifndef XRAY_EDITOR_BASE_LIBRARY_LINKAGE_H_INCLUDED

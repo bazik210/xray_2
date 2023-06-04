@@ -10,7 +10,7 @@
 #include <xray/macro_library_name.h>
 
 #ifndef	MASTER_GOLD
-#	pragma comment(lib, XRAY_LIBRARY_NAME( maya_animation, lib ) )
+#	pragma comment(lib, "xray_maya_animation.lib" )
 #endif // #ifndef	MASTER_GOLD
 
 #endif // #ifndef XRAY_DEFAULT_LIBRARY_LINKAGE_H_INCLUDED

@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( vfs, lib ) )
+#pragma comment(lib, "xray_vfs.lib" )
 
 #endif // #ifndef XRAY_VFS_LIBRARY_LINKAGE_H_INCLUDED
