@@ -42,7 +42,7 @@ enum
 	precalculation_time_for_propagators_in_msec			= 10,
 };
 
-#if !XRAY_PLATFORM_PS3
+#if 0 //!XRAY_PLATFORM_PS3
 static void role_to_string ( XAUDIO2_DEVICE_ROLE const role, fixed_string2048& dest )
 {
 	if ( role == NotDefaultDevice )
@@ -199,7 +199,7 @@ sound_world::sound_world	(
 	m_timer.start					( );
 }
 
-#if XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
+#if 0 //XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
 bool sound_world::initialize_xaudio		( )
 {
 	LOG_INFO									( "Sound initialization..." );

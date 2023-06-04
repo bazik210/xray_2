@@ -174,9 +174,16 @@ add_library(sound STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/sound_entry_point.cpp"
 )
 
+target_compile_definitions(sound PRIVATE
+	NOBITMAP
+)
+
 target_link_libraries(sound PUBLIC
 	core
 	ogg
+	x3daudio.lib
+	xapofx.lib
+	xapobase.lib
 )
 
 set_target_properties(sound PROPERTIES FOLDER "engine")
