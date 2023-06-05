@@ -17,7 +17,7 @@
 #	include <xray/render/engine/model_format.h>
 #pragma managed( pop )
 
-#pragma comment(lib, "zlibN.lib")
+#pragma comment(lib, "xray_zlibN.lib")
 
 namespace xray {
 namespace editor {

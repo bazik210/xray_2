@@ -306,7 +306,8 @@ void bullet_manager::bullets_memory_allocated ( resources::queries_result& queri
 		for ( u32 i = m_bullets_allocator_ref->allocated_size( ) / ( sizeof( bullet ) + sizeof( bullet* ) ); i > m_max_bullets_count; --i )
 			displace_one_bullet			( );
 
-		bullets_allocator new_bullets_allocator		= bullets_allocator( new_bullets_memory_ptr->buffer, m_max_bullets_count * sizeof( bullet ) );
+		//bullets_allocator new_bullets_allocator		= bullets_allocator( new_bullets_memory_ptr->buffer, m_max_bullets_count * sizeof( bullet ) );
+		bullets_allocator new_bullets_allocator( new_bullets_memory_ptr->buffer, m_max_bullets_count * sizeof( bullet ) );
 
 		while ( !m_bullets.empty( ) ) {
 			bullet*  old_bullet			= m_bullets[0];

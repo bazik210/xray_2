@@ -214,4 +214,12 @@ add_library(renderer_core_pc_dx11 STATIC
 									"${CMAKE_CURRENT_SOURCE_DIR}/render_core_entry_point.cpp"
 )
 
+target_include_directories(renderer_core_pc_dx11 PUBLIC
+	"${DXSDK_DIR_PATH}/Include"
+)
+
+target_link_directories(renderer_core_pc_dx11 PUBLIC
+	"${DXSDK_DIR_PATH}/Lib/x64"
+)
+
 set_target_properties(renderer_core_pc_dx11 PROPERTIES FOLDER "engine/renderers/pc/dx11")

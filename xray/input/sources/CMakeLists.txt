@@ -37,7 +37,7 @@ add_library(input STATIC
 )
 
 target_link_libraries(input PUBLIC
-	engine_pc
+	core
 	dxguid.lib
 	dinput8.lib
 )

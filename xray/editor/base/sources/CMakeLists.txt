@@ -284,6 +284,10 @@ target_link_libraries(editor_base PUBLIC
 	wpf_controls
 )
 
+target_link_directories(editor_base PUBLIC
+	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+)
+
 target_compile_options(editor_base PRIVATE
     /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
 )

@@ -61,7 +61,7 @@ add_library(ui STATIC
 )
 
 target_link_libraries(ui PUBLIC
-	engine_pc
+	core
 )
 
 set_target_properties(ui PROPERTIES FOLDER "engine")

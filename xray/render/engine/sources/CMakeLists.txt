@@ -522,6 +522,11 @@ add_library(renderer_engine_pc_dx11 STATIC
 									"${CMAKE_CURRENT_SOURCE_DIR}/render_engine_world_pc_dx11.cpp"
 )
 
+target_include_directories(renderer_engine_pc_dx11 PUBLIC
+    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+)
+
 target_link_libraries(renderer_engine_pc_dx11 PUBLIC
 	renderer_core_pc_dx11
 )

@@ -88,8 +88,8 @@ add_library(maya_animation STATIC
 							"${CMAKE_CURRENT_SOURCE_DIR}/maya_animation_entry_point.cpp"
 )
 
-target_link_libraries(maya_animation PUBLIC
-	engine_pc
+target_include_directories(maya_animation PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/maya_animation/sources
 )
 
 set_target_properties(maya_animation PROPERTIES FOLDER "engine/plugins")

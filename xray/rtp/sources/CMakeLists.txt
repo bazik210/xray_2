@@ -101,7 +101,8 @@ add_library(rtp STATIC
 )
 
 target_link_libraries(rtp PUBLIC
-	engine_pc
+	core
+	animation
 )
 
 set_target_properties(rtp PROPERTIES FOLDER "engine/animation")

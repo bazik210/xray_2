@@ -87,7 +87,7 @@ static pbyte allocate				( u32 const size )
 
 static RETURN_TYPE CALLBACK window_procedure ( HWND window_handle, UINT msg, WPARAM wp, LPARAM lp)
 {
-	XRAY_UNREFERENCED_PARAMETERS	( wp, lp, window_handle );
+	//XRAY_UNREFERENCED_PARAMETERS	( wp, lp, window_handle );
 
 	switch( msg ){
 		case WM_DESTROY: {

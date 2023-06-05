@@ -130,23 +130,25 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(collision)
     xr_set_target_defaults_static_lib_CPP(engine)
 	xr_set_target_defaults_static_lib_CPP(engine_pc)
-	xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
-	xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
     xr_set_target_defaults_static_lib_CPP(input)
     xr_set_target_defaults_static_lib_CPP(particle)
     xr_set_target_defaults_static_lib_CPP(physics)
     xr_set_target_defaults_static_lib_CPP(sound)
     xr_set_target_defaults_static_lib_CPP(ui)
 	xr_set_target_defaults_static_lib_CPP(opcode)
+	xr_set_target_defaults_static_lib_C(lua.5.1.4)
+	xr_set_target_defaults_static_lib_CPP(luabind.0.8.1)
 endfunction()
 
 # Called at the bottom of this CMakeLists
-# TODO add DLLs
+# TODO add missing DLLs
 function(xr_setup_shared_libs)
-    
+    xr_set_target_defaults_shared_lib(engine_pc_dx11)
+	xr_set_target_defaults_shared_lib(engine_pc_opengl)
 endfunction()
 
 # Called at the bottom of this CMakeLists
+# TODO move configs to CMakeLists of each project
 function(xr_setup_editors)
     xr_set_target_defaults_editor(animation_editor)
     xr_set_target_defaults_editor(dialog_editor)
@@ -219,6 +221,7 @@ function(xr_setup_editors)
 endfunction()
 
 # Called at the bottom of this CMakeLists
+# TODO Check what they link against not to mix x86 app with x64 lib
 function(xr_setup_network)
     # network is a x64 .lib
     xr_set_target_defaults_static_lib_CPP(network)
@@ -280,16 +283,10 @@ function(xr_setup_renderers)
     xr_set_target_defaults_static_lib_CPP(renderer_core_pc_dx11)
     xr_set_target_defaults_static_lib_CPP(renderer_engine_pc_opengl)
     xr_set_target_defaults_static_lib_CPP(renderer_facade)
-
-    target_include_directories(renderer_engine_pc_dx11 PRIVATE
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
-    )
-
 endfunction()
 
 # Called at the bottom of this CMakeLists
-# TODO add all SDK projects (non-Editor)
+# TODO add all SDK projects (probably done already?)
 function(xr_setup_sdk)
     xr_set_target_defaults_shared_lib(texture_compressor)
     xr_set_target_defaults_shared_lib(bugtrap)
@@ -318,10 +315,11 @@ function(xr_setup_sdk)
 	xr_set_target_defaults_static_lib_C(theora)
 	xr_set_target_defaults_static_lib_C(vorbis)
 	xr_set_target_defaults_static_lib_C(vorbisfile)
+	xr_set_target_defaults_static_lib_CPP(bullet)
 endfunction()
 
 # Called at the bottom of this CMakeLists
-# TODO add all utilities
+# TODO add all utilities (VERY low priority)
 function(xr_setup_utilities)
 
 endfunction()
@@ -329,6 +327,24 @@ endfunction()
 # Called at the bottom of this CMakeLists
 # TODO add all games after(!) all other configs are done
 function(xr_setup_games)
+
+xr_set_target_defaults_static_lib_CPP(game)
+
+xr_set_target_defaults_static_lib_CPP(stalker2_pc_dx11)
+target_include_directories(stalker2_pc_dx11 PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+	"${DXSDK_DIR_PATH}/Include"
+)
+target_link_libraries(stalker2_pc_dx11 PRIVATE
+	engine_pc_dx11
+	legacy_stdio_definitions.lib
+)
+target_link_directories(stalker2_pc_dx11 PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+	"${DXSDK_DIR_PATH}/Lib/x64"
+)
 
 endfunction()
 

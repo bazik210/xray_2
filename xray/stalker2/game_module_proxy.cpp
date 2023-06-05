@@ -4,7 +4,7 @@
 //	Copyright (C) GSC Game World - 2010
 ////////////////////////////////////////////////////////////////////////////
 
-#include "pch.h"
+#include "pc/sources/pch.h"
 #include <xray/stalker2/game_module_proxy.h>
 #include <xray/game/api.h>
 

@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, "physics.lib" )
+#pragma comment(lib, "xray_physics.lib" )
 
 #endif // #ifndef XRAY_PHYSICS_LIBRARY_LINKAGE_H_INCLUDED
