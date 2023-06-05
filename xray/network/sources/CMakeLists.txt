@@ -56,6 +56,14 @@ add_library(network STATIC
 						"${CMAKE_CURRENT_SOURCE_DIR}/network_entry_point.cpp"
 )
 
+# Set active code page (CP_ACP) from WinNLs.h
+# 0 - default to ANSI code page
+# 65000 - UTF-7 translation
+# 65001 - UTF-8 translation
+target_compile_definitions(network PRIVATE
+	CP_ACP=0
+)
+
 target_link_libraries(network PUBLIC
 	core
 )
