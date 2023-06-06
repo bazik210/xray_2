@@ -12,7 +12,6 @@ target_link_libraries(engine_pc PUBLIC
 	engine
 	network
 	physics
-	fs
 	vfs
 	sound
 	ai_navigation

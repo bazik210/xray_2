@@ -7,6 +7,7 @@
 #ifndef XRAY_LINKAGE_HELPER_H_INCLUDED
 #define XRAY_LINKAGE_HELPER_H_INCLUDED
 
+#ifndef XRAY_STATIC_LIBRARIES
 #define XRAY_DECLARE_LINKAGE_ID( linkage_id )  					\
 		namespace xray {											\
 			namespace linkage_helpers {								\
@@ -22,9 +23,9 @@
 			}														\
 		} // namespace xray
 
-// #else // ##ifdef XRAY_STATIC_LIBRARIES
-// #	define XRAY_DECLARE_LINKAGE_ID( linkage_id )
-// #	define XRAY_INCLUDE_TO_LINKAGE( linkage_id )
-// #endif // #ifndef XRAY_STATIC_LIBRARIES
+#else // ##ifdef XRAY_STATIC_LIBRARIES
+#	define XRAY_DECLARE_LINKAGE_ID( linkage_id )
+#	define XRAY_INCLUDE_TO_LINKAGE( linkage_id )
+#endif // #ifndef XRAY_STATIC_LIBRARIES
 
 #endif // #ifndef XRAY_LINKAGE_HELPER_H_INCLUDED

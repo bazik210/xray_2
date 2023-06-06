@@ -25,6 +25,7 @@ target_link_libraries(engine_pc_dx11 PUBLIC
 	bullet
 	particle
 	vorbis
+	FreeImage
 	renderer_engine_pc_dx11
 	texture_compressor
 	engine_pc

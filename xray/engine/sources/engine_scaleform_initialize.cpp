@@ -19,9 +19,19 @@
 // #pragma comment ( lib,"libgfx_as2.lib")
 // #pragma comment ( lib,"libgfx_as3.lib")
 // #pragma comment ( lib,"libgfx_libjpeg.lib" )
-#pragma comment( lib, "libgfx.lib" )
-#pragma comment ( lib,"libgfx_as2.lib")
-#pragma comment ( lib,"libgfx_as3.lib")
+
+// This is a *slightly* tuned libgfx (downloaded from official GitHub repo: https://github.com/mjgarland/libgfx commit: 479e8cf57d376afe6bc27b7d799c52c7096e1278 )
+// Changes: replaced MAX macro
+// Dependencies:
+//      LibPNG (from GSC 3rd party source code)
+//      LibJPEG (from GSC 3rd party source code)
+//      LibTIFF (from GSC 3rd party source code)
+//      FTLK (downloaded from official GitHub repo: https://github.com/fltk/fltk/ commit: 033ad1d732c21ff576986805ca475d1cf83bae5a )
+//#pragma comment ( lib, "xray_libgfx.lib" )
+// Let's try with our 3rd party FreeImage...
+#pragma comment ( lib, "xray_FreeImage.lib" )
+// ...and our Scaleform.
+#pragma comment ( lib, "xray_scaleform.lib" )
 
 using Scaleform::UPInt;
 

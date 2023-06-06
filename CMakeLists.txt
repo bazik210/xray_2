@@ -3,6 +3,16 @@ cmake_minimum_required(VERSION 3.26 FATAL_ERROR)
 # Leave uncommented to enable Parallel Compilation in projects that don't have settings yet
 add_compile_options(/MP)
 
+# Globally disable Boost exceptions
+#add_compile_definitions(BOOST_EXCEPTION_DISABLE)
+
+# Override Boost exception with non-template, user-defined exception boost::throw_exception(std::exception const&)
+# This doesn't apply if BOOST_EXCEPTION_DISABLE is defined
+add_compile_definitions(BOOST_NO_EXCEPTIONS)
+
+# Force Scaleform debug mode
+add_compile_definitions(SF_BUILD_DEBUG)
+
 #################################
 # GLOBAL COMPILER CONFIGURATION #
 #################################
@@ -140,6 +150,7 @@ function(xr_setup_static_libs)
 	xr_set_target_defaults_static_lib_CPP(luabind.0.8.1)
 	xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
 	xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
+	xr_set_target_defaults_static_lib_CPP(scaleform)
 endfunction()
 
 # Called at the bottom of this CMakeLists

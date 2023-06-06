@@ -54,10 +54,8 @@ target_link_directories(engine PUBLIC
 )
 
 target_link_libraries(engine PUBLIC
+	scaleform
 	delayimp.lib
-	libgfx.lib
-	libgfx_as2.lib
-	libgfx_as3.lib
 )
 
 set_target_properties(engine PROPERTIES FOLDER "engine")

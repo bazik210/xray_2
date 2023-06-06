@@ -42,10 +42,8 @@ add_library(debugging STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/macros.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/platform.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/boost_exception.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/boost_exception_inline.h"
 )
-
-target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
-target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-target_include_directories(debugging PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../")
 
 set_target_properties(debugging PROPERTIES FOLDER "engine/core")
