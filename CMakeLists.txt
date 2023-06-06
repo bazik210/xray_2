@@ -138,13 +138,15 @@ function(xr_setup_static_libs)
 	xr_set_target_defaults_static_lib_CPP(opcode)
 	xr_set_target_defaults_static_lib_C(lua.5.1.4)
 	xr_set_target_defaults_static_lib_CPP(luabind.0.8.1)
+	xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
+	xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
 endfunction()
 
 # Called at the bottom of this CMakeLists
 # TODO add missing DLLs
 function(xr_setup_shared_libs)
-    xr_set_target_defaults_shared_lib(engine_pc_dx11)
-	xr_set_target_defaults_shared_lib(engine_pc_opengl)
+    #xr_set_target_defaults_shared_lib(engine_pc_dx11)
+	#xr_set_target_defaults_shared_lib(engine_pc_opengl)
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -331,6 +333,9 @@ function(xr_setup_games)
 xr_set_target_defaults_static_lib_CPP(game)
 
 xr_set_target_defaults_static_lib_CPP(stalker2_pc_dx11)
+#target_compile_definitions(stalker2_pc_dx11 PRIVATE
+#	XRAY_STATIC_LIBRARIES=0
+#)
 target_include_directories(stalker2_pc_dx11 PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
@@ -440,7 +445,6 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -488,7 +492,6 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -537,7 +540,6 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -584,7 +586,6 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -651,7 +652,6 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -718,7 +718,6 @@ function(xr_set_target_defaults_editor TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
@@ -793,7 +792,6 @@ function(xr_set_target_defaults_network_32 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
@@ -853,7 +851,6 @@ function(xr_set_target_defaults_network_64 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
@@ -911,7 +908,6 @@ function(xr_set_target_defaults_plugin TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-        ${XRAY_DIR_INCLUDE_PATH}
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	

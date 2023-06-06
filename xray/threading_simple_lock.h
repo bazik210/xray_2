@@ -12,7 +12,7 @@
 namespace xray {
 namespace threading {
 
-class XRAY_CORE_API simple_lock : private core::noncopyable {
+class XRAY_CORE_API simple_lock/* : private core::noncopyable */ {
 public:
 	struct mutex_raii : core::noncopyable
 	{

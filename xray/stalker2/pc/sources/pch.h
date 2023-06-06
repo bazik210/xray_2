@@ -8,7 +8,6 @@
 #define PCH_H_INCLUDED
 
 #define XRAY_LOG_MODULE_INITIATOR	"stalker2"
-//#include <xray/extensions.h>
-#include "../../../extensions.h"
+#include "xray/extensions.h"
 
 #endif // #ifndef PCH_H_INCLUDED

@@ -1,6 +1,6 @@
 project(engine_pc_opengl LANGUAGES CXX)
 
-add_library(engine_pc_opengl SHARED
+add_library(engine_pc_opengl STATIC
 								# include
 								"${CMAKE_CURRENT_SOURCE_DIR}/../library_linkage.h"
 								# ./

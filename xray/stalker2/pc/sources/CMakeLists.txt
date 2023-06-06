@@ -29,11 +29,8 @@ add_executable(stalker2_pc_dx11
 )
 
 target_link_libraries(stalker2_pc_dx11 PRIVATE
-	renderer_engine_pc_dx11
 	game
-	vorbis
-	ode
-	sound
+	engine_pc_dx11
 	x3daudio.lib
 )
 

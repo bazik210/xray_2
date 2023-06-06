@@ -15,7 +15,8 @@
 #include <xray/engine/library_dependencies.h>
 
 #define XRAY_ENGINE_LIBRARY_BUILDING
-#include <xray/engine/library_linkage.h>
+//#include <xray/engine/library_linkage.h>
+#include <xray/engine/pc/library_linkage.h>
 
 #ifndef XRAY_STATIC_LIBRARIES
 

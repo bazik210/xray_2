@@ -37,7 +37,9 @@ public:
 	inline	object_type		&operator*		( ) const;
 	inline	object_type		*operator->		( ) const;
 	inline	bool			operator!		( ) const;
-	inline	operator unspecified_bool_type	( ) const;
+	// Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
+	//inline	operator unspecified_bool_type	( ) const;
+	inline  explicit		operator bool   ( ) const;
 	inline	self_type		&operator=		( object_type* object );
 	inline	self_type		&operator=		( self_type const& object );
 	inline	bool			operator==		( self_type const& object ) const;
