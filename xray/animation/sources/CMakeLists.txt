@@ -398,6 +398,10 @@ add_library(animation STATIC
 
 target_link_libraries(animation PUBLIC
 	core
+)
+
+# This is private otherwise it will be inherited by Maya plugins and cause multiple definitions
+target_link_libraries(animation PRIVATE
 	maya_animation
 )
 

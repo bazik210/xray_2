@@ -10,7 +10,7 @@
 #include <xray/core/library_linkage.h>
 #include <xray/fs/library_linkage.h>
 #include <xray/vfs/library_linkage.h>
-#include <xray/maya_animation/library_linkage.h>
+//#include <xray/maya_animation/library_linkage.h>
 #include <xray/physics/library_linkage.h>
 #include <xray/animation/library_linkage.h>
 #include <xray/render/facade/library_linkage.h>
@@ -21,14 +21,16 @@
 
 #pragma comment( lib, "opengl32.lib" )
 #pragma comment( lib, "OpenMayaUI.lib" )
-#pragma comment( lib, "Foundation.lib" )
+//#pragma comment( lib, "Foundation.lib" )
+#pragma comment( lib, "xray_LibFoundation.lib" )
 #pragma comment( lib, "OpenMaya.lib" )
 #pragma comment( lib, "OpenMayaAnim.lib" )
 #pragma comment( lib, "OpenMayaRender.lib" )
 
-#pragma comment( lib, "libgfx.lib" )
-#pragma comment( lib, "libgfx_zlib.lib" )
-#pragma comment( lib, "libgfx_libpng.lib" )
+// #pragma comment( lib, "libgfx.lib" )
+// #pragma comment( lib, "libgfx_zlib.lib" )
+// #pragma comment( lib, "libgfx_libpng.lib" )
+#pragma comment( lib, "xray_scaleform.lib" )
 
 #if defined WIN64
 	#pragma comment( lib, "TootleSoftwareOnlyStatic_2k8_MTDLL64.lib" )

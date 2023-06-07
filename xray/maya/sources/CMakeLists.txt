@@ -116,14 +116,20 @@ target_link_libraries(maya2011 PRIVATE
 	renderer_engine_pc_dx11
 	particle
 	collision
+	LibFoundation
+	LibPNG
+	scaleform
+	bullet
 	opengl32.lib
 	OpenMayaUI.lib
 	OpenMayaAnim.lib
-	OpenMaya.Render.lib
-	libgfx.lib
-	libgfx_zlib.lib
-	libgfx_libpng.lib
+	OpenMayaRender.lib
 	TootleSoftwareOnlyStatic_2k8_MTDLL64.lib
+)
+
+
+target_link_directories(maya2011 PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/xray/maya/maya2011_lib_x64
 )
 
 set_target_properties(maya2011 PROPERTIES FOLDER "engine/plugins")
@@ -246,17 +252,21 @@ target_link_libraries(maya2012 PRIVATE
 	animation
 	renderer_facade
 	renderer_engine_pc_dx11
-	renderer_core_pc_dx11
 	particle
 	collision
+	LibFoundation
+	LibPNG
+	scaleform
+	bullet
 	opengl32.lib
 	OpenMayaUI.lib
 	OpenMayaAnim.lib
-	OpenMaya.Render.lib
-	libgfx.lib
-	libgfx_zlib.lib
-	libgfx_libpng.lib
+	OpenMayaRender.lib
 	TootleSoftwareOnlyStatic_2k8_MTDLL64.lib
+)
+
+target_link_directories(maya2012 PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/xray/maya/maya2012_lib_x64
 )
 
 set_target_properties(maya2012 PROPERTIES FOLDER "engine/plugins")
