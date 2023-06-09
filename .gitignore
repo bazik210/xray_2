@@ -40,6 +40,7 @@ build/x64/*
 build/xray/*
 build/*.vcxproj
 build/*.vcxproj.filters
+build/*.vcxproj.user
 build/CMakeCache.txt
 build/CreateSln_Log.txt
 build/dependency_graph.*
