@@ -199,10 +199,11 @@ sound_world::sound_world	(
 	m_timer.start					( );
 }
 
-#if 0 //XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
+#if XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
 bool sound_world::initialize_xaudio		( )
 {
-	LOG_INFO									( "Sound initialization..." );
+	return false;
+	/*LOG_INFO("Sound initialization...");
 
 	u32 creation_flags = 0;
 	if ( s_debug_audio )
@@ -280,7 +281,7 @@ bool sound_world::initialize_xaudio		( )
 	m_xaudio->GetDeviceDetails		( preferred_device_id, &deviceDetails );
 	//u32 channelMask					= deviceDetails.OutputFormat.dwChannelMask;
 	//X3DAudioInitialize				( channelMask, X3DAUDIO_SPEED_OF_SOUND, m_x3d_instance );
-	return true;
+	return true;*/
 }
 
 #endif // #if XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360

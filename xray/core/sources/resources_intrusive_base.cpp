@@ -65,9 +65,11 @@ template <class Resource>
 signalling_bool   base_of_intrusive_base::try_unregister_from_fat_or_from_name_registry (Resource * const object, u32 count_that_allows_unregister) const
 {
 	vfs::vfs_iterator fat_it			=	object->m_fat_it;
-	if ( !object->reference_count() )
-		LOGI_TRACE							("resources", "zero links to %s", log_string(object).c_str());
-	else if ( (u32)object->reference_count() > count_that_allows_unregister )
+// 	if ( !object->reference_count() )
+// 		LOGI_TRACE							("resources", "zero links to %s", log_string(object).c_str());
+// 	else if ( (u32)object->reference_count() > count_that_allows_unregister )
+// 		return								false;
+	if ( (u32)object->reference_count() > count_that_allows_unregister )
 		return								false;
 
 	pcstr const rare_message			=	"LOL. resource was reclaimed just when we were about to delete it!";

@@ -86,11 +86,11 @@ void   quality_decreasing_functionality::decrease_for_parents (resource_base * t
 		CURE_ASSERT_CMP							(it_link->quality_value, !=, worst_quality_level, break);
 		
 		u32 const new_best_quality			=	it_link->quality_value + 1;
-		LOGI_DEBUG								("grm", "%s decrease quality %d->%d (satisfaction will be: %f)", 
-												 log_string(it_link->resource).c_str(),
-												 it_link->resource->current_quality_level(), 
-												 new_best_quality, 
-												 it_link->resource->satisfaction(new_best_quality));
+// 		LOGI_DEBUG								("grm", "%s decrease quality %d->%d (satisfaction will be: %f)", 
+// 												 log_string(it_link->resource).c_str(),
+// 												 it_link->resource->current_quality_level(), 
+// 												 new_best_quality, 
+// 												 it_link->resource->satisfaction(new_best_quality));
 
 		resource_base * const resource_to_decrease_quality		=	it_link->resource;
 		resource_to_decrease_quality->decrease_quality		(new_best_quality);

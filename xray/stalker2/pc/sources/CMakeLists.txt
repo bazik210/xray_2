@@ -32,6 +32,7 @@ target_link_libraries(stalker2_pc_dx11 PRIVATE
 	game
 	engine_pc_dx11
 	x3daudio.lib
+	xaudio2.lib
 )
 
 set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")

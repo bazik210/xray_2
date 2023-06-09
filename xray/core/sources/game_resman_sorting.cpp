@@ -38,11 +38,12 @@ void   sorting_functionality::log_memory_type_resources (memory_type * memory_ty
 							it_resource;
 							it_resource	=	memory_type->resources.get_next_of_object(it_resource) )
 	{
-		log_string						+=	resources::log_string(it_resource);
+		//log_string						+=	resources::log_string(it_resource);
+		log_string						+=	fixed_string8192("PLACEHOLDER");
 		log_string.appendf					("(%f)", it_resource->current_satisfaction());
 
 	}
-	LOGI_INFO								("grm", "memory queue: %s", log_string.c_str());
+//	LOGI_INFO								("grm", "memory queue: %s", log_string.c_str());
 }
 
 void   sorting_functionality::sort_resources_if_needed (memory_type * memory_type)

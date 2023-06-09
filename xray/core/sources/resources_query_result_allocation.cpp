@@ -216,8 +216,8 @@ allocation_result_enum   query_result::allocate_raw_managed_resource_if_needed (
 
 	set_creation_source_for_resource		(m_raw_managed_resource);
 
-	LOGI_TRACE								("resources", "allocated raw %s", 
-											 resources::log_string(m_raw_managed_resource.c_ptr()).c_str());
+// 	LOGI_TRACE								("resources", "allocated raw %s", 
+// 											 resources::log_string(m_raw_managed_resource.c_ptr()).c_str());
 
 	return									allocation_result_success;
 }
@@ -489,9 +489,9 @@ bool   query_result::retry_action_that_caused_out_of_memory	()
 			R_ASSERT						(m_out_of_memory.type);
 	}
 
-	LOGI_INFO								("grm", "%s : reallocation: %s", 
-											 resources::log_string(this).c_str(), 
-											 result ? "success" : "failed");
+// 	LOGI_INFO								("grm", "%s : reallocation: %s", 
+// 											 resources::log_string(this).c_str(), 
+// 											 result ? "success" : "failed");
 
 	if ( result )
 		unset_flag							(flag_in_grm_out_of_memory_queue);

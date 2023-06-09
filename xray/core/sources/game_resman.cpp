@@ -25,7 +25,8 @@ void   game_resources_manager::query_finished_callback (resource_base * resource
 	}
 	else
 	{
-		LOGI_TRACE								("grm", "pushed to capture %s", resources::log_string(resource).c_str());
+		// TODO Check overload for fixed_string<512>(resource_base*)
+		//LOGI_TRACE								("grm", "pushed to capture %s", resources::log_string(resource).c_str());
 		m_resources_to_capture.push_back		(resource);
 		g_resources_manager->wakeup_resources_thread	();
 	}
@@ -49,7 +50,7 @@ void   game_resources_manager::capture_resource (resource_base * resource)
 
 	resource->cast_base_of_intrusive_base()->on_capture_increment_reference_count	();
 
-	LOGI_DEBUG								("grm", "captured %s", log_string(resource).c_str());
+	//LOGI_DEBUG								("grm", "captured %s", log_string(resource).c_str());
 	
 	memory_type * const info			=	(memory_type *)resource->memory_usage().type;
 	if ( !info->in_list )
@@ -185,7 +186,7 @@ void   game_resources_manager::dispatch_capture ()
 	while ( it_resource )
 	{
 		resource_base * const next			=	m_resources_to_capture.get_next_of_object(it_resource);
-		LOGI_TRACE								("grm", "dispatched query finished callback: %s", resources::log_string(it_resource).c_str());
+		//LOGI_TRACE								("grm", "dispatched query finished callback: %s", resources::log_string(it_resource).c_str());
 		dispatch_capture						(it_resource);
 		it_resource							=	next;
 	}
@@ -215,7 +216,7 @@ void   game_resources_manager::dispatch_resources_to_release ()
 			continue;
 		}
 
-		LOG_INFO							("releasing resource from game resources manager: %s", resources::log_string(it_resource).c_str());
+		//LOG_INFO							("releasing resource from game resources manager: %s", resources::log_string(it_resource).c_str());
 		release_resource					(it_resource);
 		it_resource						=	next;
 	}
