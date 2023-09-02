@@ -38,7 +38,7 @@ namespace memory {
 	typedef memory::crt_allocator				crt_allocator_type;
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
-	extern XRAY_CORE_API crt_allocator_type*	g_crt_allocator;
+	extern "C" XRAY_CORE_API crt_allocator_type * g_crt_allocator;
 } // namespace memory
 } // namespace xray
 

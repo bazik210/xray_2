@@ -696,6 +696,7 @@ function(xr_set_target_defaults_editor TARGET)
 
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
+		_WIN32_WINNT=0x0501
         PLATFORM_WIN64
         WIN64
         WINDOWS
