@@ -64,6 +64,7 @@ add_executable(stalker2_pc_opengl
 target_link_libraries(stalker2_pc_opengl PRIVATE
 	renderer_engine_pc_opengl
 	game
+	engine_pc_opengl
 	vorbis
 	ode
 	sound

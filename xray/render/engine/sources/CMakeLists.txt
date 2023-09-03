@@ -550,6 +550,12 @@ add_library(renderer_engine_pc_opengl STATIC
 										"${CMAKE_CURRENT_SOURCE_DIR}/../library_linkage.h"
 										"${CMAKE_CURRENT_SOURCE_DIR}/../world.h"
 										"${CMAKE_CURRENT_SOURCE_DIR}/../world_pc.h"
+										# flash_renderer
+										"${CMAKE_CURRENT_SOURCE_DIR}/flash_renderer.cpp"
+										"${CMAKE_CURRENT_SOURCE_DIR}/flash_renderer.h"
+										# render_output_window
+										"${CMAKE_CURRENT_SOURCE_DIR}/render_output_window.cpp"
+										"${CMAKE_CURRENT_SOURCE_DIR}/render_output_window.h"
 										# world
 										"${CMAKE_CURRENT_SOURCE_DIR}/render_engine_world_pc_opengl.cpp"
 										# renderer
@@ -563,8 +569,14 @@ add_library(renderer_engine_pc_opengl STATIC
 										# ./
 )
 
+target_include_directories(renderer_engine_pc_opengl PUBLIC
+    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+)
+
 target_link_libraries(renderer_engine_pc_opengl PUBLIC
 	renderer_core_pc_dx11
+	scaleform
 )
 
 set_target_properties(renderer_engine_pc_opengl PROPERTIES FOLDER "engine/renderers/pc/opengl")

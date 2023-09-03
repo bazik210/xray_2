@@ -14,6 +14,9 @@
 #include <xray/render/facade/particles.h>
 #include <xray/render/engine/vertex_colored.h>
 #include <xray/render/facade/ui_renderer.h>
+#include "render_output_window.h"
+#include "flash_renderer.h"
+#include <GFx.h>
 
 using xray::math::float4x4;
 using xray::math::int2_pod;
@@ -612,5 +615,19 @@ void engine::world::set_sky_material				( scene_ptr const& scene, resources::unm
 }
 
 } // namespace engine
+
+void engine::world::show_movie(render_output_window_ptr const& base_render_output_window, stalker2::flash_movie* movie)
+{
+	render_output_window* const output_window = static_cast_checked< render_output_window* >(base_render_output_window.c_ptr());
+	output_window->m_flash_renderer->show_movie(movie);
+
+}
+void engine::world::hide_movie(render_output_window_ptr const& base_render_output_window, stalker2::flash_movie* movie)
+{
+	render_output_window* const output_window = static_cast_checked< render_output_window* >(base_render_output_window.c_ptr());
+	output_window->m_flash_renderer->hide_movie(movie);
+
+}
+
 } // namespace render
 } // namespace xray

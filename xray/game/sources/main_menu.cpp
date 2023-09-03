@@ -189,7 +189,9 @@ void main_menu::on_deactivate( )
 	super::on_deactivate				( );
 	get_game().input_world().remove_handler	( *this );
 #ifdef XRAY_STATIC_LIBRARIES
-	renderer().hide_movie( get_game().render_output_window(), m_main_menu_ui );	
+	#ifndef XRAY_RENDERER_NO_FLASH
+		renderer().hide_movie( get_game().render_output_window(), m_main_menu_ui );	
+	#endif
 #else	
 	DELETE	(m_ui);
 #endif //#ifdef XRAY_STATIC_LIBRARIES
@@ -209,10 +211,12 @@ void main_menu::on_activate( )
 	get_game().input_world().add_handler	( *this );
 
 #ifdef XRAY_STATIC_LIBRARIES
-	m_window_size = renderer().scene().window_client_size(get_game().render_output_window());
-	m_main_menu_ui->m_movie->SetViewport(m_window_size.width, m_window_size.height, 0, 0, m_window_size.width, m_window_size.height, 0);
-	renderer().show_movie( get_game().render_output_window(), m_main_menu_ui );
-	m_main_menu_ui_last_time = m_timer.get_elapsed_msec();	
+	#ifndef XRAY_RENDERER_NO_FLASH
+		m_window_size = renderer().scene().window_client_size(get_game().render_output_window());
+		m_main_menu_ui->m_movie->SetViewport(m_window_size.width, m_window_size.height, 0, 0, m_window_size.width, m_window_size.height, 0);
+		renderer().show_movie( get_game().render_output_window(), m_main_menu_ui );
+		m_main_menu_ui_last_time = m_timer.get_elapsed_msec();
+	#endif
 #else
 	m_ui	= NEW(main_menu_ui)(m_game.ui_world());
 #endif //#ifdef XRAY_STATIC_LIBRARIES

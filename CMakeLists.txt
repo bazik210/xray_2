@@ -36,7 +36,7 @@ endif()
 ############################
 
 # DirectX SDK 
-set(DXSDK_DIR_PATH "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)")
+set(DXSDK_DIR_PATH "E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)")
 
 ####################################
 # Set paths to Include Directories #
@@ -362,6 +362,74 @@ target_link_directories(stalker2_pc_dx11 PRIVATE
 	"${DXSDK_DIR_PATH}/Lib/x64"
 )
 
+xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
+target_compile_definitions(stalker2_pc_opengl PRIVATE
+	PLATFORM_WIN64
+	WIN64
+)
+target_include_directories(stalker2_pc_opengl PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+	"${DXSDK_DIR_PATH}/Include"
+)
+target_link_libraries(stalker2_pc_opengl PRIVATE
+	engine_pc_opengl
+	legacy_stdio_definitions.lib
+	kernel32.lib
+	user32.lib
+	gdi32.lib
+	winspool.lib
+	shell32.lib
+	ole32.lib
+	oleaut32.lib
+	uuid.lib
+	advapi32.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlibN.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_script_cs.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_core_cs.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_lua.5.1.4.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_luabind.0.8.1.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_ui.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_vorbisfile.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_bullet.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_particle.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_FreeImage.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_texture_compressor.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibPNG.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_OpenEXR.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibMNG.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlib.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibTIFF.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibOpenJPEG.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine_pc.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_scaleform.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibJPEG.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_animation.lib
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_maya_animation.lib
+	libgfx.lib
+	libgfx_air.lib
+	libgfx_as2.lib
+	libgfx_as3.lib
+	libgfxexpat.lib
+	libgfxplatform_gl.lib
+	libgfxrender_gl.lib
+	libgfxsound_fmod.lib
+	delayimp.lib
+	dxguid.lib
+	dinput8.lib
+	d3d11.lib
+	d3dx11d.lib
+	dxerr.lib
+	d3dcompiler.lib
+)
+target_link_directories(stalker2_pc_opengl PRIVATE
+	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+	"${DXSDK_DIR_PATH}/Lib/x64"
+)
+
 endfunction()
 
 # Set target name for game .exe files
@@ -432,6 +500,7 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -482,6 +551,7 @@ function(xr_set_target_defaults_static_lib_C TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -530,6 +600,7 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -576,6 +647,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -639,6 +711,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -709,6 +782,7 @@ function(xr_set_target_defaults_editor TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -738,9 +812,9 @@ function(xr_set_target_defaults_editor TARGET)
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 	)
 
-    # disable Warning 4945
+    # disable macro Warnings
     target_compile_options(${TARGET} PRIVATE
-        /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
     )
 
     # Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
@@ -784,6 +858,7 @@ function(xr_set_target_defaults_network_32 TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /O2
@@ -844,6 +919,7 @@ function(xr_set_target_defaults_network_64 TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ob2
@@ -900,6 +976,7 @@ function(xr_set_target_defaults_plugin TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
+	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Ox
         /Ob2

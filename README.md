@@ -50,7 +50,7 @@ Source files of third party libraries aren't part of this repository. Consult wi
 - Open **X-Ray-v2.0.sln** using **Visual Studio 2019** or **Visual Studio 2022** (make sure to use **MSVC v142** build tools).
 - Now you can Debug/Run from Visual Studio (ensure that game assets are in the right directory).
 
-\*You can use **CreateSlnVS2022.bat** if you wish to use **v143** build tools.
+\*You can use **CreateSlnVS2022.bat** if you wish to use **v143** build tools, be sure to download proper C++ MFC library, like this one: C++ MFC v 14.33 v143 build tools (x86 & x64).
 
 ## Development
 ### Utility Tools
