@@ -596,7 +596,9 @@ void binary_operation_lexeme::reset_pointers	( ) const
 	m_function_pointers				= m_operation_type == operation_type_or ? &s_or_function_pointers : &s_and_function_pointers;
 }
 
-debug::set< pcvoid > g_pointers;
+//debug::set< pcvoid > g_pointers;
+using namespace std;
+set<pcvoid> g_pointers;
 
 static inline void register_pointer		( pcvoid const pointer )
 {

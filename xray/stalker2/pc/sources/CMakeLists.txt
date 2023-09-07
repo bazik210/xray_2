@@ -1,6 +1,6 @@
 project(stalker2 LANGUAGES CXX)
 
-add_executable(stalker2_pc_dx11
+add_executable(stalker2_pc_dx11 WIN32
 						# core
 						"${CMAKE_CURRENT_SOURCE_DIR}/../../finger_print.cpp"
 						"${CMAKE_CURRENT_SOURCE_DIR}/math_error_win.cpp"
@@ -39,7 +39,7 @@ set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")
 
 ############################
 
-add_executable(stalker2_pc_opengl
+add_executable(stalker2_pc_opengl WIN32
 					# core
 					"${CMAKE_CURRENT_SOURCE_DIR}/../../finger_print.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/math_error_win.cpp"

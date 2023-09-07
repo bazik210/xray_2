@@ -31,6 +31,8 @@ if(NOT CMAKE_CSharp_COMPILER)
     return()
 endif()
 
+SET(CMAKE_CXX_FLAGS "/EHs")
+
 ############################
 # Set paths to Directories #
 ############################
@@ -70,14 +72,14 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
 foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_INIT)
-        string(REGEX REPLACE "/EH[a-z]+" "" ${var} "${${var}}")
-        string(REPLACE "/EHa" "" ${var} "${${var}}")
-        string(REPLACE "/EHsc" "" ${var} "${${var}}")
-		string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${var} "${${var}}")
-		string(REPLACE "/RTCc" "" ${var} "${${var}}")
-		string(REPLACE "/RTCs" "" ${var} "${${var}}")
-		string(REPLACE "/RTCu" "" ${var} "${${var}}")
-		string(REPLACE "/RTC1" "" ${var} "${${var}}")
+    string(REGEX REPLACE "/EH[a-z]+" "" ${var} "${${var}}")
+    string(REPLACE "/EHa" "" ${var} "${${var}}")
+    string(REPLACE "/EHsc" "" ${var} "${${var}}")
+    string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${var} "${${var}}")
+    string(REPLACE "/RTCc" "" ${var} "${${var}}")
+    string(REPLACE "/RTCs" "" ${var} "${${var}}")
+    string(REPLACE "/RTCu" "" ${var} "${${var}}")
+    string(REPLACE "/RTC1" "" ${var} "${${var}}")
 endforeach()
 
 # Main engine directory
@@ -101,11 +103,11 @@ function(xr_disable_target_exception_handling TARGET)
     string(REGEX REPLACE "/EH[a-z]+" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     string(REPLACE "/EHa" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     string(REPLACE "/EHsc" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCc" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCs" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTCu" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
-	string(REPLACE "/RTC1" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REGEX REPLACE "/RTC[a-z0-9]+" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/RTCc" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/RTCs" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/RTCu" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
+    string(REPLACE "/RTC1" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${TARGET_COMPILE_FLAGS}")
 endfunction()
 
@@ -139,25 +141,25 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(vfs)
     xr_set_target_defaults_static_lib_CPP(collision)
     xr_set_target_defaults_static_lib_CPP(engine)
-	xr_set_target_defaults_static_lib_CPP(engine_pc)
+    xr_set_target_defaults_static_lib_CPP(engine_pc)
     xr_set_target_defaults_static_lib_CPP(input)
     xr_set_target_defaults_static_lib_CPP(particle)
     xr_set_target_defaults_static_lib_CPP(physics)
     xr_set_target_defaults_static_lib_CPP(sound)
     xr_set_target_defaults_static_lib_CPP(ui)
-	xr_set_target_defaults_static_lib_CPP(opcode)
-	xr_set_target_defaults_static_lib_C(lua.5.1.4)
-	xr_set_target_defaults_static_lib_CPP(luabind.0.8.1)
-	xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
-	xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
-	xr_set_target_defaults_static_lib_CPP(scaleform)
+    xr_set_target_defaults_static_lib_CPP(opcode)
+    xr_set_target_defaults_static_lib_C(lua.5.1.4)
+    xr_set_target_defaults_static_lib_CPP(luabind.0.8.1)
+    xr_set_target_defaults_static_lib_CPP(engine_pc_dx11)
+    xr_set_target_defaults_static_lib_CPP(engine_pc_opengl)
+    xr_set_target_defaults_static_lib_CPP(scaleform)
 endfunction()
 
 # Called at the bottom of this CMakeLists
 # TODO add missing DLLs
 function(xr_setup_shared_libs)
     #xr_set_target_defaults_shared_lib(engine_pc_dx11)
-	#xr_set_target_defaults_shared_lib(engine_pc_opengl)
+    #xr_set_target_defaults_shared_lib(engine_pc_opengl)
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -318,17 +320,17 @@ function(xr_setup_sdk)
     xr_set_target_defaults_static_lib_C(LibPNG)
     xr_set_target_defaults_static_lib_C(LibTIFF)
     xr_set_target_defaults_static_lib_CPP(OpenEXR)
-	#xr_set_target_defaults_static_lib_CPP(nvcore)
-	#xr_set_target_defaults_static_lib_CPP(nvimage)
-	#xr_set_target_defaults_shared_lib(nvtt)
-	#xr_set_target_defaults_static_lib_CPP(squish)
-	xr_set_target_defaults_static_lib_CPP(LibFoundation)
-	xr_set_target_defaults_static_lib_CPP(ode)
-	xr_set_target_defaults_static_lib_C(ogg)
-	xr_set_target_defaults_static_lib_C(theora)
-	xr_set_target_defaults_static_lib_C(vorbis)
-	xr_set_target_defaults_static_lib_C(vorbisfile)
-	xr_set_target_defaults_static_lib_CPP(bullet)
+    #xr_set_target_defaults_static_lib_CPP(nvcore)
+    #xr_set_target_defaults_static_lib_CPP(nvimage)
+    #xr_set_target_defaults_shared_lib(nvtt)
+    #xr_set_target_defaults_static_lib_CPP(squish)
+    xr_set_target_defaults_static_lib_CPP(LibFoundation)
+    xr_set_target_defaults_static_lib_CPP(ode)
+    xr_set_target_defaults_static_lib_C(ogg)
+    xr_set_target_defaults_static_lib_C(theora)
+    xr_set_target_defaults_static_lib_C(vorbis)
+    xr_set_target_defaults_static_lib_C(vorbisfile)
+    xr_set_target_defaults_static_lib_CPP(bullet)
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -343,14 +345,15 @@ function(xr_setup_games)
 
 xr_set_target_defaults_static_lib_CPP(game)
 
-xr_set_target_defaults_static_lib_CPP(stalker2_pc_dx11)
+xr_set_target_defaults_stalker2(stalker2_pc_dx11)
 #target_compile_definitions(stalker2_pc_dx11 PRIVATE
 #	XRAY_STATIC_LIBRARIES=0
 #)
+
 target_include_directories(stalker2_pc_dx11 PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
-	"${DXSDK_DIR_PATH}/Include"
+	${DXSDK_DIR_PATH}/Include
 )
 target_link_libraries(stalker2_pc_dx11 PRIVATE
 	engine_pc_dx11
@@ -359,7 +362,7 @@ target_link_libraries(stalker2_pc_dx11 PRIVATE
 target_link_directories(stalker2_pc_dx11 PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-	"${DXSDK_DIR_PATH}/Lib/x64"
+	${DXSDK_DIR_PATH}/Lib/x64
 )
 
 xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
@@ -371,7 +374,7 @@ target_include_directories(stalker2_pc_opengl PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
-	"${DXSDK_DIR_PATH}/Include"
+	${DXSDK_DIR_PATH}/Include
 )
 target_link_libraries(stalker2_pc_opengl PRIVATE
 	engine_pc_opengl
@@ -427,7 +430,7 @@ target_link_libraries(stalker2_pc_opengl PRIVATE
 target_link_directories(stalker2_pc_opengl PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-	"${DXSDK_DIR_PATH}/Lib/x64"
+	${DXSDK_DIR_PATH}/Lib/x64
 )
 
 endfunction()
@@ -483,7 +486,7 @@ endfunction()
 #      see example in function xr_set_target_defaults_editor
 # TODO check if .NET version has to be specified as well (related to TODO above)
 function(xr_set_target_defaults_static_lib_CLR TARGET)
-	# set output file name
+    # set output file name
     xr_set_lib_name(${TARGET})
 
     # set platform as x64
@@ -494,13 +497,13 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
         _HAS_EXCEPTIONS=0
     )
 
-	# set properties for CLR
-	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
-	set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
+    # set properties for CLR
+    target_compile_definitions(${TARGET} PRIVATE _MANAGED)
+    set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -517,7 +520,7 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
         /MP
     )
 
-	# Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
+    # Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_disable_target_exception_handling(${TARGET})
@@ -528,17 +531,17 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 endfunction()
 
 function(xr_set_target_defaults_static_lib_C TARGET)
-	# set output file name
+    # set output file name
     xr_set_lib_name(${TARGET})
 
     # set platform as x64
@@ -551,7 +554,7 @@ function(xr_set_target_defaults_static_lib_C TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -576,17 +579,17 @@ function(xr_set_target_defaults_static_lib_C TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 endfunction()
 
-function(xr_set_target_defaults_static_lib_CPP TARGET)
-	# set output file name
+function(xr_set_target_defaults_stalker2 TARGET)
+    # set output file name
     xr_set_lib_name(${TARGET})
 
     # set platform as x64
@@ -598,24 +601,64 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
         XRAY_STATIC_LIBRARIES
     )
 
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+		${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
+
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
-        /Ox
         /Ob2
-        /Oi
-        /Ot
-        /Oy
-        /GT
-        /GF
         /MD
-        /GS-
-        /fp:fast
         /Y-
         /MP
     )
+
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+    )
+	
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_static_lib_CPP TARGET)
+    # set output file name
+    xr_set_lib_name(${TARGET})
+
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN64
+        WIN64
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+        XRAY_STATIC_LIBRARIES
+    )
+
+    # set compiler flags																				
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /W4
+        /Zi
+        /MD
+        /Y-
+        /MP
+    )
+
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE")
 
     xr_disable_target_exception_handling(${TARGET})
 
@@ -625,17 +668,17 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 endfunction()
 
 function(xr_set_target_defaults_shared_lib TARGET)
-	# set output file name
+    # set output file name
     xr_set_lib_name(${TARGET})
 
     # set platform as x64
@@ -647,7 +690,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -669,13 +712,13 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    # set Additional Library Directories
+      target_link_directories(${TARGET} PRIVATE
+      ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+      )
 
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
@@ -695,7 +738,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
 endfunction()
 
 function(xr_set_target_defaults_shared_lib_CLR TARGET)
-	# set output file name
+    # set output file name
     xr_set_lib_name(${TARGET})
 
     # set platform as x64
@@ -705,13 +748,13 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         _HAS_EXCEPTIONS=0
     )
 
-	# set properties for CLR
-	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
-	set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
+    # set properties for CLR
+    target_compile_definitions(${TARGET} PRIVATE _MANAGED)
+    set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -728,7 +771,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         /MP
     )
 
-	# Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
+    # Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_disable_target_exception_handling(${TARGET})
@@ -736,7 +779,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
 	# set Additional Library Directories
@@ -782,7 +825,7 @@ function(xr_set_target_defaults_editor TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ox
@@ -807,10 +850,10 @@ function(xr_set_target_defaults_editor TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    )
 
     # disable macro Warnings
     target_compile_options(${TARGET} PRIVATE
@@ -831,15 +874,15 @@ function(xr_set_target_defaults_editor TARGET)
         /CLRTHREADATTRIBUTE:STA
     )
 	
-	# Visual Studio 17 (2022) and above require a flag to indicate .DLLs for CLR
-	if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
-        set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
-	endif()
+    # Visual Studio 17 (2022) and above require a flag to indicate .DLLs for CLR
+    if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
+    set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
+    endif()
 
     # Set dependencies
     target_link_libraries(${TARGET} PUBLIC 
-		wpf_controls
-	)
+	wpf_controls
+    )
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()
@@ -858,7 +901,7 @@ function(xr_set_target_defaults_network_32 TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /O2
@@ -882,10 +925,10 @@ function(xr_set_target_defaults_network_32 TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    )
 
     xr_print_target_compile_flags(${TARGET})
 
@@ -919,7 +962,7 @@ function(xr_set_target_defaults_network_64 TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
         /Ob2
@@ -942,10 +985,10 @@ function(xr_set_target_defaults_network_64 TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    )
 
     xr_print_target_compile_flags(${TARGET})
 
@@ -976,7 +1019,7 @@ function(xr_set_target_defaults_plugin TARGET)
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
-	/wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Ox
         /Ob2
@@ -1000,10 +1043,10 @@ function(xr_set_target_defaults_plugin TARGET)
 		${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
-	# set Additional Library Directories
-	target_link_directories(${TARGET} PRIVATE
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-	)
+    )
 
     xr_print_target_compile_flags(${TARGET})
 

@@ -29,6 +29,7 @@ struct multi_threading_single_size_allocator_policy
 			u32			counter;
 		};
 #else // #if XRAY_PLATFORM_32_BIT
+//crash on get_pointer was due to incorrect project configuration settings
 		void			set_pointer ( T* p )	{ pointer = (T*)((u64)p | ((u64)counter << 40)); }
 		T*				get_pointer	() const	{ return (T*)((u64)pointer ^ ((u64)counter << 40)); }
 
