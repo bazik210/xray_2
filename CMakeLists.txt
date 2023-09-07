@@ -38,7 +38,7 @@ SET(CMAKE_CXX_FLAGS "/EHs")
 ############################
 
 # DirectX SDK 
-set(DXSDK_DIR_PATH "E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)")
+set(DXSDK_DIR_PATH "C:/Program Files (x86)/Microsoft DirectX SDK (June 2010)")
 
 ####################################
 # Set paths to Include Directories #
@@ -202,19 +202,19 @@ function(xr_setup_editors)
     # Specify DOTNET assembly references
 
     set_target_properties(editor_controls PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended"
+        "PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
     )
 
     set_target_properties(model_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
     )
 
     set_target_properties(particle_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
     )
 
     set_target_properties(sound_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
     )
 
     set_target_properties(test_form PROPERTIES VS_DOTNET_REFERENCES

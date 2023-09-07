@@ -811,3 +811,5 @@ target_link_libraries(core PUBLIC
 )
 
 set_target_properties(core PROPERTIES FOLDER "engine/core")
+
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/ptmalloc3/malloc.c PROPERTY VS_SETTINGS "ExcludedFromBuild=true")

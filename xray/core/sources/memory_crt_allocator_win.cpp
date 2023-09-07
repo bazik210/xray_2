@@ -163,8 +163,10 @@ crt_allocator::crt_allocator		( ) :
 #ifdef _DLL
 #	if _MSC_VER == 1500
 		pcstr const library_name	= "msvcr90.dll";
+#   elif _MSC_VER == 1800
+	pcstr const library_name = "msvcr120.dll";
 #   elif _MSC_VER >= 1900
-        pcstr const library_name    = "msvcr140.dll";
+	pcstr const library_name = "msvcr140.dll";
 #	else // #if _MSC_VER == 1500
 #		error define correct library name here
 #	endif // #if _MSC_VER == 1500

@@ -606,7 +606,7 @@ target_link_libraries(editor PUBLIC
 set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
 
 set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
-    "bugtrapN-x64;Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_animation_editor;xray_dialog_editor;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11;xray_model_editor;xray_particle_editor;xray_sound_editor"
+    "Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
 )
 
 set_target_properties(editor PROPERTIES FOLDER "engine/editors")

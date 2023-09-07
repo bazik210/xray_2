@@ -248,7 +248,7 @@ target_link_libraries(animation_editor PUBLIC
 set_target_properties(animation_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
 
 set_target_properties(animation_editor PROPERTIES VS_DOTNET_REFERENCES
-    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WeifenLuo.WinForms.UI.Docking;WindowsBase;WindowsFormsIntegration;wpf_controls;WPFToolkit.Extended;xray_editor_base;xray_editor_controls;xray_engine_pc_dx11"
+    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
 )
 
 set_target_properties(animation_editor PROPERTIES FOLDER "engine/editors")
