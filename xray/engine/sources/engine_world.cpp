@@ -96,7 +96,9 @@ engine_world::~engine_world		( )
 {
 	finalize							( );
 	
+#ifdef GFX_SCALEFORM
 	destroy_scaleform	( );
+#endif
 	core::finalize						( );
 }
 

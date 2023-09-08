@@ -616,6 +616,7 @@ void engine::world::set_sky_material				( scene_ptr const& scene, resources::unm
 
 } // namespace engine
 
+#ifdef XRAY_RENDERER_FLASH
 void engine::world::show_movie(render_output_window_ptr const& base_render_output_window, stalker2::flash_movie* movie)
 {
 	render_output_window* const output_window = static_cast_checked< render_output_window* >(base_render_output_window.c_ptr());
@@ -628,6 +629,6 @@ void engine::world::hide_movie(render_output_window_ptr const& base_render_outpu
 	output_window->m_flash_renderer->hide_movie(movie);
 
 }
-
+#endif
 } // namespace render
 } // namespace xray

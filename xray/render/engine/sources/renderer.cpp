@@ -19,9 +19,9 @@
 #include <xray/render/core/effect_manager.h>
 #include "effect_editor_gbuffer_to_screen.h"
 #include "grass_world.h"
-
+#ifdef XRAY_RENDERER_FLASH
 #include "flash_renderer.h"
-
+#endif
 // render stages
 #include "stage_gbuffer.h"
 #include "stage_pre_lighting.h"
@@ -561,8 +561,10 @@ void renderer::present	( render_output_window_ptr in_output_window, viewport_typ
 	
 	if( output_window )
 	{
+	#ifdef XRAY_RENDERER_FLASH
 		if(output_window->m_flash_renderer)
 			output_window->m_flash_renderer->present( );
+	#endif
 
 		output_window->render_output()->present();
 	}

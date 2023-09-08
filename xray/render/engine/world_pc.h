@@ -106,7 +106,7 @@ public:
 							~world						( );
 			void			initialize					( );
 //			flash_renderer&	flash_renderer				( );
-#ifndef XRAY_RENDERER_NO_FLASH
+#ifdef XRAY_RENDERER_FLASH
 			void			show_movie					( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie );
 			void			hide_movie					( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie );
 #endif

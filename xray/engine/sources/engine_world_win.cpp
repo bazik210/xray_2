@@ -32,8 +32,8 @@
 
 using xray::engine::engine_world;
 
-static pcstr s_window_id					= XRAY_ENGINE_ID " DX10 Renderer Window";
-static pcstr s_window_class_id				= XRAY_ENGINE_ID " DX10 Renderer Window Class ID";
+static pcstr s_window_id					= XRAY_ENGINE_ID " DX11 Renderer Window";
+static pcstr s_window_class_id				= XRAY_ENGINE_ID " DX11 Renderer Window Class ID";
 
 xray::command_line::key	s_no_log_file		("no_log_file", "no_log_file", "logging", "disables writing log to a file", "<no arguments>");
 
@@ -180,7 +180,9 @@ void engine_world::initialize_core	( )
 	else
 		core::initialize	( lua_config_device_folder_to_save_to, debug_thread_id, core::delay_debug_initialization );
 
+#ifdef GFX_SCALEFORM
 	initialize_scaleform	( );
+#endif
 }
 
 void engine_world::create_render	( )

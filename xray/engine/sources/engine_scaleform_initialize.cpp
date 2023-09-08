@@ -99,6 +99,7 @@ public:
 #endif
 };
 
+#ifdef GFX_SCALEFORM
 namespace xray{
 namespace engine{
 
@@ -114,3 +115,4 @@ void engine_world::destroy_scaleform( )
 }
 
 }}
+#endif

@@ -77,8 +77,10 @@ public:
 	ui::renderer& ui		( ) const;
 	scene_renderer& scene	( ) const;
 
+#ifdef	XRAY_RENDERER_FLASH
 	void	show_movie		( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie );
 	void	hide_movie		( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie );
+#endif
 
 	void	draw_scene		(
 				scene_ptr const& scene,

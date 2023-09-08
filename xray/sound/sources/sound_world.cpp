@@ -307,7 +307,8 @@ sound_world::~sound_world		( )
 #if !XRAY_PLATFORM_PS3
 	if ( m_master_voice )
 		m_master_voice->DestroyVoice( );
-	m_xaudio->Release			( );
+	if ( m_xaudio )
+		m_xaudio->Release			( );
 #endif // #if !XRAY_PLATFORM_PS3
 
 	sound_order* order			= m_xaudio_callback_orders.pop_null_node();

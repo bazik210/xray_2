@@ -11,8 +11,10 @@
 #include "game_world.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
-#include "flash_factory.h"
-#include "GFx.h"
+#ifdef XRAY_RENDERER_FLASH && GFX_SCALEFORM
+	#include "flash_factory.h"
+	#include "GFx.h"
+#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 
 #include <xray/ui/world.h>
@@ -26,7 +28,7 @@
 namespace stalker2 {
 
 
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 //--------------------------------------------------------------------------------------
 // FSCommand Handler
 //--------------------------------------------------------------------------------------
@@ -170,7 +172,7 @@ m_game_world	( w )
 
 	query_resources					( );
 
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 	create_main_menu_ui		();
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 
@@ -179,7 +181,7 @@ m_game_world	( w )
 
 main_menu::~main_menu( )
 {
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 	DELETE( m_main_menu_ui );
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 }
@@ -188,8 +190,8 @@ void main_menu::on_deactivate( )
 {
 	super::on_deactivate				( );
 	get_game().input_world().remove_handler	( *this );
-#ifdef XRAY_STATIC_LIBRARIES
-	#ifndef XRAY_RENDERER_NO_FLASH
+#ifndef XRAY_STATIC_LIBRARIES
+	#ifdef XRAY_RENDERER_FLASH
 		renderer().hide_movie( get_game().render_output_window(), m_main_menu_ui );	
 	#endif
 #else	
@@ -197,7 +199,7 @@ void main_menu::on_deactivate( )
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 }
 
-#ifndef XRAY_STATIC_LIBRARIES
+#ifdef XRAY_STATIC_LIBRARIES
 input::handler*	main_menu::dialog_input_handler	()
 {
 	return m_ui->m_ui_dialog->input_handler();
@@ -210,8 +212,8 @@ void main_menu::on_activate( )
 	super::on_activate					( );
 	get_game().input_world().add_handler	( *this );
 
-#ifdef XRAY_STATIC_LIBRARIES
-	#ifndef XRAY_RENDERER_NO_FLASH
+#ifndef XRAY_STATIC_LIBRARIES
+	#ifdef XRAY_RENDERER_FLASH
 		m_window_size = renderer().scene().window_client_size(get_game().render_output_window());
 		m_main_menu_ui->m_movie->SetViewport(m_window_size.width, m_window_size.height, 0, 0, m_window_size.width, m_window_size.height, 0);
 		renderer().show_movie( get_game().render_output_window(), m_main_menu_ui );
@@ -225,7 +227,7 @@ void main_menu::on_activate( )
 
 void main_menu::tick( )
 {
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 	if (m_main_menu_ui){
 
 		u32 current_time = m_timer.get_elapsed_msec();

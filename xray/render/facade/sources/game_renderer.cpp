@@ -114,7 +114,7 @@ xray::render::scene_renderer& renderer::scene				( ) const
 	return					*m_scene;
 }
 
-#ifndef XRAY_RENDERER_NO_FLASH
+#ifdef XRAY_RENDERER_FLASH
 void renderer::show_movie						( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie )
 {
  	m_world.logic_channel().owner_push_back	( 

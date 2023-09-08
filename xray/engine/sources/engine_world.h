@@ -107,8 +107,10 @@ private:
 			void			initialize_render		( );
 			void			initialize_logic		( );
 			void			initialize_logic_thread	( );
+#ifdef GFX_SCALEFORM
 			void			initialize_scaleform	( );
 			void			destroy_scaleform		( );
+#endif
 
 			void			post_initialize			( bool const show_window );
 			void			enable_game_impl		( bool const value );

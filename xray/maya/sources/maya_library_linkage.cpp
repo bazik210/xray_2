@@ -30,7 +30,7 @@
 // #pragma comment( lib, "libgfx.lib" )
 // #pragma comment( lib, "libgfx_zlib.lib" )
 // #pragma comment( lib, "libgfx_libpng.lib" )
-#pragma comment( lib, "xray_scaleform.lib" )
+// #pragma comment( lib, "xray_scaleform.lib" )
 
 #if defined WIN64
 	#pragma comment( lib, "TootleSoftwareOnlyStatic_2k8_MTDLL64.lib" )
