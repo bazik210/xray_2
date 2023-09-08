@@ -19,8 +19,8 @@ using xray::debug::error_mode;
 
 static HMODULE			s_bugtrap_handle			= 0;
 #if XRAY_PLATFORM_WINDOWS_64
-	static pcstr		s_bugtrap_native_id			= "BugTrap-x64.dll";
-	static pcstr		s_bugtrap_dotnet_id			= "BugTrapN-x64.dll";
+	static pcstr		s_bugtrap_native_id			= "xray_bugtrap.dll";
+	static pcstr		s_bugtrap_dotnet_id			= "xray_bugtrapN.dll";
 #else // #if XRAY_PLATFORM_WINDOWS_64
 	static pcstr		s_bugtrap_native_id			= "BugTrap.dll";
 	static pcstr		s_bugtrap_dotnet_id			= "BugTrapN.dll";
