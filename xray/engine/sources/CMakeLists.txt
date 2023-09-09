@@ -59,3 +59,5 @@ target_link_libraries(engine PUBLIC
 )
 
 set_target_properties(engine PROPERTIES FOLDER "engine")
+
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/engine_scaleform_initialize.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")

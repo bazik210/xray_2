@@ -50,15 +50,17 @@
 #include "material_effects_instance_cook.h"
 #include "model_converter.h"
 #include "decal_instance.h"
-#include "flash_renderer.h"
-
+#ifdef XRAY_RENDERER_FLASH
+	#include "flash_renderer.h"
+#endif
 #include <xray/fs_watcher.h>
 
 #include <xray/console_command.h>
 #include <xray/console_command_processor.h>
 #include <xray/render/core/options.h>
-
-#include <GFx.h>
+#ifdef GFX_SCALEFORM
+	#include <GFx.h>
+#endif
 
 #pragma comment( lib,"dxgi.lib")
 

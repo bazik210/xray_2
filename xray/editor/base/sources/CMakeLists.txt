@@ -297,3 +297,5 @@ set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
 )
 
 set_target_properties(editor_base PROPERTIES FOLDER "engine/editors")
+
+set_target_properties(editor_base PROPERTIES LINK_FLAGS "/NODEFAULTLIB:libcmt")

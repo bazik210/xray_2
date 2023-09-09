@@ -55,3 +55,10 @@ Source files of third party libraries aren't part of this repository. Consult wi
 ## Development
 ### Utility Tools
 - Build directory contains several utility tools that you can use in case new project has to be integrated into solution.
+- If you updating CMakeLists.txt project files, don't forget to run again SetupNothrownew.bat from build\ folder after or bugtrap build will be broken.
+
+## Debug
+- Go to stalker2_pc_dx11 configuration properties->Debugging and set your working directory to compiled binaries, for example: C:\xray\binaries\Debug. Then put resources\, mounts\ and user_data\ to your sources, now you can launch it.
+Or you can use a .bat file to start game like this one:
+
+   @start /Dbinaries\debug binaries\debug\xray_stalker2_pc_dx11.exe
