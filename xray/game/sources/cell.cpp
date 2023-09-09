@@ -157,22 +157,28 @@ void game_cell::load_contents( cell_manager* cm )
 
 void game_cell::on_contents_loaded(  resources::queries_result& data )
 {
-	R_ASSERT		( data.is_successful() );
-	u32 count		= data.size();
+	//R_ASSERT		( data.is_successful() );
+	LOG_INFO("query data load is not successfull!");
 
-	for( u32 i=0; i<count; ++i)
-	{
-		resources::query_result_for_user& q = data[i];
-		const_buffer user_data			= q.creation_data_from_user();
+	if (data.is_successful()) {
 
-		configs::binary_config_value* ud	= (configs::binary_config_value*)user_data.c_ptr();
+		u32 count		= data.size();
 
-		game_object_ptr_ object_ptr		= static_cast_resource_ptr<game_object_ptr_>(q.get_unmanaged_resource());
-		m_objects.push_back				( object_ptr );
-		m_cell_manager->register_object	( object_ptr->reusable_request_name().c_str(), object_ptr );
-		DELETE							( ud );
+		for( u32 i=0; i<count; ++i)
+		{
+			resources::query_result_for_user& q = data[i];
+			const_buffer user_data			= q.creation_data_from_user();
+
+			configs::binary_config_value* ud	= (configs::binary_config_value*)user_data.c_ptr();
+
+			game_object_ptr_ object_ptr		= static_cast_resource_ptr<game_object_ptr_>(q.get_unmanaged_resource());
+			if (m_objects.size() != 0) {
+				m_objects.push_back(object_ptr);
+				m_cell_manager->register_object(object_ptr->reusable_request_name().c_str(), object_ptr);
+			}
+			DELETE							( ud );
+		}
 	}
-
 	if( m_quality )
 		load_impl();
 }

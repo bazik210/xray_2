@@ -35,7 +35,7 @@ static void closest_point_to_point ( float3& result, float4x4 const& box_matrix,
 
 void intersection_double_dispatcher::dispatch	( box_geometry_instance const& bounding_volume,				box_geometry_instance const& testee )
 {
-	//XRAY_UNREFERENCED_PARAMETERS( bounding_volume, testee );
+	XRAY_UNREFERENCED_PARAMETERS( bounding_volume.load(), testee.load());
 }
 
 void intersection_double_dispatcher::dispatch	( sphere_geometry_instance const& bounding_volume,			box_geometry_instance const& testee )

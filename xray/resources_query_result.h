@@ -103,6 +103,11 @@ public:
 									query_result_for_cook	(queries_result * parent);
 	virtual						   ~query_result_for_cook	();
 
+	template < typename T >
+	inline	IMPLICIT				query_result_for_cook(const T& other);
+
+	query_result_for_cook  *		load() { return this; }
+
 	void							set_managed_resource	(managed_resource * ptr) { R_ASSERT(!m_managed_resource); m_managed_resource = ptr; }
 	void							set_zero_unmanaged_resource	();
 	memory::base_allocator *		get_user_allocator		() const { return m_user_allocator; }

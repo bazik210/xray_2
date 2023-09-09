@@ -14,9 +14,11 @@
 #include <xray/render/facade/particles.h>
 #include <xray/render/engine/vertex_colored.h>
 #include <xray/render/facade/ui_renderer.h>
+#ifdef XRAY_RENDERER_FLASH && GFX_SCALEFORM
 #include "render_output_window.h"
 #include "flash_renderer.h"
 #include <GFx.h>
+#endif
 
 using xray::math::float4x4;
 using xray::math::int2_pod;

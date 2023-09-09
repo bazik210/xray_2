@@ -421,8 +421,8 @@ void   resources_manager::free_managed_resource (managed_resource * resource)
 	resource->set_sub_fat_resource			(NULL);
 
 //	LOGI_INFO								("resources", "deleted %s", log_string(resource).c_str());
-// 	memory::g_resources_managed_allocator.deallocate	(resource->grab_managed_node());
-// 	RES_DELETE								(resource);
+ 	memory::g_resources_managed_allocator.deallocate	(resource->grab_managed_node());
+ 	RES_DELETE								(resource);
 
 	after_resource_deleted					(NULL, false, destruction_observer, memory_usage, class_id, request_name.c_str());
 

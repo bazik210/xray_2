@@ -45,5 +45,12 @@ void   query_result_for_cook::set_requery_path (pcstr path_to_requery)
 	m_requery_path						=	strings::duplicate(memory::g_mt_allocator, path_to_requery);
 }
 
+
+template < typename T >
+inline query_result_for_cook::query_result_for_cook(T const& other)
+{
+	swap(*this, other);
+}
+
 } // namespace resources
 } // namespace xray

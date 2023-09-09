@@ -16,7 +16,7 @@ namespace fs_new {
 #pragma message(XRAY_TODO("fix it"))
 void   log_last_error (pcstr initiator, pcstr header)
 {
-	//XRAY_UNREFERENCED_PARAMETERS(initiator, header);
+	XRAY_UNREFERENCED_PARAMETERS(initiator, header);
 	/*pstr message					=	core::debug::platform::fill_format_message	((int)GetLastError());
 	fixed_string<128>	full_initiator	=	XRAY_LOG_MODULE_INITIATOR;
 	if ( initiator && *initiator )

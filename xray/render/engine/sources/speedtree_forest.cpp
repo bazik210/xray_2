@@ -148,6 +148,14 @@ void speedtree_forest::get_visible_tree_components(renderer_context* context,
 												   bool sort_result, 
 												   tree_render_info_array_type& out_tree_render_info_array)
 {
+	if (this == NULL) {
+		if (context->speedtree_cp_log) {
+			LOGI_INFO("info", "Can't get speed tree visible components! Something wrong with LOD's?");
+			context->speedtree_cp_log = false;
+		}
+		return;
+	} //stub
+
 	BEGIN_TIMER(statistics::ref().speedtree_stat_group.culling_time);
 	cull_and_compute_lod			(context, lod_reference_point, sort_result);
 	END_TIMER;

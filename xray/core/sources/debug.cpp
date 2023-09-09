@@ -142,6 +142,8 @@ void xray::debug::on_error		( bool* do_debug_break, xray::process_error_enum pro
 
 	string4096				description;
 	vsnprintf				( description, sizeof(description), sizeof(description) - 1, format, mark );
+	
+	va_end					( mark );
 
 	process					( do_debug_break, process_error, ignore_always, assert_type, reason, expression, description, file, function, line );
 }
@@ -158,6 +160,8 @@ void xray::debug::on_error		( bool* do_debug_break, xray::process_error_enum pro
 
 	string4096				description;
 	vsnprintf				( description, sizeof(description), sizeof(description) - 1, format, mark );
+	
+	va_end					( mark );
 
 	pcstr const graphics	= core::debug::platform::get_graphics_api_error_description( error_code );
 	if ( graphics ) {

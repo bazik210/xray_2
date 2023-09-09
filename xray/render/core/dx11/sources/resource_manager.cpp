@@ -1863,7 +1863,8 @@ struct load_texture_delegate
 			dest_texture = 0;
 			//DELETE ((load_texture_delegate*)this);
 			// YOLO
-			free(this);
+			delete this;
+			//free(this);
 			return;
 		}
 		
@@ -1949,7 +1950,8 @@ struct load_texture_delegate
 		
 		//DELETE ((load_texture_delegate*)this);
 		// YOLO
-		free(this);
+		// TEMP!!!
+	    //free(this);
 	}
 
 private:

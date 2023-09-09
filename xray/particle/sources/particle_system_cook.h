@@ -28,7 +28,7 @@ public:
 													 u32 &								out_offset_to_file, 
 													 bool								file_exist)
 	{
-		//XRAY_UNREFERENCED_PARAMETERS		(in_query, file_exist);
+		XRAY_UNREFERENCED_PARAMETERS		(in_query.load(), file_exist);
 		out_offset_to_file				=	sizeof(particle_system);
 		u32 const size					=	sizeof(particle_system) + file_size;
 		return								mutable_buffer(UNMANAGED_ALLOC(char, size), size);
