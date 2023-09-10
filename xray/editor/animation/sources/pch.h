@@ -25,6 +25,7 @@ namespace animation_editor {
 } // namespace animation_editor
 } // namespace xray
 
+#pragma comment(lib, "legacy_stdio_definitions.lib")
 
 #pragma make_public (xray::animation_editor::allocator_type)
 #pragma make_public (xray::render::world)

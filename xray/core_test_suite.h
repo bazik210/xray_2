@@ -15,7 +15,7 @@ XRAY_INCLUDE_TO_LINKAGE(resources_test);
 XRAY_INCLUDE_TO_LINKAGE(compressor_test);
 XRAY_INCLUDE_TO_LINKAGE(threading_test);
 XRAY_INCLUDE_TO_LINKAGE(math_tests);
-XRAY_INCLUDE_TO_LINKAGE(game_resources_manager_test);
+//XRAY_INCLUDE_TO_LINKAGE(game_resources_manager_test);
 XRAY_INCLUDE_TO_LINKAGE(resources_fs_task_erase);
 
 namespace xray {

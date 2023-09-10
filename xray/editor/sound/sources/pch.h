@@ -26,6 +26,8 @@ namespace sound_editor {
 #include <xray/sound/world.h>
 #include <xray/render/world.h>
 
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+
 #pragma make_public (xray::sound_editor::allocator_type)
 #pragma make_public (xray::sound::world)
 #pragma make_public (xray::render::world)

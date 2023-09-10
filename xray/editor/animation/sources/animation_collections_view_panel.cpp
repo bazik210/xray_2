@@ -382,7 +382,7 @@ void animation_collections_view_panel::on_tree_mouse_move(Object^, MouseEventArg
 				operation = animation_collections_editor_drag_drop_operation::tree_view_folder;
 
 			data->SetData( "item_type", node_type );
-			data->SetData( "animation_item_type", animation_item_type::animation_collection_item );
+			data->SetData( "animation_item_type", static_cast<int>(animation_item_type::animation_collection_item ));
 			if( ( ModifierKeys & Keys::Control ) == Keys::Control )
 				m_raw_files_tree_view->DoDragDrop( data, DragDropEffects::Copy );
 			else
