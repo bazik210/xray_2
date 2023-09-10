@@ -1,6 +1,6 @@
 project(engine_pc_dx11 LANGUAGES CXX)
 
-add_library(engine_pc_dx11 STATIC
+add_library(engine_pc_dx11 SHARED
 							# include
 							"${CMAKE_CURRENT_SOURCE_DIR}/../library_linkage.h"
 							# ./
@@ -32,3 +32,5 @@ target_link_libraries(engine_pc_dx11 PUBLIC
 )
 
 set_target_properties(engine_pc_dx11 PROPERTIES FOLDER "engine")
+
+target_link_libraries(engine_pc_dx11 PRIVATE legacy_stdio_definitions.lib)

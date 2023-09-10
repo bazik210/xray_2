@@ -11,7 +11,7 @@ add_compile_options(/MP)
 add_compile_definitions(BOOST_NO_EXCEPTIONS)
 
 # Force Scaleform debug mode
-add_compile_definitions(SF_BUILD_DEBUG)
+# add_compile_definitions(SF_BUILD_DEBUG)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #
@@ -186,13 +186,13 @@ function(xr_setup_editors)
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
 	
-    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v2.0")
-    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
 
     # Set Default Namespace
     set_property(TARGET WeifenLuo.WinFormsUI.Docking PROPERTY VS_GLOBAL_RootNamespace "WeifenLuo.WinFormsUI")
@@ -206,15 +206,15 @@ function(xr_setup_editors)
     )
 
     set_target_properties(model_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(particle_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(sound_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(test_form PROPERTIES VS_DOTNET_REFERENCES
@@ -222,15 +222,15 @@ function(xr_setup_editors)
     )
 
     set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml"
+        "System;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml"
     )
 
     set_target_properties(WPFToolkit.Extended PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
+        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
     )
 
     set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration"
+        "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration"
     )
 
 endfunction()
@@ -598,7 +598,7 @@ function(xr_set_target_defaults_stalker2 TARGET)
         WIN64
         WINDOWS
         _HAS_EXCEPTIONS=0
-        XRAY_STATIC_LIBRARIES
+#       XRAY_STATIC_LIBRARIES
     )
 
     xr_disable_target_exception_handling(${TARGET})
@@ -612,11 +612,10 @@ function(xr_set_target_defaults_stalker2 TARGET)
     set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
 
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
-        /Ob2
         /MD
         /Y-
         /MP
@@ -645,7 +644,7 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
         WIN64
         WINDOWS
         _HAS_EXCEPTIONS=0
-        XRAY_STATIC_LIBRARIES
+#       XRAY_STATIC_LIBRARIES
     )
 
     # set compiler flags																				
@@ -823,21 +822,14 @@ function(xr_set_target_defaults_editor TARGET)
 	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
 	set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
 
+   	set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "")
+
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
-        /Ox
-        /Ob2
-        /Oi
-        /Ot
-        /Oy
-        /GT
-        /GF
         /MD
-        /GS-
-        /fp:fast
         /Y-
         /MP
     )

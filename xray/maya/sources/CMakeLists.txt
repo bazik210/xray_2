@@ -118,7 +118,7 @@ target_link_libraries(maya2011 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
-	scaleform
+#	scaleform
 	bullet
 	opengl32.lib
 	OpenMayaUI.lib
@@ -256,7 +256,7 @@ target_link_libraries(maya2012 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
-	scaleform
+#	scaleform
 	bullet
 	opengl32.lib
 	OpenMayaUI.lib

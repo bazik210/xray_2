@@ -99,7 +99,7 @@ add_library(core STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/threading_functions_win.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/threading_functions_win_xbox360.cpp"
 	# tests
-	#"${CMAKE_CURRENT_SOURCE_DIR}/threading_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/threading_test.cpp"
 	# os_extensions
 	# functions
 	"${CMAKE_CURRENT_SOURCE_DIR}/os_functions_win.cpp"
@@ -152,15 +152,15 @@ add_library(core STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/resources_hdd_manager.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/resources_hdd_manager.h"
 	# test
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test.cpp"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_base_cook.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_configuration.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_inplace_managed.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_inplace_unmanaged.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_managed.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_resource.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_translate_query.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_unmanaged.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_base_cook.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_configuration.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_inplace_managed.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_inplace_unmanaged.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_managed.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_resource.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_translate_query.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/resources_test_unmanaged.h"
 	# helper
 	"${CMAKE_CURRENT_SOURCE_DIR}/member_to_functor.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/member_to_functor_inline.h"
@@ -238,8 +238,8 @@ add_library(core STATIC
 	#"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_resource_with_quality.h"
 	#"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_resource_with_quality_cook.cpp"
 	#"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_resource_with_quality_cook.h"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_utils.cpp"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_utils.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_utils.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_test_utils.h"
 	# satisfaction
 	"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_satisfaction_tree.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/game_resman_satisfaction_tree.h"
@@ -292,7 +292,7 @@ add_library(core STATIC
 	# constants
 	"${CMAKE_CURRENT_SOURCE_DIR}/math_constants.cpp"
 	# tests
-	#"${CMAKE_CURRENT_SOURCE_DIR}/math_tests.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/math_tests.cpp"
 	# functions
 	"${CMAKE_CURRENT_SOURCE_DIR}/math_functions.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/math_functions_win_xbox360.cpp"
@@ -336,7 +336,7 @@ add_library(core STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/console_command.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/console_command_processor.cpp"
 	# compression
-	#"${CMAKE_CURRENT_SOURCE_DIR}/compressors_test.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/compressors_test.cpp"
 	# ppmd
 	"${CMAKE_CURRENT_SOURCE_DIR}/compressor_ppmd.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/compressor_ppmd_allocator.h"

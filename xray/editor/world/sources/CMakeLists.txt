@@ -603,10 +603,10 @@ target_link_libraries(editor PUBLIC
 	editor_controls
 )
 
-set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
 
 set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
-    "Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+    "Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
 )
 
 set_target_properties(editor PROPERTIES FOLDER "engine/editors")
