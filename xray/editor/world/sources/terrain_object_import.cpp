@@ -15,7 +15,7 @@
 #include "tool_terrain.h"
 
 #include <FreeImage/FreeImage.h>
-#pragma comment(lib, "xray_FreeImage.lib" )
+#pragma comment(lib, "xray_FreeImageDLL.lib" )
 
 namespace xray {
 namespace editor {

@@ -24,3 +24,7 @@ target_link_libraries(engine_pc PUBLIC
 )
 
 set_target_properties(engine_pc PROPERTIES FOLDER "engine")
+
+# set_target_properties(engine_pc PROPERTIES
+# 	 OUTPUT_NAME "xray_engine_pc_dx11"
+# )
