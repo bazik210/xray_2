@@ -12,10 +12,19 @@ target_include_directories(engine_pc_dx11 PRIVATE
     ${SOLUTION_DIR_INCLUDE_PATH}
 	${THIRDPARTY_DIR_INCLUDE_PATH}
 )
+
+if(x64)
 target_link_directories(engine_pc_dx11 PRIVATE
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 )
+else()
+target_link_directories(engine_pc_dx11 PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+)
+endif()
+
 target_link_libraries(engine_pc_dx11 PUBLIC
 	zlibN
 	bugtrap

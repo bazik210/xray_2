@@ -218,8 +218,14 @@ target_include_directories(renderer_core_pc_dx11 PUBLIC
 	"${DXSDK_DIR_PATH}/Include"
 )
 
+if(x64)
 target_link_directories(renderer_core_pc_dx11 PUBLIC
 	"${DXSDK_DIR_PATH}/Lib/x64"
 )
+else()
+target_link_directories(renderer_core_pc_dx11 PUBLIC
+	"${DXSDK_DIR_PATH}/Lib/x86"
+)
+endif()
 
 set_target_properties(renderer_core_pc_dx11 PROPERTIES FOLDER "engine/renderers/pc/dx11")

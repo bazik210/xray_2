@@ -13,6 +13,9 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
+# set(CMAKE_GENERATOR_PLATFORM x64)
+set(CMAKE_GENERATOR_PLATFORM Win32)
+
 #################################
 # GLOBAL COMPILER CONFIGURATION #
 #################################
@@ -248,7 +251,11 @@ function(xr_setup_network)
     xr_set_target_defaults_network_32(login_server)
 
     # x64
+if(x64)
     xr_set_target_defaults_network_64(game_server)
+else()
+    xr_set_target_defaults_network_32(game_server)
+endif()
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -265,31 +272,55 @@ function(xr_setup_plugins)
     target_include_directories(maya2011 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
     )
+
+if(x64)
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
     )
+else()
+    target_link_directories(maya2011 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+    )
+endif()
 
     set_target_properties(maya_animation PROPERTIES
-		OUTPUT_NAME "xray_maya_animation"
+	 OUTPUT_NAME "xray_maya_animation"
 	)
 
     set_target_properties(maya2012 PROPERTIES
-		OUTPUT_NAME "xray.maya2012"
-        SUFFIX ".mll"
+	 OUTPUT_NAME "xray.maya2012"
+         SUFFIX ".mll"
 	)
     target_include_directories(maya2012 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012
     )
+
+if(x64)
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
+
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
+else()
+    target_link_directories(maya2012 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+	${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib32
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+    )
+endif()
+
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -359,17 +390,34 @@ target_link_libraries(stalker2_pc_dx11 PRIVATE
 	engine_pc_dx11
 	legacy_stdio_definitions.lib
 )
+if(x64)
 target_link_directories(stalker2_pc_dx11 PRIVATE
-#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
-	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${DXSDK_DIR_PATH}/Lib/x64
 )
+else()
+target_link_directories(stalker2_pc_dx11 PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+	${DXSDK_DIR_PATH}/Lib/x86
+)
+endif()
 
+if(x64)
 xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
 target_compile_definitions(stalker2_pc_opengl PRIVATE
 	PLATFORM_WIN64
 	WIN64
 )
+else()
+xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
+target_compile_definitions(stalker2_pc_opengl PRIVATE
+	PLATFORM_WIN32
+	WIN32
+)
+endif()
+
 target_include_directories(stalker2_pc_opengl PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
@@ -427,11 +475,21 @@ target_link_libraries(stalker2_pc_opengl PRIVATE
 	dxerr.lib
 	d3dcompiler.lib
 )
+
+
+if(x64)
 target_link_directories(stalker2_pc_opengl PRIVATE
-#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
-	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${DXSDK_DIR_PATH}/Lib/x64
 )
+else()
+target_link_directories(stalker2_pc_opengl PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+	    ${DXSDK_DIR_PATH}/Lib/x86
+)
+endif()
 
 endfunction()
 
@@ -439,9 +497,9 @@ endfunction()
 function(xr_set_game_name TARGET)
 	if (MSVC)
 		if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(PLATFORM_NAME "win64")
+			set(PLATFORM_NAME "WIN64")
 		else()
-			set(PLATFORM_NAME "win64")
+			set(PLATFORM_NAME "WIN32")
 		endif()
 	endif()
 
@@ -489,13 +547,23 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+         PLATFORM_WIN64
+         WIN64
+         WINDOWS
+         _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	     PLATFORM_WIN32
+         WIN32
+         WINDOWS
+         _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set properties for CLR
     target_compile_definitions(${TARGET} PRIVATE _MANAGED)
@@ -528,12 +596,12 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+	${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
     # list all Target properties
@@ -544,6 +612,7 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64
@@ -551,6 +620,15 @@ function(xr_set_target_defaults_static_lib_C TARGET)
         WINDOWS
         _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	PLATFORM_WIN32
+        WIN32
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
@@ -576,12 +654,12 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
     # list all Target properties
@@ -592,21 +670,32 @@ function(xr_set_target_defaults_stalker2 TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
-#       XRAY_STATIC_LIBRARIES
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+endif()
 
     xr_disable_target_exception_handling(${TARGET})
 
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
     set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
@@ -638,15 +727,25 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
-#       XRAY_STATIC_LIBRARIES
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
     )
-
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+endif()
     # set compiler flags																				
     target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
@@ -664,7 +763,7 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
     # set Additional Library Directories
@@ -680,13 +779,23 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
     )
-
+else()
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
@@ -722,7 +831,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-    
+if(x64)
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -732,6 +841,17 @@ function(xr_set_target_defaults_shared_lib TARGET)
         /FIXED:NO
         /MACHINE:X64
     )
+else()
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+        /DEBUG
+        /OPT:REF
+        /OPT:ICF
+        /DYNAMICBASE:NO
+        /FIXED:NO
+        /MACHINE:X86
+    )
+endif()
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()
@@ -740,12 +860,23 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set properties for CLR
     target_compile_definitions(${TARGET} PRIVATE _MANAGED)
@@ -789,7 +920,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-    
+if(x64)   
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -799,7 +930,17 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         /FIXED:NO
         /MACHINE:X64
     )
-
+else()
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+        /DEBUG
+        /OPT:REF
+        /OPT:ICF
+        /DYNAMICBASE:NO
+        /FIXED:NO
+        /MACHINE:X86
+    )
+endif()  
     xr_print_target_linker_flags(${TARGET})
 endfunction()
 
@@ -809,14 +950,25 @@ function(xr_set_target_defaults_editor TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if(x64)
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         _WIN32_WINNT=0x0501
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+          PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+        _WIN32_WINNT=0x0501
+          PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
 
 	# set properties for CLR
 	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
@@ -856,7 +1008,7 @@ function(xr_set_target_defaults_editor TARGET)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_print_target_compile_flags(${TARGET})
-
+if(x64)
     target_link_options(${TARGET} PRIVATE
         /DEBUG
         /SUBSYSTEM:WINDOWS
@@ -865,7 +1017,16 @@ function(xr_set_target_defaults_editor TARGET)
         /MACHINE:X64
         /CLRTHREADATTRIBUTE:STA
     )
-	
+else()
+    target_link_options(${TARGET} PRIVATE
+        /DEBUG
+        /SUBSYSTEM:WINDOWS
+        /DYNAMICBASE:NO
+        /DELAY:UNLOAD
+        /MACHINE:X86
+        /CLRTHREADATTRIBUTE:STA
+    )
+endif()
     # Visual Studio 17 (2022) and above require a flag to indicate .DLLs for CLR
     if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
     set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
@@ -885,7 +1046,6 @@ function(xr_set_target_defaults_network_32 TARGET)
 
     # set platform as x86
     target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN32
         WIN32
         _CONSOLE
         _HAS_EXCEPTIONS=0
@@ -948,8 +1108,8 @@ function(xr_set_target_defaults_network_64 TARGET)
 
     # set platform as x64
     target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        _HAS_EXCEPTIONS=0
+      PLATFORM_WIN64
+      _HAS_EXCEPTIONS=0
     )
 
     # set compiler flags
@@ -974,7 +1134,7 @@ function(xr_set_target_defaults_network_64 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
     # set Additional Library Directories
@@ -994,13 +1154,15 @@ function(xr_set_target_defaults_network_64 TARGET)
         /DYNAMICBASE:NO
         /FIXED:NO
         /DELAY:UNLOAD
-        /MACHINE:X64
+		/MACHINE:X64
     )
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()
 
 function(xr_set_target_defaults_plugin TARGET)
+
+if(x64)
     # set platform as x64
     target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64
@@ -1008,6 +1170,15 @@ function(xr_set_target_defaults_plugin TARGET)
         WINDOWS
         _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+    target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN32
+        WIN32
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
