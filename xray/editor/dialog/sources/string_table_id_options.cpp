@@ -61,7 +61,7 @@ void string_table_id_options::save(xray::configs::lua_config_value cfg)
 
 void string_table_id_options::add_batch_file_name_for_localization(pcstr l_name)
 {
-	batch_file_names_type::iterator it = m_batch_file_names->find(l_name);
+	batch_file_names_type::iterator it = m_batch_file_names->find((char*)l_name);
 	R_ASSERT(it==m_batch_file_names->end());
 	pstr loc_name = strings::duplicate(g_allocator, l_name);
 	m_batch_file_names->insert(std::pair<pstr, pstr>(loc_name, strings::duplicate(g_allocator, "")));
@@ -69,7 +69,7 @@ void string_table_id_options::add_batch_file_name_for_localization(pcstr l_name)
 
 void string_table_id_options::remove_batch_file_name_for_localization(pcstr l_name)
 {
-	batch_file_names_type::iterator it = m_batch_file_names->find(l_name);
+	batch_file_names_type::iterator it = m_batch_file_names->find((char*)l_name);
 	R_ASSERT(it!=m_batch_file_names->end());
 	FREE(it->second);
 	FREE(it->first);
@@ -78,7 +78,7 @@ void string_table_id_options::remove_batch_file_name_for_localization(pcstr l_na
 
 void string_table_id_options::set_batch_file_name(pcstr loc_name, pcstr fn)
 {
-	batch_file_names_type::iterator it = m_batch_file_names->find(loc_name);
+	batch_file_names_type::iterator it = m_batch_file_names->find((char*)loc_name);
 	R_ASSERT(it!=m_batch_file_names->end());
 	FREE(it->second);
 	it->second = strings::duplicate(g_allocator, fn);
@@ -86,7 +86,7 @@ void string_table_id_options::set_batch_file_name(pcstr loc_name, pcstr fn)
 
 pcstr string_table_id_options::batch_file_name(pcstr loc_name)
 {
-	batch_file_names_type::iterator it = m_batch_file_names->find(loc_name);
+	batch_file_names_type::iterator it = m_batch_file_names->find((char*)loc_name);
 	R_ASSERT(it!=m_batch_file_names->end());
 	return it->second;
 }

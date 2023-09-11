@@ -125,7 +125,7 @@ void dialogs_manager::on_editor_dialog_loaded(xray::resources::queries_result& r
 	dialog_resources_ptr res = static_cast_resource_ptr<dialog_resources_ptr>(result[0].get_unmanaged_resource());
 	pcstr name = res->get_dialog()->name();
 	editor_dialogs_list::iterator it = (m_editor_dialogs_list.insert(std::pair<pcstr, dialog_resources_ptr>(name, res.c_ptr()))).first;
-	editor_callbacks_list::iterator f_it = m_editor_callbacks.find(name);
+	editor_callbacks_list::iterator f_it = m_editor_callbacks.find((char*)name);
 	if(f_it!=m_editor_callbacks.end())
 	{
 		f_it->second(it->second);
@@ -158,7 +158,7 @@ void dialogs_manager::on_game_dialog_loaded(xray::resources::queries_result& res
 	game_dialog_ptr res = static_cast_resource_ptr<game_dialog_ptr>(result[0].get_unmanaged_resource());
 	pcstr name = res.c_ptr()->text();
 	game_dialogs_list::iterator it = (m_game_dialogs_list.insert(std::pair<pcstr, game_dialog_ptr>(name, res.c_ptr()))).first;
-	game_callbacks_list::iterator f_it = m_game_callbacks.find(name);
+	game_callbacks_list::iterator f_it = m_game_callbacks.find((char*)name);
 	if(f_it!=m_game_callbacks.end())
 	{
 		f_it->second(it->second);

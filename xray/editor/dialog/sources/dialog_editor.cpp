@@ -266,7 +266,7 @@ void dialog_editor_impl::save_string_table()
 		for(; str_it!=get_string_tables()->string_table_ids()->end(); ++str_it)
 		{
 			pcstr key = str_it->first;
-			references_table::iterator opt_it = m_references_table->find(key);
+			references_table::iterator opt_it = m_references_table->find((char*)key);
 			R_ASSERT(opt_it!=m_references_table->end());
 			if(opt_it->second->references_count()==0 && str_it->second->check_on_empty_text())
 				continue;
@@ -335,7 +335,7 @@ void dialog_editor_impl::add_new_id(System::String^ id, System::String^ txt)
 
 bool dialog_editor_impl::change_ids_text(System::String^ id, System::String^ txt, bool use_message)
 {
-	references_table::iterator it = m_references_table->find(unmanaged_string(id).c_str());
+	references_table::iterator it = m_references_table->find((char*)unmanaged_string(id).c_str());
 	R_ASSERT(it!=m_references_table->end());
 	if(use_message && it->second->references_count()>1)
 	{
@@ -355,14 +355,14 @@ bool dialog_editor_impl::change_ids_text(System::String^ id, System::String^ txt
 u32 dialog_editor_impl::id_category(System::String^ id)
 {
 	unmanaged_string str(id);
-	references_table::iterator it = m_references_table->find(str.c_str());
+	references_table::iterator it = m_references_table->find((char*)str.c_str());
 	R_ASSERT(it!=m_references_table->end(), "dialog_editor_impl::id_category. [%s] id is not found", id);
 	return it->second->category();
 }
 
 void dialog_editor_impl::set_id_category(System::String^ id, u32 new_cat)
 {
-	references_table::iterator it = m_references_table->find(unmanaged_string(id).c_str());
+	references_table::iterator it = m_references_table->find((char*)unmanaged_string(id).c_str());
 	R_ASSERT(it!=m_references_table->end());
 	it->second->set_category(new_cat);
 }
@@ -381,11 +381,11 @@ void dialog_editor_impl::change_references_count(System::String^ id1, System::St
 	if(id1!=nullptr)
 	{
 		unmanaged_string str_id = unmanaged_string(id1);
-		references_table::iterator it = m_references_table->find(str_id.c_str());
+		references_table::iterator it = m_references_table->find((char*)str_id.c_str());
 		if(it==m_references_table->end())
 		{
 			add_new_id(id1, "");
-			it = m_references_table->find(str_id.c_str());
+			it = m_references_table->find((char*)str_id.c_str());
 			R_ASSERT(it!=m_references_table->end());
 		}
 
@@ -396,11 +396,11 @@ void dialog_editor_impl::change_references_count(System::String^ id1, System::St
 	if(id2!=nullptr)
 	{
 		unmanaged_string str_id = unmanaged_string(id2);
-		references_table::iterator it = m_references_table->find(str_id.c_str());
+		references_table::iterator it = m_references_table->find((char*)str_id.c_str());
 		if(it==m_references_table->end())
 		{
 			add_new_id(id2, "");
-			it = m_references_table->find(str_id.c_str());
+			it = m_references_table->find((char*)str_id.c_str());
 			R_ASSERT(it!=m_references_table->end());
 		}
 
@@ -469,7 +469,7 @@ void dialog_editor_impl::set_last_translators_id(System::String^ lang_name, u32 
 u32 dialog_editor_impl::references_count(System::String^ id)
 {
 	unmanaged_string str_id = unmanaged_string(id);
-	references_table::iterator it = m_references_table->find(str_id.c_str());
+	references_table::iterator it = m_references_table->find((char*)str_id.c_str());
 	R_ASSERT(it!=m_references_table->end());
 	return it->second->references_count();
 }
@@ -477,7 +477,7 @@ u32 dialog_editor_impl::references_count(System::String^ id)
 void dialog_editor_impl::set_batch_file_name(System::String^ id, System::String^ lang_name, System::String^ new_file_name)
 {
 	unmanaged_string str_id = unmanaged_string(id);
-	references_table::iterator it = m_references_table->find(str_id.c_str());
+	references_table::iterator it = m_references_table->find((char*)str_id.c_str());
 	R_ASSERT(it!=m_references_table->end());
 	it->second->set_batch_file_name(unmanaged_string(lang_name).c_str(), unmanaged_string(new_file_name).c_str());
 }
@@ -485,7 +485,7 @@ void dialog_editor_impl::set_batch_file_name(System::String^ id, System::String^
 bool dialog_editor_impl::is_batch_file_name_empty(System::String^ id, System::String^ lang_name)
 {
 	unmanaged_string str_id = unmanaged_string(id);
-	references_table::iterator it = m_references_table->find(str_id.c_str());
+	references_table::iterator it = m_references_table->find((char*)str_id.c_str());
 	R_ASSERT(it!=m_references_table->end());
 	pcstr bfn = it->second->batch_file_name(unmanaged_string(lang_name).c_str());
 	if(bfn==NULL || strings::compare(bfn, "")==0)
@@ -497,7 +497,7 @@ bool dialog_editor_impl::is_batch_file_name_empty(System::String^ id, System::St
 String^ dialog_editor_impl::batch_file_name(System::String^ id, System::String^ lang_name)
 {
 	unmanaged_string str_id = unmanaged_string(id);
-	references_table::iterator it = m_references_table->find(str_id.c_str());
+	references_table::iterator it = m_references_table->find((char*)(str_id.c_str()));
 	R_ASSERT(it!=m_references_table->end());
 	pcstr bfn = it->second->batch_file_name(unmanaged_string(lang_name).c_str());
 	return gcnew System::String(bfn);

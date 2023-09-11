@@ -37,9 +37,9 @@ void get_plane_to_convex_intersection_points( math::plane const& p, math::convex
 
 	typedef math::convex::planes_type planes_type;
 	planes_type const& convex_planes = c.get_planes();
-	planes_type::const_iterator plane_it = std::find_if( convex_planes.begin(), convex_planes.end(), std::bind2nd( math::convex::plane_similar(), p ) );
+	planes_type::const_iterator plane_it = std::find_if( convex_planes.begin(), convex_planes.end(), std::bind( math::convex::plane_similar(), std::placeholders::_1, p ) );
 	if ( plane_it == convex_planes.end() )
-		plane_it = std::find_if( convex_planes.begin(), convex_planes.end(), std::bind2nd( math::convex::plane_similar(),  math::plane( -p.normal, -p.d ) ) );
+		plane_it = std::find_if(convex_planes.begin(), convex_planes.end(), std::bind( math::convex::plane_similar(), std::placeholders::_1, math::plane(-p.normal, -p.d)));
 	if ( plane_it != convex_planes.end() )
 	{
 		typedef math::convex::adjacencies_type adjacencies_type;
@@ -60,7 +60,7 @@ void get_plane_to_convex_intersection_points( math::plane const& p, math::convex
 		for ( math::convex::cache::edges_type::const_iterator it = cache.edges.begin(); it != cache.edges.end(); ++it )
 		{
 			if ( p.intersect_segment( cache.vertices[ it->first ], cache.vertices[ it->second ], intersection ) &&
-				 std::find_if( temp.begin(), temp.end(), std::bind2nd( float3_similar(), intersection ) ) == temp.end() )
+				 std::find_if( temp.begin(), temp.end(), std::bind(float3_similar(), std::placeholders::_1, intersection ) ) == temp.end() )
 					temp.push_back( intersection );
 		}
 	}
