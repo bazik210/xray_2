@@ -797,19 +797,12 @@ else()
     )
 endif()
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
-        /Ox
-        /Ob2
-        /Oi
-        /Ot
-        /Oy
-        /GT
         /GF
         /MD
-        /GS-
         /fp:fast
         /Y-
         /MP
