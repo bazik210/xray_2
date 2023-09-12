@@ -166,7 +166,7 @@ crt_allocator::crt_allocator		( ) :
 #   elif _MSC_VER == 1800
 	pcstr const library_name = "msvcr120.dll";
 #   elif _MSC_VER >= 1900
-	pcstr const library_name = "api-ms-win-crt-heap-l1-1-0.dll";
+    pcstr const library_name = "MSVCRT.DLL"; //"api-ms-win-crt-heap-l1-1-0.dll";
 #	else // #if _MSC_VER == 1500
 #		error define correct library name here
 #	endif // #if _MSC_VER == 1500

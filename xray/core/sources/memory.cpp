@@ -124,7 +124,7 @@ void xray::memory::preinitialize			( )
 	XRAY_CONSTRUCT_REFERENCE					( s_allocators, allocators_type );
 
 #ifndef XRAY_STATIC_LIBRARIES
-	s_crt_allocator.do_register					(             0,	"C runtime library"		);
+	s_crt_allocator.do_register					(       8*Mb,	"C runtime library"		);
 #else // #ifndef XRAY_STATIC_LIBRARIES
 	#if XRAY_USE_CRT_MEMORY_ALLOCATOR
 		g_crt_allocator->do_register				(			0,	"C runtime library"		);
@@ -145,7 +145,7 @@ void xray::memory::preinitialize			( )
 
 #if XRAY_DEBUG_ALLOCATOR
 	if ( !s_debug_allocator_memory.is_set() )
-		register_debug_allocator				( 0 );
+		register_debug_allocator				( 8*Mb );
 	else {
 		int result;
 		if ( !s_debug_allocator_memory.is_set_as_number(&result) )
@@ -231,8 +231,16 @@ void xray::memory::initialize				( )
 
 	allocators_type::iterator i			= s_allocators->begin( );
 	allocators_type::iterator const e	= s_allocators->end( );
-	for ( ; i != e; ++i )
-		(*i).allocator->initialize	( (*i).arena_address, (*i).arena_size, (*i).arena_id);
+
+	for ( ; i != e; ++i ) {
+			if ((*i).arena_size != 0)
+			{
+				(*i).allocator->initialize	( (*i).arena_address, (*i).arena_size, (*i).arena_id);
+			}
+			else {
+				(*i).allocator->initialize(malloc(8*Mb), 8*Mb, (*i).arena_id);
+			}
+		}
 
 #if XRAY_USE_MEMORY_MONITOR
 	monitor::initialize			( );
@@ -248,7 +256,7 @@ void xray::memory::initialize				( )
 
 	on_after_memory_initialized	( );
 
-	memory::dump_statistics		( true );
+	//memory::dump_statistics		( true );
 }
 
 void xray::memory::finalize				( )
