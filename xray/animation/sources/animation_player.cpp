@@ -71,9 +71,9 @@ bool animation_player::set_target	 ( expression const& expression, u32 const cur
 		mixing_buffer_size
 	);
 
-	#ifndef MASTER_GOLD
-	m_mixing_tree.dump_tree		( current_time_in_ms );
-	#endif // #ifndef MASTER_GOLD
+	#ifdef ANIM_DEBUG
+		m_mixing_tree.dump_tree		( current_time_in_ms );
+	#endif // #ifndef ANIM_DEBUG
 
 	mixing::n_ary_tree temp		= 
 		mixing::n_ary_tree_transition_tree_constructor(
@@ -84,9 +84,9 @@ bool animation_player::set_target	 ( expression const& expression, u32 const cur
 			current_time_in_ms,
 			m_first_subscribed_channel
 		).computed_tree( m_mixing_tree );
-	#ifndef MASTER_GOLD
-	temp.dump_tree				( current_time_in_ms );
-	#endif // #ifndef MASTER_GOLD
+	#ifdef ANIM_DEBUG
+		temp.dump_tree				( current_time_in_ms );
+	#endif // #ifndef ANIM_DEBUG
 
 	R_ASSERT					( !mixing_buffer.size(), "buffer calculation failed: %d bytes left", mixing_buffer.size() );
 	m_mixing_tree				= temp;
@@ -108,8 +108,8 @@ bool animation_player::set_target_and_tick		( expression const& expression, u32 
 
 	tick						( current_time_in_ms );
 
-	#ifndef MASTER_GOLD
-	if ( is_new_target )
+	#ifdef ANIM_DEBUG
+		if ( is_new_target )
 		m_mixing_tree.dump_tree	( current_time_in_ms );
 	#endif // #ifndef MASTER_GOLD
 

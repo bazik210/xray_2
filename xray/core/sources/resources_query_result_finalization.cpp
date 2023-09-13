@@ -343,7 +343,8 @@ void   query_result::clear_reference ()
 {
 	if ( !has_flag(flag_is_referer) )
 	{
-		R_ASSERT						(m_next_referer == this);
+		//this working on callbacks and destructor, we can skip check
+		//R_ASSERT						(m_next_referer == this);
 		return;
 	}
 

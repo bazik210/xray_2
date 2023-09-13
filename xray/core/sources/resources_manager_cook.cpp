@@ -230,6 +230,11 @@ void   resources_manager::cooker_thread_tick	()
 
 	dispatch_callbacks							(false);
 	delete_delayed_unmanaged_resources			();
+
+	if (!resource_to_cook) {
+		return;
+	}
+
 	create_resources							(m_resources_to_create, resource_to_cook, false);
 
 	decompress_resources						();

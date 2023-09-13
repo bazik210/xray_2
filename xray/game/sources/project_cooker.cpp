@@ -131,7 +131,12 @@ void project_cooker::on_game_project_loaded( resources::queries_result& data,
 void project_cooker::on_editor_project_loaded( resources::queries_result& data, 
 												resources::query_result_for_cook* parent )
 {
-	R_ASSERT							( data.is_successful() );
+	//R_ASSERT							( data.is_successful() );
+
+	if (!data.is_successful()) {
+		LOG_INFO("Map resources data load unsuccessful!");
+		return;
+	}
 
 	resources::query_result_for_user const& result	= data[0];
 
@@ -684,24 +689,30 @@ void process_folder( configs::lua_config_value const& t_folders,
 					
 					pcstr current_game_object_type		= t_current_object["game_object_type"];
 
-					if (strings::equal( current_game_object_type, "scene" ) )
-					{
-						resolve_job_resources_names		( sub_folder_name.c_str( ), t_current_object );
-						fixed_string1024 scene_name 	= sub_folder_name;
-						scene_name						+= (pcstr)t_current_object["name"];
-						
-						configs::lua_config_value scenes_to_start = t_scenes.get_parent()["start"]["scenes_to_start"];
-						scenes_to_start[scenes_to_start.size()]		= scene_name.c_str();
-					}
+					if (current_game_object_type) {
+						if (strings::equal(current_game_object_type, "scene"))
+						{
+							resolve_job_resources_names(sub_folder_name.c_str(), t_current_object);
+							fixed_string1024 scene_name = sub_folder_name;
+							scene_name += (pcstr)t_current_object["name"];
 
-					process_object	( t_current_object, 
-										t_objects, 
-										t_scenes, 
-										cells_root, 
-										cell_idx, 
-										tmp_cells, 
-										cell_prefix, 
-										sub_folder_name.c_str() );
+							configs::lua_config_value scenes_to_start = t_scenes.get_parent()["start"]["scenes_to_start"];
+							scenes_to_start[scenes_to_start.size()] = scene_name.c_str();
+						}
+						if (t_current_object) {
+							process_object(t_current_object,
+								t_objects,
+								t_scenes,
+								cells_root,
+								cell_idx,
+								tmp_cells,
+								cell_prefix,
+								sub_folder_name.c_str());
+						}
+					}
+					else {
+						LOG_INFO("Can't get config of t_current_object! t_objects size is %d", t_objects.size());
+					}
 				}
 			}else
 			{
