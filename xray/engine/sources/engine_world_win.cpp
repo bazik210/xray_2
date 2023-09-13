@@ -36,6 +36,7 @@ static pcstr s_window_id					= XRAY_ENGINE_ID " DX11 Renderer Window";
 static pcstr s_window_class_id				= XRAY_ENGINE_ID " DX11 Renderer Window Class ID";
 
 xray::command_line::key	s_no_log_file		("no_log_file", "no_log_file", "logging", "disables writing log to a file", "<no arguments>");
+xray::command_line::key s_fullscreen		("fullscreen", "fullscreen", "engine", "Fullscreen mode");
 
 static WNDCLASSEX s_window_class;
 
@@ -114,13 +115,15 @@ HWND new_window			( )
 	u32 const screen_size_x	= GetSystemMetrics( SM_CXSCREEN );
 	u32 const screen_size_y	= GetSystemMetrics( SM_CYSCREEN );
 
-	DWORD const	window_style = WS_OVERLAPPED;// | WS_CAPTION;
+	DWORD window_style = WS_OVERLAPPED;// | WS_CAPTION;
+	if (s_fullscreen.is_set())
+		window_style = WS_POPUP | WS_VISIBLE;
 
 	u32 window_size_x		= 0;
 	u32 window_size_y		= 0;
 
-	u32 const window_sizes_x []	= { 1024, 800, 640 };
-	u32 const window_sizes_y []	= { 768, 600, 480 };
+	u32 const window_sizes_x []	= { 1920, 1600, 1280, 1024, 800, 640 };
+	u32 const window_sizes_y []	= { 1080, 1024, 768, 720, 600, 480 };
 	for ( u32 i=0; i<xray::array_size(window_sizes_x); ++i ) {
 		if ( window_sizes_x[i] < screen_size_x && 
 			 window_sizes_y[i] < screen_size_y )
