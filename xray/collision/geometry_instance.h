@@ -83,6 +83,7 @@ public:
 	virtual float3					get_closest_point_to( float3 const& point, float4x4 const& origin = float4x4().identity() ) const = 0;
 
 	inline	bool					delete_by_collision_object	( ) const { return m_delete_by_collision_object; }
+	const							geometry_instance* load		( )	const { return  this; }
 	XRAY_DECLARE_PURE_VIRTUAL_DESTRUCTOR	( geometry_instance )
 private:
 	bool							m_delete_by_collision_object;

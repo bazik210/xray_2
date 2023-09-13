@@ -270,7 +270,7 @@ function(xr_setup_plugins)
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
     )
 
     set_target_properties(maya_animation PROPERTIES
@@ -351,8 +351,8 @@ xr_set_target_defaults_stalker2(stalker2_pc_dx11)
 #)
 
 target_include_directories(stalker2_pc_dx11 PRIVATE
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
 target_link_libraries(stalker2_pc_dx11 PRIVATE
@@ -360,7 +360,7 @@ target_link_libraries(stalker2_pc_dx11 PRIVATE
 	legacy_stdio_definitions.lib
 )
 target_link_directories(stalker2_pc_dx11 PRIVATE
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 	${DXSDK_DIR_PATH}/Lib/x64
 )
@@ -372,8 +372,8 @@ target_compile_definitions(stalker2_pc_opengl PRIVATE
 )
 target_include_directories(stalker2_pc_opengl PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
 target_link_libraries(stalker2_pc_opengl PRIVATE
@@ -407,18 +407,18 @@ target_link_libraries(stalker2_pc_opengl PRIVATE
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibOpenJPEG.lib
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine_pc.lib
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_scaleform.lib
+#	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_scaleform.lib
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibJPEG.lib
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_animation.lib
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_maya_animation.lib
-	libgfx.lib
-	libgfx_air.lib
-	libgfx_as2.lib
-	libgfx_as3.lib
-	libgfxexpat.lib
-	libgfxplatform_gl.lib
-	libgfxrender_gl.lib
-	libgfxsound_fmod.lib
+#	libgfx.lib
+#	libgfx_air.lib
+#	libgfx_as2.lib
+#	libgfx_as3.lib
+#	libgfxexpat.lib
+#	libgfxplatform_gl.lib
+#	libgfxrender_gl.lib
+#	libgfxsound_fmod.lib
 	delayimp.lib
 	dxguid.lib
 	dinput8.lib
@@ -428,7 +428,7 @@ target_link_libraries(stalker2_pc_opengl PRIVATE
 	d3dcompiler.lib
 )
 target_link_directories(stalker2_pc_opengl PRIVATE
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 	${DXSDK_DIR_PATH}/Lib/x64
 )
@@ -812,7 +812,7 @@ function(xr_set_target_defaults_editor TARGET)
 
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-		_WIN32_WINNT=0x0501
+        _WIN32_WINNT=0x0501
         PLATFORM_WIN64
         WIN64
         WINDOWS

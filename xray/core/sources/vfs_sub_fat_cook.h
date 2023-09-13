@@ -22,14 +22,15 @@ public:
 													 bool								file_exist)
 	{
 		// TODO FIX VARIADIC FUNC ERROR C4839
-		//XRAY_UNREFERENCED_PARAMETERS				((resources::query_result_for_cook) in_query, raw_file_data, file_exist);
+		// IS IT STILL EXISTS? LOX
+		XRAY_UNREFERENCED_PARAMETERS				(in_query.load(), raw_file_data, file_exist);
 		NOT_IMPLEMENTED								(return mutable_buffer::zero());
 	}
 	virtual void			create_resource			(resources::query_result_for_cook &	in_out_query, 
 										 			 const_buffer						raw_file_data, 
 													 mutable_buffer						in_out_unmanaged_resource_buffer)
 	{
-		//XRAY_UNREFERENCED_PARAMETERS				((resources::query_result_for_cook) in_out_query, raw_file_data, in_out_unmanaged_resource_buffer);
+		XRAY_UNREFERENCED_PARAMETERS				(in_out_query.load(), raw_file_data, in_out_unmanaged_resource_buffer);
 		NOT_IMPLEMENTED								();
 	}
 

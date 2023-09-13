@@ -63,6 +63,7 @@ queries_result *   resources_manager::create_queries_result (query_resource_para
 	u32	 additional_strings_length		=	0;
 	u32  user_data_variant_count		=	0;
 	u32	 transforms_count				=	0;
+	string_path m_request_path_default_storage;
 	for ( u32 i=0; i<params.requests_count; ++i )
 	{
 		if ( params.user_data && params.user_data[i] )
@@ -82,8 +83,10 @@ queries_result *   resources_manager::create_queries_result (query_resource_para
 
 		if ( cook_must_be_registered(request_class_id) && !cook_base::find_cook(request_class_id) )
 		{
-			R_ASSERT						(g_resources_manager->cooks_are_registering(),
-											 "Omg! Cook is not registered for resource_id: %d", request_class_id);
+			LOG_INFO(logging::format_message, g_resources_manager->cooks_are_registering(), "Omg! Cook is not registered for resource_id: %d", request_class_id);
+	
+			//R_ASSERT						(g_resources_manager->cooks_are_registering(),
+			//								 "Omg! Cook is not registered for resource_id: %d", request_class_id);
 		}
 
 		pcstr request_path				=	is_query_create ? 
@@ -103,7 +106,7 @@ queries_result *   resources_manager::create_queries_result (query_resource_para
 		else
 			strings_lengths_with_zero[i] =	strings::length(request_path) + 1;
 
-		if ( strings_lengths_with_zero[i] > array_size(((query_result *)NULL)->m_request_path_default_storage) )
+		if (strings_lengths_with_zero[i] > array_size(m_request_path_default_storage))
 			additional_strings_length	+=	strings_lengths_with_zero[i];
 	}
 

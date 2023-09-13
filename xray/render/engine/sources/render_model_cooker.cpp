@@ -36,7 +36,7 @@ mutable_buffer user_mesh_cook::allocate_resource( resources::query_result_for_co
 													 const_buffer raw_file_data, 
 													 bool file_exist )
 {
-	//XRAY_UNREFERENCED_PARAMETERS	( in_query, &raw_file_data, file_exist );
+	XRAY_UNREFERENCED_PARAMETERS	( in_query.load(), &raw_file_data, file_exist);
 	return mutable_buffer::zero		( );
 }
 
