@@ -173,7 +173,8 @@ void collision_cook::delete_resource( resources::resource_base* resource )
 {
 	collision::geometry* geom			= static_cast_checked<collision::geometry*>(resource);
 //	geom->destroy						( resources::unmanaged_allocator() );
-	collision::delete_geometry			( resources::unmanaged_allocator(), geom );
+	if (geom)
+		collision::delete_geometry			( resources::unmanaged_allocator(), geom );
 }
 
 }

@@ -303,7 +303,7 @@ void   managed_allocator::log_defragmenter_state () const
 	m_temp_arena.check_consistency			();
 	check_consistency						();
 #if !XRAY_PLATFORM_PS3
-	//test_unmovables_list_valid				();
+	test_unmovables_list_valid				();
 #endif // #if !XRAY_PLATFORM_PS3
 
 	++m_log_iteration;

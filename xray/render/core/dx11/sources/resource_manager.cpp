@@ -1861,10 +1861,7 @@ struct load_texture_delegate
 		if ( !data.is_successful() || !data[0].get_managed_resource())
 		{
 			dest_texture = 0;
-			//DELETE ((load_texture_delegate*)this);
-			// YOLO
-			delete this;
-			//free(this);
+			DELETE_THIS((load_texture_delegate*)this);
 			return;
 		}
 		
@@ -1948,10 +1945,7 @@ struct load_texture_delegate
 			mip_height /= 2;
 		}
 		
-		//DELETE ((load_texture_delegate*)this);
-		// YOLO
-		// TEMP!!!
-	    //free(this);
+		DELETE_THIS((load_texture_delegate*)this);
 	}
 
 private:

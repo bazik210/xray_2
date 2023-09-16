@@ -33,7 +33,9 @@ void object_environment::material_ready( resources::queries_result& data )
 {
 	if(data.is_successful())
 	{
-		m_game_scene.renderer().scene().set_post_process(m_game_scene.get_render_scene_view(), data[0].get_unmanaged_resource());
+		if (&m_game_scene.renderer() != nullptr) {
+				m_game_scene.renderer().scene().set_post_process(m_game_scene.get_render_scene_view(), data[0].get_unmanaged_resource());
+		}
 	}
 }
 

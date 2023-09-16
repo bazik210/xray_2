@@ -66,6 +66,10 @@ binary_config_value const& binary_config_value::operator[]	( pcstr key ) const
 	u32 const crc				= processor.checksum();
 
 	const_iterator const result	= std::lower_bound(it, it_e, crc);
+
+	if (result->id_crc != crc) {
+		return *result;
+	}
 	
 	R_ASSERT					(result!=it_e, "item not found [%s][%s]", id, key );
 	R_ASSERT					(result->id_crc==crc, "item not found  [%s][%s]", id, key );
