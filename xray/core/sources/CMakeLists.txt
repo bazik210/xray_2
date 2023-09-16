@@ -59,7 +59,7 @@ add_library(core STATIC
 	# managed
 	"${CMAKE_CURRENT_SOURCE_DIR}/managed_allocator.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/managed_allocator_base.cpp"
-	#"${CMAKE_CURRENT_SOURCE_DIR}/managed_allocator_test_win_xbox360.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/managed_allocator_test_win_xbox360.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/managed_node.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/managed_node.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/managed_node_owner.cpp"

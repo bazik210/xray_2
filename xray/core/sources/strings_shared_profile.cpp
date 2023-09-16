@@ -28,7 +28,9 @@ profile* profile::create			( mutex& mutex, pcstr const value, profile const& tem
 	R_ASSERT					( ( sizeof( profile ) + buffer_length ) < max_length, "alignment is corrupted, check compiler options" );
 
 	mutex.lock					( );
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	g_allocator.user_current_thread_id	( );
+#endif
 	profile* const result		= ( profile* ) XRAY_MALLOC_IMPL( g_allocator, sizeof( profile ) + buffer_length, "shared::string" );
 	mutex.unlock				( );
 
@@ -56,7 +58,9 @@ void profile::destroy				( mutex& mutex, profile* string )
 	string->~profile			( );
 
 	mutex.lock					( );
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	g_allocator.user_current_thread_id	( );
+#endif
 	XRAY_FREE_IMPL				( g_allocator, string );
 	mutex.unlock				( );
 }

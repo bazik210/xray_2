@@ -180,3 +180,5 @@ set_target_properties(dialog_editor PROPERTIES VS_DOTNET_REFERENCES
 )
 
 set_target_properties(dialog_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(dialog_editor editor_base editor_controls)

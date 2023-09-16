@@ -386,10 +386,13 @@ target_include_directories(stalker2_pc_dx11 PRIVATE
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
-target_link_libraries(stalker2_pc_dx11 PRIVATE
-	engine_pc_dx11
-	legacy_stdio_definitions.lib
-)
+#target_link_libraries(stalker2_pc_dx11 PRIVATE
+#	game
+#	engine_pc_dx11
+#	x3daudio.lib
+#	legacy_stdio_definitions.lib
+#	xaudio2.lib
+#)
 if(x64)
 target_link_directories(stalker2_pc_dx11 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
@@ -424,58 +427,10 @@ target_include_directories(stalker2_pc_opengl PRIVATE
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
-target_link_libraries(stalker2_pc_opengl PRIVATE
-	engine_pc_opengl
-	legacy_stdio_definitions.lib
-	kernel32.lib
-	user32.lib
-	gdi32.lib
-	winspool.lib
-	shell32.lib
-	ole32.lib
-	oleaut32.lib
-	uuid.lib
-	advapi32.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlibN.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_script_cs.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_core_cs.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_lua.5.1.4.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_luabind.0.8.1.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_ui.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_vorbisfile.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_bullet.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_particle.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_FreeImage.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_texture_compressor.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibPNG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_OpenEXR.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibMNG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlib.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibTIFF.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibOpenJPEG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine_pc.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine.lib
-#	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_scaleform.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibJPEG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_animation.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_maya_animation.lib
-#	libgfx.lib
-#	libgfx_air.lib
-#	libgfx_as2.lib
-#	libgfx_as3.lib
-#	libgfxexpat.lib
-#	libgfxplatform_gl.lib
-#	libgfxrender_gl.lib
-#	libgfxsound_fmod.lib
-	delayimp.lib
-	dxguid.lib
-	dinput8.lib
-	d3d11.lib
-	d3dx11d.lib
-	dxerr.lib
-	d3dcompiler.lib
-)
-
+#target_link_libraries(stalker2_pc_opengl PRIVATE
+#	engine_pc_opengl
+#	legacy_stdio_definitions.lib
+#)
 
 if(x64)
 target_link_directories(stalker2_pc_opengl PRIVATE
@@ -532,8 +487,6 @@ function(xr_set_lib_name TARGET)
 		OUTPUT_NAME "xray_${TARGET}"
 	)
 endfunction()
-
-
 
 ###################
 # TARGET DEFAULTS #
@@ -698,7 +651,7 @@ endif()
         ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
+    set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "" LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>

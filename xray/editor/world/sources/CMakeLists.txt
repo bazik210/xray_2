@@ -610,3 +610,5 @@ set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
 )
 
 set_target_properties(editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(editor editor_base editor_controls)

@@ -252,3 +252,5 @@ set_target_properties(animation_editor PROPERTIES VS_DOTNET_REFERENCES
 )
 
 set_target_properties(animation_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(animation_editor editor_base editor_controls)

@@ -14,7 +14,9 @@ using xray::engine::engine_world;
 
 void engine_world::initialize_network_modules	( )
 {
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	m_network_allocator.user_current_thread_id	( );
+#endif
 	network::memory_allocator( m_network_allocator );
 
 	threading::interlocked_exchange_pointer	(

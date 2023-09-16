@@ -29,7 +29,9 @@ void engine_world::initialize_sound_modules	( )
 	CoInitializeEx					( 0, COINIT_APARTMENTTHREADED );
 #endif // #if XRAY_PLATFORM_WINDOWS
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	m_sound_allocator.user_current_thread_id( );
+#endif
 	sound::set_memory_allocator		( m_sound_allocator );
 
 	threading::interlocked_exchange_pointer	(

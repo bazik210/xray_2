@@ -22,33 +22,54 @@
 #include <xray/construction.h>
 #include <xray/memory_doug_lea_mt_allocator.h>
 
-#if XRAY_DEBUG_ALLOCATOR
-xray::memory::doug_lea_mt_allocator_type		xray::debug::g_mt_allocator(
+#define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
+
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	#if XRAY_DEBUG_ALLOCATOR
+	xray::memory::doug_lea_mt_allocator_type		xray::debug::g_mt_allocator(
 													true,
 													false
-#if XRAY_USE_MEMORY_LEAK_DETECTOR
+	#if XRAY_USE_MEMORY_LEAK_DETECTOR
 													, false
-#endif // #if XRAY_USE_MEMORY_LEAK_DETECTOR
+	#endif // #if XRAY_USE_MEMORY_LEAK_DETECTOR
 												);
-#endif // #if XRAY_DEBUG_ALLOCATOR
+	#endif // #if XRAY_DEBUG_ALLOCATOR
 
-xray::memory::pthreads_allocator_type			xray::memory::g_mt_allocator;
-xray::memory::fs_allocator						xray::memory::g_fs_allocator;
-xray::memory::doug_lea_allocator_type			xray::memory::g_cook_allocator;
-xray::memory::doug_lea_allocator_type			xray::strings::shared::g_allocator( xray::memory::thread_id_const_false );
+#else
+	#if XRAY_DEBUG_ALLOCATOR
+	XRAY_CORE_API xray::memory::crt_allocator_type				xray::debug::g_mt_allocator;
+	#endif // #if XRAY_DEBUG_ALLOCATOR
+#endif
 
-xray::memory::doug_lea_allocator_type			xray::memory::g_resources_helper_allocator( xray::memory::thread_id_const_false );
+	xray::memory::pthreads_allocator_type			xray::memory::g_mt_allocator;
+
+
+	xray::memory::fs_allocator						xray::memory::g_fs_allocator;
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	xray::memory::doug_lea_allocator_type			xray::memory::g_cook_allocator;
+	xray::memory::doug_lea_allocator_type			xray::strings::shared::g_allocator( xray::memory::thread_id_const_false );
+	xray::memory::doug_lea_allocator_type			xray::memory::g_resources_helper_allocator(xray::memory::thread_id_const_false);
+#else
+	xray::memory::crt_allocator_type				xray::memory::g_cook_allocator;
+	xray::memory::crt_allocator_type				xray::strings::shared::g_allocator;
+	xray::memory::crt_allocator_type				xray::memory::g_resources_helper_allocator;
+#endif
+
+
 xray::memory::managed_allocator					xray::memory::g_resources_managed_allocator( 0 * Mb, 0 );
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 xray::memory::doug_lea_allocator_type			xray::memory::g_resources_unmanaged_allocator( xray::memory::thread_id_const_false, false, true );
-
+#else
+xray::memory::crt_allocator_type				xray::memory::g_resources_unmanaged_allocator;
+#endif
 xray::memory::fixed_size_allocator< xray::resources::resource_link, xray::threading::mutex >
 												xray::memory::g_resources_links_allocator;
 
 static xray::command_line::key					s_enable_crt_memory_allocator( "enable_crt_memory_allocator", "", "memory", "enables crt memory allocator usage");
 
-#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
-xray::memory::crt_allocator_type*				xray::memory::g_crt_allocator = 0;
+#if !XRAY_DISABLE_CRT_ALLOCATOR
+	XRAY_CORE_API xray::memory::crt_allocator_type*				xray::memory::g_crt_allocator = 0;
 #endif // #if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 
 #if XRAY_DEBUG_ALLOCATOR
@@ -124,10 +145,10 @@ void xray::memory::preinitialize			( )
 	XRAY_CONSTRUCT_REFERENCE					( s_allocators, allocators_type );
 
 #ifndef XRAY_STATIC_LIBRARIES
-	s_crt_allocator.do_register					(       8*Mb,	"C runtime library"		);
+		s_crt_allocator.do_register					(       8*Mb,	"C runtime library"		);
 #else // #ifndef XRAY_STATIC_LIBRARIES
-	#if XRAY_USE_CRT_MEMORY_ALLOCATOR
-		g_crt_allocator->do_register				(			0,	"C runtime library"		);
+	#if !XRAY_DISABLE_CRT_ALLOCATOR
+		g_crt_allocator->do_register				(		8*Mb,	"C runtime library"		);
 	#endif
 #endif // #ifndef XRAY_STATIC_LIBRARIES
 
@@ -320,8 +341,8 @@ void xray::memory::dump_statistics		( bool const dump_stats_for_empty_arenas_as_
 			(*i).allocator->dump_statistics	( );
 	}
 #else // #if !XRAY_USE_CRT_MEMORY_ALLOCATOR
-	u64 crt_allocated_size		= (static_cast<base_allocator const&>(s_crt_allocator)).allocated_size( )
-	u64 process_allocated_size	= (static_cast<base_allocator const&>(s_process_allocator)).allocated_size( )
+	u64 crt_allocated_size		= (static_cast<base_allocator const&>(s_crt_allocator)).allocated_size( );
+	u64 process_allocated_size	= (static_cast<base_allocator const&>(s_process_allocator)).allocated_size( );
 	u64 const total_size		= (static_cast<base_allocator const&>(s_crt_allocator)).total_size( );
 	u64 const allocated_size	= (static_cast<base_allocator const&>(s_crt_allocator)).allocated_size( );
 #endif // #if !XRAY_USE_CRT_MEMORY_ALLOCATOR

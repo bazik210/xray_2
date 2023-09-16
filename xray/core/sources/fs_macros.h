@@ -12,8 +12,13 @@
 namespace xray {
 namespace memory {
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 typedef memory::memory_synchronized_allocator<memory::doug_lea_allocator_type>	fs_allocator;
 //typedef memory::doug_lea_allocator_type	fs_allocator;
+#else
+	typedef memory::crt_allocator_type	fs_allocator;
+#endif
+
 extern	fs_allocator				g_fs_allocator;
 
 } // namespace memory

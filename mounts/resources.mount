@@ -1,0 +1,49 @@
+local function get_resources_physical_path				( )
+	local platform_id = xray.platform( )
+	if ( platform_id == "ps3" ) then
+		return "/app_home/resources"
+	elseif ( platform_id == "xbox360" ) then
+		return "resources"
+	else
+		return "../../resources"
+	end
+end
+
+local function get_resources_converted_physical_path	( )
+	local platform_id = xray.platform( )
+	if ( platform_id == "ps3" ) then
+		return "ps3"
+	elseif ( platform_id == "xbox360" ) then
+		return "xbox360"
+	else
+		return "pc_dx11"
+	end
+end
+
+mounts = {
+
+	{
+		id					= "sources",
+		physical_path		= xray.create_physical_path( get_resources_physical_path( ), "/sources" ),
+		virtual_path		= "resources",
+		compression_ratio	= 0.5,
+		lazy_mount		= true,
+	}, -- resources
+	{
+		id					= "exported",
+		physical_path		= xray.create_physical_path( get_resources_physical_path( ), "/exported" ),
+		virtual_path		= "resources",
+		compression_ratio	= 0.5,
+		lazy_mount		= true,
+	}, -- resources
+	{
+		id					= "converted",
+		physical_path		= xray.create_physical_path( get_resources_physical_path( ), "/platforms/" .. get_resources_converted_physical_path( )),
+		virtual_path		= "resources.converted",
+		compression_ratio	= 0.5,
+		create_physical_path_if_not_exists = 1,
+		watcher_enabled		= false,
+		lazy_mount		= true,
+	}, -- resources.converted
+
+} -- mounts

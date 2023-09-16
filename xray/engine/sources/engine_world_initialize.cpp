@@ -122,8 +122,9 @@ void engine_world::initialize			( )
 	apc::run							( apc::network,	boost::bind(&engine_world::initialize_network_modules, this), apc::continue_process_loop, apc::dont_wait_for_completion);
 
 	initialize_logic					( );
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	apc::run							( apc::logic,	boost::bind(&engine_world::initialize_logic_thread, this), apc::continue_process_loop, apc::dont_wait_for_completion);
-
+#endif
 	apc::wait							( apc::sound );
 	R_ASSERT							( m_sound_world );
 

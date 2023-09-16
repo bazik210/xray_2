@@ -28,14 +28,9 @@ add_executable(stalker2_pc_dx11 WIN32
 						"${CMAKE_CURRENT_SOURCE_DIR}/stalker2_pc_entry_point.cpp"
 )
 
-target_link_libraries(stalker2_pc_dx11 PRIVATE
-	game
-	engine_pc_dx11
-	x3daudio.lib
-	xaudio2.lib
-)
-
 set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")
+
+add_dependencies(stalker2_pc_dx11 collision engine engine_pc engine_pc_dx11 input particle physics sound ui)
 
 ############################
 
@@ -61,14 +56,6 @@ add_executable(stalker2_pc_opengl WIN32
 					"${CMAKE_CURRENT_SOURCE_DIR}/stalker2_pc_entry_point.cpp"
 )
 
-target_link_libraries(stalker2_pc_opengl PRIVATE
-	renderer_engine_pc_opengl
-	game
-	engine_pc_opengl
-	vorbis
-	ode
-	sound
-	x3daudio.lib
-)
+set_target_properties(stalker2_pc_opengl PROPERTIES LINK_LIBRARIES "" FOLDER "stalker2")
 
-set_target_properties(stalker2_pc_opengl PROPERTIES FOLDER "stalker2")
+add_dependencies(stalker2_pc_opengl collision engine engine_pc engine_pc_opengl input particle physics sound ui)

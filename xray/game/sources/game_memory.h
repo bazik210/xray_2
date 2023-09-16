@@ -18,7 +18,11 @@
 
 namespace stalker2 {
 
-extern xray::memory::doug_lea_allocator_type*	g_allocator;
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	extern xray::memory::doug_lea_allocator_type*	g_allocator;
+#else
+	extern xray::memory::crt_allocator_type* g_allocator;
+#endif
 
 #define USER_ALLOCATOR							*::stalker2::g_allocator
 #include <xray/std_containers.h>

@@ -67,10 +67,13 @@ xray::engine_user::world* game_module::create_world	(
 	xray::physics::set_memory_allocator					( memory::g_crt_allocator );
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_input_allocator->user_current_thread_id			( );
+#endif
 	xray::input::set_memory_allocator					( *s_input_allocator );
-
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_animation_allocator->user_current_thread_id		( );
+#endif
 	xray::animation::set_memory_allocator				( *s_animation_allocator );
 
 #if (!XRAY_RTP_LEARNING)
@@ -79,18 +82,22 @@ xray::engine_user::world* game_module::create_world	(
 #else
 	xray::rtp::set_memory_allocator						( debug::g_mt_allocator );
 #endif
-
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_ui_allocator->user_current_thread_id				( );
+#endif
 //.	xray::ui::set_memory_allocator						( *s_ui_allocator );
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_ai_navigation_allocator->user_current_thread_id	( );
+#endif
 	xray::ai::navigation::set_memory_allocator			( memory::g_mt_allocator );
-
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_ai_allocator->user_current_thread_id				( );
+#endif
 	xray::ai::set_memory_allocator						( *s_ai_allocator );
-
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	s_game_allocator->user_current_thread_id			( );
-
+#endif
 	XRAY_CONSTRUCT_REFERENCE	( s_game, game )		( engine, render_world, sound, network );
 
 	return												( &*s_game );

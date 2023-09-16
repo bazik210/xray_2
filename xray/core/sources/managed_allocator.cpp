@@ -15,7 +15,7 @@
 #define DO_RESOURCE_LOGGING			0
 
 #if !XRAY_PLATFORM_PS3
-#	define TEST_UNMOVABLES			0
+#	define TEST_UNMOVABLES			1
 #endif // #if !XRAY_PLATFORM_PS3
 
 namespace xray		{

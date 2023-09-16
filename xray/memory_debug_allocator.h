@@ -4,6 +4,8 @@
 //	Copyright (C) GSC Game World - 2010
 ////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #ifndef XRAY_MEMORY_DEBUG_ALLOCATOR_H_INCLUDED
 #define XRAY_MEMORY_DEBUG_ALLOCATOR_H_INCLUDED
 
@@ -41,7 +43,12 @@ namespace memory {
 } // namespace memory
 
 namespace debug {
+
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	extern XRAY_CORE_API memory::doug_lea_mt_allocator_type	g_mt_allocator;
+#else	
+	extern XRAY_CORE_API memory::crt_allocator g_mt_allocator;
+#endif
 } // namespace debug
 
 #endif // #if XRAY_DEBUG_ALLOCATOR

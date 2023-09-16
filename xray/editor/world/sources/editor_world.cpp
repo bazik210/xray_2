@@ -305,7 +305,9 @@ void editor_world::updated_render_options_list()
 
 void editor_world::load( )
 {
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	g_allocator->user_current_thread_id( );
+#endif
 	
 	xray::editor::wpf_controls::library_initializer::initialize( );
 	

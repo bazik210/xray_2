@@ -121,12 +121,21 @@ static xray::threading::atomic32_type	s_crt_allocator_creation	=	0;
 struct inplace_constructor {
 	void   operator () (xray::memory::base_allocator* const pointer)
 	{
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 		new (pointer) xray::memory::doug_lea_mt_allocator( true, false, false );
 		xray::static_cast_checked<xray::memory::doug_lea_mt_allocator*>(pointer)->initialize	(
 			s_CRT_arena,
 			sizeof(s_CRT_arena),
 			"CRT allocator"
 		);
+#else
+	new (pointer) xray::memory::crt_allocator();
+		xray::static_cast_checked<xray::memory::crt_allocator*>(pointer)->initialize(
+		s_CRT_arena,
+		sizeof(s_CRT_arena),
+		"CRT allocator"
+);
+#endif
 	}
 }; // struct inplace_constructor
 

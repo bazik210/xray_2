@@ -118,3 +118,5 @@ target_link_libraries(sound_editor PUBLIC
 )
 
 set_target_properties(sound_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(sound_editor editor_base editor_controls)
