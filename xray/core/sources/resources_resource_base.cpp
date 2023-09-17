@@ -115,7 +115,7 @@ bool   resource_base::needs_cook ()
 
 resource_base::creation_source_enum   resource_base::creation_source () const 
 { 
-	return									m_creation_source; 
+	return									static_cast<creation_source_enum>(m_creation_source);
 }
 
 void   resource_base::set_name_registry_entry (name_registry_entry * entry) 

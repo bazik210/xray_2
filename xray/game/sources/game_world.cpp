@@ -24,6 +24,8 @@
 
 #include <xray/render/facade/scene_renderer.h>
 
+static xray::command_line::key	s_cam("cam", "", "", "free camera");
+
 //static void server_on_packet_received	( xray::network::server& server, xray::network::client_session& client, xray::network::packet_reader& packet )
 //{
 //	string256 message;
@@ -255,7 +257,8 @@ void game_world::on_project_loaded( resources::queries_result& data )
 	m_camera_director->set_position_direction( camera_position, camera_direction );
 	switch_to_free_fly_camera		( );
 
-	m_local_actor						= NEW(actor)( *this );
+	if(!s_cam)
+		m_local_actor						= NEW(actor)( *this );
 }
 
 void game_world::on_activate( )
@@ -265,6 +268,9 @@ void game_world::on_activate( )
 	
 	if(get_sound_scene())
 		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
+
+if (s_cam)
+	switch_to_free_fly_camera();
 }
 
 void game_world::on_deactivate( )

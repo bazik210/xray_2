@@ -108,6 +108,7 @@ protected:
 
 	resource_base *						m_next_for_grm_observer_list;
 	query_result *						m_destruction_observer;
+public:
 	creation_source_enum				m_creation_source;
 
 private:

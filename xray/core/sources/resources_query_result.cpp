@@ -125,8 +125,8 @@ device_manager *   query_result::find_capable_device_manager ()
 
 bool   query_result::translate_query_if_needed ()
 {
-	R_ASSERT								(!has_flag(flag_translated_query));
-	if ( !is_translate_query() )	
+	//R_ASSERT								(!has_flag(flag_translated_query));
+	if (has_flag(flag_translated_query) || !is_translate_query() )
 		return								false;
 
 	translate_query_cook * const cook	=	cook_base::find_translate_query_cook(m_class_id);

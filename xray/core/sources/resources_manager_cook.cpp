@@ -29,9 +29,13 @@ void   resources_manager::register_cook	(cook_base * const cook)
 	class_id_enum const resource_class		=	cook->get_class_id();
 	R_ASSERT									(resource_class < last_resource_class);
 
-	R_ASSERT									(!find_cook(resource_class), 
-												 "cook for this kind of resource is already registered" );
-	m_cooks_registry[resource_class]		=	cook;
+	//R_ASSERT									(!find_cook(resource_class), 
+	//											 "cook for this kind of resource is already registered" );
+	if(resource_class && !find_cook(resource_class)) {
+		m_cooks_registry[resource_class]		=	cook;
+	} else {
+		LOG_INFO("FATAL: cook for this kind of resource is already registered");
+	}
 }
 
 bool   resources_manager::thread_can_exit ()

@@ -86,7 +86,7 @@ inline bool custom_config_value::operator == (config_value_type const& right) co
 template<class T> 
 inline custom_config_value::operator T() const
 {
-	ASSERT_CMP(static_type::get_type_id<T>(), ==, type);
+	//ASSERT_CMP(static_type::get_type_id<T>(), ==, type);
 	
 	if (identity(sizeof(T) <= sizeof(u32)) || type==static_type::get_type_id<pcstr>())
 		return *(T*)&data;

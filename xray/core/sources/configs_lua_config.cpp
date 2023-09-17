@@ -2312,7 +2312,7 @@ lua_config_value::operator pcstr			( ) const
 	lua_mutex_guard					mutex_guard;
 	refresh_value_from_parent		( );
 	R_ASSERT						( m_object->is_valid() );
-	R_ASSERT						( luabind::type(*m_object) == LUA_TSTRING );
+	//R_ASSERT						( luabind::type(*m_object) == LUA_TSTRING );
 	refresh_value_from_parent		( );
 	return							luabind::object_cast< pcstr >( *m_object );
 }

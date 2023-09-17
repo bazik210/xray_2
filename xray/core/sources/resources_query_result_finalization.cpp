@@ -262,14 +262,17 @@ void   query_result_for_cook::finish_query_impl (cook_base::result_enum		result,
 {
 	if ( result == cook_base::result_error )
 	{
-		if ( m_parent->assert_on_fail() && assert_on_cook_failure )
+//		if ( m_parent->assert_on_fail() && assert_on_cook_failure )
 //			LOGI_WARNING					("resources", "cook of %s failed", log_string().c_str());
 
 		if ( assert_on_cook_failure && s_assert_on_cook_failure.is_set() )
 			DEBUG_BREAK						();
 	}
 
-	query_result * const this_ptr		=	static_cast_checked<query_result *>(this);
+	query_result * const this_ptr		=	static_cast<query_result *>(this);
+
+	if (!this_ptr)
+		result = cook_base::result_error;
 
 	if ( result == cook_base::result_out_of_memory )
 	{

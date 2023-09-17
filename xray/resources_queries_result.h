@@ -27,7 +27,14 @@ public:
 	bool					is_successful				() const;
 	
 	query_result_for_cook *	get_parent_query			() const { return m_parent_query; }
-	assert_on_fail_bool		assert_on_fail				() const { return m_assert_on_fail; }
+	assert_on_fail_bool		assert_on_fail() const {
+		if (m_assert_on_fail) {
+		 return m_assert_on_fail; }
+		 else {
+			assert_on_fail_bool	assert_on_fail = { assert_on_fail_false };
+			return assert_on_fail;
+		}
+	}
 
 private:
 							queries_result				(u32						num_queries, 

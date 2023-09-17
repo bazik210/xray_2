@@ -147,7 +147,14 @@ void   resources_manager::deallocate_unmanaged_resource (unmanaged_resource_buff
 	ASSERT									(!cook->cast_translate_query_cook());
 
 	resource_buffer->~unmanaged_resource_buffer	();
-	cook->deallocate_resource				(resource_buffer);
+	//auto len = lstrlen(resource_buffer->request_name());
+	//if (len < 259) {
+		cook->deallocate_resource(resource_buffer);
+	//} else 
+	//{
+	//	if(resource_buffer != NULL)
+	//		  free(resource_buffer);
+	//}
 
 	after_resource_deleted					(cook, is_delay_delete, destruction_observer, memory_usage, class_id, request_path.c_str());
 }

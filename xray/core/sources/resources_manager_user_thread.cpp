@@ -651,9 +651,11 @@ void   resources_manager::translate_queries (queries_list const &, query_result 
 
 void   resources_manager::translate_query (query_result * const query)
 {
-	bool const translated_query			=	query->translate_query_if_needed();
-	XRAY_UNREFERENCED_PARAMETER				(translated_query);
-	R_ASSERT								(translated_query);
+	if (query != nullptr) {
+		bool const translated_query = query->translate_query_if_needed();
+		XRAY_UNREFERENCED_PARAMETER(translated_query);
+	R_ASSERT						(translated_query);
+	}
 }
 
 void   resources_manager::dispatch_tasks_finished_callback (query_result * query, bool finalizing_thread)

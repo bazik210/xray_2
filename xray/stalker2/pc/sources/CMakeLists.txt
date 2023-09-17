@@ -30,7 +30,7 @@ add_executable(stalker2_pc_dx11 WIN32
 
 set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")
 
-add_dependencies(stalker2_pc_dx11 collision engine engine_pc engine_pc_dx11 input particle physics sound ui)
+add_dependencies(stalker2_pc_dx11 game collision engine engine_pc engine_pc_dx11 input particle physics sound ui)
 
 ############################
 
@@ -58,4 +58,4 @@ add_executable(stalker2_pc_opengl WIN32
 
 set_target_properties(stalker2_pc_opengl PROPERTIES LINK_LIBRARIES "" FOLDER "stalker2")
 
-add_dependencies(stalker2_pc_opengl collision engine engine_pc engine_pc_opengl input particle physics sound ui)
+add_dependencies(stalker2_pc_opengl game collision engine engine_pc engine_pc_opengl input particle physics sound ui)

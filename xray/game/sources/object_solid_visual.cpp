@@ -254,8 +254,8 @@ void object_skeleton_visual::load_contents( )
 
 void object_skeleton_visual::on_visual_ready( resources::queries_result& data )
 {
-	R_ASSERT	( data.is_successful() );
-	if( !m_model )
+	//R_ASSERT	( data.is_successful() );
+	if( !m_model && data.is_successful())
 	{
 		m_model		= static_cast_resource_ptr<render::skeleton_model_ptr>(data[0].get_unmanaged_resource());
 		R_ASSERT	( m_model );

@@ -23,7 +23,7 @@ public:
 	inline explicit     operator bool       ( ) const;
 	inline	T*			c_ptr				( ) const;
 
-private:
+public:
 	T*		m_object;
 }; // class unique_ptr
 

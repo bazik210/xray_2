@@ -179,7 +179,9 @@ struct predicate : private xray::logging::noncopyable
 		u32 const	final_length		=	128 + length + end_line_length + 1;
 
 		xray::buffer_string	final_string	((pstr)ALLOCA(final_length*sizeof(char)), final_length);
-
+	
+	// kills log
+	//	if (final_string.begin() == final_string.end()) return (false);
 		fill_log_string						(final_string, string, string+length, 
 											 m_path, m_verbosity, m_format);
 
