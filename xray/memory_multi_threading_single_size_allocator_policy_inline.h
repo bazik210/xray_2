@@ -14,10 +14,13 @@ template < typename T >
 void multi_threading_single_size_allocator_policy< T >::initialize	( free_list_type& free_list_head )
 {
 	free_list_head.set_pointer	( 0 );
+#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
 	free_list_head.whole		= 0;
+#endif	
 	free_list_head.counter		= 0;
 }
 	
+#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
 template < typename T >
 T* multi_threading_single_size_allocator_policy< T >::allocate		( free_list_type& free_list_head )
 {
@@ -60,6 +63,55 @@ void multi_threading_single_size_allocator_policy< T >::deallocate	(
 			head.whole
 		) != head.whole );
 }
+
+#else // XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
+
+template < typename T >
+T* multi_threading_single_size_allocator_policy< T >::allocate		( free_list_type& free_list_head )
+{
+	free_list_type				allocated_node;
+	free_list_type				new_head;
+	do 
+	{
+		allocated_node			= free_list_head;
+		if ( !allocated_node.get_pointer() )
+			break;
+
+		new_head.set_pointer	( allocated_node.get_pointer()->next );
+		new_head.counter		= allocated_node.counter + 1;
+			
+	} while ( _InterlockedCompareExchange128(
+			  &free_list_head.whole[0],
+			  new_head.whole[1],
+			  new_head.whole[0],
+			  (s64*)&allocated_node.whole[0]
+			) != 1 );			
+
+	CURE_ASSERT	( allocated_node.get_pointer(), return 0, "single_size_buffer_allocator - out of memory!" );
+	return		allocated_node.get_pointer();
+}
+
+template < typename T >
+void multi_threading_single_size_allocator_policy< T >::deallocate	(
+		free_list_type& free_list_head,
+		free_list_type& freeing_node
+	)
+{
+	free_list_type 							head;
+	do
+	{	
+		head								=	free_list_head;
+		freeing_node.get_pointer()->next	=	head.get_pointer();
+		freeing_node.counter				=	head.counter;
+	} while ( _InterlockedCompareExchange128(
+			&free_list_head.whole[0],
+			freeing_node.whole[1],
+			freeing_node.whole[0],
+			(s64*)&head.whole[0]
+		) != 1 );
+}
+
+#endif
 
 template < typename T >
 void multi_threading_single_size_allocator_policy< T >::increment	( counter_type& operand )
