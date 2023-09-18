@@ -17,9 +17,9 @@ struct multi_threading_single_size_allocator_policy
 #pragma warning(push)
 #pragma warning(disable:4201)
 
-#if XRAY_PLATFORM_64_BIT
-	XRAY_ALIGN(16) 
-#endif
+//#if XRAY_PLATFORM_64_BIT
+//	XRAY_ALIGN(16) 
+//#endif
 	union free_list_type
 	{
 		threading::atomic64_type	whole;
@@ -33,16 +33,20 @@ struct multi_threading_single_size_allocator_policy
 			u32			counter;
 		};
 #else // #if XRAY_PLATFORM_32_BIT
-		void			set_pointer ( T* p )	{ pointer = p; }
-		T*				get_pointer	() const	{ return pointer; }
+		void			set_pointer ( T* p )	{ pointer = (T*)(u64)p; }
+		T*				get_pointer	() const	{ return (T*)(u64)pointer; }
 
-		volatile s64 whole[2];
+		//volatile s64 whole[2];
 
-		struct
-		{
+		private:
 			T*			pointer;
-			u64			counter;
-		};
+		
+		public:
+			struct
+			{
+				u64		dummy	: 40;
+				u64		counter;	//: 24;
+			};
 #endif // #if XRAY_PLATFORM_32_BIT
 	};
 #pragma warning(pop)
@@ -61,11 +65,7 @@ struct multi_threading_single_size_allocator_policy
 	};
 #endif // #if defined(_MSC_VER)
 
-//#if XRAY_PLATFORM_32_BIT
 	typedef threading::atomic32_type	counter_type;
-//#else
-//	typedef threading::atomic64_type	counter_type;
-//#endif
 
 	static void		initialize	( free_list_type& free_list_head );
 	static	T*		allocate	( free_list_type& free_list_head );

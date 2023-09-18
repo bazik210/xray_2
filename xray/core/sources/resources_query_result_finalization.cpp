@@ -294,7 +294,8 @@ void   query_result_for_cook::finish_query_impl (cook_base::result_enum		result,
 			result									=	cook_base::result_error;
 	}
 
-	this_ptr->set_create_resource_result	(result, error_code);
+	//if(!result == cook_base::result_undefined && !result == cook_base::result_error)
+		this_ptr->set_create_resource_result	(result, error_code);
 
 	if ( this_ptr->is_translate_query() )
 		this_ptr->finish_translated_query	(result);

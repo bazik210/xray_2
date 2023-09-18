@@ -13,8 +13,8 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
-# set(CMAKE_GENERATOR_PLATFORM x64)
-set(CMAKE_GENERATOR_PLATFORM Win32)
+ set(CMAKE_GENERATOR_PLATFORM x64)
+# set(CMAKE_GENERATOR_PLATFORM Win32)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #
@@ -251,7 +251,7 @@ function(xr_setup_network)
     xr_set_target_defaults_network_32(login_server)
 
     # x64
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     xr_set_target_defaults_network_64(game_server)
 else()
     xr_set_target_defaults_network_32(game_server)
@@ -273,7 +273,7 @@ function(xr_setup_plugins)
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
     )
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
@@ -303,7 +303,7 @@ endif()
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012
     )
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 
@@ -393,7 +393,7 @@ target_include_directories(stalker2_pc_dx11 PRIVATE
 #	legacy_stdio_definitions.lib
 #	xaudio2.lib
 #)
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(stalker2_pc_dx11 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 #       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
@@ -407,7 +407,7 @@ target_link_directories(stalker2_pc_dx11 PRIVATE
 )
 endif()
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
 target_compile_definitions(stalker2_pc_opengl PRIVATE
 	PLATFORM_WIN64
@@ -432,7 +432,7 @@ target_include_directories(stalker2_pc_opengl PRIVATE
 #	legacy_stdio_definitions.lib
 #)
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(stalker2_pc_opengl PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 #       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
@@ -500,7 +500,7 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
          PLATFORM_WIN64
@@ -565,7 +565,7 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64
@@ -623,7 +623,7 @@ function(xr_set_target_defaults_stalker2 TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
 	      PLATFORM_WIN64
@@ -680,7 +680,7 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
 	      PLATFORM_WIN64
@@ -732,10 +732,10 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-	      PLATFORM_WIN64
+	  PLATFORM_WIN64
           WIN64
           WINDOWS
           _HAS_EXCEPTIONS=0
@@ -743,7 +743,7 @@ if(x64)
 else()
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-	      PLATFORM_WIN32
+	  PLATFORM_WIN32
           WIN32
           WINDOWS
           _HAS_EXCEPTIONS=0
@@ -777,7 +777,7 @@ endif()
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -806,7 +806,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
 	      PLATFORM_WIN64
@@ -866,7 +866,7 @@ endif()
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-if(x64)   
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -896,7 +896,7 @@ function(xr_set_target_defaults_editor TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         _WIN32_WINNT=0x0501
@@ -954,7 +954,7 @@ endif()
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_print_target_compile_flags(${TARGET})
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /DEBUG
         /SUBSYSTEM:WINDOWS
@@ -1108,7 +1108,7 @@ endfunction()
 
 function(xr_set_target_defaults_plugin TARGET)
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
     target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64

@@ -14,13 +14,13 @@ template < typename T >
 void multi_threading_single_size_allocator_policy< T >::initialize	( free_list_type& free_list_head )
 {
 	free_list_head.set_pointer	( 0 );
-#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
+//#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
 	free_list_head.whole		= 0;
-#endif	
+//#endif	
 	free_list_head.counter		= 0;
 }
 	
-#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
+//#if XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
 template < typename T >
 T* multi_threading_single_size_allocator_policy< T >::allocate		( free_list_type& free_list_head )
 {
@@ -64,7 +64,7 @@ void multi_threading_single_size_allocator_policy< T >::deallocate	(
 		) != head.whole );
 }
 
-#else // XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
+/*#else // XRAY_PLATFORM_32_BIT || !defined(_MSC_VER)
 
 template < typename T >
 T* multi_threading_single_size_allocator_policy< T >::allocate		( free_list_type& free_list_head )
@@ -111,7 +111,7 @@ void multi_threading_single_size_allocator_policy< T >::deallocate	(
 		) != 1 );
 }
 
-#endif
+#endif*/
 
 template < typename T >
 void multi_threading_single_size_allocator_policy< T >::increment	( counter_type& operand )
