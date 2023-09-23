@@ -12,10 +12,10 @@
 
 namespace stalker2 
 {
-class object_values_storage : public game_object_, public object_controlled
+class object_values_storage : public game_world_object, public object_controlled
 {
 
-typedef game_object_	super;
+typedef game_world_object	super;
 
 public:
 					object_values_storage			( game_world& w );

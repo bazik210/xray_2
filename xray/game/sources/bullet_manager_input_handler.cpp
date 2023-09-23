@@ -9,7 +9,7 @@
 #include "bullet_manager.h"
 #include "game.h"
 #include "game_world.h"
-//#include "game_camera.h"
+#include "game_camera.h"
 #include <xray/input/world.h>
 #include <xray/input/keyboard.h>
 
@@ -18,7 +18,7 @@ namespace stalker2{
 bullet_manager_input_handler::bullet_manager_input_handler	( bullet_manager& bullet_manager )
 :m_bullet_manager( bullet_manager )
 {
-	m_bullet_manager.get_game( ).input_world( ).add_handler( *this );
+	m_bullet_manager.get_game_world().get_game( ).input_world( ).add_handler( *this );
 }
 
 bullet_manager_input_handler::~bullet_manager_input_handler	( )
@@ -36,7 +36,7 @@ bool bullet_manager_input_handler::on_keyboard_action( xray::input::world* input
 	{
 		case xray::input::key_f:
 		{
-			float4x4 view_transform = m_bullet_manager.get_game( ).get_game_world( ).get_camera_director( )->get_active_camera( )->get_inverted_view_matrix( );
+			float4x4 view_transform = m_bullet_manager.get_game_world( ).get_camera_director( )->get_active_camera( )->get_inverted_view_matrix( );
 			m_bullet_manager.fire( view_transform.c.xyz( ), view_transform.k.xyz( ) * 900 );
 			return			true;
 		}
@@ -44,7 +44,7 @@ bool bullet_manager_input_handler::on_keyboard_action( xray::input::world* input
 		{
 #ifndef MASTER_GOLD
 
-			m_bullet_manager.toggle_is_fixed( );
+			//m_bullet_manager.toggle_is_fixed( );
 			return			true;
 
 #endif // #ifndef MASTER_GOLD

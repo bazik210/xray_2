@@ -164,7 +164,7 @@ private:
 	float						m_max_speed;
 }; // struct animation_space_graph
 
-struct animation_space_graph_wrapper : private boost::noncopyable {
+struct animation_space_graph_wrapper /* : private boost::noncopyable*/ {
 private:
 	typedef animation_space_graph::edges_type	edges_type;
 
@@ -222,7 +222,7 @@ private:
 	vertex_id_type const&			m_start_vertex_id;
 }; // struct animation_space_graph_wrapper
 
-class animation_space_heuristics : private boost::noncopyable {
+class animation_space_heuristics /* : private boost::noncopyable*/ {
 public:
 	inline			animation_space_heuristics	(
 			animation_space_graph const& graph,

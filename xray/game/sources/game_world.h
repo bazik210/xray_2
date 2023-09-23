@@ -9,7 +9,9 @@
 
 #include "game_scene.h"
 #include "game_project.h"
+#include "camera_director.h"
 #include "logic_fwd_defines.h"
+#include <xray/render/facade/game_renderer.h>
 #include <xray/physics/engine.h>
 
 // IMPORTANT!!!
@@ -19,6 +21,7 @@
 
 namespace xray{
 
+namespace physics{struct world;}
 namespace collision{struct space_partitioning_tree;};
 
 };
@@ -32,8 +35,11 @@ class free_fly_handler;
 class free_fly_camera;
 class actor;
 class actor_input_controller;
+//class hud;
+struct test_anim_object;
 
-class game_world	:public game_scene
+class game_world	:public game_scene//,
+//					private physics::engine
 {
 	typedef			game_scene				super;
 public:
@@ -56,8 +62,7 @@ public:
 	void			load					( pcstr project_resource_name, pcstr project_resource_path=NULL );
 	void			unload					( );
 	bool			empty					( );
-
-
+//	game&			get_game				( ) const { return m_game; }
 	bullet_manager&					get_bullet_manager		( ) const			{ return *m_bullet_manager; }
 	xray::collision::space_partitioning_tree*	get_collision_tree	( ) const	{ return m_collision_tree; };
 
@@ -67,16 +72,19 @@ public:
 
 	game_object_ptr_	 get_object_by_name	( pcstr object_id ) const;
 	void			query_object_by_name	( pcstr object_id, object_loaded_callback_type const& callback ) const;
-	//void			on_scene_start			( object_scene_ptr scene );
-	//void			on_scene_stop			( object_scene_ptr scene );
+	void			on_scene_start			( object_scene_ptr scene );
+	void			on_scene_stop			( object_scene_ptr scene );
 	
 	void			switch_to_free_fly_camera( );
 	void			switch_to_hud_camera	( );
 	bool			is_loading_or_unloading	( ){return false;}
+//	hud*			get_hud					( ) { return m_hud; }
+//	xray::physics::world*					get_physics_world		( ) { return m_physics_world;}
 	void			tmp_actor_ready			( actor* a );
 	
 protected:
 	void			on_project_loaded		( resources::queries_result& data );
+	void			turn_rtp_debug			( pcstr params );
 	void			on_resources_ready		( xray::resources::queries_result& data );
 	void			query_resources			( );
 	void			time_update				( );
@@ -84,9 +92,12 @@ private:
 
 	fs_new::virtual_path_string				m_project_resource_path;
 	game_project_ptr						m_game_project;
+//	game&									m_game;
 	camera_director_ptr						m_camera_director;
+public:
 	actor*									m_local_actor;
 	actor_input_controller*					m_actor_input_controller;
+//	hud*									m_hud;
 	free_fly_camera*						m_free_fly_camera;
 
 	cell_manager* 							m_cell_manager;
@@ -99,7 +110,10 @@ private:
 	u32										m_last_frame_time_ms;
 	float									m_last_frame_time_sec;
 	
-//	scenes_list								m_active_scenes;
+	scenes_list								m_active_scenes;
+//	xray::physics::world*					m_physics_world;
+	test_anim_object*						m_test_anim_object;
+	
 private:
 //	network::server		m_server;
 	network::client		m_client;

@@ -33,7 +33,8 @@ m_animation_player	( NULL ),
 m_camera_director	( w.get_camera_director() ),
 m_is_active			( false ),
 m_model_added		( false ),
-m_crouch			( false )
+m_crouch			( false ),
+game_world_object ( w )
 {
 	m_character_transform.identity	( );
 	m_frame_events.m_last_frame_time_ms= 0;
@@ -147,7 +148,7 @@ void hud::on_deactivate( )
 
 void hud::add_models_to_scene( )
 {
-	render::scene_ptr scene		= m_game_world.get_game().get_render_scene();
+	render::scene_ptr scene		= m_game_world.get_game().get_active_scene();
 	render::game::renderer& r	= m_game_world.get_game().renderer();
 
 	r.scene().add_model			( scene, m_character_model->m_render_model, m_character_transform );
@@ -158,7 +159,7 @@ void hud::add_models_to_scene( )
 
 void hud::remove_models_from_scene( )
 {
-	render::scene_ptr scene		= m_game_world.get_game().get_render_scene();
+	render::scene_ptr scene		= m_game_world.get_game().get_active_scene();
 	render::game::renderer& r	= m_game_world.get_game().renderer();
 
 	r.scene().remove_model		( scene, m_character_model->m_render_model );
@@ -259,7 +260,7 @@ void hud::tick( )
 						+ weapon_target /*+ current_additive_lexeme_1*/
 						,current_time );
 
-	render::scene_ptr scene			= m_game_world.get_game().get_render_scene();
+	render::scene_ptr scene			= m_game_world.get_game().get_active_scene();
 	render::game::renderer& r		= m_game_world.get_game().renderer();
 
 	

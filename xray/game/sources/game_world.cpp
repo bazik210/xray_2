@@ -7,10 +7,14 @@
 #include "pch.h"
 #include "game_world.h"
 #include "game.h"
+//#include "camera_director.h"
 #include "cell_manager.h"
 #include "bullet_manager.h"
+//#include <xray/console_command.h>
 #include "event_manager.h"
 #include "object_scene.h"
+//#include "hud.h"
+#include "test_anim_object.h"
 #include "actor.h"
 #include "actor_input_controller.h"
 #include "free_fly_camera.h"
@@ -68,7 +72,8 @@ m_game_time_ms			( 0 ),
 m_game_time_sec			( 0 ),
 m_last_frame_time_ms	( 0 ),
 m_last_frame_time_sec	( 0 ),
-//m_test_anim_object	( NULL ),
+//m_physics_world			( NULL ),
+m_test_anim_object	( NULL ),
 m_bullet_manager		( 0 ),
 m_local_actor			( NULL ),
 //m_server				( game.get_network_world() ),
@@ -110,7 +115,7 @@ game_world::~game_world( )
 	camera_director* cd = m_camera_director.c_ptr(); 
 	m_camera_director	= NULL;
 	DELETE				( cd );
-//	DELETE				( m_test_anim_object );
+	DELETE				( m_test_anim_object );
 }
 
 void game_world::time_update( )
@@ -151,7 +156,12 @@ void game_world::tick( )
 
 	}
 
+	if(m_test_anim_object)
+		m_test_anim_object->tick();
+
 	m_camera_director->apply			( );
+//	if(g_physics_enabled)
+//		m_physics_world->tick			( );
 
 	m_cell_manager->set_inv_view_matrix	( m_camera_director->get_inverted_view_matrix( ) );
 	m_cell_manager->tick				( );

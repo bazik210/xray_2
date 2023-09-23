@@ -9,7 +9,8 @@
 #include "object_proximity_trigger.h"
 #include "object_scene.h"
 #include "game_world.h"
-#include "hud.h"
+//#include "hud.h"
+#include "actor.h"
 
 #ifndef MASTER_GOLD
 #	include "game.h"
@@ -37,7 +38,7 @@ proximity_trigger_behaviour::proximity_trigger_behaviour ( object_scene_job* own
 
 	if( xray::strings::compare( testees_source, "HUD" ) == 0 )
 	{
-		m_testee = &owner->get_game_world( ).get_hud( )->get_caracter_capsule( );
+		m_testee = &owner->get_game_world().m_local_actor->get_caracter_capsule();
 	}
 
 #ifndef MASTER_GOLD
@@ -174,7 +175,7 @@ void proximity_trigger_behaviour::tick ( )
 #ifndef MASTER_GOLD
 
 	render::debug::renderer& renderer	= m_proximity_trigger->get_game_world( ).get_game( ).renderer( ).debug( );
-	render::scene_ptr const& scene		= m_proximity_trigger->get_game_world( ).get_game( ).get_render_scene( );
+	render::scene_ptr const& scene		= m_proximity_trigger->get_game_world( ).get_game( ).get_active_scene( );
 
 	if( m_is_testee_volume_enabled )
 	{

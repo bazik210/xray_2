@@ -82,7 +82,7 @@ human_npc::human_npc		(
 		render::game::renderer& renderer,
 		game_world& game_world
 	) :
-	game_object_			( game_world ),
+	game_world_object		( game_world ),
 	m_ai_world				( ai_world ),
 	m_sound_world			( sound_world ),
 	m_sound_scene			( sound_scene ),
@@ -197,7 +197,8 @@ void human_npc::on_sound_event	( sound::sound_producer const& sound_source )
 	m_sound_perceived			= true;
 
 	ai::sensed_sound_object		perceived_sound;
-	human_npc const* source		= static_cast_checked< human_npc const* >( &sound_source );
+	//human_npc const* source		= static_cast_checked< human_npc const* >( &sound_source );
+	human_npc const* source = static_cast< human_npc const* >(&sound_source);
 	perceived_sound.object		= source->cast_game_object();
 	perceived_sound.position	= sound_source.get_source_position( float3( 0, 0, 0 ) );
 	perceived_sound.type		= (ai::sound_collection_types)sound_source.m_sound_type;
@@ -300,7 +301,7 @@ void human_npc::draw		( render::game::renderer& render, render::scene_ptr const&
 #ifndef MASTER_GOLD
 	if ( m_target_vertex )
 	{
-		m_renderer.debug().draw_origin	( m_scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
+		//m_renderer.debug().draw_origin	( m_scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
 
 		typedef xray::ai::navigation::path_type	path_type;
 		for ( path_type::const_iterator b = m_navigation_path.begin(), e = m_navigation_path.end(), i = b; i != e; ++i ) {

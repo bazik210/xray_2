@@ -597,11 +597,11 @@ void graph_generator::tick					( )
 	//	m_renderer.debug().draw_sphere ( m_scene, v0, .1f, math::color(255,   0, 255));
 	//	m_renderer.debug().draw_sphere ( m_scene, v1, .1f, math::color(255,   0, 255));
 	}
-	*/
+
 
 	m_renderer.draw_sphere ( m_scene, m_start_position, m_path_finder_agent_radius, math::color( 255, 128, 128 ) );
 	m_renderer.draw_sphere ( m_scene, m_goal_position, m_path_finder_agent_radius, math::color( 128, 128, 255 ) );
-
+	*/
 	if ( m_show_path_channel ) {
 		u32 channel_triangles_count = m_channel.size();
 		for ( u32 i = 0 ; i < channel_triangles_count; ++i ) {
@@ -647,13 +647,13 @@ void graph_generator::tick					( )
 		if ( m_show_triangle_id == (i->triangle_id) )
 			continue;
 		
-		if ( m_show_triangle_faces )
-			m_renderer.draw_triangle( m_scene, v0, v1, v2, m_input_triangles.data[ (i->triangle_id) ].color );
+		//if ( m_show_triangle_faces )
+		//	m_renderer.draw_triangle( m_scene, v0, v1, v2, m_input_triangles.data[ (i->triangle_id) ].color );
 		
-		static const math::color obstruction_color(255, 0, 0);
-		m_renderer.draw_line	( m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
-		m_renderer.draw_line	( m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
-		m_renderer.draw_line	( m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		//static const math::color obstruction_color(255, 0, 0);
+		//m_renderer.draw_line	( m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		//m_renderer.draw_line	( m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		//m_renderer.draw_line	( m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
 		
 	}
 

@@ -17,7 +17,7 @@ namespace stalker2{
 class camera_director;
 bool b_rtp_dbg_input = false;
 
-class rtp_debug_camera : public free_fly_camera
+class rtp_debug_camera : public free_fly_camera, game_world_object
 {
 	typedef free_fly_camera super;
 public:
@@ -33,7 +33,8 @@ private:
 
 rtp_debug_camera::rtp_debug_camera( game_world& w )
 :super			( w ),
-m_prev_camera	( NULL )
+m_prev_camera	( NULL ),
+game_world_object ( w )
 {};
 
 void rtp_debug_camera::start( )

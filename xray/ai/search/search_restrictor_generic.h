@@ -15,8 +15,8 @@ namespace search_restrictor {
 
 template < typename vertex_id_type, typename const_edge_iterator, typename distance_type >
 class generic :
-	public base< vertex_id_type, const_edge_iterator, distance_type >,
-	private boost::noncopyable
+	public base< vertex_id_type, const_edge_iterator, distance_type >//,
+	//private boost::noncopyable
 {
 public:
 	inline						generic				(

@@ -24,6 +24,7 @@
 #include <xray/animation/animation_expression_emitter.h>
 #include <xray/ai_navigation/sources/navigation_mesh_types.h>
 #include <xray/animation/animation_expression_emitter.h>
+#include <xray/render/engine/base_classes.h>
 
 namespace xray {
 
@@ -88,7 +89,7 @@ class human_npc :
 	public sound::sound_producer,
 	public sound::sound_receiver,
 	public object_controlled,
-	public game_object_	
+	public game_world_object
 {
 public:
 								human_npc			(
@@ -96,8 +97,8 @@ public:
 									sound::world& sound_world,
 									sound::sound_scene_ptr const& sound_scene,
 									collision::space_partitioning_tree& spatial_tree,
-									render::scene_ptr const& scene,
-									render::game::renderer& renderer,
+									xray::render::scene_ptr const& scene,
+									xray::render::game::renderer& renderer,
 									game_world& game_world
 								);
 	virtual						~human_npc			( );
@@ -189,7 +190,7 @@ public:
 			void				clear_filter		( );
 			void				fill_stats			( ai::npc_statistics& stats ) const;
 
-			void				draw				( render::game::renderer& render, render::scene_ptr const& scene ) const;
+			void				draw				( xray::render::game::renderer& render, xray::render::scene_ptr const& scene ) const;
 			void				tick				( u32 const current_time_in_ms );
 
 			void				add_weapon			( object_weapon* weapon );
@@ -206,8 +207,8 @@ public:
 
 public:
 	// for testing purposes only
-	inline	render::game::renderer&	get_dbg_render	( ) const { return m_renderer; }
-	inline	render::scene_ptr const& get_dbg_scene	( ) const { return m_scene; }
+	inline	xray::render::game::renderer&	get_dbg_render	( ) const { return m_renderer; }
+	inline	xray::render::scene_ptr const& get_dbg_scene	( ) const { return m_scene; }
 
 	inline	void				set_sound_dbg_mode	( bool val ) { m_dbg_sound = val; }
 	inline	bool				get_sound_dbg_mode	( ) const { return m_dbg_sound; }
@@ -252,7 +253,7 @@ private:
 	sound::world&									m_sound_world;
 	ai::brain_unit_res_ptr							m_brain_unit;
 
-	render::game::renderer&							m_renderer;
+	xray::render::game::renderer&					m_renderer;
 	animated_model_instance_ptr						m_model_instance;
 
 	collision::space_partitioning_tree&				m_spatial_tree;
@@ -263,7 +264,7 @@ private:
 
 	float4x4										m_transform;
 
-	render::scene_ptr								m_scene;
+	xray::render::scene_ptr								m_scene;
 	sound::sound_scene_ptr							m_sound_scene;
 
 	ai::animation_item const*						m_current_animation;
