@@ -103,7 +103,7 @@ void game::initialize_modules		( )
 	initialize_physics				( );
 	initialize_input				( );
 	initialize_animation			( );
-//	initialize_rtp					( );
+	initialize_rtp					( );
 	initialize_ui					( );
 	initialize_ai_navigation		( );
 	initialize_ai					( );
@@ -114,7 +114,7 @@ void game::deinitialize_modules		( )
 	ai::destroy_world				( m_ai_world );
 	ai::navigation::destroy_world	( m_ai_navigation_world );
 	ui::destroy_world				( m_ui_world );
-	//rtp::destroy_world			( m_rtp_world );
+	rtp::destroy_world				( m_rtp_world );
 	animation::destroy_world		( m_animation_world );
 	input::destroy_world			( m_input_world );
 #ifdef MASTER_GOLD

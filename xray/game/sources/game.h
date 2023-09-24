@@ -302,6 +302,8 @@ private:
 	// for sound test
 	bool									m_sound_test_allowed;
 
+	bool									m_rtp;
+
 	float3									m_movement_target;
 
 	// for debug window

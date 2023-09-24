@@ -48,6 +48,7 @@ add_library(game STATIC
 					# actor
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/actor_controller.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor_input_controller.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor_input_controller.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_anim_object.cpp"
@@ -65,7 +66,9 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_sky.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_sky.h"
 					# values_storage
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_values_storage.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_values_storage.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/values_storage_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/values_storage_behaviour.h"
 					# composite_object
 					"${CMAKE_CURRENT_SOURCE_DIR}/composite_object_behaviour.cpp"
@@ -108,15 +111,23 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/building_object.h"
 					# npc
 					# human
+					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animation_controller_planner.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animation_controller_planner.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animation_controller.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animations.cpp"
 					# cook
+					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_cook.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_cook.h"
 					# game_material_visibility_parameters
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_material_visibility_parameters.h"
 					# npc_behaviours
+					"${CMAKE_CURRENT_SOURCE_DIR}/npc_empty_switcher_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/npc_empty_switcher_behaviour.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/npc_play_animation_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/npc_play_animation_behaviour.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/npc_reach_position_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/npc_reach_position_behaviour.h"
 					# composite_building
 					"${CMAKE_CURRENT_SOURCE_DIR}/composite_building.cpp"
@@ -126,6 +137,7 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/ai_collision_object.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/collision_object_types.h"
 					# weapon
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_weapon.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_weapon.h"
 					# project
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_project.cpp"
@@ -136,7 +148,9 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/project_cooker_simple.h"
 					# sound_player
 					"${CMAKE_CURRENT_SOURCE_DIR}/ai_sound_player.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/ai_sound_player.cpp"
 					# cook
+					"${CMAKE_CURRENT_SOURCE_DIR}/sound_player_cook.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/sound_player_cook.h"
 					# sound_position_calculator
 					"${CMAKE_CURRENT_SOURCE_DIR}/sound_position_calculator.cpp"
@@ -162,6 +176,7 @@ add_library(game STATIC
 					# game_world
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_world.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_world.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/game_world_input.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/memory_allocation_test.cpp"
 					# main_menu
 					"${CMAKE_CURRENT_SOURCE_DIR}/main_menu.cpp"
@@ -177,6 +192,7 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/bullet_manager.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/bullet_manager.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/bullet_manager_debug_render.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/bullet_manager_input_handler.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/bullet_manager_input_handler.h"
 					# animations_selector
 					"${CMAKE_CURRENT_SOURCE_DIR}/animations_selector.cpp"
@@ -209,6 +225,7 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_exit_handler.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_exit_handler.h"
 					# npc_manipulation
+					"${CMAKE_CURRENT_SOURCE_DIR}/npc_manipulation_handler.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/npc_manipulation_handler.h"
 					# network
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_net_client.cpp"

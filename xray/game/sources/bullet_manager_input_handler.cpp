@@ -44,7 +44,7 @@ bool bullet_manager_input_handler::on_keyboard_action( xray::input::world* input
 		{
 #ifndef MASTER_GOLD
 
-			//m_bullet_manager.toggle_is_fixed( );
+			m_bullet_manager.toggle_is_fixed( );
 			return			true;
 
 #endif // #ifndef MASTER_GOLD

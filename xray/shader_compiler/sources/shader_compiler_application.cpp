@@ -95,7 +95,7 @@ void application::initialize( )
 	logging::push_filter		( "", logging::silent, &memory::g_mt_allocator );
 	logging::push_filter		( "shader_compiler", logging::trace, &memory::g_mt_allocator);
 
-	LOG_INFO	(logging::format_message, "", logging::log_to_console, "");
+	LOG_INFO	(logging::format_message, logging::log_to_console, "");
 }
 
 void application::finalize	( )

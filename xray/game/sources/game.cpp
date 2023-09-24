@@ -178,7 +178,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_ui_world				( 0 ),
 	m_physics_world			( 0 ),
 	m_animation_world		( 0 ),
-//	m_rtp_world				( 0 ),
+	m_rtp_world				( 0 ),
 	m_ai_navigation_world	( 0 ),
 	
 	m_ai_world				( 0 ),
@@ -199,7 +199,8 @@ game::game(		xray::engine_user::engine& engine,
 	m_is_active				( false ),
 	m_sound_scene			( 0 ),
 	m_debug_window_type		( debug_window_none ),
-	m_debug_window			( NULL )
+	m_debug_window			( NULL ),
+	m_rtp					( 0 )
 {
 	query_render_scene		( );
 	query_sound_scene		( );
@@ -310,9 +311,6 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	else
 		m_game_world->switch_to_free_fly_camera( );
 
-//	R_ASSERT					( m_rtp_world );
-//	rtp().set_scene				( get_active_scene() );
-	
 	R_ASSERT					( m_animation_world );
 //	animation_world().set_test_scene( get_active_scene() );
 
@@ -506,6 +504,16 @@ void game::tick( u32 const current_frame_id )
 		return;
 	}
 
+	if (!m_rtp) {
+		m_rtp = true;
+
+		R_ASSERT(m_rtp_world);
+
+		rtp().set_scene(get_active_scene());
+
+		//LOG_INFO("rtp is ready!");
+	}
+
 	if ( m_active_scene )
 	{
  		m_input_world->tick			( );
@@ -517,7 +525,7 @@ void game::tick( u32 const current_frame_id )
 	m_ui_world->tick				( );
 	m_physics_world->tick			( );
 
-//	m_rtp_world->tick				( );
+	m_rtp_world->tick				( );
 	m_animation_world->tick			( );
 
 	m_ai_navigation_world->tick		( );
@@ -638,18 +646,18 @@ void game::clear_resources				( )
 	m_sound_stats->clear_resources		( m_sound_world.get_logic_world_user() );
 #endif //#ifndef MASTER_GOLD
 
-	//m_sound_world.get_logic_world_user().remove_sound_scene	( m_sound_scene );
+	m_sound_world.get_logic_world_user().remove_sound_scene	( m_sound_scene );
 	//m_render_world.destroy( *g_allocator, m_renderer);
 
 
 	m_physics_world->clear_resources	( );
-
+	 
 	m_input_world->clear_resources		( );
 	m_ui_world->clear_resources			( );
 	m_ai_navigation_world->clear_resources( );
 	m_ai_world->clear_resources			( );
 	m_animation_world->clear_resources	( );
-//	m_rtp_world->clear_resources		( );
+	m_rtp_world->clear_resources		( );
 
 	if( !m_game_world->empty() )
 		m_game_world->unload			( );
