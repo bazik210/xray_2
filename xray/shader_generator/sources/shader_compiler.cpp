@@ -167,7 +167,7 @@ typedef char const* values_type[s_max_value_count];
 struct definition;
 typedef values_type const& (*get_value_ptr)	( definition* const first, definition* const last );
 
-struct definition : private boost::noncopyable {
+struct definition /* : private boost::noncopyable*/ {
 	inline			definition	(
 			char const* const	id,
 			char const* const value0,

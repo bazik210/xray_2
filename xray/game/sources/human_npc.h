@@ -264,7 +264,7 @@ private:
 
 	float4x4										m_transform;
 
-	xray::render::scene_ptr								m_scene;
+	xray::render::scene_ptr							m_scene;
 	sound::sound_scene_ptr							m_sound_scene;
 
 	ai::animation_item const*						m_current_animation;

@@ -7,7 +7,10 @@
 #include "pch.h"
 #include "bullet_manager.h"
 #include "bullet.h"
+#include "game.h"
 #include "game_world.h"
+#include "game_camera.h"
+#include "bullet_manager_input_handler.h"
 
 #include <xray/tasks_system.h>
 #include <xray/buffer_vector.h>
@@ -28,17 +31,18 @@
 
 namespace stalker2 {
 
-bullet_manager::bullet_manager ( game_world& w ) 
-:	m_bullets					( NULL, 0 ),
+/////////////////////////////			   I N I T I A L I Z E				///////////////////////////////////////
+bullet_manager::bullet_manager ( game_world& w )  
+:	m_bullets				( NULL, 0 ),
 	m_gravity					( float3( 0, -9.81f, 0 ) ),
 	m_game_world				( w ),
 	m_task_type					( tasks::create_new_task_type( "bullet", tasks::task_type_flags_no_self_parallelization_hint ) ),
 	m_max_bullets_count			( 0 ),
 	m_max_bullets_decals_count	( 64 ),
 	m_current_decal_id			( 0 ),
-	m_bullet_time_factor		( 1.0f ),
-	m_air_resistance_epsilon	( 0.1f ),
-	m_current_air_resistance	( 1.0f )
+	m_bullet_time_factor		( 1 ),
+	m_air_resistance_epsilon	( .1f ),
+	m_current_air_resistance	( 1 )
 
 #ifndef MASTER_GOLD	
 	,
@@ -47,6 +51,7 @@ bullet_manager::bullet_manager ( game_world& w )
 	m_is_draw_collision_trajectories( false ),
 	m_is_draw_decals_data		( true ),
 	m_is_draw_collision_points	( true ),
+	m_is_fixed					( false ),
 	m_bullet_trajectories_points( vectora< render::vertex_colored >( g_allocator ) )
 
 #endif // #ifndef MASTER_GOLD
@@ -54,7 +59,7 @@ bullet_manager::bullet_manager ( game_world& w )
 	initialize					( );
 	register_console_commands	( );
 
-//	static bullet_manager_input_handler	input_handler( *this );
+	static bullet_manager_input_handler	input_handler( *this );
 }
 
 bullet_manager::~bullet_manager ( )
@@ -88,6 +93,9 @@ void bullet_manager::register_console_commands ( )
 #endif // #ifndef MASTER_GOLD
 
 }
+
+
+/////////////////////////////		   P U B L I C   M E T H O D S			///////////////////////////////////////
 
 struct redundant_bullet_predicate
 {
@@ -136,7 +144,14 @@ float3 const& bullet_manager::get_gravity( ) const
 
 void bullet_manager::fire ( float3 position, float3 direction )
 {
-	emit_bullet( position, direction, m_current_air_resistance );
+#ifndef MASTER_GOLD
+
+	if( m_is_fixed )
+		emit_bullet( m_fixed_position, m_fixed_direction * 900, m_current_air_resistance );
+	else
+		emit_bullet( position, direction, m_current_air_resistance );
+#endif // #ifndef MASTER_GOLD
+
 }
 
 float bullet_manager::get_bullet_time_factor ( )
@@ -219,6 +234,17 @@ void bullet_manager::store_bullet_trajectory ( bullet* bullet )
 		}
 	}
 	m_bullet_sequences_sizes.push_back( senquence_size );
+}
+
+void bullet_manager::toggle_is_fixed ( )
+{
+	m_is_fixed = !m_is_fixed;
+	if( m_is_fixed )
+	{
+		float4x4 view_transform		= m_game_world.get_camera_director( )->get_active_camera( )->get_inverted_view_matrix( );
+		m_fixed_position			= view_transform.c.xyz( );
+		m_fixed_direction			= view_transform.k.xyz( );
+	}
 }
 
 void bullet_manager::add_collision_point ( float3 const& point, math::color const& color )
@@ -410,33 +436,39 @@ void bullet_manager::destroy_bullet ( bullets_type::iterator& destroying_bullet_
 
 void bullet_manager::displace_one_bullet ( )
 {
-
 	// removed dependency from active camera ( temp solution )
-	if(!m_bullets.empty())
+	///if (!m_bullets.empty())
+	//{
+	//	bullets_type::iterator farthest_bullet = m_bullets.begin();
+	//	destroy_bullet(farthest_bullet);
+	//}
+
+	//not sure we should use this one, lox
+	// probably it's this: https://www.youtube.com/watch?v=EpkvNUoxlxM&t=56s
+
+	float3 const&		camera_position			= m_game_world.get_camera_director( )->get_active_camera( )->get_inverted_view_matrix( ).c.xyz( );
+
+#pragma message( XRAY_TODO("jes to all: this may be a bottleneck in some circumstances") )
+
+	float	farthest_distance_square					= 0;
+	bullets_type::iterator farthest_bullet	= NULL;
+
+	if (!m_bullets.empty())
 	{
-		bullets_type::iterator farthest_bullet	= m_bullets.begin( );
-		destroy_bullet			( farthest_bullet );
+		bullets_type::iterator	current = m_bullets.begin();
+		bullets_type::iterator	end = m_bullets.end();
+
+		for (; current != end; ++current)
+		{
+			float	distance_square = ((*current)->get_position() - camera_position).squared_length();
+			if (distance_square > farthest_distance_square)
+			{
+				farthest_bullet = current;
+				farthest_distance_square = distance_square;
+			}
+		}
+		destroy_bullet(farthest_bullet);
 	}
-//	float3 const&		camera_position			= m_game_world.get_camera_director()->get_active_camera()->get_inverted_view_matrix().c.xyz();
-//
-//#pragma message( XRAY_TODO("jes to all: this may be a bottleneck in some circumstances") )
-//
-//	float	farthest_distance_square		= 0;
-//	bullets_type::iterator farthest_bullet	= NULL;
-//
-//	bullets_type::iterator	current = m_bullets.begin( );
-//	bullets_type::iterator	end		= m_bullets.end( );
-//
-//	for ( ; current != end; ++current )
-//	{
-//		float	distance_square			= ( (*current)->get_position() - camera_position ).squared_length( );	
-//		if( distance_square > farthest_distance_square )
-//		{
-//			farthest_bullet				= current;
-//			farthest_distance_square	= distance_square;
-//		}
-//	}
-//	destroy_bullet			( farthest_bullet );
 }
 
 } // namespace stalker2

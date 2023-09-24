@@ -696,7 +696,7 @@ void define_manager::compare_bytecode( shader_bytecode_buffer& bytecode )
 			}
 			else
 			{
-				shader_bytecode_buffer* b = it->bytecode_history.begin();
+				shader_bytecode_buffer* b = &*it->bytecode_history.begin();
 				if (!it->effect_to_shader && !b->equal( bytecode ) || !bytecode.data)
 					it->effect_to_shader = true;
 				

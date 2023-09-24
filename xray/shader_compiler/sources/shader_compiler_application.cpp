@@ -77,7 +77,7 @@ void application::initialize( )
 
 	core::preinitialize		(
 		& * s_core_engine,
-		core::create_log, 
+		logging::create_log, 
 		new_command_line,
 		command_line::contains_application_true,
 		"shader_compiler",
@@ -92,16 +92,10 @@ void application::initialize( )
 
 	core::initialize		( "../../resources/sources/", "shader_compiler", core::perform_debug_initialization );
 
-	logging::push_filter		( "", logging::silent );
-	logging::push_filter		( "shader_compiler", logging::trace );
+	logging::push_filter		( "", logging::silent, &memory::g_mt_allocator );
+	logging::push_filter		( "shader_compiler", logging::trace, &memory::g_mt_allocator);
 
-	LOG_INFO				(
-		logging::settings (
-			"",
-			logging::settings::flags_log_only_user_string | logging::settings::flags_log_to_console
-		),
-		""
-	);
+	LOG_INFO	(logging::format_message, "", logging::log_to_console, "");
 }
 
 void application::finalize	( )
@@ -189,7 +183,7 @@ void application::execute	( )
 			define_manager.merge_with_declarated_defines(found_declared_macroses);
 		}
 		
-		char* buffer	= file_data.begin();
+		char* buffer	= &*file_data.begin();
 		u32 file_size	= file_data.length();		
 		
 //		bool is_debug = g_debug_mode.is_set();
