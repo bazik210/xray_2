@@ -21,6 +21,7 @@ START /B /WAIT cmake --graphviz=dependency_graph.dot --fresh -G "Visual Studio 1
 	CALL RemoveExceptions.bat
 	CALL SetupNothrownew.bat
 	CALL SetupEditor.bat
+	CALL SetupTools.bat
 	echo Cleaning up...
 	CALL RemoveTempFiles.bat
 	echo Done!

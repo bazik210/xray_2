@@ -50,12 +50,12 @@ Source files of third party libraries aren't part of this repository. Consult wi
 - Open **X-Ray-v2.0.sln** using **Visual Studio 2019** or **Visual Studio 2022** (make sure to use **MSVC v142** build tools).
 - Now you can Debug/Run from Visual Studio (ensure that game assets are in the right directory).
 
-\*You can use **CreateSlnVS2022.bat** if you wish to use **v143** build tools, be sure to download proper C++ MFC library, like this one: C++ MFC v 14.33 v143 build tools (x86 & x64).
+\*You can use **CreateSlnVS2022.bat** if you wish to use **v143** build tools, be sure to download proper C++ MFC library, like this one: C++ MFC v 14.33 (14.34) v143 build tools (x86 & x64).
 
 ## Development
 ### Utility Tools
 - Build directory contains several utility tools that you can use in case new project has to be integrated into solution.
-- If you updating CMakeLists.txt project files, don't forget to run again SetupNothrownew.bat and SetupEditor.bat from build\ folder after or bugtrap and editor build will be broken. 
+- If you updating CMakeLists.txt project files, don't forget to run Update.bat from build\ folder when projects will ask for reload or bugtrap, editor and some tools build will be broken. 
 - You can also disable ZERO_CHECK project, so it won't update your vs projects every time you touch cmake files, this is in case you have some critical changes in projects you didn't add yet to cmake.
 
 ## Debug
