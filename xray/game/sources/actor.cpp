@@ -66,7 +66,7 @@ void actor::set_input_source( actor_input_controller* s )
 void actor::query_resources( )
 {
 	resources::request r[] ={
-		{ "character/human/neutral/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
+		{ "character/human/actor/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
 		{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
 		{ "ak_74",												resources::weapon_class },

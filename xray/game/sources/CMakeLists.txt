@@ -53,12 +53,17 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor_input_controller.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_anim_object.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_anim_object.h"
+					# old actor
+					"${CMAKE_CURRENT_SOURCE_DIR}/hud.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/hud.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/hud_input.cpp"
 					# collision_geometry
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_collision_geometry.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_collision_geometry.h"
 					# proximity_trigger
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_proximity_trigger.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_proximity_trigger.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/proximity_trigger_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/proximity_trigger_behaviour.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/proximity_trigger_input_handler.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/proximity_trigger_input_handler.h"
@@ -246,5 +251,8 @@ target_link_libraries(game PUBLIC
 
 set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_factory.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
 set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_factory.h PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/hud.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/hud.h PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/hud_input.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
 
 set_target_properties(game PROPERTIES FOLDER "stalker2")

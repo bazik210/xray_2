@@ -284,10 +284,10 @@ void   spawn_task (task::function const & function, task_type * type, task * par
 {
 	//it's not a proper fix!
 	//shaders doesn't compile for some reason!
-	if (strcmp(type->m_next_task_type->m_description, "bullet") != 0)
-	{
+	//if (strcmp(type->m_next_task_type->m_description, "bullet") != 0)
+	//{
 		s_task_manager.spawn_task(function, type, parent);
-	}
+	//}
 }
 
 task *   grab_next_task ()

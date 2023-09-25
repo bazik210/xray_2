@@ -121,11 +121,10 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 		data				= MALLOC( object_size, type );
 	}
 	else {
-
 		data = MALLOC(0, "values_storage");
 	}
 	 
-	mutable_buffer	result(data, object_size);
+	mutable_buffer	result( data, object_size );
 	return result;
 
 }

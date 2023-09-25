@@ -109,6 +109,7 @@ m_client				( game.get_network_world() )
 game_world::~game_world( )
 {
 	DELETE				( m_free_fly_camera );
+//	DELETE				( m_hud );
 	DELETE				( m_local_actor );
 	DELETE				( m_actor_input_controller );
 
@@ -135,14 +136,6 @@ void game_world::tick( )
 	super::tick					( );
 	time_update					( );
 
-	//if(m_test_anim_object)
-	//	m_test_anim_object->tick();
-
-	//scenes_list::iterator it = m_active_scenes.begin();
-	//scenes_list::iterator it_e = m_active_scenes.end();
-	//for( ;it!=it_e; ++it)
-	//	(*it)->tick			( );
-
 	m_camera_director->tick				( );
 
 	if(m_local_actor)
@@ -156,9 +149,14 @@ void game_world::tick( )
 
 	}
 
-	if(m_test_anim_object)
-		m_test_anim_object->tick();
+	//if (m_test_anim_object)
+	//	m_test_anim_object->tick();
 
+	scenes_list::iterator it = m_active_scenes.begin();
+	scenes_list::iterator it_e = m_active_scenes.end();
+	for( ;it!=it_e; ++it)
+		(*it)->tick			( );
+		
 	m_camera_director->apply			( );
 //	if(g_physics_enabled)
 //		m_physics_world->tick			( );
@@ -198,17 +196,17 @@ float game_world::last_frame_time_sec ( )
 
 void game_world::unload( )
 {
-	//scenes_list::iterator it = m_active_scenes.begin();
-	//scenes_list::iterator it_e = m_active_scenes.end();
-	//for( ;it!=it_e; ++it)
-	//{
-	//	(*it)->stop			( true );
-	//}
+	scenes_list::iterator it = m_active_scenes.begin();
+	scenes_list::iterator it_e = m_active_scenes.end();
+	for( ;it!=it_e; ++it)
+	{
+		(*it)->stop			( true );
+	}
 
 	switch_to_free_fly_camera	( );
 	DELETE						( m_local_actor );
 
-//	m_active_scenes.clear				( );
+	m_active_scenes.clear				( );
 	m_camera_director->switch_to_camera	( NULL, "null" );
 	m_cell_manager->unload				( );
 	ASSERT								( empty() );
@@ -219,6 +217,8 @@ void game_world::unload( )
 
 void game_world::switch_to_hud_camera( )
 {
+//	m_camera_director->switch_to_camera(m_hud, "hud game camera");
+
 	if(m_local_actor)
 		m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
 }
@@ -266,9 +266,12 @@ void game_world::on_project_loaded( resources::queries_result& data )
 	math::float3 camera_direction	= (*m_game_project->m_config)["camera"]["direction"];
 	m_camera_director->set_position_direction( camera_position, camera_direction );
 	switch_to_free_fly_camera		( );
+	//switch_to_hud_camera();
 
 	if(!s_cam)
 		m_local_actor						= NEW(actor)( *this );
+
+		//m_hud =							  NEW(hud)( *this);
 }
 
 void game_world::on_activate( )
@@ -314,27 +317,32 @@ void game_world::start_game( )
 	camera_director_ptr object_ptr			= get_camera_director();
 	m_cell_manager->m_named_registry["camera_director"]		= object_ptr.c_ptr();
 	
-	//configs::binary_config_value scenes_to_start = (*m_game_project->m_config)["start"]["scenes_to_start"];
-	//for ( u32 i = 0; i < scenes_to_start.size(); i++ )
-	//{
-	//	pcstr start_scene		= (pcstr)scenes_to_start[i];
-	//	game_object_ptr_ s		= get_object_by_name(start_scene);
-	//	object_scene_ptr scene	= static_cast_resource_ptr<object_scene_ptr>(s);
-	//	scene->start			( );
-	//}
+	configs::binary_config_value scenes_to_start = (*m_game_project->m_config)["start"]["scenes_to_start"];
+	for ( u32 i = 0; i < scenes_to_start.size(); i++ )
+	{
+		pcstr start_scene		= (pcstr)scenes_to_start[i];
+		game_object_ptr_ s		= get_object_by_name(start_scene);
+		object_scene_ptr scene	= static_cast_resource_ptr<object_scene_ptr>(s);
+		scene->start			( );
+	}
+	
+// 	pcstr start_scene		= (*m_game_project->m_config)["start"]["scene_name"];
+// 	game_object_ptr_ s		= get_object_by_name(start_scene);
+// 	object_scene_ptr scene	= static_cast_resource_ptr<object_scene_ptr>(s);
+// 	scene->start			( );
 }
 
-//void game_world::on_scene_start( object_scene_ptr scene )
-//{
-//	m_active_scenes.push_back	( scene );
-//}
-//
-//void game_world::on_scene_stop( object_scene_ptr scene )
-//{
-//	scenes_list::iterator it	= std::find(m_active_scenes.begin(), m_active_scenes.end(), scene );
-//	R_ASSERT					( it!=m_active_scenes.end() );
-//	m_active_scenes.erase		( it );
-//}
+void game_world::on_scene_start( object_scene_ptr scene )
+{
+	m_active_scenes.push_back	( scene );
+}
+
+void game_world::on_scene_stop( object_scene_ptr scene )
+{
+	scenes_list::iterator it	= std::find(m_active_scenes.begin(), m_active_scenes.end(), scene );
+	R_ASSERT					( it!=m_active_scenes.end() );
+	m_active_scenes.erase		( it );
+}
 
 void game_world::query_resources( )
 {

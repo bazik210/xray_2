@@ -40,9 +40,9 @@ bullet_manager::bullet_manager ( game_world& w )
 	m_max_bullets_count			( 0 ),
 	m_max_bullets_decals_count	( 64 ),
 	m_current_decal_id			( 0 ),
-	m_bullet_time_factor		( 1 ),
-	m_air_resistance_epsilon	( .1f ),
-	m_current_air_resistance	( 1 )
+	m_bullet_time_factor		( 1.0f ),
+	m_air_resistance_epsilon	( 0.1f ),
+	m_current_air_resistance	( 1.0f )
 
 #ifndef MASTER_GOLD	
 	,

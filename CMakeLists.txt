@@ -13,8 +13,8 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
- set(CMAKE_GENERATOR_PLATFORM x64)
-# set(CMAKE_GENERATOR_PLATFORM Win32)
+# set(CMAKE_GENERATOR_PLATFORM x64)
+ set(CMAKE_GENERATOR_PLATFORM Win32)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #

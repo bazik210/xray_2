@@ -58,6 +58,18 @@ private:
 		}
 
 #else // #if XRAY_PLATFORM_32_BIT
+		struct {
+			task* m_pointer;
+			u64	  counter;
+		};
+
+		inline task* pointer()
+		{
+			return m_pointer;
+		}
+
+		//not working mambo-jambo with bits
+/*
 		enum {
 			bit_count = 40,
 		};
@@ -71,6 +83,7 @@ private:
 		{
 			return		reinterpret_cast<task*>( *reinterpret_cast<u64*>(&m_pointer) & ((u64(1) << bit_count) - 1) );
 		}
+*/
 #endif // #if XRAY_PLATFORM_32_BIT
 	};
 #	pragma warning(pop)

@@ -197,8 +197,7 @@ void human_npc::on_sound_event	( sound::sound_producer const& sound_source )
 	m_sound_perceived			= true;
 
 	ai::sensed_sound_object		perceived_sound;
-	//human_npc const* source		= static_cast_checked< human_npc const* >( &sound_source );
-	human_npc const* source = static_cast< human_npc const* >(&sound_source);
+	human_npc const* source		= static_cast_checked< human_npc const* >( &sound_source );
 	perceived_sound.object		= source->cast_game_object();
 	perceived_sound.position	= sound_source.get_source_position( float3( 0, 0, 0 ) );
 	perceived_sound.type		= (ai::sound_collection_types)sound_source.m_sound_type;

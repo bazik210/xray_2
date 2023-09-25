@@ -38,6 +38,7 @@ proximity_trigger_behaviour::proximity_trigger_behaviour ( object_scene_job* own
 
 	if( xray::strings::compare( testees_source, "HUD" ) == 0 )
 	{
+		//m_testee = &owner->get_game_world().get_hud()->get_caracter_capsule();
 		m_testee = &owner->get_game_world().m_local_actor->get_caracter_capsule();
 	}
 
