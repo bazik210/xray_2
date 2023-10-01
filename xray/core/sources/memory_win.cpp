@@ -155,9 +155,9 @@ void iterate_regions		( u32 const start_address, u32 const allocation_granularit
 #if XRAY_PLATFORM_32_BIT
 	u64 const max_address		= u64(1) << 32;
 #elif XRAY_PLATFORM_64_BIT // #if XRAY_PLATFORM_WINDOWS_32
-	u64 const max_address		= u64(1) << 40;
+	u64 const max_address		= u64(1) << 44;
 #else // #if XRAY_PLATFORM_64_BIT
-	u64 const max_address		= u64(1) << 40;
+	u64 const max_address		= u64(1) << 44;
 #endif // #if XRAY_PLATFORM_WINDOWS_32
 
 	for ( ; i < max_address; ) {

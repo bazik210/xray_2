@@ -93,7 +93,9 @@ static void output						( xray::buffer_string & message, pcstr const format, ...
 		xray::logging::helper	( __FILE__, __FUNCSIG__, __LINE__, "debug", xray::logging::error )
 								( "%s", message.c_str() + old_length);
 	}
-
+	
+	va_end	 				( mark );
+	
 	message					+= "\r\n";
 }
 
@@ -188,6 +190,8 @@ void xray::debug::terminate			( pcstr format, ... )
 
 	string4096				message;
 	vsnprintf				( message, sizeof(message), sizeof(message) - 1, format, mark );
+	
+	va_end	 				( mark );
 
 	logging::flush			( );
 	core::engine * const  engine	=	xray::core::debug::get_core_engine();

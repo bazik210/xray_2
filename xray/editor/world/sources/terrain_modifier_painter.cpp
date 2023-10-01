@@ -459,7 +459,7 @@ void terrain_modifier_detail_painter::load_settings(RegistryKey^ key)
 
 	RegistryKey^ self_key		= get_sub_key(key, name);
 
-	mode						= (painter_mode)((int)System::Enum::Parse(painter_mode::typeid, (self_key->GetValue("mode", (int)painter_mode::both)->ToString()->ToString()) ));
+		mode						= (painter_mode)((int)System::Enum::Parse(painter_mode::typeid, (self_key->GetValue("mode", static_cast<int>(painter_mode::both)))->ToString()));
 //.. active index
 	self_key->Close				();
 }

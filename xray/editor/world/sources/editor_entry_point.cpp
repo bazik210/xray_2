@@ -61,10 +61,12 @@ static void install_bugtrap						( )
 
 static System::Reflection::Assembly^ assembly_resolve					( System::Object^ , System::ResolveEventArgs^ e )
 {
+	LOG_INFO("assembly to resolve name: '%s'", e->Name);
+	LOG_INFO("result assembly name '%s'", (e->Name->Substring(0, e->Name->IndexOf('.')) + ".dll"));
 #ifdef DEBUG
-	return System::Reflection::Assembly::Load( System::IO::File::ReadAllBytes( e->Name->Substring( 0, e->Name->IndexOf( ',' ) ) + "-debug.dll" ) );
+	return System::Reflection::Assembly::Load( System::IO::File::ReadAllBytes( e->Name->Substring( 0, e->Name->IndexOf( '.' ) ) + ".dll" ) );
 #else  // #ifdef DEBUG
-	return System::Reflection::Assembly::Load( System::IO::File::ReadAllBytes( e->Name->Substring( 0, e->Name->IndexOf( ',' ) ) + "-release.dll" ) );
+	return System::Reflection::Assembly::Load( System::IO::File::ReadAllBytes( e->Name->Substring( 0, e->Name->IndexOf( '.' ) ) + ".dll" ) );
 #endif // #ifdef DEBUG
 }
 
@@ -72,7 +74,7 @@ static void install_asembly_resolver			( )
 {
 	// this is workaround on not understanding separate output C# assembly names by VisualStudio
 	// we change the names of our assemblies at the post build step and load by hand, when the AppDomain is trying to resolve the assembly.
-	System::AppDomain::CurrentDomain->AssemblyResolve += gcnew System::ResolveEventHandler( &assembly_resolve );
+	// System::AppDomain::CurrentDomain->AssemblyResolve += gcnew System::ResolveEventHandler( &assembly_resolve );
 }
 
 static void collect_garbage						( )

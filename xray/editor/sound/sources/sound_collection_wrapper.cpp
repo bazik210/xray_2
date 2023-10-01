@@ -47,7 +47,7 @@ void sound_collection_wrapper::save(xray::configs::lua_config_value& root)
 
 void sound_collection_wrapper::save()
 {
-	String^ file_path = gcnew String(sound_editor::sound_resources_path + "collections/" + m_name + ".sound_collection");
+	String^ file_path = gcnew String(sound_editor::sound_resources_path + "/collections/" + m_name + ".sound_collection");
 	unmanaged_string str(file_path);
 	configs::lua_config_ptr const& config = configs::create_lua_config(str.c_str());
 	configs::lua_config_value root = config->get_root()["collection"];
@@ -87,7 +87,7 @@ void sound_collection_wrapper::load(Action<sound_object_wrapper^>^ options_callb
 {
 	m_sound_loaded_callback = sound_callback;
 	m_options_loaded_callback = options_callback;
-	String^ path = gcnew String(sound_editor::sound_resources_path + "collections/" + m_name + ".sound_collection");
+	String^ path = gcnew String(sound_editor::sound_resources_path + "/collections/" + m_name + ".sound_collection");
 	unmanaged_string options_path(path);
 	resources::request request[] = { 
 		options_path.c_str(), resources::lua_config_class

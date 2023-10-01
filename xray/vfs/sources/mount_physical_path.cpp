@@ -155,6 +155,7 @@ void   physical_path_mounter::mount_physical_folder	(virtual_path_string &		fold
 													 native_path_string &		absolute_path,
 													 u32 const					folder_hash)
 {
+	LOG_INFO("absolute path name: '%s'", (pcstr)(absolute_path.as_buffer_string().begin()));
 	physical_path_info const path_info	=	(* m_device)->get_physical_path_info(absolute_path);
 	R_ASSERT								(path_info.exists());
 

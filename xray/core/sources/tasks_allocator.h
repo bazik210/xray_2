@@ -58,20 +58,23 @@ private:
 		}
 
 #else // #if XRAY_PLATFORM_32_BIT
-		struct {
-			task* m_pointer;
-			u64	  counter;
+		enum {
+			bit_count = 44,
 		};
-
-		inline task* pointer()
+		struct
 		{
-			return m_pointer;
+			u64			dummy : bit_count;
+			u64			counter;
+		};
+		task *			m_pointer;
+		inline task* pointer	( )
+		{
+			return		reinterpret_cast<task*>( *reinterpret_cast<u64*>(&m_pointer));
 		}
 
-		//not working mambo-jambo with bits
-/*
+/*		
 		enum {
-			bit_count = 40,
+			bit_count = 44,
 		};
 		struct
 		{

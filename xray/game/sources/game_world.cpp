@@ -73,7 +73,7 @@ m_game_time_sec			( 0 ),
 m_last_frame_time_ms	( 0 ),
 m_last_frame_time_sec	( 0 ),
 //m_physics_world			( NULL ),
-m_test_anim_object	( NULL ),
+//m_test_anim_object	( NULL ),
 m_bullet_manager		( 0 ),
 m_local_actor			( NULL ),
 //m_server				( game.get_network_world() ),
@@ -116,7 +116,7 @@ game_world::~game_world( )
 	camera_director* cd = m_camera_director.c_ptr(); 
 	m_camera_director	= NULL;
 	DELETE				( cd );
-	DELETE				( m_test_anim_object );
+//	DELETE				( m_test_anim_object );
 }
 
 void game_world::time_update( )

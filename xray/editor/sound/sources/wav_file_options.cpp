@@ -35,7 +35,7 @@ wav_file_options::wav_file_options(lua_config_ptr config)
 
 void wav_file_options::save(String^ name)
 {
-	String^ file_path = gcnew String(sound_editor::sound_resources_path + "single/" + name + ".raw_options");
+	String^ file_path = gcnew String(sound_editor::sound_resources_path + "/single/" + name + ".raw_options");
 	unmanaged_string str(file_path);
 	lua_config_ptr const& config = create_lua_config(str.c_str());
 	lua_config_value root = config->get_root()["options"];

@@ -102,7 +102,7 @@ u8*   texture_converter_cook::create_texture (u32 *				out_size,
 															is_srgb);
 
 	if(!only_calculate_size)
-		LOG_INFO("converting %s take %f sec", buf_struct->m_dest_path, t.get_elapsed_sec() );
+		LOG_INFO("converting %s take %f sec", buf_struct->m_dest_path.c_str(), t.get_elapsed_sec());
 
 	R_ASSERT( (*out_size != 0) && (only_calculate_size || (!only_calculate_size && (destination_buffer!=NULL))) , 
 			"while converting file %s", buf_struct->m_dest_path.c_str() );

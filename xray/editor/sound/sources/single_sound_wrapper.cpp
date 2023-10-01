@@ -65,7 +65,7 @@ void single_sound_wrapper::save(xray::configs::lua_config_value& root)
 void single_sound_wrapper::save()
 {
 	m_wav_options->save(m_name);
-	String^ file_path = gcnew String(sound_editor::sound_resources_path + "single/" + m_name + ".single_sound_options");
+	String^ file_path = gcnew String(sound_editor::sound_resources_path + "/single/" + m_name + ".single_sound_options");
 	unmanaged_string str(file_path);
 	configs::lua_config_ptr const& config = configs::create_lua_config(str.c_str());
 	configs::lua_config_value root = config->get_root()["spl"];
@@ -84,8 +84,8 @@ void single_sound_wrapper::load(Action<sound_object_wrapper^>^ options_callback,
 {
 	m_sound_loaded_callback = sound_callback;
 	m_options_loaded_callback = options_callback;
-	String^ raw_path = gcnew String(sound_editor::sound_resources_path + "single/" + m_name + ".raw_options");
-	String^ ss_path = gcnew String(sound_editor::sound_resources_path + "single/" + m_name + ".single_sound_options");
+	String^ raw_path = gcnew String(sound_editor::sound_resources_path + "/single/" + m_name + ".raw_options");
+	String^ ss_path = gcnew String(sound_editor::sound_resources_path + "/single/" + m_name + ".single_sound_options");
 	fs::path_string source_wav_path;
 	source_wav_path.assignf			(	"%ssingle/%s.wav",
 										unmanaged_string( sound_editor::sound_resources_path ).c_str(),

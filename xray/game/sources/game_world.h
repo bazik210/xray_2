@@ -112,7 +112,7 @@ public:
 	
 	scenes_list								m_active_scenes;
 //	xray::physics::world*					m_physics_world;
-	test_anim_object*						m_test_anim_object;
+//	test_anim_object*						m_test_anim_object;
 	
 private:
 //	network::server		m_server;

@@ -11,6 +11,10 @@
 #include "functor_response.h"
 #include "functor_order.h"
 
+#ifndef MASTER_GOLD
+static xray::command_line::key	s_no_network_key("no_network", "", "", "disable network");
+#endif // #ifndef MASTER_GOLD
+
 using xray::network::network_world;
 
 static void empty_function ( ) { }
@@ -19,6 +23,14 @@ network_world::network_world					( xray::network::engine& engine, xray::memory::
 	m_engine							( engine ),
 	m_channel							( *xray::network::g_allocator, orders_allocator )
 {
+#ifndef MASTER_GOLD
+	if (s_no_network_key.is_set())
+	{ 
+		(void)0;
+		return;
+	}
+#endif // #if !XRAY_PLATFORM_PS3
+
 	m_channel.orders.user_initialize	( );
 	m_channel.responses.owner_initialize( NEW(functor_response)( &empty_function ), NEW(functor_response)( &empty_function ) );
 }
@@ -41,6 +53,13 @@ void network_world::finalize					( )
 
 void network_world::tick						( )
 {
+#ifndef MASTER_GOLD
+	if (s_no_network_key.is_set())
+	{
+		(void)0;
+		return;
+	}
+#endif
 	process_orders						( );
 	m_io_service.poll					( );
 }

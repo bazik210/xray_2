@@ -37,6 +37,7 @@ vfs_watcher_subscriber::vfs_watcher_subscriber	(threading::thread_id_type const	
 u32   vfs_watcher::subscribe			(virtual_path_string const &			path, 
 										 vfs_notification_callback const &		callback)
 {
+	LOG_INFO("vfs_watcher::subscribe %s", (pcstr)path.as_buffer_string().begin());
 	R_ASSERT								(!path.ends_with(virtual_path_string::separator), "path should not end with separator!");
 	vfs_watcher_subscriber * new_subscriber	=	DEBUG_NEW(vfs_watcher_subscriber)
 													(threading::current_thread_id(), path, callback);

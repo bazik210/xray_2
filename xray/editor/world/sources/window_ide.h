@@ -7,6 +7,7 @@
 #ifndef WINDOW_IDE_H_INCLUDED
 #define WINDOW_IDE_H_INCLUDED
 
+using namespace System;
 using namespace System::ComponentModel;
 using namespace System::Collections;
 using namespace System::Windows::Forms;
@@ -14,17 +15,17 @@ using namespace System::Data;
 using namespace System::Drawing;
 using xray::editor_base::action;
 
+#include <xray/editor/world/sources/editor_world.h>
+
 namespace xray {
 
-namespace editor_base { ref class gui_binder;}
+//#pragma unmanaged
+//class editor_world;
+//#pragma managed
 
 namespace editor {
 
 	ref class options_dialog;
-
-	#pragma unmanaged
-		class editor_world;
-	#pragma managed
 
 	/// <summary>
 	/// Summary for window_ide
@@ -63,58 +64,32 @@ namespace editor {
 			custom_finalize	( );
 		}
 
-	protected: 
-
-	protected: 
+	private:
+		/// <summary>
+		/// Required designer variable.
+		/// </summary>
+		System::ComponentModel::Container^ components;
 
 	private: System::Windows::Forms::MenuStrip^  menuStrip;
 	private: System::Windows::Forms::ToolStripMenuItem^  ViewMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  HelpMenuItem;
-
 	private: System::Windows::Forms::ToolStripMenuItem^  aboutToolStripMenuItem;
-
-
-
-
-
 	private: System::Windows::Forms::ToolStripMenuItem^  outputToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  ToolsMenuItem;
-
-
 	private: System::Windows::Forms::ToolStripMenuItem^  optionsToolStripMenuItem;
-
-
 	private: System::Windows::Forms::ToolStripMenuItem^  FileMenuItem;
-
 	private: System::Windows::Forms::ToolStripSeparator^  toolStripMenuItem1;
 	private: System::Windows::Forms::ToolStripMenuItem^  exitToolStripMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  EditMenuItem;
 	private: System::Windows::Forms::ToolStripMenuItem^  recentFilesToolStripMenuItem;
 	private: System::Windows::Forms::StatusStrip^  statusStrip1;
 	private: System::Windows::Forms::ToolStripStatusLabel^  toolStripStatusLabel0;
-
-
 	private: WeifenLuo::WinFormsUI::Docking::DockPanel^  Editor;
 	private: System::Windows::Forms::ToolStripStatusLabel^  toolStripStatusLabel3;
 	private: System::Windows::Forms::ToolStripStatusLabel^  toolStripStatusLabel4;
 	private: System::Windows::Forms::ToolStripSplitButton^  error_message_button;
-
 	private: System::Windows::Forms::ToolStripStatusLabel^  message_button;
 	private: System::Windows::Forms::ToolStripMenuItem^  clearToolStripMenuItem;
-
-
-
-
-
-
-
-
-
-	private:
-		/// <summary>
-		/// Required designer variable.
-		/// </summary>
-		System::ComponentModel::Container ^components;
 
 #pragma region Windows Form Designer generated code
 		/// <summary>
@@ -465,6 +440,9 @@ public:
 };
 
 } // namespace editor
+
+namespace editor_base { ref class gui_binder; }
+
 } // namespace xray
 
 #endif // #ifndef WINDOW_IDE_H_INCLUDED

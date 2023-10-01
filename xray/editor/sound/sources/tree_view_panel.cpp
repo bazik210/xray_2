@@ -746,11 +746,11 @@ String^	tree_view_panel::get_absolute_path()
 {
 	String^ absolute_path = System::IO::Path::GetFullPath(sound_editor::absolute_sound_resources_path)->Replace("\\", "/");
 	if(get_mode()==tree_view_files_source_mode::show_single)
-		absolute_path += "single/";
+		absolute_path += "/single/";
 	else if(get_mode()==tree_view_files_source_mode::show_composite)
-		absolute_path += "composite/";
+		absolute_path += "/composite/";
 	else if(get_mode()==tree_view_files_source_mode::show_collections)
-		absolute_path += "collections/";
+		absolute_path += "/collections/";
 
 	return absolute_path;
 }
@@ -790,7 +790,7 @@ void tree_view_panel::do_fs_operation(tree_view_panel::fs_operation_type t, Stri
 					String^ res_path = sound_editor::sound_resources_path;
 					unmanaged_string unm_res_path(res_path);
 					xray::fs_new::virtual_path_string file_name = unm_res_path.c_str();
-					file_name += "collections/";
+					file_name += "/collections/";
 					file_name += unmanaged_string(new_node_path).c_str();
 					file_name += unmanaged_string(extension).c_str();
 					xray::configs::lua_config_ptr cfg_ptr = xray::configs::create_lua_config(file_name.c_str());
@@ -807,7 +807,7 @@ void tree_view_panel::do_fs_operation(tree_view_panel::fs_operation_type t, Stri
 					String^ res_path = sound_editor::sound_resources_path;
 					unmanaged_string unm_res_path(res_path);
 					xray::fs_new::virtual_path_string file_name = unm_res_path.c_str();
-					file_name += "composite/";
+					file_name += "/composite/";
 					file_name += unmanaged_string(new_node_path).c_str();
 					file_name += unmanaged_string(extension).c_str();
 					xray::configs::lua_config_ptr cfg_ptr = xray::configs::create_lua_config(file_name.c_str());
