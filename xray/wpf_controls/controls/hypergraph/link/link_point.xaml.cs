@@ -92,7 +92,9 @@ namespace xray.editor.wpf_controls.hypergraph
 
 		private				void			link_place_mouse_down		( Object sender, MouseButtonEventArgs e )	
 		{
-			node.hypergraph.start_link_creating( this );
+			if( node!=null )
+				node.hypergraph.start_link_creating( this );
+
 			e.Handled = true;
 		}
 		protected			void			on_property_changed			( String property_name )					

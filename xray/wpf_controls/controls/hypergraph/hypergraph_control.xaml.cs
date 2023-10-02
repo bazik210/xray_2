@@ -464,35 +464,37 @@ namespace xray.editor.wpf_controls.hypergraph
 				ReleaseMouseCapture		( );
 				m_field.Children.Remove	( m_new_link_path );
 				m_field.Children.Remove	( m_link_icon_container );
-				VisualTreeHelper.HitTest( m_field, null,  result =>
-				{
-					if( result.VisualHit is Ellipse )
-					{
-						var place =  ( (Ellipse)result.VisualHit ).Parent as link_point;
-						if( place != null )
-						{
-							place.refresh_field_position( );
 
-							var destination	= place;
-							var source		= m_link_start_point;
+                    VisualTreeHelper.HitTest( m_field, null,  result =>
+                    {
+                        if( result.VisualHit is Ellipse )
+                        {
+                            var place =  ( (Ellipse)result.VisualHit ).Parent as link_point;
+                            if( place != null && place.node != null )
+                            {
+                                place.refresh_field_position( );
 
-							if( !can_link_impl( source, destination ) )
-								return HitTestResultBehavior.Stop;
+                                var destination	= place;
+                                var source		= m_link_start_point;
 
-							on_link_creating( 
-								new link_event_args(
-									new link_id( source.node.id, source.id, destination.node.id, destination.id ),
-									source,
-									destination
-								 )
-							);
+                                if( !can_link_impl( source, destination ) )
+                                    return HitTestResultBehavior.Stop;
 
-							return HitTestResultBehavior.Stop;
-						}
-					}
-					return HitTestResultBehavior.Continue;
-				}, new PointHitTestParameters( Mouse.GetPosition( m_field ) ) );
-				e.Handled			= true;
+                                on_link_creating( 
+                                    new link_event_args(
+                                        new link_id( source.node.id, source.id, destination.node.id, destination.id ),
+                                        source,
+                                        destination
+                                     )
+                                );
+
+                                return HitTestResultBehavior.Stop;
+                            }
+                        }
+                        return HitTestResultBehavior.Continue;
+                    }, new PointHitTestParameters( Mouse.GetPosition( m_field ) ) );
+                    
+                    e.Handled			= true;
 			}
 			if( m_select_started )
 			{

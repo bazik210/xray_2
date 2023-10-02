@@ -24,7 +24,7 @@
 						PreviewMouseLeftButtonDown="header_mouse_down"
 						MouseMove="header_mouse_move"
 						PreviewMouseLeftButtonUp="header_mouse_up">
-						<TextBlock Text="{Binding name, Source={ext:this}}" MinWidth="40" FontSize="12" FontStyle="Italic"  FontWeight="500" DockPanel.Dock="Top" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{ext:this}"/>
+                        <TextBlock Text="{Binding name, Source={ext:this}}" MinWidth="40" FontSize="12" FontStyle="Italic"  FontWeight="Medium" DockPanel.Dock="Top" VerticalAlignment="Center" HorizontalAlignment="Center" Tag="{ext:this}"/>
 					</Border>
 				</DockPanel>
 				<Border BorderThickness="0" BorderBrush="Black" CornerRadius="1" Background="SteelBlue" Visibility="{Binding is_expanded, ElementName=this, Converter={StaticResource bool_to_visibility_converter}}">

@@ -390,6 +390,7 @@ void object_scene::add_scene_to_logic_view( object_scene^ scene , bool is_new_sc
 	node->type_id = "logic_scene";
 
 	node->input_link_place_enabled = true;
+	node->input_link_place_node_set(node);
 
 	scene->own_logic_node_in_parent_view = node;
 }
