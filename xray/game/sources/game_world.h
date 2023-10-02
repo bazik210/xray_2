@@ -104,6 +104,8 @@ public:
 	bullet_manager* 						m_bullet_manager;
 	collision::space_partitioning_tree*		m_collision_tree;
 
+	bool									m_scenes_check;
+
 	timing::timer							m_timer;
 	u32										m_game_time_ms;
 	float									m_game_time_sec;

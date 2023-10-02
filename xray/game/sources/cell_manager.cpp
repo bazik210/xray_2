@@ -327,7 +327,7 @@ void cell_manager::on_scenes_loaded(  resources::queries_result& data )
 		DELETE								( ud );
 	}
 	
-	m_game_world.start_game		( );
+	m_game_world.m_scenes_check = true;
 }
 
 } // namespace stalker2

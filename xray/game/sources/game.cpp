@@ -514,6 +514,13 @@ void game::tick( u32 const current_frame_id )
 		//LOG_INFO("rtp is ready!");
 	}
 
+	if (m_active_scene && m_game_world->m_scenes_check)
+	{
+		m_game_world->m_scenes_check = false;
+
+		m_game_world->start_game();
+	}
+
 	if ( m_active_scene )
 	{
  		m_input_world->tick			( );

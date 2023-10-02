@@ -49,6 +49,7 @@ void bt_character_controller::initialize( )
 	btConvexShape* capsule				= XRAY_NEW_IMPL( allocator(), btCapsuleShape)(m_capsule_radius, m_capsule_height );
 	m_ghostObject->setCollisionShape	( capsule );
 	m_ghostObject->setCollisionFlags	( btCollisionObject::CF_CHARACTER_OBJECT );
+	m_ghostObject->setRestitution		(0.001);
 	m_ghostObject->setFriction			(100);
 	btScalar step_height				= 0.35f;
 	m_bt_controller						= XRAY_NEW_IMPL( allocator(), btKinematicCharacterController)( m_ghostObject, capsule, step_height );

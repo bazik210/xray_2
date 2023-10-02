@@ -15,10 +15,11 @@
 #include "object_collision_geometry.h"
 #include "object_proximity_trigger.h"
 #include "object_scene.h"
+#include "object_values_storage.h"
 #include "object_composite.h"
 #include "object_volumetric_sound.h"
 #include "object_wire.h"
-//#include "game_camera.h"
+#include "game_camera.h"
 #include "game_world.h" 
 
 namespace stalker2 {
@@ -78,10 +79,10 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 	{
 		object_size = sizeof(object_track);
 	}else
-	//if( strings::equal("camera", type))
-	//{
-	//	object_size = sizeof(game_camera);
-	//}else
+	if( strings::equal("camera", type))
+	{
+		object_size = sizeof(game_camera);
+	}else
 	if( strings::equal("timer", type))
 	{
 		object_size = sizeof(object_timer);
@@ -93,10 +94,10 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 	if( strings::equal("proximity_trigger", type))
 	{
 		object_size = sizeof(object_proximity_trigger);
-	//}else
-	//if( strings::equal("values_storage", type))
-	//{
-	//	object_size = sizeof(object_values_storage);
+	}else
+	if( strings::equal("values_storage", type))
+	{
+		object_size = sizeof(object_values_storage);
 	}else
 	if( strings::equal("composite", type))
 	{
@@ -185,10 +186,10 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 	{
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_track( m_game_world );
 	}else
-	//if( strings::equal("camera", type))
-	//{
-	//	resource = new (in_out_unmanaged_resource_buffer.c_ptr()) game_camera(m_game_world );
-	//}else
+	if( strings::equal("camera", type))
+	{
+		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) game_camera( m_game_world );
+	}else
 	if( strings::equal("timer", type))
 	{
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_timer( m_game_world );
@@ -200,10 +201,10 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 	if( strings::equal("proximity_trigger", type))
 	{
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_proximity_trigger( m_game_world );
-	//}else
-	//if( strings::equal("values_storage", type))
-	//{
-	//	resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_values_storage( m_game.get_game_world() );
+	}else
+	if( strings::equal("values_storage", type))
+	{
+		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_values_storage( m_game_world );
 	}else	
 	if( strings::equal("composite", type))
 	{

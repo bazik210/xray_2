@@ -77,7 +77,8 @@ m_last_frame_time_sec	( 0 ),
 m_bullet_manager		( 0 ),
 m_local_actor			( NULL ),
 //m_server				( game.get_network_world() ),
-m_client				( game.get_network_world() )
+m_client				( game.get_network_world() ),
+m_scenes_check			( 0 )
 {
 	init_physics						( );
 
