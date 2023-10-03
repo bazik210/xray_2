@@ -588,7 +588,7 @@ void game::update_stats				( u32 const current_frame_id )
 	if ( s_draw_stats_value && !m_active_npc_set )
 	{
 		m_stats->set_fps_stats		( m_fps_graph->average_value() );
-		m_stats->set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
+		//m_stats->set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
 		string64					buff;
 		xray::sprintf				( buff, "Q: %d", xray::resources::pending_queries_count() );
 		m_stats->set_resources_stats( buff );

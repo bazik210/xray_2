@@ -52,7 +52,7 @@ void camera_director::apply( )
 
 void camera_director::switch_to_camera( game_camera* c, pcstr camera_name )
 {
-	LOG_ERROR("switching to camera %s", camera_name );
+	LOG_INFO("switching to camera %s", camera_name );
 
 	bool bfocused = m_game_scene.is_active();
 

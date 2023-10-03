@@ -27,7 +27,9 @@ object_behaviour::object_behaviour( object_scene_job* owner, configs::binary_con
 m_owner	( owner ),
 m_prev_time ( 0.0f ),
 m_name	( name ),
-m_controlled_object( NULL )
+m_controlled_object( NULL ),
+m_cycled ( 0 ),
+m_length ( 0 )
 {	
 	//LOG_INFO( "object_behaviour construct [%x]", this );
 

@@ -266,11 +266,14 @@ void game_world::on_project_loaded( resources::queries_result& data )
 	math::float3 camera_position	= (*m_game_project->m_config)["camera"]["position"];
 	math::float3 camera_direction	= (*m_game_project->m_config)["camera"]["direction"];
 	m_camera_director->set_position_direction( camera_position, camera_direction );
-	switch_to_free_fly_camera		( );
+	m_free_fly_camera->set_position_direction( camera_position, camera_direction );
+
 	//switch_to_hud_camera();
 
-	if(!s_cam)
+	if(!s_cam) {
+		switch_to_free_fly_camera();
 		m_local_actor						= NEW(actor)( *this );
+		}
 
 		//m_hud =							  NEW(hud)( *this);
 }
@@ -324,7 +327,12 @@ void game_world::start_game( )
 		pcstr start_scene		= (pcstr)scenes_to_start[i];
 		game_object_ptr_ s		= get_object_by_name(start_scene);
 		object_scene_ptr scene	= static_cast_resource_ptr<object_scene_ptr>(s);
-		scene->start			( );
+		if (scene.m_object) {
+			scene->start();
+		}
+		else {
+			LOG_ERROR("NULL Object! Can't process a scene!");
+		}
 	}
 	
 // 	pcstr start_scene		= (*m_game_project->m_config)["start"]["scene_name"];
