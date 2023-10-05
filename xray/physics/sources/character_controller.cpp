@@ -53,6 +53,9 @@ void bt_character_controller::initialize( )
 	m_ghostObject->setFriction			(100);
 	btScalar step_height				= 0.35f;
 	m_bt_controller						= XRAY_NEW_IMPL( allocator(), btKinematicCharacterController)( m_ghostObject, capsule, step_height );
+	//for bullet 289 with default btKinematicCharacterController 
+	//m_bt_controller->setGravity(btVector3(0, -10, 0));
+	//m_bt_controller->setJumpSpeed(3.5);
 
 	m_geometry_instance						= &*xray::collision::new_capsule_geometry_instance( &allocator(), float4x4().identity(), m_capsule_radius, m_capsule_height / 2 );
 }

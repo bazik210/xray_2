@@ -30,5 +30,6 @@ triangle_mesh_buffer::triangle_mesh_buffer	(
 		m_triangle_data.assign(triangle_data, triangle_data+triangle_count);
 	}
 
-	initialize	( allocator, &*m_vertices.begin(), m_vertices.size(), &*m_indices.begin(), m_indices.size() );
+	if(m_vertices.size()!=0 && m_indices.size()!=0)
+		initialize	( allocator, &*m_vertices.begin(), m_vertices.size(), &*m_indices.begin(), m_indices.size() );
 }

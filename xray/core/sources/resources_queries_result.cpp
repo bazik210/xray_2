@@ -224,6 +224,9 @@ void   queries_result::call_user_callback ()
 	thread_local_data * const tls		=	g_resources_manager->get_thread_local_data(threading::current_thread_id(), true);
 	++tls->disable_translate_query_counter_check;
 
+	if(this->m_parent_query)
+		LOG_INFO("queries_result::call_user_callback '%s'", this->m_parent_query->m_request_path_default_storage);
+
 	m_callback						(*this);
 
 	--tls->disable_translate_query_counter_check;

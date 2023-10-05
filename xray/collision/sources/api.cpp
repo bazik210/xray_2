@@ -175,7 +175,10 @@ non_null<geometry_instance>::ptr		new_triangle_mesh_geometry_instance	(
 												non_null<geometry const>::ptr geometry
 											)
 {
-	triangle_mesh_geometry const* mesh_geom		= static_cast_checked<triangle_mesh_geometry const*>( &*geometry );
+	LOG_INFO("new_triangle_mesh_geometry_instance: cast to geom instance '%s'", geometry->m_request_path);
+	triangle_mesh_geometry const* mesh_geom	= reinterpret_cast<triangle_mesh_geometry const*>(&*geometry);
+	//triangle_mesh_geometry const* mesh_geom		= static_cast_checked<triangle_mesh_geometry const*>( &*geometry );
+
 	return XRAY_NEW_IMPL( allocator, triangle_mesh_geometry_instance )( matrix, mesh_geom );
 }
 
