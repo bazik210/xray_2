@@ -54,6 +54,9 @@ void   binary_config_cook_impl::create_resource (query_result_for_cook &	in_out_
 												 const_buffer				raw_file_data,
 												 mutable_buffer				in_out_unmanaged_resource_buffer)
 {
+		//if(&in_out_query)
+		//	LOG_INFO("binary_config_cook_impl::create_resource '%s'", in_out_query.m_request_path_default_storage);
+
 	binary_config * const config	= new (in_out_unmanaged_resource_buffer.c_ptr()) binary_config 
 		((pcbyte)raw_file_data.c_ptr(), raw_file_data.size(), unmanaged_allocator());
 
@@ -234,7 +237,7 @@ void binary_config_cook::delete_resource( resource_base * resource )
 	binary_config* config	= static_cast_checked<binary_config*>(resource);
 	R_ASSERT				( config );
 	memory::base_allocator * const allocator	=	config->get_allocator();
-	XRAY_DELETE_IMPL		(allocator, config);	
+	XRAY_DELETE_IMPL		(allocator, config);
 }
 
 } // namespace configs
