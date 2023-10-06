@@ -81,7 +81,7 @@ engine_world::engine_world				(
 	R_ASSERT_BOX						(!s_editor_key && !s_editor_st_key, "Editor is not supported in static configurations!");
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
-	u64 additional_memory_size			= 384*Mb;
+	u64 additional_memory_size			= 192*Mb;
 	bool const is_command_line_editor	= command_line_editor( );
 	if ( is_command_line_editor ) {
 		// reserve memory for .NET stuff
@@ -90,9 +90,6 @@ engine_world::engine_world				(
 
 	if (additional_memory_size) {
 		memory::allocate_region(additional_memory_size);
-	}
-	else {
-		ASSERT("Set additional memory size not lower that 384Mb!");
 	}
 }
 	

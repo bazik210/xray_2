@@ -22,9 +22,9 @@ triangle_mesh_buffer::triangle_mesh_buffer	(
 	) :
 	super		( allocator ),
 	m_vertices	( *allocator, vertices, vertices + vertex_count ),
-	m_indices	( *allocator,  indices,  indices  + index_count )
+	m_indices	(*allocator, indices, indices + index_count)
 {
-	if ( triangle_data )
+	if ( triangle_data)
 	{
 		R_ASSERT(index_count/3 == triangle_count);
 		m_triangle_data.assign(triangle_data, triangle_data+triangle_count);

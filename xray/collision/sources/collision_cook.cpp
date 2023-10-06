@@ -147,7 +147,18 @@ void collision_cook::on_triangle_mesh_collision_loaded( resources::queries_resul
 	
 	memory::reader vertices_reader = vertices_chunk_reader.open_reader(render::model_chunk_collision_v);
 	memory::reader indices_reader  = indices_chunk_reader.open_reader(render::model_chunk_collision_i);
+
+	//auto indicies_result = (u32 const*)indices_reader.pointer();
+
+	//if (*indicies_result == NULL) {
+		//LOG_ERROR("indicies for collision model '%s' incorrect... skipping.", parent_query->m_request_path_default_storage);
+		//parent_query->finish_query(result_error);
+		//return;
+	//}
 	
+	if(DEBUG_RESOURCES)
+		LOG_INFO("loading collision for '%s'", parent_query->m_request_path_default_storage);
+
 	collision::geometry_ptr resource =
 		&*collision::new_triangle_mesh_geometry
 		( 
