@@ -280,8 +280,9 @@ void   queries_result::end_and_delete_self (bool finalizing_thread)
 	}
 
 	this->~queries_result					();
-	queries_result const * this_ptr		=	const_cast<queries_result *>(this);
-	XRAY_FREE_IMPL							(m_allocator, this_ptr);
+	free(this);
+	//queries_result const * this_ptr		=	const_cast<queries_result *>(this);
+	//XRAY_FREE_IMPL							(m_allocator, this_ptr);
 }
 
 void   queries_result::translate_request_paths ()

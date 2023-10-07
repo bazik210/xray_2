@@ -387,7 +387,8 @@ void   resources_manager::on_mounted (vfs::base_node<> * const node)
 {
 	R_ASSERT								(!node->get_mount_root_user_data());
 
-	vfs_sub_fat_resource * const sub_fat	=	XRAY_NEW_IMPL(helper_allocator(), vfs_sub_fat_resource);
+	//vfs_sub_fat_resource * const sub_fat	=	XRAY_NEW_IMPL(helper_allocator(), vfs_sub_fat_resource);
+	vfs_sub_fat_resource * const sub_fat	=	new(vfs_sub_fat_resource);
 
 	sub_fat->set_deleter_object				(get_vfs_sub_fat_cook(), threading::current_thread_id());
 

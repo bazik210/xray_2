@@ -38,7 +38,8 @@ void   vfs_sub_fat_cook::destroy_resource	(unmanaged_resource * resource)
 
 	parent								=	NULL;
 
-	XRAY_DELETE_IMPL						(helper_allocator(), resource);
+	delete(resource);
+	//XRAY_DELETE_IMPL						(helper_allocator(), resource);
 }
 
 } // namespace resources

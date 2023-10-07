@@ -247,12 +247,22 @@ void xray::core::initialize			(
 	XRAY_UNREFERENCED_PARAMETER	( lua_config_device_folder_to_save_to );
 #endif	// #ifndef MASTER_GOLD
 
-	tasks::initialize		(	2 * threading::core_count(),	// tasks thread count
-								64,								// user thread count
-								threading::core_count(), //1,								// minimum active task thread count
-								tasks::execute_while_wait_for_children_true, 
-								tasks::do_logging_false
-							);
+	// Giperion - Do not hardcode user threads.
+	  // At least take into account CPU threads
+	u32 CPULogicalCores = threading::core_count();
+	u32 TaskThreadCount = CPULogicalCores;
+	if (TaskThreadCount < 12)
+	{
+		TaskThreadCount *= 2;
+	}
+	u32 UserThreadCount = CPULogicalCores + 32;
+
+	tasks::initialize(TaskThreadCount,    // tasks thread count
+		UserThreadCount,                                // user thread count
+		CPULogicalCores, //1,                                // minimum active task thread count
+		tasks::execute_while_wait_for_children_true,
+		tasks::do_logging_false
+	);
 	threading::set_current_thread_affinity	( 0 );
 	threading::on_thread_spawn	( threading::tasks_aware );
 }

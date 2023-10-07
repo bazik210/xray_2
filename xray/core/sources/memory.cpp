@@ -160,13 +160,13 @@ void xray::memory::preinitialize			( )
 
 	//xray::particle::g_particles_allocator.do_register			(		 10*Mb  ,	"particle system"		);
 	
-	u32 mt_memory_amount						= 8*Mb;
+	u32 mt_memory_amount						= 192*Mb;
 	if ( testing::run_tests_command_line () )
 		mt_memory_amount						+= 16*Mb;
 
 #if XRAY_DEBUG_ALLOCATOR
 	if ( !s_debug_allocator_memory.is_set() )
-		register_debug_allocator				( 8*Mb );
+		register_debug_allocator				( 192*Mb );
 	else {
 		int result;
 		if ( !s_debug_allocator_memory.is_set_as_number(&result) )

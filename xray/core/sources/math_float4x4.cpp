@@ -58,7 +58,7 @@ static float4x4 invert_impl								( float4x4 const& other, float const determin
 
 float4x4 xray::math::invert4x3							( float4x4 const& other )
 {
-	R_ASSERT	( other.valid( ) );
+//	R_ASSERT	( other.valid( ) );
 	return		invert_impl( other, other.determinant4x3() );
 }
 

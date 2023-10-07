@@ -421,43 +421,32 @@ void   query_result::finish_normal_query (cook_base::result_enum const create_re
 	try_push_created_resource_to_manager_might_destroy_this		();
 }
 
-void   query_result::set_deleter_object_if_needed (bool * out_is_new_resource)
+void   query_result::set_deleter_object_if_needed(bool* out_is_new_resource)
 {
-	if ( out_is_new_resource )
-		* out_is_new_resource			=	false;
+	if (out_is_new_resource)
+		*out_is_new_resource = false;
 
-	if ( m_unmanaged_resource)
+	if (m_unmanaged_resource)
 	{
-			if (this->m_unmanaged_resource.m_object != nullptr)
-			{
-				if (m_unmanaged_resource->creation_source() == resource_base::creation_source_unset)
-				{
-					if (out_is_new_resource)
-						*out_is_new_resource = true;
-					set_deleter_object(m_unmanaged_resource.c_ptr());
-					m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
-					set_creation_source_for_resource(m_unmanaged_resource);
-				}
-				else
-					R_ASSERT(m_unmanaged_resource->has_deleter_object());
-			}
-		else 
+		if (m_unmanaged_resource->creation_source() == resource_base::creation_source_unset)
 		{
-				if (out_is_new_resource)
-					*out_is_new_resource = true;
-				set_deleter_object(m_unmanaged_resource.c_ptr());
-				m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
-				set_creation_source_for_resource(m_unmanaged_resource);
+			if (out_is_new_resource)
+				*out_is_new_resource = true;
+			set_deleter_object(m_unmanaged_resource.c_ptr());
+			m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
+			set_creation_source_for_resource(m_unmanaged_resource);
 		}
+		else
+			R_ASSERT(m_unmanaged_resource->has_deleter_object());
 	}
-	else if ( m_managed_resource )
+	else if (m_managed_resource)
 	{
-		if ( m_managed_resource->creation_source() == resource_base::creation_source_unset )
+		if (m_managed_resource->creation_source() == resource_base::creation_source_unset)
 		{
-			if ( out_is_new_resource )
-				* out_is_new_resource	=	true;
-			m_managed_resource->late_set_fat_it		(get_fat_it_zero_if_physical_path_it());
-			set_creation_source_for_resource		(m_managed_resource);
+			if (out_is_new_resource)
+				*out_is_new_resource = true;
+			m_managed_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
+			set_creation_source_for_resource(m_managed_resource);
 		}
 	}
 }
