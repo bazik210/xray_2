@@ -38,6 +38,8 @@ public:
 			void	stop					( bool unloading );
 			void	tick					( );
 
+			pcstr	get_name				( ) { return this->m_name; };
+
 private:
 	typedef vector<object_scene_job*>	jobs_list;
 	jobs_list							m_jobs;

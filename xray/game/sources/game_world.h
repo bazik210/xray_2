@@ -63,6 +63,8 @@ public:
 	void			unload					( );
 	bool			empty					( );
 //	game&			get_game				( ) const { return m_game; }
+	void			delete_actor();
+	void			spawn_actor();
 	bullet_manager&					get_bullet_manager		( ) const			{ return *m_bullet_manager; }
 	xray::collision::space_partitioning_tree*	get_collision_tree	( ) const	{ return m_collision_tree; };
 
@@ -104,7 +106,11 @@ public:
 	bullet_manager* 						m_bullet_manager;
 	collision::space_partitioning_tree*		m_collision_tree;
 
+	bool									m_actor_spawned;
+	bool									m_key_actor;
+	bool									m_key_camera;
 	bool									m_scenes_check;
+
 
 	timing::timer							m_timer;
 	u32										m_game_time_ms;

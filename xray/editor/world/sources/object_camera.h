@@ -32,8 +32,9 @@ public ref class object_timer :public object_base
 	typedef object_base	super;
 public:
 							object_timer			( tool_misc^ tool );
+	virtual void			load_props(configs::lua_config_value const& t) override;
 	virtual void			load_contents			( ) override				{ };
-	virtual void			unload_contents			( bool ) override			{ };
+	virtual void			unload_contents			( bool bdestroy ) override			{ };
 	virtual void			save					( configs::lua_config_value t ) override;
 }; // class object_timer
 

@@ -514,7 +514,7 @@ void object_job::remove_link				( link^ lnk )
 
 bool object_job::has_static_resource						()
 {
-	if ( job_type == "camera_director" || job_type == "timing" )
+	if ( job_type == "camera_director" /* || job_type == "timing"*/)
 		return true;
 	return false;
 }

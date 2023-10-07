@@ -10,7 +10,6 @@
 //#include "camera_director.h"
 #include "cell_manager.h"
 #include "bullet_manager.h"
-//#include <xray/console_command.h>
 #include "event_manager.h"
 #include "object_scene.h"
 //#include "hud.h"
@@ -27,8 +26,6 @@
 #include <xray/network/packet_reader.h>
 
 #include <xray/render/facade/scene_renderer.h>
-
-static xray::command_line::key	s_cam("cam", "", "", "free camera");
 
 //static void server_on_packet_received	( xray::network::server& server, xray::network::client_session& client, xray::network::packet_reader& packet )
 //{
@@ -57,6 +54,9 @@ static void client_on_connected			( xray::network::client& client )
 	client.send							( packet );
 }
 
+static xray::command_line::key	cl_cam("cam", "", "", "free camera");
+static xray::command_line::key	cl_actor("actor", "", "", "force actor");
+
 namespace stalker2 {
 
 
@@ -75,10 +75,13 @@ m_last_frame_time_sec	( 0 ),
 //m_physics_world			( NULL ),
 //m_test_anim_object	( NULL ),
 m_bullet_manager		( 0 ),
-m_local_actor			( NULL ),
+m_local_actor			( 0 ),
 //m_server				( game.get_network_world() ),
 m_client				( game.get_network_world() ),
-m_scenes_check			( 0 )
+m_scenes_check			( 0 ),
+m_actor_spawned			( false ),
+m_key_camera			( cl_cam ),
+m_key_actor				( cl_actor )
 {
 	init_physics						( );
 
@@ -103,9 +106,6 @@ m_scenes_check			( 0 )
 	m_client.set_on_connected		( boost::bind( &client_on_connected, boost::ref(m_client)) );
 	m_client.connect				( "localhost", port );
 }
-
-
-
 
 game_world::~game_world( )
 {
@@ -132,22 +132,21 @@ void game_world::time_update( )
 	m_game_time_ms						= new_game_time_ms;
 }
 
-void game_world::tick( )
+void game_world::tick()
 {
-	super::tick					( );
-	time_update					( );
+	super::tick();
+	time_update();
 
-	m_camera_director->tick				( );
+	m_camera_director->tick();
 
-	if(m_local_actor)
+	if (m_local_actor)
 	{
-		m_local_actor->tick				( );
+		m_local_actor->tick();
 		m_actor_input_controller->inverted_view_matrix() = m_local_actor->character_head_transform();
 		//m_actor_input_controller->update_camera_matrix(	float2( m_frame_events.m_onframe_turn_x, m_frame_events.m_onframe_turn_y ), 
 		//										m_frame_events.m_onframe_move_fwd, 
 		//										m_frame_events.m_onframe_move_right,
 		//										m_inverted_view_matrix );
-
 	}
 
 	//if (m_test_anim_object)
@@ -155,16 +154,19 @@ void game_world::tick( )
 
 	scenes_list::iterator it = m_active_scenes.begin();
 	scenes_list::iterator it_e = m_active_scenes.end();
-	for( ;it!=it_e; ++it)
-		(*it)->tick			( );
-		
-	m_camera_director->apply			( );
-//	if(g_physics_enabled)
-//		m_physics_world->tick			( );
+	for (; it != it_e; ++it)
+		(*it)->tick();
 
-	m_cell_manager->set_inv_view_matrix	( m_camera_director->get_inverted_view_matrix( ) );
-	m_cell_manager->tick				( );
-	m_bullet_manager->tick				( m_game_time_sec );
+	//	if (!get_game().get_active_scene())
+	//		return;
+
+	m_camera_director->apply();
+	//	if(g_physics_enabled)
+	//		m_physics_world->tick			( );
+
+		m_cell_manager->set_inv_view_matrix(m_camera_director->get_inverted_view_matrix());
+		m_cell_manager->tick();
+		m_bullet_manager->tick(m_game_time_sec);
 
 	get_game().get_sound_world().get_logic_world_user().set_listener_properties_interlocked(
 		get_sound_scene(),
@@ -220,7 +222,11 @@ void game_world::switch_to_hud_camera( )
 {
 //	m_camera_director->switch_to_camera(m_hud, "hud game camera");
 
-	if(m_local_actor)
+	if (!m_local_actor) {
+		spawn_actor();
+		return;
+	}
+
 		m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
 }
 
@@ -256,6 +262,13 @@ void game_world::load( pcstr project_resource_name, pcstr project_resource_path 
 	);
 }
 
+void game_world::spawn_actor() 
+{
+	m_local_actor = NEW(actor)(*this);
+	m_actor_spawned = true;
+	m_local_actor->query_resources();
+}
+
 void game_world::on_project_loaded( resources::queries_result& data )
 {
 	R_ASSERT						( data.is_successful() );
@@ -270,12 +283,14 @@ void game_world::on_project_loaded( resources::queries_result& data )
 
 	//switch_to_hud_camera();
 
-	if(!s_cam) {
+	if(!m_key_camera) {
 		switch_to_free_fly_camera();
-		m_local_actor						= NEW(actor)( *this );
+
+		m_local_actor = NEW(actor)(*this);
+		m_actor_spawned	= true;
 		}
 
-		//m_hud =							  NEW(hud)( *this);
+		//m_hud = NEW(hud)( *this);
 }
 
 void game_world::on_activate( )
@@ -286,7 +301,7 @@ void game_world::on_activate( )
 	if(get_sound_scene())
 		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
 
-if (s_cam)
+if (m_key_camera)
 	switch_to_free_fly_camera();
 }
 
@@ -384,6 +399,13 @@ void game_world::query_resources( )
  	);
 }
 
+void game_world::delete_actor() {
+	if (m_local_actor) {
+		m_local_actor->m_stop_query = true;
+		DELETE(m_local_actor);
+	}
+}
+
 void game_world::on_resources_ready( resources::queries_result& data )
 {
 	R_ASSERT			( data.is_successful( ) );
@@ -404,6 +426,9 @@ void game_world::clear_resources( )
 
 void game_world::tmp_actor_ready( actor* a )
 {
+	if (!m_actor_spawned)
+		return;
+
 	R_ASSERT				(a==m_local_actor);
 	a->set_input_source		( m_actor_input_controller );
 

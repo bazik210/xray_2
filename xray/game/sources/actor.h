@@ -44,8 +44,9 @@ public:
 
 	void			activate			( math::float4x4 const& initial_matrix );
 
-private:
+	bool			m_stop_query;
 
+private:
 	void			on_resources_ready			( resources::queries_result& data );
 	void			add_models_to_scene			( );
 	void			remove_models_from_scene	( );

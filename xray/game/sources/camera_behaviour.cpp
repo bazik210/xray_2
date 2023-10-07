@@ -316,6 +316,11 @@ void camera_director_behaviour::attach_to_object( object_controlled* o )
 	R_ASSERT					( t );
 	game_camera* c				= static_cast_checked<game_camera*>(t.c_ptr());
 
+	if (!m_owner->get_game_world().m_key_actor && !m_owner->get_game_world().m_key_camera /*m_owner->get_game_world().m_actor_spawned == true*/) {
+		m_owner->get_game_world().m_actor_spawned = false;
+		m_owner->get_game_world().delete_actor();
+	}
+
 	m_owner->get_game_world().get_camera_director()->switch_to_camera( c, camera_name );
 }
 
