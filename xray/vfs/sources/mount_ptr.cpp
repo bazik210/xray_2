@@ -70,10 +70,13 @@ void	vfs_intrusive_mount_base::unlink_children	(vfs_mount * object, virtual_file
 	}
 }
 
+static u32	m_iterate_count = 0;
+
 void	vfs_intrusive_mount_base::destroy	(vfs_mount * object) const
 {
 	mount_root_node_base<> * const mount_root	=	object->get_mount_root();
 	memory::base_allocator * const allocator	=	object->get_allocator();
+
 	if ( !mount_root )
 	{
 		u32 const ref_count				=	object->decrement_destroy_count();
@@ -113,13 +116,21 @@ void	vfs_intrusive_mount_base::destroy	(vfs_mount * object) const
 				
 	if ( !file_system.hashset.find_and_lock_branch	(root_write_lock, "", lock_type_write, lock_operation_try_lock) )
 	{
-		LOG_INFO	("rescheduling unmount (cannot lock) '%s' on '%s'", (pcstr)mount_root->physical_path, (pcstr)mount_root->virtual_path);
-		// we cant do it now, lets try later...
-		file_system.scheduled_to_unmount.push_back	(object);
-		return;
+		if (m_iterate_count > 3) {
+			m_iterate_count = 0;
+			LOG_INFO("can't rescheldule anymore '%s', unlocking branch", (pcstr)mount_root->physical_path);
+			unlock_branch(args.root_write_lock, lock_type_write);
+		}
+		else {
+			LOG_INFO("rescheduling unmount (cannot lock) '%s' on '%s'", (pcstr)mount_root->physical_path, (pcstr)mount_root->virtual_path);
+			// we cant do it now, lets try later...
+			file_system.scheduled_to_unmount.push_back(object);
+			m_iterate_count++;
+			return;
+		}
 	}
 
-	R_ASSERT								(root_write_lock);
+	//R_ASSERT								(root_write_lock);
 
 	if ( object->get_reference_count() != 0 )
 	{

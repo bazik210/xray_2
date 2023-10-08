@@ -155,7 +155,7 @@ void xray::memory::preinitialize			( )
 	#if XRAY_HEAP_PROCESS_ALLOCATOR
 		s_process_allocator.do_register				(	   256*Kb,		"process heap"			);
 	#endif
-	strings::shared::g_allocator.do_register	(      256*Kb  ,	"shared strings"		);
+	strings::shared::g_allocator.do_register	(        1*Mb  ,	"shared strings"		);
 	g_fs_allocator.do_register					(		16*Mb  ,	"filesystem"			);
 
 	//xray::particle::g_particles_allocator.do_register			(		 10*Mb  ,	"particle system"		);
