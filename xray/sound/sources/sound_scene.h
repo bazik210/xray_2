@@ -177,7 +177,6 @@ public:
 																float3 const& orient_top
 															);
 
-
 	inline	float3 const&		get_listenet_position		( ) const { return m_listener.m_position; }
 	inline	float3 const&		get_listenet_orient_front	( ) const { return m_listener.m_orient_front; }
 	inline	float3 const&		get_listenet_orient_top		( ) const { return m_listener.m_orient_top; }
@@ -306,15 +305,15 @@ private:
 	resources::unmanaged_allocation_resource_ptr			m_unmanaged_resources_ptr;
 
 	u32 const												m_proxies_count;
-	uninitialized_reference< sound_proxies_allocator >		m_proxies_allocator;
+	//uninitialized_reference< sound_proxies_allocator >		m_proxies_allocator;
 
 	u32	const												m_propagators_count;
-	uninitialized_reference< sound_propagators_allocator >	m_propagators_allocator;
+	//uninitialized_reference< sound_propagators_allocator >	m_propagators_allocator;
 
 	u32	const												m_receivers_count;
-	uninitialized_reference< receiver_position_allocator >	m_receiver_positions_allocator;
+	//uninitialized_reference< receiver_position_allocator >	m_receiver_positions_allocator;
 
-	uninitialized_reference< receiver_collision_allocator > m_receiver_collisions_allocator;
+	//uninitialized_reference< receiver_collision_allocator > m_receiver_collisions_allocator;
 
 	collision::space_partitioning_tree*						m_spatial_tree;
 	sound_receivers_list									m_receivers;

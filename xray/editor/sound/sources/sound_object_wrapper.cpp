@@ -17,13 +17,13 @@ m_options_loaded_callback(nullptr),
 m_is_loaded(false),
 m_is_exist(false)
 {
-	m_sound = NEW(sound::sound_emitter_ptr)();
+	m_sound = new(sound::sound_emitter_ptr)();
 }
 
 sound_object_wrapper::~sound_object_wrapper()
 {
 	if(m_sound)
-		DELETE(m_sound);
+		delete(m_sound);
 
 	m_sound = NULL;
 	m_sound_loaded_callback = nullptr;

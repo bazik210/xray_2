@@ -159,13 +159,14 @@ sound_instance_proxy_ptr sound_scene::create_sound_instance_proxy
 										)
 {
 	LOG_DEBUG							( "sound_scene::create_sound_instance_proxy" );
-	if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
-	{
-		LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
-		return sound_instance_proxy_ptr	( 0 );
-	}
+	//if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
+	//{
+	//	LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
+	//	return sound_instance_proxy_ptr	( 0 );
+	//}
 
-	sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user );
+	//sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user );
+	sound_instance_proxy* new_proxy = new(sound_instance_proxy_internal)(*this, emitter, propagator_emitter, user);
 	LOG_INFO							( "new sound_instance_proxy allocated, id %d", new_proxy->get_id( ) );
 	return sound_instance_proxy_ptr		( new_proxy );
 }
@@ -179,13 +180,14 @@ sound_instance_proxy_ptr sound_scene::create_sound_instance_proxy
 										)
 {
 	LOG_DEBUG							( "sound_scene::create_sound_instance_proxy" );
-	if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
-	{
-		LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
-		return sound_instance_proxy_ptr	( 0 );
-	}
+	//if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
+	//{
+	//	LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
+	//	return sound_instance_proxy_ptr	( 0 );
+	//}
 
-	sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user, cone_type );
+	//sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user, cone_type );
+	sound_instance_proxy* new_proxy = new(sound_instance_proxy_internal)(*this, emitter, propagator_emitter, user, cone_type);
 	LOG_INFO							( "new sound_instance_proxy allocated, id %d", new_proxy->get_id( ) );
 	return sound_instance_proxy_ptr		( new_proxy );
 }
@@ -200,13 +202,15 @@ sound_instance_proxy_ptr sound_scene::create_sound_instance_proxy
 											)
 {
 	LOG_DEBUG							( "sound_scene::create_sound_instance_proxy" );
-	if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
-	{
-		LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
-		return sound_instance_proxy_ptr	( 0 );
-	}
+	//if ( m_proxies_allocator->total_size( ) == m_proxies_allocator->allocated_size( ) )
+	//{
+	//	LOG_ERROR						( "can't allocate sound_instance_proxy, memory is full" );
+	//	return sound_instance_proxy_ptr	( 0 );
+	//}
 
-	sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user, geometry, radius );
+//	sound_instance_proxy* new_proxy		= XRAY_NEW_IMPL( m_proxies_allocator.c_ptr(), sound_instance_proxy_internal )( *this, emitter, propagator_emitter, user, geometry, radius );
+	sound_instance_proxy* new_proxy = new(sound_instance_proxy_internal)(*this, emitter, propagator_emitter, user, geometry, radius);
+
 	LOG_INFO							( "new sound_instance_proxy allocated, id %d", new_proxy->get_id( ) );
 	return sound_instance_proxy_ptr		( new_proxy );
 }
@@ -214,7 +218,8 @@ sound_instance_proxy_ptr sound_scene::create_sound_instance_proxy
 void sound_scene::free_sound_instance_proxy	( sound_instance_proxy* proxy )
 {
 	LOG_INFO							( "sound instance proxy with id %d is deallocated", proxy->get_id( ) );
-	XRAY_DELETE_IMPL					( m_proxies_allocator.c_ptr(), proxy );
+	//XRAY_DELETE_IMPL					( m_proxies_allocator.c_ptr(), proxy );
+	delete(proxy);
 }
 
 void sound_scene::emit_sound_propagators	(	sound_instance_proxy_internal& proxy,
@@ -348,14 +353,17 @@ sound_propagator* sound_scene::create_sound_propagator
 									) 
 {
 	LOG_DEBUG							( "sound_scene::create_sound_propagator" );
-	if ( m_propagators_allocator->total_size() == m_propagators_allocator->allocated_size() )
-	{
-		LOG_ERROR( "can't allocate sound_propagator, memory pool is empty :(" );
-		return 0;
-	}
+	//if ( m_propagators_allocator->total_size() == m_propagators_allocator->allocated_size() )
+	//{
+	//	LOG_ERROR( "can't allocate sound_propagator, memory pool is empty :(" );
+	//	return 0;
+	//}
 
-	sound_propagator* new_propagator	= XRAY_NEW_IMPL
-										( m_propagators_allocator.c_ptr(), sound_propagator )
+	//sound_propagator* new_propagator	= XRAY_NEW_IMPL
+	//									( m_propagators_allocator.c_ptr(), sound_propagator )
+
+	 sound_propagator* new_propagator = new( sound_propagator )
+
 										( 
 											mode,
 											playing_offset,
@@ -372,15 +380,17 @@ sound_propagator* sound_scene::create_sound_propagator
 
 sound_propagator* sound_scene::create_sound_propagator_for_looped( sound_propagator& original )
 {
-	LOG_DEBUG							( "sound_scene::create_sound_propagator_for_looped" );
-	if ( m_propagators_allocator->total_size() == m_propagators_allocator->allocated_size() )
-	{
-		LOG_ERROR( "can't allocate sound_propagator, memory pool is empty :(" );
-		return 0;
-	}
+//	LOG_DEBUG							( "sound_scene::create_sound_propagator_for_looped" );
+//	if ( m_propagators_allocator->total_size() == m_propagators_allocator->allocated_size() )
+//	{
+//		LOG_ERROR( "can't allocate sound_propagator, memory pool is empty :(" );
+//		return 0;
+//	}
 
-	sound_propagator* new_propagator	= XRAY_NEW_IMPL
-										( m_propagators_allocator.c_ptr(), sound_propagator )
+	//sound_propagator* new_propagator	= XRAY_NEW_IMPL
+	//									( m_propagators_allocator.c_ptr(), sound_propagator )
+	   sound_propagator* new_propagator = new( sound_propagator )
+
 										( 
 											original.get_playback_mode( ),
 											0,
@@ -407,7 +417,8 @@ void sound_scene::delete_sound_propagator	( sound_instance_proxy_internal& proxy
 
 	R_ASSERT							( proxy.get_propagators().contains_object( propagator ));
 	proxy.get_propagators().erase		( propagator );
-	XRAY_DELETE_IMPL					( m_propagators_allocator.c_ptr(), propagator );
+	//XRAY_DELETE_IMPL					( m_propagators_allocator.c_ptr(), propagator );
+	delete(propagator);
 
 	R_ASSERT							( m_active_proxies.contains_object( &proxy ) );
 	if ( proxy.get_propagators().empty() )
@@ -440,20 +451,20 @@ void sound_scene::init_allocators	( )
 	);
 
 	u32 proxies_offset				= 0;
-	XRAY_CONSTRUCT_REFERENCE		( m_proxies_allocator, sound_proxies_allocator )
-									( m_unmanaged_resources_ptr->buffer + proxies_offset, proxies_size );
+	//XRAY_CONSTRUCT_REFERENCE		( m_proxies_allocator, sound_proxies_allocator )
+	//								( m_unmanaged_resources_ptr->buffer + proxies_offset, proxies_size );
 
 	u32 propagators_offset			= proxies_offset + proxies_size;
-	XRAY_CONSTRUCT_REFERENCE		( m_propagators_allocator, sound_propagators_allocator )
-									( m_unmanaged_resources_ptr->buffer + propagators_offset, propagators_size );
+	//XRAY_CONSTRUCT_REFERENCE		( m_propagators_allocator, sound_propagators_allocator )
+	//								( m_unmanaged_resources_ptr->buffer + propagators_offset, propagators_size );
 
 	u32 receivers_positions_offset	= propagators_offset + propagators_size;
-	XRAY_CONSTRUCT_REFERENCE		( m_receiver_positions_allocator, receiver_position_allocator )
-									( m_unmanaged_resources_ptr->buffer + receivers_positions_offset, receiver_positions_size );
+	//XRAY_CONSTRUCT_REFERENCE		( m_receiver_positions_allocator, receiver_position_allocator )
+	//								( m_unmanaged_resources_ptr->buffer + receivers_positions_offset, receiver_positions_size );
 
 	u32 receivers_collisions_offset	= receivers_positions_offset + receiver_positions_size;
-	XRAY_CONSTRUCT_REFERENCE		( m_receiver_collisions_allocator, receiver_collision_allocator )
-									( m_unmanaged_resources_ptr->buffer + receivers_collisions_offset, receiver_collisions_size );
+	//XRAY_CONSTRUCT_REFERENCE		( m_receiver_collisions_allocator, receiver_collision_allocator )
+	//								( m_unmanaged_resources_ptr->buffer + receivers_collisions_offset, receiver_collisions_size );
 }
 
 void sound_scene::on_unmanaged_resources_allocated	( resources::queries_result& queries )
@@ -916,13 +927,14 @@ void sound_scene::register_receiver		( sound_receiver* receiver, atomic_half3* p
 
 	R_ASSERT							( new_receiver == 0 );
 
-	if ( m_receiver_collisions_allocator->total_size( ) == m_receiver_collisions_allocator->allocated_size( ) )
-	{
-		LOG_ERROR					( "can't allocate receiver_collision, memory is full" );
-		return;
-	}
+//	if ( m_receiver_collisions_allocator->total_size( ) == m_receiver_collisions_allocator->allocated_size( ) )
+//	{
+//		LOG_ERROR					( "can't allocate receiver_collision, memory is full" );
+//		return;
+//	}
 
-	new_receiver			= XRAY_NEW_IMPL( m_receiver_collisions_allocator.c_ptr(), receiver_collision )( receiver, position );
+//	new_receiver			= XRAY_NEW_IMPL( m_receiver_collisions_allocator.c_ptr(), receiver_collision )( receiver, position );
+	new_receiver			= new( receiver_collision )( receiver, position );
 
 	m_receivers.push_back	( new_receiver );
 
@@ -948,7 +960,8 @@ void sound_scene::unregister_receiver	( world_user& user, sound_receiver* receiv
 		m_receivers.erase				( collision );
 		m_spatial_tree->erase			( collision->get_collision_object() );
 		collision->delete_position		( *this );
-		XRAY_DELETE_IMPL				( m_receiver_collisions_allocator.c_ptr( ), collision );
+		//XRAY_DELETE_IMPL				( m_receiver_collisions_allocator.c_ptr( ), collision );
+		delete(collision);
 	}
 	else
 		LOG_ERROR						( "attempt to delete not unregistered receiver" );
@@ -1153,20 +1166,22 @@ void sound_scene::process_fade	( sound_world& world, u64 time_delta )
 
 atomic_half3* sound_scene::create_receiver_position	( )
 {
-	if ( m_receiver_positions_allocator->total_size( ) == m_receiver_positions_allocator->allocated_size( ) )
-	{
-		LOG_ERROR					( "can't allocate receiver_position, memory is full" );
-		return						0;
-	}
+//	if ( m_receiver_positions_allocator->total_size( ) == m_receiver_positions_allocator->allocated_size( ) )
+//	{
+//		LOG_ERROR					( "can't allocate receiver_position, memory is full" );
+//		return						0;
+//	}
 
-	atomic_half3* pos	= XRAY_NEW_IMPL( m_receiver_positions_allocator.c_ptr(), atomic_half3 )( );
+//	atomic_half3* pos	= XRAY_NEW_IMPL( m_receiver_positions_allocator.c_ptr(), atomic_half3 )( );
+	atomic_half3* pos = new(atomic_half3)();
 	return pos;
 }
 
 void sound_scene::delete_receiver_position	( atomic_half3* pos )
 {
 	R_ASSERT			( pos );
-	XRAY_DELETE_IMPL	( m_receiver_positions_allocator.c_ptr(), pos );
+	//XRAY_DELETE_IMPL	( m_receiver_positions_allocator.c_ptr(), pos );
+	delete(pos);
 	pos					= 0;
 }
 

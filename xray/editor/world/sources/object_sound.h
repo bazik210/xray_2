@@ -42,12 +42,13 @@ public:
 							object_sound	( tool_sound^ tool, render::scene_ptr const& scene );
 	virtual					~object_sound	( );
 	virtual void			load_contents	( )										override;
+	virtual void			load_props		(configs::lua_config_value const& config_value) override;
 	virtual	void			set_transform	( float4x4 const& transform )			override;
 	virtual void			unload_contents	( bool )								override { }
 	virtual wpf_controls::property_container^	get_property_container	( )			override;
 	virtual void			render			( )										override;
 	virtual	void			on_selected		( bool selected )						override;
-
+	virtual	void			save			(configs::lua_config_value t) override;
 
 private:
 			void			initialize_collision( );

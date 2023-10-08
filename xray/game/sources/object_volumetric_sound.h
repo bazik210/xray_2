@@ -18,7 +18,7 @@ namespace collision {
 
 namespace stalker2 {
 
-class object_volumetric_sound : public game_object_
+class object_volumetric_sound : public game_object_, public sound::sound_producer
 {
 	typedef game_object_				super;
 public:
@@ -27,6 +27,9 @@ public:
 	virtual void	load					( configs::binary_config_value const& t );
 	virtual void	load_contents			( );
 	virtual void	unload_contents			( );
+
+	virtual pcstr	get_description() const { return "volumetric sound"; };
+	virtual	float3	get_source_position(float3 const& requester) const { return m_position; };
 private:
 			void	on_collision_object_loaded	( game_object_ptr_ const& object );
 			void	on_config_loaded			( resources::queries_result& data );
@@ -39,6 +42,7 @@ private:
 	xray::sound::world_user&				m_world_user;
 	xray::collision::geometry_instance*		m_collision_geometry;
 	float									m_radius;
+	float3									m_position;
 }; // class volumetric_sound
 
 } // namespace stalker2
