@@ -160,11 +160,11 @@ void shader_binary_source_cook::all_tasks_finished(conveted_shader_loaded_data* 
 			)
 		);
 		
-#ifdef MASTER_GOLD
+//#ifdef MASTER_GOLD
 		MT_FREE										(data->data_to_save);
-#else // #ifdef MASTER_GOLD
-		DEBUG_FREE									(data->data_to_save);
-#endif // #ifdef MASTER_GOLD
+//#else // #ifdef MASTER_GOLD
+//		DEBUG_FREE									(data->data_to_save);
+//#endif // #ifdef MASTER_GOLD
 	}		
 	
 	if (data->new_resource->shader_byte_code)
