@@ -19,6 +19,7 @@ START /B /WAIT cmake --graphviz=dependency_graph.dot --fresh -G "Visual Studio 1
 	echo CMake finished generation successfully! Running post-generation scripts...
 	CALL GenerateDependencyGraph.bat
 	CALL RemoveExceptions.bat
+	CALL RemoveDebugNDebug.bat
 	CALL SetupNothrownew.bat
 	CALL SetupTools.bat
 	echo Cleaning up...

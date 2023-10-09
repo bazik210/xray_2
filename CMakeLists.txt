@@ -112,6 +112,29 @@ function(xr_disable_target_exception_handling TARGET)
     set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${TARGET_COMPILE_FLAGS}")
 endfunction()
 
+# Remove NDEBUG and _DEBUG from preprocessor definitions
+# Useful only when running compiler directly - Visual Studio WILL ADD THESE on its own
+# Python script takes care of removing them from .vcxproj
+function(xr_remove_target_debug_definition TARGET)
+    get_target_property(TARGET_COMPILE_DEFINITIONS ${TARGET} COMPILE_DEFINITIONS )
+    # MSVC
+    string(REPLACE "/DNDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "/D_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    # GCC/Clang
+    string(REPLACE "-NDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "-_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    # Sanity check
+    string(REPLACE "NDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    set_target_properties(${TARGET} PROPERTIES COMPILE_DEFINITIONS "${TARGET_COMPILE_DEFINITIONS}")
+endfunction()
+
+# List all Target Compile Options
+function(xr_print_target_compile_definitions TARGET)
+    get_target_property(TARGET_COMPILE_DEFINITIONS ${TARGET} COMPILE_DEFINITIONS )
+    message(STATUS "\nPreprocessor definitions of ${TARGET}:\n${TARGET_COMPILE_DEFINITIONS}")
+endfunction()
+
 # List all Target Compile Options
 function(xr_print_target_compile_flags TARGET)
     get_target_property(TARGET_COMPILE_FLAGS ${TARGET} COMPILE_OPTIONS )
@@ -555,8 +578,11 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+    xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_static_lib_C TARGET)
@@ -613,8 +639,10 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_stalker2 TARGET)
@@ -670,8 +698,11 @@ endif()
     ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+    xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_static_lib_CPP TARGET)
@@ -722,8 +753,10 @@ endif()
     ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_shared_lib TARGET)
@@ -772,9 +805,6 @@ endif()
       ${SOLUTION_DIR_INCLUDE_PATH}/binaries
       )
 
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
@@ -797,7 +827,11 @@ else()
     )
 endif()
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_shared_lib_CLR TARGET)
@@ -861,9 +895,6 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 	)
 
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
@@ -884,8 +915,13 @@ else()
         /FIXED:NO
         /MACHINE:X86
     )
-endif()  
+endif()
+
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 # The only difference between Static and Shared editor libs are Linkage settings
@@ -951,7 +987,7 @@ endif()
     # Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
-    xr_print_target_compile_flags(${TARGET})
+    #xr_print_target_compile_flags(${TARGET})
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /DEBUG
@@ -981,9 +1017,12 @@ endif()
 	wpf_controls
     )
 
-    xr_print_target_linker_flags(${TARGET})
-
     target_compile_definitions(${TARGET} PUBLIC MBCS _MBCS)
+
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
+    xr_print_target_linker_flags(${TARGET})
 
 endfunction()
 
@@ -1029,8 +1068,6 @@ function(xr_set_target_defaults_network_32 TARGET)
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -1046,7 +1083,11 @@ function(xr_set_target_defaults_network_32 TARGET)
         /DELAYLOAD:advapi32.dll
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_network_64 TARGET)
@@ -1089,8 +1130,6 @@ function(xr_set_target_defaults_network_64 TARGET)
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -1104,7 +1143,11 @@ function(xr_set_target_defaults_network_64 TARGET)
 		/MACHINE:X64
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_plugin TARGET)
@@ -1158,8 +1201,6 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /OPT:REF
@@ -1168,7 +1209,11 @@ endif()
         /DELAY:UNLOAD
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 
