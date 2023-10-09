@@ -186,4 +186,8 @@ target_link_libraries(sound PUBLIC
 	xapobase.lib
 )
 
+target_include_directories(sound PRIVATE
+	${DXSDK_DIR_PATH}/Include
+)
+
 set_target_properties(sound PROPERTIES FOLDER "engine")

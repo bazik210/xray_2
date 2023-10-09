@@ -13,8 +13,8 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
-# set(CMAKE_GENERATOR_PLATFORM x64)
- set(CMAKE_GENERATOR_PLATFORM Win32)
+set(CMAKE_GENERATOR_PLATFORM x64)
+#set(CMAKE_GENERATOR_PLATFORM Win32)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #
@@ -34,6 +34,7 @@ if(NOT CMAKE_CSharp_COMPILER)
     return()
 endif()
 
+# /ZI
 SET(CMAKE_CXX_FLAGS "/EHs")
 
 ############################
@@ -92,8 +93,6 @@ add_subdirectory(third_party)
 
 # Enable folder hierarchy view
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-
 
 #############
 # UTILITIES #
@@ -653,7 +652,7 @@ endif()
     set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "" LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
 
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -699,7 +698,7 @@ else()
     )
 endif()
     # set compiler flags																				
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -749,7 +748,7 @@ else()
     )
 endif()
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise /fp:except->
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -922,7 +921,7 @@ endif()
    	set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "")
 
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi

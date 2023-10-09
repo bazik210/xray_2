@@ -97,7 +97,7 @@ void object_volumetric_sound::on_sound_loaded			( resources::queries_result& dat
 	R_ASSERT							( m_emitter.c_ptr( ) );
 	m_proxy								= m_emitter->emit( m_sound_scene, m_world_user );
 	//m_proxy->set_collision_geometry		( *m_collision_geometry, m_radius );
-	m_proxy->play						( xray::sound::looped );
+	m_proxy->play						( xray::sound::looped, this );
 }
 
 } // namespace stalker2

@@ -200,7 +200,8 @@ game::game(		xray::engine_user::engine& engine,
 	m_sound_scene			( 0 ),
 	m_debug_window_type		( debug_window_none ),
 	m_debug_window			( NULL ),
-	m_rtp					( 0 )
+	m_rtp					( 0 ),
+	gload					( 0 )
 {
 	query_render_scene		( );
 	query_sound_scene		( );
@@ -682,6 +683,11 @@ void game::unload_cmd					( pcstr s )
 
 void game::load( pcstr project_resource_name, pcstr project_resource_path )
 {
+	if (gload)
+		return;
+
+	gload = true;
+
 	m_game_world->load		( project_resource_name, project_resource_path );
 	
 	m_ai_navigation_world->load_navmesh( project_resource_path ? project_resource_path : project_resource_name );

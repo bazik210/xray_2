@@ -426,6 +426,8 @@ void game_world::clear_resources( )
 
 void game_world::tmp_actor_ready( actor* a )
 {
+	get_game().gload = false;
+
 	if (!m_actor_spawned)
 		return;
 
