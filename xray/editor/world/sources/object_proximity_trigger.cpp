@@ -42,7 +42,7 @@ void object_proximity_trigger::unload_contents ( Boolean is_destroy )
 	XRAY_UNREFERENCED_PARAMETER( is_destroy );
 
 	if( m_collision->initialized( ) )
-		m_collision->destroy( &debug::g_mt_allocator );
+		m_collision->destroy( /*&debug::g_mt_allocator */ );
 }
 
 void object_proximity_trigger::load_props ( configs::lua_config_value const& config_value )

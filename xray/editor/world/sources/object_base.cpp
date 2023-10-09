@@ -230,7 +230,7 @@ level_editor^ object_base::get_level_editor( )
 void object_base::destroy_collision	( )
 {
 	if ( m_collision->initialized() )
-		m_collision->destroy( g_allocator );
+		m_collision->destroy( /*g_allocator */);
 }
 
 object_base^ create_object( level_editor^ le, configs::lua_config_value cfg )

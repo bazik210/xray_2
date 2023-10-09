@@ -36,7 +36,7 @@ public:
 	void							create_from_geometry( bool user_geom, object_base^ o, collision::geometry_instance* geom, xray::collision::object_type t );
 	aabb							get_aabb			( );
 
-	void							destroy				( memory::base_allocator* allocator );
+	void							destroy				( /*memory::base_allocator* allocator*/);
 	void							insert				( float4x4 const* m );
 	void							remove				( );
 	void							set_matrix			( float4x4 const* m );

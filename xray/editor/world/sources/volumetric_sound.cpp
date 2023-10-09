@@ -125,20 +125,40 @@ void volumetric_sound::select_collision_geometry	( wpf_controls::property_editor
 
 void volumetric_sound::play_looped_clicked	( button^ )
 {
-	object_collision_geometry^ geom					= (object_collision_geometry^)( m_collision_geometry->get_object( ));
-	object_collision_geometry_mesh^	mesh			= geom->get_mesh( false, 0 );
-	collision::geometry_instance* instance			= mesh->get_geometry_instance( );
-	if ( (*m_sound_emitter_ptr).c_ptr() )
-	{
-		*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+	if (m_collision_geometry) {
+		object_collision_geometry^ geom = (object_collision_geometry^)(m_collision_geometry->get_object());
+		object_collision_geometry_mesh^ mesh = geom->get_mesh(false, 0);
+		collision::geometry_instance* instance = mesh->get_geometry_instance();
+
+		if ((*m_sound_emitter_ptr).c_ptr())
+		{
+			*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+			(
+				get_editor_world().sound_scene(),
+				get_editor_world().engine().get_sound_world().get_editor_world_user(),
+				*instance,
+				m_radius
+			));
+		}
+	} else {
+			if ((*m_sound_emitter_ptr).c_ptr())
+			{
+				*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+				(
+					get_editor_world().sound_scene(),
+					get_editor_world().engine().get_sound_world().get_editor_world_user(),
+					*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 0.5f),
+					m_radius
+				));
+			}
+		* m_proxy = ((*m_sound_emitter_ptr)->emit_point_sound
 		(
 			get_editor_world().sound_scene(),
-			get_editor_world().engine().get_sound_world().get_editor_world_user(),
-			*instance,
-			m_radius
+			get_editor_world().engine().get_sound_world().get_editor_world_user()
 		));
-		(*m_proxy)->play( sound::looped );
 	}
+			(*m_proxy)->play(sound::looped);
+
 }
 
 void volumetric_sound::on_sound_loaded( resources::queries_result& data )

@@ -647,13 +647,13 @@ void graph_generator::tick					( )
 		if ( m_show_triangle_id == (i->triangle_id) )
 			continue;
 		
-		//if ( m_show_triangle_faces )
-		//	m_renderer.draw_triangle( m_scene, v0, v1, v2, m_input_triangles.data[ (i->triangle_id) ].color );
+		if ( m_show_triangle_faces )
+			m_renderer.draw_triangle( m_scene, v0, v1, v2, m_input_triangles.data[ (i->triangle_id) ].color );
 		
-		//static const math::color obstruction_color(255, 0, 0);
-		//m_renderer.draw_line	( m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
-		//m_renderer.draw_line	( m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
-		//m_renderer.draw_line	( m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		static const math::color obstruction_color(255, 0, 0);
+		m_renderer.draw_line	( m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		m_renderer.draw_line	( m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
+		m_renderer.draw_line	( m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color( 0, 255, 0 ) );
 		
 	}
 

@@ -199,6 +199,8 @@ float game_world::last_frame_time_sec ( )
 
 void game_world::unload( )
 {
+//	DELETE(volumetric_test);
+
 	scenes_list::iterator it = m_active_scenes.begin();
 	scenes_list::iterator it_e = m_active_scenes.end();
 	for( ;it!=it_e; ++it)
@@ -428,6 +430,11 @@ void game_world::tmp_actor_ready( actor* a )
 {
 	get_game().gload = false;
 
+	std::for_each(volumetric_refs[0].begin(), volumetric_refs[0].end(), [&](object_volumetric_sound* snd)
+		{
+			snd->play();
+		});
+
 	if (!m_actor_spawned)
 		return;
 
@@ -439,6 +446,9 @@ void game_world::tmp_actor_ready( actor* a )
 	a->activate				( initial_matrix );
 
 	m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
+
+//	volumetric_test = NEW(object_volumetric_sound)(*this);
+//	volumetric_test->load_custom("rain");
 }
 
 } // namespace stalker2

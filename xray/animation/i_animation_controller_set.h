@@ -23,6 +23,8 @@ public:
 	virtual void						set_callback_on_loaded	( const boost::function< void ( ) >	 &cb  ) = 0;
 	virtual	bool						loaded					()const = 0;
 	virtual	pcstr						path					() const = 0;
+	//virtual void						position				() const = 0;
+
 //	
 	XRAY_DECLARE_PURE_VIRTUAL_DESTRUCTOR( i_animation_controller_set )
 }; // class i_animation_controller_set

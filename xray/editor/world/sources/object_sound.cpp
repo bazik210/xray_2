@@ -56,7 +56,7 @@ object_sound::~object_sound()
 	DELETE ( m_callback );
 
 	if ( m_collision->initialized() )
-		m_collision->destroy( &debug::g_mt_allocator );
+		m_collision->destroy( /*&debug::g_mt_allocator */);
 }
 
 void object_sound::set_transform(float4x4 const& transform)
@@ -213,10 +213,23 @@ void object_sound::play_clicked		( button^ )
 
 	emit							( );
 
+	//test
+	//if ((*m_sound_emitter_ptr).c_ptr())
+	//{
+	//	*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+	//	(
+	//		get_editor_world().sound_scene(),
+	//		get_editor_world().engine().get_sound_world().get_editor_world_user(),
+	//		*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 0.5f),
+	//		300
+	//	));
+	//}
+
 	if ((*m_proxy).c_ptr( ) == 0)
 		return;
 
 	(*m_proxy)->set_callback		( boost::bind( &callback_handler::on_finish_playing, m_callback ) );
+	//disable for test
 	if ( m_sound_type == 0 )
 		(*m_proxy)->set_position				(*m_position);
 	else

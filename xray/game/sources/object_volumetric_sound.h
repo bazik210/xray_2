@@ -26,6 +26,7 @@ public:
 	virtual			~object_volumetric_sound( );
 	virtual void	load					( configs::binary_config_value const& t );
 	virtual void	load_contents			( );
+	virtual void    load_custom				( fs::path_string m_sound_name );
 	virtual void	unload_contents			( );
 
 	virtual pcstr	get_description() const { return "volumetric sound"; };
@@ -34,6 +35,8 @@ private:
 			void	on_collision_object_loaded	( game_object_ptr_ const& object );
 			void	on_config_loaded			( resources::queries_result& data );
 			void	on_sound_loaded				( resources::queries_result& data );
+public:
+			void	play();
 private:
 	fs::path_string							m_sound_name;
 	xray::sound::sound_emitter_ptr			m_emitter;
@@ -43,6 +46,7 @@ private:
 	xray::collision::geometry_instance*		m_collision_geometry;
 	float									m_radius;
 	float3									m_position;
+	game_scene&								m_game_scene;
 }; // class volumetric_sound
 
 } // namespace stalker2
