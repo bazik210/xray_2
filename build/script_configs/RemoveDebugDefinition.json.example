@@ -1,0 +1,6 @@
+{
+	"included_projects" : [
+		"ExampleProj0.vcxproj",
+		"ExampleProj1.vcxproj"
+	]
+}
