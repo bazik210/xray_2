@@ -1,9 +1,8 @@
 {
 	"included_directories" : [
-		"exampleDir"
+		"third_party"
 	],
 	"included_projects" : [
-		"exampleProj0",
-		"exampleProj1"
+		"collision"
 	]
 }

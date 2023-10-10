@@ -1,4 +1,7 @@
 {
+	"included_directories" : [
+		"third_party"
+	],
 	"included_projects" : [
 		"bugtrap",
 		"bugtrapN",
@@ -12,7 +15,6 @@
 		"LibTIFF",
 		"lua.5.1.4",
 		"luabind.0.8.1",
-		"OpenEXR",
 		"OpenEXR",
 		"minizip",
 		"minizipN",

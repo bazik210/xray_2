@@ -17,16 +17,19 @@ except IOError:
     cfgFile = open('./script_configs/RemoveDebugDefinition.json.example')
     cfg = json.load(cfgFile)
 
-# Parse each project file and remove _DEBUG and NDEBUG from RelWithDebInfo configuration
+# Parse each project file and remove DEBUG, _DEBUG and NDEBUG from RelWithDebInfo configuration
 for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
     for filename in fnmatch.filter(files, '*.vcxproj'):
         skip = 1
+        for dir in cfg['included_directories']:
+            if os.getcwd() + '\\' + dir + '\\' in path:
+                skip = 0
+                continue
         for proj in cfg['included_projects']:
-            if proj in filename:
+            if proj + '.vcxproj' in filename:
                 skip = 0
                 continue
         if skip == 1:
-            #print('Skipped')
             continue
 
         vcxproj = os.path.join(path, filename)

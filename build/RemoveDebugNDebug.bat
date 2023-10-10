@@ -1,6 +1,6 @@
 @echo off
 
-echo Removing _DEBUG and NDEBUG preprocessor definitions from RelWithDebInfo configuration...
+echo Removing DEBUG, _DEBUG and NDEBUG preprocessor definitions from RelWithDebInfo configuration...
 
 set currentDir=%~dp0
 
