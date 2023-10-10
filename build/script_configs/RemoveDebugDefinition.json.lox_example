@@ -1,0 +1,30 @@
+{
+	"included_projects" : [
+		"bugtrap",
+		"bugtrapN",
+		"bullet",
+		"FreeImageDLL",
+		"FreeImage",
+		"LibJPEG",
+		"LibMNG",
+		"LibOpenJPEG",
+		"LibPNG",
+		"LibTIFF",
+		"lua.5.1.4",
+		"luabind.0.8.1",
+		"OpenEXR",
+		"OpenEXR",
+		"minizip",
+		"minizipN",
+		"nvcore",
+		"nvimage",
+		"nvtt",
+		"squish",
+		"ode",
+		"ogg",
+		"theora",
+		"vorbis",
+		"vorbisfile",
+		"zlib"
+	]
+}

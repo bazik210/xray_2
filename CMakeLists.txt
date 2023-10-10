@@ -74,7 +74,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
-foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_INIT)
+foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_INIT)
     string(REGEX REPLACE "/EH[a-z]+" "" ${var} "${${var}}")
     string(REPLACE "/EHa" "" ${var} "${${var}}")
     string(REPLACE "/EHsc" "" ${var} "${${var}}")
@@ -83,7 +83,9 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_
     string(REPLACE "/RTCs" "" ${var} "${${var}}")
     string(REPLACE "/RTCu" "" ${var} "${${var}}")
     string(REPLACE "/RTC1" "" ${var} "${${var}}")
-endforeach()
+    string(REPLACE "/DNDEBUG" "/DDEBUG" ${var} "${${var}}")
+endforeach() 
+
 
 # Main engine directory
 add_subdirectory(xray)

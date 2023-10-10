@@ -45,5 +45,6 @@ for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
                 if element.tag == '{'+ namespace + '}' + 'PreprocessorDefinitions' and 'RelWithDebInfo' in group.get('Condition'):
                     element.text = element.text.replace('_DEBUG;', '')
                     element.text = element.text.replace('NDEBUG;', '')
+                    element.text = element.text.replace('DEBUG;', '')
                         
         contents.write(vcxproj, '')
