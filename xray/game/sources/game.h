@@ -235,8 +235,9 @@ private:
 							threading::single_threading_policy,
 							size_policy >	npcs_type;
 public:
-	xray::render::scene_view_ptr const	get_active_scene_view	( )	const;
+	xray::render::scene_view_ptr const		get_active_scene_view	( )	const;
 	xray::render::scene_ptr const			get_active_scene		( )	const;
+	bool									get_editor				( ) { return false; };
 	bool									gload;
 private:
 	timing::timer							m_timer;

@@ -213,6 +213,9 @@ private:
 	bool								m_exit_query;
 	bool								m_editor_mode;
 	bool								m_paused;
+public:
+	bool								get_editor() { return m_editor; };
+	bool								m_editor = true;
 }; // class editor_world
 
 } // namespace editor
