@@ -123,7 +123,7 @@ public:
 //	xray::physics::world*					m_physics_world;
 //	test_anim_object*						m_test_anim_object;
 //	object_volumetric_sound*				volumetric_test;
-	std::vector<object_volumetric_sound*>	volumetric_refs[255];
+//	std::vector<object_volumetric_sound*>	volumetric_refs[255];
 	
 private:
 //	network::server		m_server;

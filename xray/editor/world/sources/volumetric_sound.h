@@ -100,6 +100,7 @@ private:
 	System::String^									m_volumetric_config_file_name;
 	System::String^									m_sound_file_name;
 	float											m_radius;
+	bool											m_config_radius;
 }; // class volumetric_sound
 
 } // namespace editor

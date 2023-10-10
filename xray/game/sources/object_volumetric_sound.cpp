@@ -107,7 +107,8 @@ void object_volumetric_sound::on_sound_loaded( resources::queries_result& data )
 {
 	m_emitter = static_cast_resource_ptr<xray::sound::sound_emitter_ptr>(data[0].get_unmanaged_resource());
 	R_ASSERT(m_emitter.c_ptr());
-	m_game_scene.get_game().get_game_world().volumetric_refs->push_back(this);
+//	m_game_scene.get_game().get_game_world().volumetric_refs->push_back(this);
+	play();
 }
 
 void object_volumetric_sound::play			(  )

@@ -24,6 +24,7 @@ namespace editor{
 
 using xray::editor::wpf_controls::property_descriptor;
 using xray::editor::wpf_controls::property_editors::attributes::external_editor_event_handler;
+using System::Convert;
 
 
 volumetric_sound::volumetric_sound( tool_sound^ tool, render::scene_ptr const& scene )	:
@@ -175,7 +176,9 @@ void volumetric_sound::on_config_loaded( resources::queries_result& data )
 	R_ASSERT									(cfg.c_ptr());
 	configs::binary_config_value const& root	= cfg->get_root();
 	configs::binary_config_value const& vol_snd	= root		["volumetric_sound"];
+if(!m_config_radius) {
 	radius										= vol_snd	["radius"];
+}
 	configs::binary_config_value const& snd		= vol_snd	["sound"];
 	fs::path_string snd_filename				= snd		["filename"];
 	u32 type									= snd		["resource_type"];
@@ -202,6 +205,13 @@ void volumetric_sound::load_props ( configs::lua_config_value const& config_valu
 	if ( selected_collision_geometry != "")
 		owner_tool( )->get_level_editor( )->get_project( )->query_project_item( selected_collision_geometry, gcnew xray::editor::queried_object_loaded( this, &volumetric_sound::collision_geometry_loaded ) );
 	String^ config_file_name = gcnew String( config_value["sound"] );
+
+	String^ rstr = gcnew String(config_value["radius"]);
+	if (rstr) {
+		m_config_radius = true;
+		float   cfg_radius = (float)(Convert::ToSingle(rstr));
+		radius = cfg_radius;
+	}
 
 	if ( config_file_name != "" )
 		wav_filename			= config_file_name;

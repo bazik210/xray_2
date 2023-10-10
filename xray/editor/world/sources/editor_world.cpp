@@ -858,7 +858,9 @@ void editor_world::editor_mode(bool beditor_mode)
 		
 		while ( ShowCursor(TRUE) <= 0 );
 
-		m_view_window->unclip_cursor();
+			m_view_window->unclip_cursor();
+		
+	//		m_view_window->Update();
 	}else
 	{
 		m_level_editor->get_project()->save_intermediate( ); 

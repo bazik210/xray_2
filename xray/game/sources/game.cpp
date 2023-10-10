@@ -483,10 +483,13 @@ void game::exit( pcstr str )
 {
 	unload							( str, true );
 	
-	if ( m_engine.command_line_editor() )
-		m_engine.enter_editor_mode	( );
-	else
-		m_engine.exit				( 0 );
+	if (m_engine.command_line_editor())
+	{
+		m_engine.enter_editor_mode();
+	}
+	else {
+		m_engine.exit(0);
+	}
 }
 
 void game::tick( u32 const current_frame_id )
