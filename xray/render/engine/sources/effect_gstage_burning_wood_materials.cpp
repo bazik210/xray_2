@@ -146,8 +146,12 @@ void effect_gstage_burning_wood_materials::compile( effect_compiler& compiler, c
 			
 			if (pass_index == 0)
 			{
-				if( configuration.use_normal_texture)
-					compiler.set_texture("t_normal", pcstr(custom_config["texture_normal"]));
+				if (configuration.use_normal_texture) {
+					char const* normal = pcstr(custom_config["texture_normal"]);
+					if (!strings::equal(normal, "")) {
+						compiler.set_texture("t_normal", normal);
+					}
+				}	
 			}
 			else
 			{

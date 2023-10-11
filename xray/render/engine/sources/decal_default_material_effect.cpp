@@ -54,8 +54,12 @@ void decal_default_material_effect::compile( effect_compiler& compiler, custom_c
 			if (config.value_exists("normal_multiplier"))
 				compiler.set_constant	("constant_normal_multiplier", math::float3(config["normal_multiplier"]));
 			
-			if (configuration.use_normal_texture)
-				compiler.set_texture	("t_normal_map", pcstr(config["texture_normal"]));
+			if (configuration.use_normal_texture) {
+				char const* normal = pcstr(config["texture_normal"]);
+				if (!strings::equal(normal, "")) {
+				compiler.set_texture	("t_normal_map", normal);
+				}
+			}
 			
 			compiler.set_texture		("t_position", r2_rt_p);
 			compiler.set_texture		("t_normal", r2_rt_n);
