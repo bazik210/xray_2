@@ -102,7 +102,7 @@ void	renderer_context_targets::create_targets( math::uint2 size)
 
 	
 	m_rt_light_scattering_name.assignf( "%s_%d", r2_rt_light_scattering, m_id);
-	m_rt_light_scattering	= resource_manager::ref().create_render_target( m_rt_light_scattering_name.get_buffer(), size.width/4, size.height/4,	DXGI_FORMAT_R8G8B8A8_UNORM, enum_rt_usage_render_target);
+	m_rt_light_scattering	= resource_manager::ref().create_render_target( m_rt_light_scattering_name.get_buffer(), size.width/4, size.height/4, DXGI_FORMAT_R16_FLOAT, enum_rt_usage_render_target);
 	
 
 	m_rt_present_name.assignf( "%s_%d", r2_rt_present, m_id);
