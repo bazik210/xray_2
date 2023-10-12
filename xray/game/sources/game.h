@@ -169,6 +169,8 @@ public:
 			void			on_npc_attributes_received	( configs::binary_config_value const& attributes_config, human_npc_ptr owner );
 			void			assign_behaviour		( );
 
+			void			speedtree_loaded		(resources::queries_result& data, xray::render::game::renderer* r);
+			void			load_speedtree			(xray::render::game::renderer* r);
 
 private:
 			//void			test					( );

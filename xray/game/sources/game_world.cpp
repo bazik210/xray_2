@@ -449,6 +449,7 @@ void game_world::tmp_actor_ready( actor* a )
 
 //	volumetric_test = NEW(object_volumetric_sound)(*this);
 //	volumetric_test->load_custom("rain");
+	m_game.load_speedtree(&m_game.renderer());
 }
 
 } // namespace stalker2

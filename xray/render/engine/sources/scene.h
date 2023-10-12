@@ -59,6 +59,7 @@ class terrain;
 struct scene_configuration;
 struct speedtree_forest;
 struct grass_world;
+//class model_manager;
 
 class scene : public base_scene {
 public:

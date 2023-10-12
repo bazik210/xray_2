@@ -33,6 +33,7 @@ public:
 			void	apply_camera				( camera_director_ptr cd );
 
 	game&						get_game		( ) const { return m_game; }
+	game_world&					get_game_world  ( ) const { return m_game_world; }
 	render::game::renderer&		renderer		( );
 	xray::physics::world*		get_physics_world		( ) { return m_physics_world;}
 
@@ -57,6 +58,7 @@ protected:
 
 protected:
 	game&								m_game;
+	game_world&							m_game_world;
 	xray::sound::sound_scene_ptr		m_sound_scene;
 	float4x4							m_inverted_view_matrix;
 	float4x4							m_projection_matrix;

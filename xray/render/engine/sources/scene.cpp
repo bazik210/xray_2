@@ -87,7 +87,7 @@ scene::scene( xray::render::scene_configuration const& renderer_configuration)
 :
 //.	m_models			( NEW(xray::render::model_manager) ),
 	m_lights			( NEW(lights_db) ),
-	m_speedtree_forest	( renderer_configuration.m_create_speedtree_world ? NEW(speedtree_forest) : NULL),
+	m_speedtree_forest	( renderer_configuration.m_create_speedtree_world ? MT_NEW(speedtree_forest) : NULL),
 	m_terrain			( renderer_configuration.m_create_terrain ? NEW(render::terrain) : NULL ),
 	m_particle_world	( NULL ),
 	m_scene_slomo		( 1.0f ),
@@ -107,7 +107,7 @@ scene::scene( xray::render::scene_configuration const& renderer_configuration)
 
 scene::~scene()
 {
-	DELETE			( m_speedtree_forest );
+	MT_DELETE		( m_speedtree_forest );
 	DELETE			( m_grass );
 	
 	collision::delete_space_partitioning_tree( m_decals_tree );

@@ -52,6 +52,7 @@
 #include "main_menu.h"
 #include "lobby_menu.h"
 #include "key_binder.h"
+#include "help_functions.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
 	#ifdef XRAY_RENDERER_FLASH
@@ -85,7 +86,7 @@ static cc_delegate	cgf_save_user_cc( "cfg_save_user", boost::bind(&cfg_save_user
 
 
 static command_line::key		s_speedtree_key		( "speedtree", "", "", "speedtree test" );
-//static bool is_speedtree_loaded	= false;
+static bool is_speedtree_loaded	= false;
 
 
 
@@ -124,44 +125,6 @@ namespace stalker2 {
 // 			random_float(min_value.z, max_value.z));
 // 	}
 // }
-
-// static void speedtree_loaded(resources::queries_result& data, xray::render::game::renderer* r)
-// {
-// 	if (!data.is_successful())
-// 		return;
-// 	
-// 	using namespace xray::math;
-// 	
-// 	float4x4 transform = create_translation( temp::random_float3(float3(-400, 0, -400), float3(400, 0, 400)));
-// 	
-// 	xray::render::speedtree_instance_ptr st_instance_ptr = static_cast_resource_ptr<xray::render::speedtree_instance_ptr>(data[0].get_unmanaged_resource());
-// 	r->add_speedtree_instance(st_instance_ptr, transform);
-// }
-// 
-// static void load_speedtree(xray::render::game::renderer* r)
-// {
-// 	if (is_speedtree_loaded || !s_speedtree_key.is_set())
-// 		return;
-// 	
-// 	for (u32 i=0; i<5000; i++)
-// 	{
-// 		pcstr					tree_name = "acacia";
-// 		if (i>5*333 && i<5*666)		tree_name = "white_birch"; // live_oak
-// 		else if (i>=5*666)		tree_name = "banana_plant";
-// 		
-// 		resources::query_resource(
-// 			tree_name,
-// 			resources::speedtree_instance_class,
-// 			boost::bind(&speedtree_loaded, _1, r),
-// 			g_allocator
-// 		);
-// 	}
-// 	
-// 	is_speedtree_loaded = true;
-// }
-
-
-
 
 game::game(		xray::engine_user::engine& engine,
 				xray::render::world& render_world,
@@ -323,6 +286,39 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 		on_application_activate	( );
 	}
 }
+
+void game::speedtree_loaded(resources::queries_result& data, xray::render::game::renderer* r)
+{
+	if (!data.is_successful())
+		return;
+
+	float4x4 transform = create_translation(xray::game::random_float3(float3(-50, 0, -50), float3(50, 0, 50)));
+
+	xray::render::speedtree_instance_ptr st_instance_ptr = static_cast_resource_ptr<xray::render::speedtree_instance_ptr>(data[0].get_unmanaged_resource());
+	r->scene().add_speedtree_instance(m_game_world->get_render_scene(), st_instance_ptr, transform, true);
+}
+
+void game::load_speedtree(xray::render::game::renderer* r)
+ {
+ 	if (is_speedtree_loaded || !s_speedtree_key.is_set())
+ 		return;
+ 	
+ 	for (u32 i=0; i<500; i++)
+ 	{
+ 		pcstr					tree_name = "bereza_mir/bereza_small";
+ 		if (i>5*33 && i<5*66)		tree_name = "eastern_white_pine"; // live_oak
+ 		else if (i>=5*66)		tree_name = "scots_pine_ironnick";
+ 		
+ 		resources::query_resource(
+ 			tree_name,
+ 			resources::speedtree_instance_class,
+ 			boost::bind(&game::speedtree_loaded, this, _1, r),
+ 			g_allocator
+ 		);
+ 	}
+ 	
+ 	is_speedtree_loaded = true;
+ }
 
 void game::query_render_scene( )
 {

@@ -52,7 +52,7 @@ struct speed_tree_allocator : public CAllocator
 {
 	virtual void* Alloc(size_t size)
 	{
-		void* block = MALLOC(size, "speed_tree_allocator");
+		void* block = (speed_tree_allocator*)malloc(size);
 		
 		num_speedtree_memory_used += size;
 		
@@ -64,7 +64,7 @@ struct speed_tree_allocator : public CAllocator
 	virtual void Free(void* block)
 	{
 		if (block)
-			FREE(block);
+			free(block);
 	}
 };
 

@@ -8,6 +8,7 @@
 #define XRAY_RENDER_GRASS_WORLD_H_INCLUDED
 
 #include <xray/resources_intrusive_base.h>
+#include <xray/resources_cook_classes.h>
 #include "grass_template.h"
 #include "grass_instance.h"
 
@@ -31,7 +32,7 @@ struct grass_world
 	
 							grass_world					();
 							~grass_world				();
-	void					initialize_test_grass		();
+	void					initialize_test_grass		(resources::query_result_for_cook& parent);
 	void					on_sub_resources_loaded		(xray::resources::queries_result& data);
 	void					add_template				(u32 const in_id, grass_render_model_ptr const& in_render_model);
 	void					remove_template				(u32 const in_id);

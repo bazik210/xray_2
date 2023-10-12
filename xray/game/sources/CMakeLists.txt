@@ -219,6 +219,9 @@ add_library(game STATIC
 					# key_binder
 					"${CMAKE_CURRENT_SOURCE_DIR}/key_binder.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/key_binder.h"
+					# help functions
+					"${CMAKE_CURRENT_SOURCE_DIR}/help_functions.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/help_functions.h"
 					# persistent
 					"${CMAKE_CURRENT_SOURCE_DIR}/game.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/game.h"

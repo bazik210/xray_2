@@ -434,14 +434,17 @@ void grass_world::render(renderer_context*			context,
 }
 
 
-void grass_world::initialize_test_grass()
+void grass_world::initialize_test_grass(resources::query_result_for_cook& parent)
 {
-	resources::request requests[]					=	{{"resources/models/nature/bush/grass_small_01.model/render", resources::grass_render_model_class},
+	resources::request requests[]					=	{
+														 {"resources/models/nature/bush/grass_small_01.model/render", resources::grass_render_model_class},
 														 {"resources/models/nature/bush/grass_small_02.model/render", resources::grass_render_model_class},
 														 {"resources/models/nature/bush/grass_small_03.model/render", resources::grass_render_model_class},
 														 {"resources/models/nature/bush/grass_small_04.model/render", resources::grass_render_model_class},
 														 {"resources/models/nature/bush/grass_small_05.model/render", resources::grass_render_model_class},
-														 {"resources/models/nature/bush/grass_small_06.model/render", resources::grass_render_model_class},};
+														 {"resources/models/nature/bush/grass_small_06.model/render", resources::grass_render_model_class},
+														};
+
 	query_resources									(
 		requests,
 		boost::bind(&grass_world::on_sub_resources_loaded, this, _1), 
