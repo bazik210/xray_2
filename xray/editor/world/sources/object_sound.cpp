@@ -206,6 +206,7 @@ void object_sound::save(configs::lua_config_value config_value)
 	super::save(config_value);
 
 	config_value["sound"] = unmanaged_string(m_wav_file_name).c_str();
+	config_value["game_object_type"] = "object_sound";
 }
 
 void object_sound::play_clicked		( button^ )

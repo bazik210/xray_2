@@ -134,7 +134,11 @@ public:
 	xray::collision::space_partitioning_tree&		get_spatial_tree		( ) const	{ return *m_spatial_tree; }
 	xray::network::world&	get_network_world		( ) const	{ return m_network_world; }
 
-	sound::sound_scene_ptr const& get_sound_scene() { return m_sound_scene; }
+	sound::sound_scene_ptr const& get_sound_scene	( ) 
+	
+	{ 
+		return m_sound_scene; 
+	}
 
 	inline	engine_user::engine&	engine			( ) const	{ return m_engine; }
 	xray::render::world&			render_world	( )			{ return m_render_world; }
@@ -271,7 +275,7 @@ private:
 	xray::ai::navigation::world*			m_ai_navigation_world;
 	xray::ai::world*						m_ai_world;
 	
-	xray::render::game::renderer&					m_renderer;
+	xray::render::game::renderer&			m_renderer;
 
 	game_world*								m_game_world;
 	main_menu*								m_main_menu;
@@ -310,6 +314,11 @@ private:
 
 	float3									m_movement_target;
 
+//public:
+//	std::vector<game_object_*>				m_postload;
+//	bool									m_sound_created;
+
+//private:
 	// for debug window
 	enum debug_window_enum					{ debug_window_none, debug_window_resources, debug_window_tasks };
 	debug_window_enum						m_debug_window_type;

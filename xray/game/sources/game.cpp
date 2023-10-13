@@ -369,6 +369,7 @@ void game::on_sound_scene_created	( resources::queries_result& data )
 
 	m_sound_world.get_logic_world_user().set_active_sound_scene( m_sound_scene, 1000, 0 );
 
+//	m_sound_created = true;
 }
 
 void game::enable( bool value )
@@ -497,7 +498,6 @@ void game::tick( u32 const current_frame_id )
 	//	game_test_run				= true;
 	//}
 
-
 	if( !get_active_scene() )
 	{
 		m_renderer.end_frame		( );
@@ -547,6 +547,15 @@ void game::tick( u32 const current_frame_id )
 		run_ai_tests				( current_frame_id );
 
 	m_ai_world->tick				( );
+
+//	if (m_sound_created) {
+//		std::for_each(m_postload.begin(), m_postload.end(), [&](game_object_* object)
+//			{
+//				m_postload.erase(std::remove(m_postload.begin(), m_postload.end(), object));
+//				auto volumetric = static_cast<object_volumetric_sound*>(object);
+//				volumetric->play();
+//			});
+//	}
 
 //#ifdef DEBUG
 //	if ( m_game_world->get_camera_director()->get_active_camera() )
@@ -693,7 +702,7 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 
 	switch_to_scene			( m_game_world );
 
-	m_sound_world.get_logic_world_user().set_active_sound_scene( m_sound_scene, 0, 0 );
+//	m_sound_world.get_logic_world_user().set_active_sound_scene( m_sound_scene, 0, 0 );
 }
 
 void game::unload( pcstr , bool destroying )

@@ -430,11 +430,6 @@ void game_world::tmp_actor_ready( actor* a )
 {
 	get_game().gload = false;
 
-//	std::for_each(volumetric_refs[0].begin(), volumetric_refs[0].end(), [&](object_volumetric_sound* snd)
-//		{
-//			snd->play();
-//		});
-
 	if (!m_actor_spawned)
 		return;
 

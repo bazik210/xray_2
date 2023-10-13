@@ -678,7 +678,7 @@ void sound_scene::calculate_3d_sound	( sound_voice& voice, panning_lut_ptr panni
 	distance							= math::max ( distance, min_dist );
 	distance							= math::min ( distance, max_dist );
 
-	float attenuation					= voice.get_sound_spl( )->get_loudness( distance );;
+	float attenuation					= voice.get_sound_spl( )->get_loudness( distance );
 	
 	//if( (min_dist + (distance - min_dist)) > 0.0f )
 	//	attenuation = min_dist / (min_dist + (distance - min_dist));

@@ -26,6 +26,9 @@ add_library(game STATIC
 					# track
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_track.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_track.h"
+					# sound
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_sound.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_sound.h"
 					# camera
 					"${CMAKE_CURRENT_SOURCE_DIR}/camera_behaviour.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/camera_behaviour.h"

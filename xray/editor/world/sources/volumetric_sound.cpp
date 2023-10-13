@@ -35,7 +35,8 @@ volumetric_sound::volumetric_sound( tool_sound^ tool, render::scene_ptr const& s
 	m_proxy							( NEW(sound::sound_instance_proxy_ptr)() ),
 	m_volumetric_config_file_name	( gcnew System::String("") ),
 	m_sound_file_name				( gcnew System::String("") ),
-	m_radius						( 50.0f )
+	m_radius						( 50.0f ),
+	m_config_radius					( false )
 {
 }
 
@@ -148,15 +149,15 @@ void volumetric_sound::play_looped_clicked	( button^ )
 				(
 					get_editor_world().sound_scene(),
 					get_editor_world().engine().get_sound_world().get_editor_world_user(),
-					*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 0.5f),
+					*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
 					m_radius
 				));
 			}
-		* m_proxy = ((*m_sound_emitter_ptr)->emit_point_sound
-		(
-			get_editor_world().sound_scene(),
-			get_editor_world().engine().get_sound_world().get_editor_world_user()
-		));
+		//* m_proxy = ((*m_sound_emitter_ptr)->emit_point_sound
+		//(
+		//	get_editor_world().sound_scene(),
+		//	get_editor_world().engine().get_sound_world().get_editor_world_user()
+		//));
 	}
 			(*m_proxy)->play(sound::looped);
 

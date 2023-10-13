@@ -18,6 +18,7 @@
 #include "object_values_storage.h"
 #include "object_composite.h"
 #include "object_volumetric_sound.h"
+#include "object_sound.h"
 #include "object_wire.h"
 #include "game_camera.h"
 #include "game_world.h" 
@@ -107,6 +108,11 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 	{
 		object_size = sizeof(object_volumetric_sound);
 	}else
+	if (strings::equal("object_sound", type))
+	{
+		object_size = sizeof(object_sound);
+	}
+	else
 	if( strings::equal("wire_set", type))
 	{
 		object_size = sizeof(object_wire);
@@ -214,6 +220,11 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 	{
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_volumetric_sound( m_game_world );
 	}else	
+	if (strings::equal("object_sound", type))
+	{
+		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_sound(m_game_world);
+	}
+	else
 	if( strings::equal("wire_set", type))
 	{
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_wire( m_game_world );
