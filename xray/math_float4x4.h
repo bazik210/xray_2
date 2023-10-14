@@ -7,6 +7,8 @@
 #ifndef XRAY_MATH_FLOAT4X4_H_INCLUDED
 #define XRAY_MATH_FLOAT4X4_H_INCLUDED
 
+//#include <array>
+
 namespace xray {
 namespace math {
 
@@ -63,6 +65,16 @@ public:
 
 			float3		get_angles						( axis_rotation_order const order ) const;
 			float3		get_angles_xyz					( ) const;
+
+			//access to union variables from cli
+			float3		get_i_xyz						( ) const;
+			float3		get_j_xyz						( ) const;
+			float3		get_k_xyz						( )	const;
+			float3		get_c_xyz						( ) const;
+
+//			std::array<float4_pod, 4> matrix { {i, j, k, c} };
+
+//			std::array<float4_pod, 4> get_matrix();
 
 	#ifndef MASTER_GOLD
 	inline	bool		valid							( ) const;

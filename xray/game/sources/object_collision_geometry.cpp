@@ -134,6 +134,8 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 		collision::primitive primitive;
 		primitive.type		= primitive_type;
 		primitive.data_		= scale;
+
+		m_transform = create_scale(scale) * create_rotation(rotation) * create_translation(position);
 		
 		float4x4 matrix		= create_rotation( rotation ) * create_translation( position ) * m_transform;
 

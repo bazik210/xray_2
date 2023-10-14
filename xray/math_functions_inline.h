@@ -23,7 +23,7 @@ inline typename T::type	dot_product	( T const& left, T const& right )
 template < typename T >
 inline T sqr			( T const& value )
 {
-	//R_ASSERT	( valid(value) );
+	R_ASSERT	( valid(value) );
 	return		( value * value );
 }
 
@@ -161,7 +161,7 @@ inline u64 max			( u64 left, u64 right )
 
 inline float abs		( float value )
 {
-	//R_ASSERT	( valid(value) );
+	R_ASSERT	( valid(value) );
 	u32			bit_value = (*(u32*)&value) & 0x7fffffff;
 	return		( *( float* )&bit_value );
 }
