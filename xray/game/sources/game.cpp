@@ -230,6 +230,9 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	query_npc_dictionary		( );
 
 	initialize_modules			( );
+	
+	m_ui_world->set_base_screen_size(m_engine.get_render_window_size());
+
 	register_cooks				( );
 
 	m_initialized				= true;

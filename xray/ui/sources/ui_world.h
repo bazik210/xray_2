@@ -47,6 +47,7 @@ public:
 	virtual void			on_device_reset			( );
 	void					client_to_screen_scaled ( float2 const& src, float2& dst );
 	void					align_pixel				( float2 const& src, float2& dst );
+	void					set_base_screen_size	( const float2& screen_size );
 	float2 const&			base_screen_size		( ) const								{ return m_base_screen_size; }
 	
 	
