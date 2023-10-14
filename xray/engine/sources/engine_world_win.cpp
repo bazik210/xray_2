@@ -64,11 +64,11 @@ static LRESULT APIENTRY message_processor	( HWND window_handle, UINT message_id,
 
 			if (active)
 			{
-				s_world->on_application_activate( );
+				if (s_world) s_world->on_application_activate( );
 				while (	ShowCursor( FALSE ) >= 0 );
 			}else
 			{
-				s_world->on_application_deactivate( );
+				if (s_world) s_world->on_application_deactivate( );
 				while (	ShowCursor( TRUE ) < 0 );
 			}
 			//if ( (w_param == WA_ACTIVE) || (w_param == WA_CLICKACTIVE) ) {
@@ -132,6 +132,12 @@ HWND new_window			( )
 			window_size_y	= window_sizes_y[i];
 			break;
 		}
+	}
+
+	if (s_fullscreen.is_set())
+	{
+		window_size_x = screen_size_x;
+		window_size_y = screen_size_y;
 	}
 
 	R_ASSERT				(window_size_x);
