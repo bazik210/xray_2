@@ -191,11 +191,12 @@ void edit_object_mesh::on_model_folder_fs_iterator_ready( vfs::vfs_locked_iterat
 bool edit_object_mesh::load_model_settings( )
 {
 	bool result = true;
-	configs::lua_config_value const& root = (*m_settings_cfg)->get_root();
+	configs::lua_config_value & root = (*m_settings_cfg)->get_root();
 
 	if(root.size())
 	{
-		configs::lua_config_value const& msettings = root["material_settings"];
+		auto mat_settings = root["material_settings"];
+		configs::lua_config_value & msettings = mat_settings;
 		for each ( edit_surface^ s in m_surfaces.Values )
 		{
 			unmanaged_string sg_name( s->name );
@@ -210,7 +211,8 @@ bool edit_object_mesh::load_model_settings( )
 			}
 		}
 
-		configs::lua_config_value const& lods_table = root["lod_hierrarchy"];
+		auto lod_hierrarchy = root["lod_hierrarchy"];
+		configs::lua_config_value & lods_table = lod_hierrarchy;
 		for each ( lod_descriptor^ l in m_lods )
 		{
 			unmanaged_string lod_name( l->name );
@@ -271,11 +273,13 @@ bool edit_object_mesh::save( )
 	for each ( edit_surface^ s in m_surfaces.Values )
 	{
 		unmanaged_string sg_name( s->name );
-		configs::lua_config_value current	= root["material_settings"][sg_name.c_str()];
+		auto mat_settings = root["material_settings"];
+		configs::lua_config_value current	= mat_settings[sg_name.c_str()];
 		s->save_material_settings			( current );
 	}	
 
-	configs::lua_config_value const& lods_table = root["lod_hierrarchy"];
+	auto lod_hierrarchy = root["lod_hierrarchy"];
+	configs::lua_config_value & lods_table = lod_hierrarchy;
 	for each ( lod_descriptor^ d in m_lods )
 	{
 		unmanaged_string lod_name( d->name );

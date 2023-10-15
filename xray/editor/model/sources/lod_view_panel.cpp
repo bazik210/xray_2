@@ -16,7 +16,6 @@ void lod_view_panel::in_constructor( )
 	hg->field->is_fixed_size	= true;
 	hg->is_nodes_moveable		= false;
 	hg->is_selectable			= true;
-
 }
 
 } // namespace model_editor

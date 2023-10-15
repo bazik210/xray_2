@@ -16,7 +16,7 @@ typedef xray::editor::wpf_controls::hypergraph::link_id	hypergraph_link;
 
 void lod_descriptor::load_settings( configs::lua_config_value const& v )
 {
-	configs::lua_config_value surfaces_list = v["surfaces"];
+	configs::lua_config_value surfaces_list = const_cast<configs::lua_config_value&>(v)["surfaces"];
 	configs::lua_config_iterator it = surfaces_list.begin();
 	configs::lua_config_iterator it_e = surfaces_list.end();
 
@@ -45,7 +45,8 @@ void lod_descriptor::save_settings( configs::lua_config_value& v )
 		edit_surface^ snext		= s->next_lod;
 		unmanaged_string sname	(s->name);
 
-		surfaces_list[sname.c_str()]	= (snext==nullptr) ? "" : unmanaged_string(snext->name).c_str();
+		configs::lua_config_value surface_name = surfaces_list[sname.c_str()];
+		surface_name = (snext == nullptr) ? "" : unmanaged_string(snext->name).c_str();
 	}
 }
 

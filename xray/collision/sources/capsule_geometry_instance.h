@@ -72,7 +72,14 @@ public:
 	virtual	void		enumerate_primitives( enumerate_primitives_callback& cb ) const;
 	virtual	void		enumerate_primitives( float4x4 const& transform, enumerate_primitives_callback& cb ) const;
 
-	XRAY_IMPLEMENT_COLLISION_GEOMETRY_VISIT_FUNCTIONS
+	virtual void accept	( geometry_double_dispatcher& dispatcher, geometry_instance const& instance ) const				{ instance.visit( dispatcher, *this );	}
+	virtual void visit	( geometry_double_dispatcher& dispatcher, box_geometry_instance const& node ) const				{ dispatcher.dispatch( node, *this );	}
+	virtual void visit	( geometry_double_dispatcher& dispatcher, sphere_geometry_instance const& node ) const			{ dispatcher.dispatch( node, *this );	}
+	virtual void visit	( geometry_double_dispatcher& dispatcher, cylinder_geometry_instance const& node ) const		{ dispatcher.dispatch( node, *this );	}
+	virtual void visit	( geometry_double_dispatcher& dispatcher, capsule_geometry_instance const& node ) const			{ dispatcher.dispatch( node, *this );	}
+	virtual void visit	( geometry_double_dispatcher& dispatcher, truncated_sphere_geometry_instance const& node ) const{ dispatcher.dispatch( node, *this );	}
+
+//	XRAY_IMPLEMENT_COLLISION_GEOMETRY_VISIT_FUNCTIONS
 private:
 	float4x4			m_matrix;
 	float4x4			m_inverted_matrix;
