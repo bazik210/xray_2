@@ -252,7 +252,7 @@ function(xr_setup_editors)
     )
 
     set_target_properties(WPFToolkit.Extended PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
+        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework"
     )
 
     set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
