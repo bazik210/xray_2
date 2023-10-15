@@ -105,7 +105,7 @@ void edit_object_mesh::fill_lod_view( )
 			n->Height			= 20;
 			d->m_hypergraph_node= n;
 		}
-		h						+= n->Height + 5;
+		h						+= n->Height + 10;
 		
 
 		for each ( edit_surface^ s in d->m_surfaces )
@@ -116,8 +116,8 @@ void edit_object_mesh::fill_lod_view( )
 			{
 				n							= hg->create_properties_node(s->name);
 				n->name						= s->name;
-				n->Width					= 100;
-				n->Height					= 40;
+				n->Width					= 135;
+				n->Height					= 20;
 				s->m_hypergraph_node		= n;
 			}
 
