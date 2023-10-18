@@ -39,20 +39,23 @@ inline bool unique_ptr< T >::operator !	( ) const
 	return			!m_object;
 }
 
+#if _MSC_VER < 1600
 // Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
-// template < typename T >
-// inline unique_ptr< T >::operator typename unique_ptr< T >::unspecified_bool_type ( ) const
-// {
-// 	if ( !m_object )
-// 		return		0;
-// 
-// 	return			&unique_ptr< T >::c_ptr;
-// }
+template < typename T >
+ inline unique_ptr< T >::operator typename unique_ptr< T >::unspecified_bool_type ( ) const
+ {
+ 	if ( !m_object )
+ 		return		0;
+ 
+ 	return			&unique_ptr< T >::c_ptr;
+ }
+#else
 template < typename T >
 inline unique_ptr< T >::operator bool   ( ) const
 {
 	return m_object == nullptr ? false : true;
 }
+#endif
 
 template < typename T >
 inline T* unique_ptr< T >::c_ptr		( ) const
