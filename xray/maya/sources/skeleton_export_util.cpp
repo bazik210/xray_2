@@ -150,7 +150,11 @@ MSyntax	skeleton_export_cmd::newSyntax()
 	using namespace xray::fs_new;
 	MStatus				stat;
 
-	MArgDatabase argData( syntax(), args );
+	if (!args.length()) {
+		return MS::kFailure;
+	}
+
+	MArgDatabase argData(newSyntax(), args );
 	MString				file_name = file_name_from_args( argData, &stat );
 	CHK_STAT_R			( stat );	
 	

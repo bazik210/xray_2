@@ -79,7 +79,7 @@
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:\Projects\xray\binaries\RelWithDebInfo\maya2019\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">maya2019.dir\RelWithDebInfo\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">xray.maya</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">xray_maya</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.mll</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkIncremental>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
@@ -284,7 +284,6 @@
       <PreprocessorDefinitions>%(PreprocessorDefinitions);DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="RelWithDebInfo";maya2019_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR=\"RelWithDebInfo\";maya2019_EXPORTS</PreprocessorDefinitions>
@@ -305,11 +304,11 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <ImportLibrary>F:/Projects/xray/binaries/RelWithDebInfo/xray.maya2019.lib</ImportLibrary>
+      <ImportLibrary>F:/Projects/xray/binaries/RelWithDebInfo/xray_maya2019.lib</ImportLibrary>
       <OptimizeReferences>true</OptimizeReferences>
-      <ProgramDataBaseFile>F:/Projects/xray/binaries/RelWithDebInfo/xray.maya2019.pdb</ProgramDataBaseFile>
+      <ProgramDataBaseFile>F:/Projects/xray/binaries/RelWithDebInfo/xray.maya.pdb</ProgramDataBaseFile>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>NotSet</SubSystem>
       <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
     </Link>
     <ProjectReference>

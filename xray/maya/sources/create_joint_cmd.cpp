@@ -105,7 +105,8 @@ MStatus	doLinkIt(MArgDatabase &argData, MDagModifier &dagMod, MFnTransform	&dagN
 MStatus	createJointCmd::doIt ( const MArgList &args )
 {
 	MStatus					stat;
-	MArgDatabase argData	(syntax(), args);
+
+	MArgDatabase argData	(newSyntax(), args);
 	
 	bool bEdit				= argData.isEdit();
 	MObject object;

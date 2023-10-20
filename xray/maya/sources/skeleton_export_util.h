@@ -14,10 +14,10 @@ public:
 
 public:
 
-	virtual MStatus			doIt		( const MArgList& );
+	virtual MStatus			doIt		( const MArgList& args );
 	virtual bool			isUndoable	() const			{return false;} 
 
-	static void*			creator		()					{return CRT_NEW( skeleton_export_cmd );}
+	static void*			creator		()					{return new skeleton_export_cmd;}
 	static MSyntax			newSyntax	();
 
 

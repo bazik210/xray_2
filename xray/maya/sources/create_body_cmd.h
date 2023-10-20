@@ -19,7 +19,7 @@ public:
  	virtual MStatus redoIt();
 	virtual bool isUndoable() const { return true; } 
 
-	static void *creator() { return CRT_NEW(createBodyCmd); }
+	static void *creator() { return new createBodyCmd; }
 	static MSyntax newSyntax();
 
 

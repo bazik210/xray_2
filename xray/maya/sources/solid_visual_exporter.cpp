@@ -91,7 +91,7 @@ MSyntax solid_visual_exporter::newSyntax()
 
 void* solid_visual_exporter::creator( )
 {
-	return CRT_NEW(solid_visual_exporter)();
+	return new solid_visual_exporter;
 }
 
 MStatus solid_visual_exporter::check_args( MArgDatabase& arg_data )
@@ -104,7 +104,7 @@ MStatus solid_visual_exporter::check_args( MArgDatabase& arg_data )
 		error_str				+= ") not specified";
 
 		display_warning	(error_str);
-		return					MStatus::kFailure;
+		return					MS::kFailure;
 	}
 
 	MStatus result				= arg_data.getFlagArgument( file_name_flag_l, 0, m_file_name );
@@ -118,21 +118,26 @@ MStatus solid_visual_exporter::check_args( MArgDatabase& arg_data )
 		error_str				+= ") not specified";
 
 		display_warning	(error_str);
-		return					MStatus::kFailure;
+		return					MS::kFailure;
 	}
-	return MStatus::kSuccess;
+
+	return MS::kSuccess;
 }
 
-MStatus solid_visual_exporter::doIt( const MArgList& arglist)
+MStatus solid_visual_exporter::doIt( const MArgList& args)
 {
 	using namespace xray::fs_new;
 
 	g_uniq_surface_counter		= 0;
 	MStatus						result;
 
-	MArgDatabase arg_data		(syntax(), arglist, &result);
-	CHK_STAT_R					(result);
+	if (!args.length()) {
+		return MS::kFailure;
+	}
 	
+	MArgDatabase arg_data(newSyntax(), args, &result);
+	CHK_STAT_R(result);
+
 	result						= check_args( arg_data );
 	CHK_STAT_R					(result);
 	remove_file_or_directory	( m_file_name );
@@ -182,8 +187,9 @@ MStatus solid_visual_exporter::doIt( const MArgList& arglist)
 
 	u16 max_verts_count = 65500;
 
-	for(;;)
-	{
+//	int i = 0;
+//	for(i=0;i<3;i++)
+//	{
 	solid_visual_collector collector	( arg_data, result, max_verts_count );
 	CHK_STAT_R							( result );
 	collector.set_locator_matrix		( locator_matrix );
@@ -241,7 +247,7 @@ MStatus solid_visual_exporter::doIt( const MArgList& arglist)
 	if(prepare_result==MStatus::kInsufficientMemory)
 	{
 		max_verts_count	-=500;
-		continue;
+		//continue;
 	}
 
 	collector.dump_statistic		( true );
@@ -276,11 +282,10 @@ MStatus solid_visual_exporter::doIt( const MArgList& arglist)
 		if(prepare_result==MStatus::kInsufficientMemory)
 		{
 			max_verts_count	-=500;
-			continue;
+			//continue;
 		}
 
 	}
-
 
 	fs_new::synchronous_device_interface& fs_device	=	xray::resources::get_synchronous_device();
 
@@ -398,10 +403,10 @@ MStatus solid_visual_exporter::doIt( const MArgList& arglist)
 		remove_file_or_directory	( temp_path );
 	 
 	display_info				( "Export " + m_file_name + " successful!\n" );
-	break;
-	}
+//	break;
+//	}
 
-	return						MStatus::kSuccess;
+	return						MS::kSuccess;
 }
 
 } //namespace maya

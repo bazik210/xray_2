@@ -16,7 +16,7 @@ public:
 	static const MString			Name;
 
 public:
-	virtual MStatus			doIt		( const MArgList& );
+	virtual MStatus			doIt		( const MArgList& args );
 	virtual bool			isUndoable	( ) const		{ return false; } 
 
 	static void*			creator		( );

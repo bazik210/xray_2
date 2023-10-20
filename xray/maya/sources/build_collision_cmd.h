@@ -17,7 +17,7 @@ public:
 	virtual MStatus			doIt		(const MArgList&);
 	virtual bool			isUndoable	() const			{return false;} 
 
-	static void*			creator		()					{return CRT_NEW(build_collision_cmd);}
+	static void*			creator		()					{return new(build_collision_cmd);}
 	static MSyntax			newSyntax	();
 private:
 			MStatus			build		(MDagPath const& path, bool b_reciursive, MString const& parent_name);

@@ -26,7 +26,7 @@ Comments:
   
 */
 
-#include "../pch.h"
+#include "pch.h"
 #include "nvMeshMender.h"
 
 namespace
