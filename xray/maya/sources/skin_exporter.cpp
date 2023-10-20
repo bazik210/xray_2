@@ -93,7 +93,7 @@ MStatus skinned_visual_exporter::doIt( const MArgList& args )
 		return MS::kFailure;
 	}
 
-	MArgDatabase arg_data		( newSyntax(), args, &result );
+	MArgDatabase arg_data		( syntax(), args, &result );
 	CHK_STAT_R					( result );
 	
 	result						= check_args( arg_data );

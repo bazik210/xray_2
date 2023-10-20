@@ -152,7 +152,7 @@ MStatus	xray_path_cmd::doIt( const MArgList& args)
 //		}
 //	}
 //	
-//	item* result			= CRT_NEW(item);
+//	item* result			= new(item);
 //	g_cont.push_back		( result );
 //	result->m_set_name		= setFn.name();
 //	result->m_initial_set	= set_object;

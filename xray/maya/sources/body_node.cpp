@@ -164,7 +164,7 @@ MBoundingBox body_node::boundingBox() const
 
 void* body_node::creator()
 {
-	return CRT_NEW(body_node);
+	return new(body_node);
 }
 
 MStatus body_node::initialize()

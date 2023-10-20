@@ -154,7 +154,7 @@ MSyntax	skeleton_export_cmd::newSyntax()
 		return MS::kFailure;
 	}
 
-	MArgDatabase argData(newSyntax(), args );
+	MArgDatabase argData(syntax(), args );
 	MString				file_name = file_name_from_args( argData, &stat );
 	CHK_STAT_R			( stat );	
 	

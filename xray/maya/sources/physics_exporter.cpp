@@ -23,7 +23,7 @@ MStatus export_transform(lua_config_value table, MFnTransform& node_tr, const MM
 
 void* physics_exporter::creator()
 {
-	return CRT_NEW(physics_exporter)();
+	return new(physics_exporter)();
 }
 
 

@@ -74,6 +74,16 @@ MStatus save_visuals( solid_visual_collector& collector,
 }
 
 
+struct mesh_descr{
+	pcstr visual;
+	pcstr collision;
+};
+
+mesh_descr input_meshes [] = {
+	{"vis", "col" },
+	{NULL, NULL},
+};
+
 MSyntax solid_visual_exporter::newSyntax()
 {
     MSyntax			syntax;
@@ -135,12 +145,14 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 		return MS::kFailure;
 	}
 	
-	MArgDatabase arg_data(newSyntax(), args, &result);
+	MArgDatabase arg_data(syntax(), args, &result);
 	CHK_STAT_R(result);
-
+	
 	result						= check_args( arg_data );
 	CHK_STAT_R					(result);
 	remove_file_or_directory	( m_file_name );
+
+	MStringArray				file_list;
 
 	MString						temp_path;
 	if( !arg_data.isFlagSet( no_out_to_db_flag ) )
@@ -168,8 +180,11 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 	MString last_name			= root_dag_path.partialPathName( &result );
 	CHK_STAT_R					(result);
 
-	MString	visual_name			= root_name + "|vis";
-	result						= get_path_by_name( visual_name, dag_path, false );
+	mesh_descr& desc = input_meshes[0];
+
+	MString	visual_name			= root_name + "|" + desc.visual;
+						
+	result						= get_path_by_name( visual_name, dag_path, false );// assert having LOD0 
 
 	if( result.error() )
 	{
@@ -187,71 +202,71 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 
 	u16 max_verts_count = 65500;
 
-//	int i = 0;
-//	for(i=0;i<3;i++)
-//	{
-	solid_visual_collector collector	( arg_data, result, max_verts_count );
-	CHK_STAT_R							( result );
-	collector.set_locator_matrix		( locator_matrix );
-	result								= collector.extract_render_static_geometry_from_path( dag_path  );
+	for(;;)
+	{
+		solid_visual_collector collector	( arg_data, result, max_verts_count );
+		CHK_STAT_R							( result );
+		collector.set_locator_matrix		( locator_matrix );
+		result								= collector.extract_render_static_geometry_from_path( dag_path  );
 		
-	if( result.error() )
-	{
-		display_error	( "Invalid geometry detected in " + visual_name );
-		display_error	( "Export " + m_file_name + " FAILED!\n" );
-		return MStatus::kFailure;
-	}
-	
-	u32 render_surfaces_count			= collector.get_surfaces_count( );
-	if(render_surfaces_count==0)
-	{
-		display_error	( "no render surfaces collected from " + visual_name );
-		display_error	( "Export " + m_file_name + " FAILED!\n" );
-		return			MStatus::kFailure;
-	}
-
-	MString	collision_name		= root_name + "|col";
-	result						= get_path_by_name( collision_name, dag_path, false );
-
-	if( !result.error() )
-	{
-		result					= collector.extract_collision_geometry_from_path( dag_path );
-		CHK_STAT_R				(result);
-
-		if(collector.get_collision_surface().vertices_count()==0)
+		if( result.error() )
 		{
-			display_error("no collision vertices collected from " + visual_name );
+			display_error	( "Invalid geometry detected in " + visual_name );
 			display_error	( "Export " + m_file_name + " FAILED!\n" );
 			return MStatus::kFailure;
 		}
-	}else
-	{
-		result				= collector.build_collision_geometry_by_render( );
-		CHK_STAT_R			(result);
-		if(collector.get_collision_surface().vertices_count()==0)
+		
+		u32 render_surfaces_count			= collector.get_surfaces_count( );
+		if(render_surfaces_count==0)
 		{
-			display_error	("no collision vertices collected from " + collision_name );
+			display_error	( "no render surfaces collected from " + visual_name );
 			display_error	( "Export " + m_file_name + " FAILED!\n" );
-
 			return			MStatus::kFailure;
 		}
-	}
 
-	MString locators_path		= root_name  + "|locators";
-	result						= collector.extract_locators( locators_path, locator_matrix );
-	CHK_STAT_R					( result );
+		MString	collision_name		= root_name + "|" + desc.collision;
+		result						= get_path_by_name( collision_name, dag_path, false );
 
-	MString file_name			= temp_path;
+		if( !result.error() )
+		{
+			result					= collector.extract_collision_geometry_from_path( dag_path );
+			CHK_STAT_R				(result);
 
-	MStatus prepare_result = collector.prepare_surfaces		( );
-	if(prepare_result==MStatus::kInsufficientMemory)
-	{
-		max_verts_count	-=500;
-		//continue;
-	}
+			if(collector.get_collision_surface().vertices_count()==0)
+			{
+				display_error("no collision vertices collected from " + visual_name );
+				display_error	( "Export " + m_file_name + " FAILED!\n" );
+				return MStatus::kFailure;
+			}
+		}else
+		{
+			result				= collector.build_collision_geometry_by_render( );
+			CHK_STAT_R			(result);
+			if(collector.get_collision_surface().vertices_count()==0)
+			{
+				display_error	("no collision vertices collected from " + collision_name );
+				display_error	( "Export " + m_file_name + " FAILED!\n" );
 
-	collector.dump_statistic		( true );
+				return			MStatus::kFailure;
+			}
+		}
 
+		MString locators_path		= root_name  + "|locators";
+		result						= collector.extract_locators( locators_path, locator_matrix );
+		CHK_STAT_R					( result );
+
+		MString file_name			= temp_path;
+
+		MStatus prepare_result = collector.prepare_surfaces		( );
+		if(prepare_result==MStatus::kInsufficientMemory)
+		{
+			max_verts_count	-=500;
+			continue;
+		}
+
+		collector.dump_statistic		( true );
+
+	
 	solid_visual_collector l1_collector	( arg_data, result, max_verts_count );
 	MString	l1_visual_name			= root_name + "|vis1";
 	MDagPath						l1_dag_path;
@@ -287,124 +302,163 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 
 	}
 
-	fs_new::synchronous_device_interface& fs_device	=	xray::resources::get_synchronous_device();
-
-	MString fn					= file_name;
-	{
-		// write geometry and material
-		fn							+= "/render";
-
-		//write render model properties
-		configs::lua_config_ptr	config	= configs::create_lua_config();
-		result						= collector.write_properties( config->get_root());
-		CHK_STAT_R					( result );
-
-		create_folder_r		( fs_device, fn.asChar(), true );
-		
-		MString fnp					= fn;
-		fnp							+= "/export_properties";
-		config->save_as				( fnp.asChar(), configs::target_default );
-	}
-
-	result						= save_visuals( collector, fn, fs_device );
-	CHK_STAT_R					(result);
-
-	if(l1_collector.get_surfaces_count()!=0)
-	{
-		MString l1_fn				= file_name;
-		l1_fn						+= "/render/lod1";
-		result = save_visuals		( l1_collector, l1_fn, fs_device );
-		CHK_STAT_R					(result);
-	}
-
-	{
-		//write collision
-		memory::writer w( &g_allocator );
-		result						= collector.get_collision_surface().save_indices( w ) ? MStatus::kSuccess : MStatus::kFailure;
-		CHK_STAT_R					(result);
+		fs_new::synchronous_device_interface& fs_device	=	xray::resources::get_synchronous_device();
 
 		MString fn					= file_name;
-		fn							+= "/collision/indices";
+		{
+			// write geometry and material
+			fn							+= "/render";
 
-		fs_new::create_folder_r		( fs_device, fn.asChar(), false );
+			//write render model properties
+			configs::lua_config_ptr	config	= configs::create_lua_config();
+			result						= collector.write_properties( config->get_root());
+			CHK_STAT_R					( result );
 
-		w.save_to					( fn.asChar() );
-		w.clear						( );
+			create_folder_r		( fs_device, fn.asChar(), true );
+			
+			MString fnp					= fn;
+			fnp							+= "/export_properties";
+			config->save_as				( fnp.asChar(), configs::target_default );
+			file_list.append			( fnp );
+		}
 
-		result						= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
-		CHK_STAT_R					(result);
+		for( u32 idx = 0; idx < render_surfaces_count; ++idx )
+		{
+			surface const* s			= collector.get_surface( idx );
+			if(s->empty())
+				continue;
 
-		fn							= file_name;
-		fn							+= "/collision/vertices";
+			MString fns					= fn;
+			fns							+= "/";
+			fns							+= s->save_name();
+			MString fnsv;
 
-		create_folder_r	( device, fn.asChar(), false );
+			//write properties
+			configs::lua_config_ptr	config	= configs::create_lua_config();
+			result						= s->save_properties( config->get_root() );
+			CHK_STAT_R					( result );
+			
+			create_folder_r		( fs_device, fns.asChar(), true );
 
-		w.save_to					( fn.asChar() );
-		w.clear					( );
+			fnsv						= fns;
+			fnsv						+= "/export_properties";
+			config->save_as				( fnsv.asChar(), configs::target_default );
+			file_list.append			( fnsv );
+
+			//write vertices
+			memory::writer wv			( &g_allocator );
+			result						= s->save_vertices( wv );
+			CHK_STAT_R					(result);
+
+			fnsv						= fns;
+			fnsv						+= "/vertices";
+			wv.save_to					( fnsv.asChar() );
+			file_list.append			( fnsv );
+
+			//write indices
+			memory::writer wi			( &g_allocator );
+			result						= s->save_indices( wi );
+			CHK_STAT_R					(result);
+
+			fnsv						= fns;
+			fnsv						+= "/indices";
+			wi.save_to					( fnsv.asChar() );
+			file_list.append			( fnsv );
+
+		}
+
+		{
+			//write collision
+			memory::writer w( &g_allocator );
+			result						= collector.get_collision_surface().save_indices( w ) ? MStatus::kSuccess : MStatus::kFailure;
+			CHK_STAT_R					(result);
+
+			MString fn					= file_name;
+			fn							+= "/collision/indices";
+
+			fs_new::create_folder_r		( fs_device, fn.asChar(), false );
+
+			w.save_to					( fn.asChar() );
+			file_list.append			( fn );
+			w.clear						( );
+
+			result						= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
+			CHK_STAT_R					(result);
+
+			fn							= file_name;
+			fn							+= "/collision/vertices";
+
+			create_folder_r	( device, fn.asChar(), false );
+
+			w.save_to					( fn.asChar() );
+			file_list.append			( fn );
+			w.clear					( );
+		}
+
+		// write high-quality collision geometry for editor
+		if(!collector.is_collision_from_geometry())
+			collector.build_collision_geometry_by_render();
+
+		{
+			memory::writer w( &g_allocator );
+			result					= collector.get_collision_surface().save_indices( w ) ? MStatus::kSuccess : MStatus::kFailure;
+			CHK_STAT_R				(result);
+
+			MString fn				= file_name;
+			fn						+= "/hq_collision/indices";
+
+			fs_new::create_folder_r		( device, fn.asChar(), false );
+
+			w.save_to				( fn.asChar() );
+			file_list.append		( fn );
+			w.clear					( );
+
+			result					= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
+			CHK_STAT_R				(result);
+
+			fn						= file_name;
+			fn						+= "/hq_collision/vertices";
+			
+			fs_new::create_folder_r		( device, fn.asChar(), false );
+
+			w.save_to				( fn.asChar() );
+			file_list.append		( fn );
+			w.clear					( );
+
+		}
+
+		bool is_db_created = false;
+
+		if( !arg_data.isFlagSet( no_out_to_db_flag ) )
+		{
+
+			MString db_file_name		= m_file_name;
+			create_folder_r				( fs_device, db_file_name.asChar(), false );
+
+			vfs::pack_archive_args	pack_args	(fs_device, NULL, (logging::log_flags_enum)0);
+			pack_args.flags				= (vfs::save_flags_enum)
+				(vfs::save_flag_forbid_folder_links | vfs::save_flag_forbid_empty_files);
+
+			pack_args.sources			= native_path_string::convert(temp_path.asChar());
+			pack_args.allocator			= & g_allocator;
+			pack_args.target_db			= native_path_string::convert(db_file_name.asChar());
+			pack_args.target_fat		= native_path_string::convert(db_file_name.asChar());
+			pack_args.fat_align			= 512;
+			pack_args.platform			= vfs::archive_platform_pc;
+
+			bool const result			= vfs::pack_archive(pack_args);
+			R_ASSERT					(result);
+	
+
+			is_db_created				= true;
+		}
+
+		if(is_db_created)
+			remove_file_or_directory	( temp_path );
+		 
+		display_info				( "Export " + m_file_name + " successful!\n" );
+		break;
 	}
-
-	// write high-quality collision geometry for editor
-	if(!collector.is_collision_from_geometry())
-		collector.build_collision_geometry_by_render();
-
-	{
-		memory::writer w( &g_allocator );
-		result					= collector.get_collision_surface().save_indices( w ) ? MStatus::kSuccess : MStatus::kFailure;
-		CHK_STAT_R				(result);
-
-		MString fn				= file_name;
-		fn						+= "/hq_collision/indices";
-
-		fs_new::create_folder_r		( device, fn.asChar(), false );
-
-		w.save_to				( fn.asChar() );
-		w.clear					( );
-
-		result					= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
-		CHK_STAT_R				(result);
-
-		fn						= file_name;
-		fn						+= "/hq_collision/vertices";
-		
-		fs_new::create_folder_r		( device, fn.asChar(), false );
-
-		w.save_to				( fn.asChar() );
-		w.clear					( );
-
-	}
-
-	bool is_db_created = false;
-
-	if( !arg_data.isFlagSet( no_out_to_db_flag ) )
-	{
-
-		MString db_file_name		= m_file_name;
-		create_folder_r				( fs_device, db_file_name.asChar(), false );
-
-		vfs::pack_archive_args	pack_args	(fs_device, NULL, (logging::log_flags_enum)0);
-		pack_args.flags				= (vfs::save_flags_enum)
-			(vfs::save_flag_forbid_folder_links | vfs::save_flag_forbid_empty_files);
-
-		pack_args.sources			= native_path_string::convert(temp_path.asChar());
-		pack_args.allocator			= & g_allocator;
-		pack_args.target_db			= native_path_string::convert(db_file_name.asChar());
-		pack_args.target_fat		= native_path_string::convert(db_file_name.asChar());
-		pack_args.fat_align			= 512;
-		pack_args.platform			= vfs::archive_platform_pc;
-
-		bool const result			= vfs::pack_archive(pack_args);
-		R_ASSERT					(result);
-
-
-		is_db_created				= true;
-	}
-
-	if(is_db_created)
-		remove_file_or_directory	( temp_path );
-	 
-	display_info				( "Export " + m_file_name + " successful!\n" );
-//	break;
-//	}
 
 	return						MS::kSuccess;
 }

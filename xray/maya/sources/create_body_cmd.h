@@ -32,7 +32,7 @@ private:
 //class create_body_cmd  : public MPxCommand 
 //{
 //public:
-//static void *creator() { return CRT_NEW(create_body_cmd); }
+//static void *creator() { return new(create_body_cmd); }
 //static MSyntax newSyntax();
 //
 // 	

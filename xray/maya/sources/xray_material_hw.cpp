@@ -17,7 +17,7 @@ hwPhongShaderBehavior::~hwPhongShaderBehavior()
 
 void *hwPhongShaderBehavior::creator()
 {
-	return CRT_NEW(hwPhongShaderBehavior)();
+	return new(hwPhongShaderBehavior)();
 }
 
 bool hwPhongShaderBehavior::shouldBeUsedFor(
@@ -439,7 +439,7 @@ void hwPhongShader::detachSceneCallbacks()
 
 void * hwPhongShader::creator()
 {
-    return CRT_NEW(hwPhongShader)();
+    return new(hwPhongShader)();
 }
 
 MStatus hwPhongShader::initialize()

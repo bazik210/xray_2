@@ -165,7 +165,7 @@ MStatus solid_visual_collector::extract_render_static_geometry( MDagPath& fnMesh
 			surfaces_indices_all[si]	= surf_idx;
 		}else
 		{
-			render_static_surface*	s	= NEW( render_static_surface )( m_max_verts_count );
+			render_static_surface*	s	= new( render_static_surface )( m_max_verts_count );
 			s->m_sg_name				= sg_name;
 			s->m_mesh_dag_path			= fnMeshDagPath;
 			m_render_static_surfaces.push_back( s );

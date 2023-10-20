@@ -106,7 +106,7 @@ MStatus	createJointCmd::doIt ( const MArgList &args )
 {
 	MStatus					stat;
 
-	MArgDatabase argData	(newSyntax(), args);
+	MArgDatabase argData	(syntax(), args);
 	
 	bool bEdit				= argData.isEdit();
 	MObject object;

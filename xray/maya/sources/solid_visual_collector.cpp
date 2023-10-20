@@ -32,7 +32,7 @@ void solid_visual_collector::clear()
 	for( ;it!=it_e; ++it)
 	{
 		render_static_surface* s	= *it;
-		DELETE				( s );
+		delete				( s );
 	}
 	m_render_static_surfaces.clear		( );
 	m_collision_surface.clear	( );

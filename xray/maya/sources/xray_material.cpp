@@ -57,7 +57,7 @@ xray_material_node::~xray_material_node()
 
 void * xray_material_node::creator()
 {
-	return CRT_NEW(xray_material_node)();
+	return new(xray_material_node)();
 }
 
 MStatus xray_material_node::initialize()

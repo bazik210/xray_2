@@ -189,7 +189,7 @@ MBoundingBox joint_node::boundingBox( ) const
 
 void* joint_node::creator( )
 {
-	return  CRT_NEW(joint_node); 
+	return  new(joint_node); 
 }
 
 
