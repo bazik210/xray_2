@@ -37,7 +37,7 @@ MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lu
 
 	//if( all_claster_joints.hasItem( my_path, my_obj,  &stat ) )
 	//if( ik_anim_joint_object.hasFn( MFn::kJoint ) )
-	if( ik_anim_joint_object.hasFn( MFn::kJoint ) && all_claster_joints.hasItem( my_path, ik_anim_joint_object,  &stat ) )
+	if( ik_anim_joint_object.hasFn( MFn::kJoint ) /* && all_claster_joints.hasItem(my_path, ik_anim_joint_object, &stat)*/)
 	{
 		CHK_STAT_R		( stat );
 		my_cfg			= cfg[ name ];
