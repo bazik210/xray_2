@@ -20,6 +20,7 @@ def replaceAll_Config(maya_type):
     replaceAll(src_dir + maya_type + prj_name, r"binaries\MinSizeRel\</OutDir>", r"binaries\MinSizeRel"'\\'+ maya_type + bins_out)
     replaceAll(src_dir + maya_type + prj_name, r"binaries\RelWithDebInfo\</OutDir>", r"binaries\RelWithDebInfo"'\\'+ maya_type + bins_out)
     replaceAll(src_dir + maya_type + prj_name, r"<SubSystem>Console</SubSystem>", r"<SubSystem>NotSet</SubSystem>")
+    replaceAll(src_dir + maya_type + prj_name, r"xray_"+maya_type+"</TargetName>", r"xray_maya</TargetName>")
 
 
 replaceAll_Config("maya2011")
