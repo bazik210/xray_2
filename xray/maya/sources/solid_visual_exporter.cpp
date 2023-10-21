@@ -147,12 +147,10 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 	
 	MArgDatabase arg_data(syntax(), args, &result);
 	CHK_STAT_R(result);
-	
+
 	result						= check_args( arg_data );
 	CHK_STAT_R					(result);
 	remove_file_or_directory	( m_file_name );
-
-	MStringArray				file_list;
 
 	MString						temp_path;
 	if( !arg_data.isFlagSet( no_out_to_db_flag ) )
@@ -182,9 +180,8 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 
 	mesh_descr& desc = input_meshes[0];
 
-	MString	visual_name			= root_name + "|" + desc.visual;
-						
-	result						= get_path_by_name( visual_name, dag_path, false );// assert having LOD0 
+	MString	visual_name			= root_name + "|" + desc.visual;		
+	result						= get_path_by_name( visual_name, dag_path, false );
 
 	if( result.error() )
 	{
@@ -266,7 +263,6 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 
 		collector.dump_statistic		( true );
 
-	
 	solid_visual_collector l1_collector	( arg_data, result, max_verts_count );
 	MString	l1_visual_name			= root_name + "|vis1";
 	MDagPath						l1_dag_path;
@@ -319,52 +315,17 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			MString fnp					= fn;
 			fnp							+= "/export_properties";
 			config->save_as				( fnp.asChar(), configs::target_default );
-			file_list.append			( fnp );
 		}
 
-		for( u32 idx = 0; idx < render_surfaces_count; ++idx )
-		{
-			surface const* s			= collector.get_surface( idx );
-			if(s->empty())
-				continue;
-
-			MString fns					= fn;
-			fns							+= "/";
-			fns							+= s->save_name();
-			MString fnsv;
-
-			//write properties
-			configs::lua_config_ptr	config	= configs::create_lua_config();
-			result						= s->save_properties( config->get_root() );
-			CHK_STAT_R					( result );
-			
-			create_folder_r		( fs_device, fns.asChar(), true );
-
-			fnsv						= fns;
-			fnsv						+= "/export_properties";
-			config->save_as				( fnsv.asChar(), configs::target_default );
-			file_list.append			( fnsv );
-
-			//write vertices
-			memory::writer wv			( &g_allocator );
-			result						= s->save_vertices( wv );
+	result						= save_visuals( collector, fn, fs_device );
 			CHK_STAT_R					(result);
 
-			fnsv						= fns;
-			fnsv						+= "/vertices";
-			wv.save_to					( fnsv.asChar() );
-			file_list.append			( fnsv );
-
-			//write indices
-			memory::writer wi			( &g_allocator );
-			result						= s->save_indices( wi );
+	if(l1_collector.get_surfaces_count()!=0)
+	{
+		MString l1_fn				= file_name;
+		l1_fn						+= "/render/lod1";
+		result = save_visuals		( l1_collector, l1_fn, fs_device );
 			CHK_STAT_R					(result);
-
-			fnsv						= fns;
-			fnsv						+= "/indices";
-			wi.save_to					( fnsv.asChar() );
-			file_list.append			( fnsv );
-
 		}
 
 		{
@@ -379,7 +340,6 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			fs_new::create_folder_r		( fs_device, fn.asChar(), false );
 
 			w.save_to					( fn.asChar() );
-			file_list.append			( fn );
 			w.clear						( );
 
 			result						= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
@@ -391,7 +351,6 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			create_folder_r	( device, fn.asChar(), false );
 
 			w.save_to					( fn.asChar() );
-			file_list.append			( fn );
 			w.clear					( );
 		}
 
@@ -410,7 +369,6 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			fs_new::create_folder_r		( device, fn.asChar(), false );
 
 			w.save_to				( fn.asChar() );
-			file_list.append		( fn );
 			w.clear					( );
 
 			result					= collector.get_collision_surface().save_vertices( w ) ? MStatus::kSuccess : MStatus::kFailure;
@@ -422,7 +380,6 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			fs_new::create_folder_r		( device, fn.asChar(), false );
 
 			w.save_to				( fn.asChar() );
-			file_list.append		( fn );
 			w.clear					( );
 
 		}
@@ -448,7 +405,7 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 
 			bool const result			= vfs::pack_archive(pack_args);
 			R_ASSERT					(result);
-	
+
 
 			is_db_created				= true;
 		}

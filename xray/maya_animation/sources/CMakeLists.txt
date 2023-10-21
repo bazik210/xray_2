@@ -92,4 +92,6 @@ target_include_directories(maya_animation PRIVATE
 	${SOLUTION_DIR_INCLUDE_PATH}/maya_animation/sources
 )
 
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+
 set_target_properties(maya_animation PROPERTIES FOLDER "engine/plugins")

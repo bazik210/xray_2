@@ -281,7 +281,7 @@
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level4</WarningLevel>
       <WholeProgramOptimization>true</WholeProgramOptimization>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="RelWithDebInfo";maya2023_EXPORTS</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="RelWithDebInfo";maya2023_EXPORTS</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
