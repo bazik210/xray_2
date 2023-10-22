@@ -37,7 +37,18 @@ MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lu
 
 	//if( all_claster_joints.hasItem( my_path, my_obj,  &stat ) )
 	//if( ik_anim_joint_object.hasFn( MFn::kJoint ) )
-	if( ik_anim_joint_object.hasFn( MFn::kJoint ) /* && all_claster_joints.hasItem(my_path, ik_anim_joint_object, &stat)*/)
+
+	MStringArray list;
+	all_claster_joints.getSelectionStrings(list);
+	std::string joints = "";
+	for (int i = 0; i < list.length(); i++) {
+		joints += list[i].asChar();
+		joints += " ";
+	}
+	//MString lst = "We got list: "; lst += joints.c_str();
+	//display_info(lst);
+
+	if( ik_anim_joint_object.hasFn( MFn::kJoint ) && joints.find(name) != std::string::npos /*all_claster_joints.hasItem(my_path, ik_anim_joint_object, &stat)*/)
 	{
 		CHK_STAT_R		( stat );
 		my_cfg			= cfg[ name ];
