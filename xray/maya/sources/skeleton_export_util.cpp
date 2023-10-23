@@ -8,6 +8,7 @@
 #include "skeleton_export_util.h"
 #include "anim_export_util.h"
 #include "export_utils.h"
+#include "export_defines.h"
 
 #include <xray/fs/device_utils.h>
 
@@ -16,7 +17,7 @@ const MString skeleton_export_cmd::Name	( "xray_skeleton_export" );
 
 static pcstr extension = "skeleton";
 
-MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lua_config_value &cfg, const  MSelectionList &all_claster_joints )
+MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lua_config_value &cfg, const  MSelectionList &all_claster_joints, MArgDatabase& argData )
 {
 	MStatus				stat;
 	
@@ -40,15 +41,21 @@ MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lu
 
 	MStringArray list;
 	all_claster_joints.getSelectionStrings(list);
-	std::string joints = "";
+
+	const char* sp = ""; const char* sp2 = " ";
+	if (!argData.isFlagSet(raw_name_flag)) {
+		sp = "/"; sp2 = sp;
+	}
+
+	std::string joints = sp;
 	for (int i = 0; i < list.length(); i++) {
 		joints += list[i].asChar();
-		joints += "/";
+		joints += sp2;
 	}
-	//MString lst = "We got list: "; list += joints.c_str();
+	//MString lst = "We got bones list: "; list += joints.c_str();
 	//display_info(list);
 
-	auto str = (std::string)name + "/";
+	auto str = sp + (std::string)name + sp;
 	if( ik_anim_joint_object.hasFn( MFn::kJoint ) && joints.find(str) != std::string::npos /*all_claster_joints.hasItem(my_path, ik_anim_joint_object, &stat)*/)
 	{
 		CHK_STAT_R		( stat );
@@ -68,13 +75,13 @@ MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lu
 		//MFnIkJoint ik_anim_joint_child( obj, &stat );CHK_STAT_R( stat );
 		
 		xray::configs::lua_config_value temp_cfg = my_cfg;
-		CHK_STAT_R( export_skeleton_node( ik_anim_joint_child, temp_cfg, all_claster_joints ) );
+		CHK_STAT_R( export_skeleton_node( ik_anim_joint_child, temp_cfg, all_claster_joints, argData) );
 	}
 	return stat;
 
 }
 
-MStatus		export_skeleton( MSelectionList &all_claster_joints, xray::configs::lua_config_value &cfg  )
+MStatus		export_skeleton( MSelectionList &all_claster_joints, xray::configs::lua_config_value &cfg, MArgDatabase& argData )
 {
 	
 	MStatus stat;
@@ -105,17 +112,15 @@ MStatus		export_skeleton( MSelectionList &all_claster_joints, xray::configs::lua
 	object_movenent_cfg.create_table();
 
 	//export_skeleton_node( ik_anim_joint_root, object_movenent_cfg, all_claster_joints );
-	export_skeleton_node( anim_joint_object_root, object_movenent_cfg, all_claster_joints );
+	export_skeleton_node( anim_joint_object_root, object_movenent_cfg, all_claster_joints, argData );
 	return stat;
 
 }
 
-MStatus		export_skeleton( MString file_name )
+MStatus		export_skeleton( MString file_name, MArgDatabase &argData )
 {
 	MStringArray					all_joints_str;
 	MGlobal::executeCommand			("skinCluster -q -inf", all_joints_str);
-	
-	
 
 	MSelectionList all_joints;
 	int length						= all_joints_str.length();
@@ -131,7 +136,7 @@ MStatus		export_skeleton( MString file_name )
 	xray::configs::lua_config_ptr		cfg		= xray::configs::create_lua_config();
 	xray::configs::lua_config_value		v_cfg  = *cfg;
 
-	if( export_skeleton( all_joints, v_cfg ) == MStatus::kSuccess )
+	if( export_skeleton( all_joints, v_cfg, argData) == MStatus::kSuccess )
 	{
 		cfg->save_as	( file_name.asChar(), xray::configs::target_sources );
 		display_info	( "Export " + file_name + " successful!\n" );
@@ -152,6 +157,7 @@ MSyntax	skeleton_export_cmd::newSyntax()
 	
 	//syntax.addArg( 
 	syntax.addFlag( file_name_flag, file_name_flag_l,	MSyntax::kString );
+	syntax.addFlag( raw_name_flag, raw_name_flag_l, MSyntax::kNoArg );
 
 	return syntax;
 }
@@ -169,12 +175,12 @@ MSyntax	skeleton_export_cmd::newSyntax()
 	MArgDatabase argData(syntax(), args );
 	MString				file_name = file_name_from_args( argData, &stat );
 	CHK_STAT_R			( stat );	
-	
+
 	synchronous_device_interface const & device	=	xray::resources::get_synchronous_device();
 	create_folder_r		( device, file_name.asChar(), false );
 	
 	if( MString( extension_from_path( file_name.asChar() ) ) != extension )
 		file_name += MString(".") + MString( extension );
 
-	return export_skeleton( file_name );
+	return export_skeleton( file_name, argData);
 }

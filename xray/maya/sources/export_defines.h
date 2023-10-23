@@ -28,4 +28,7 @@
 #define skeleton_name_flag		"-skl"
 #define skeleton_name_flag_l	"-skeleton"
 
+#define raw_name_flag			"-raw"
+#define raw_name_flag_l			"-raw_l"
+
 #endif // #ifndef EXPORT_DEFINES_H_INCLUDED
