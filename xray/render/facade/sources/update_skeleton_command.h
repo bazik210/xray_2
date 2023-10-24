@@ -24,7 +24,7 @@ public:
 	virtual	void			execute						( );
 
 private:
-	math::float4x4					m_matrices[80];
+	math::float4x4					m_matrices[256];
 	render_model_instance_ptr	m_model_instance;
 	engine::world&					m_world;
 	u32								m_matrices_count;
