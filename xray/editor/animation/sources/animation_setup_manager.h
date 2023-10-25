@@ -6,6 +6,10 @@
 #ifndef ANIMATION_SETUP_MANAGER_H_INCLUDED
 #define ANIMATION_SETUP_MANAGER_H_INCLUDED
 
+using namespace xray::editor_base;
+
+#include <xray/render/engine/base_classes.h>
+
 using namespace System;
 using namespace System::Windows::Forms;
 using namespace System::Collections;
@@ -45,6 +49,15 @@ namespace animation_editor {
 		bool					model_loaded					();
 		void					add_model_to_render				();
 		void					remove_model_from_render		();
+		void					add_vmodel_to_render			(scene_view_panel^ m_view_window);
+		void					remove_vmodel_from_render		(scene_view_panel^ m_view_window);
+
+		//template <typename T = animation_setup_manager>
+		//void					add_model_to_render				(T caller);
+
+		//template <typename T = animation_setup_manager>
+		//void					remove_model_from_render		(T caller);
+
 		void					document_saved					(System::String^ doc_name);
 		void					on_scene_created				( render::scene_ptr const& scene );
 		void					on_property_changed				(System::Object^ sender, value_changed_event_args^ e);
