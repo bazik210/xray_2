@@ -36,6 +36,8 @@ namespace xray
 			animation_collections_editor			( animation_editor^ ed );
 			~animation_collections_editor			( );
 
+			void	update_model( animation_model^ model );
+
 			bool			close_query				( );
 			IDockContent^	find_dock_content		( String^ persist_string );
 
@@ -64,6 +66,7 @@ namespace xray
 			property animation_model^									active_model
 			{
 				animation_model^									get( ){ return m_model; }
+				void												set( animation_model^ model ) { m_model = model; }
 			}
 		
 		#pragma region Windows Form Designer generated code
@@ -101,8 +104,8 @@ namespace xray
 			void						clear_properties			( );
 			void						update_properties			( );
 			void						scene_created				( xray::render::scene_ptr const& scene );
-			void						add_models_to_render		( );
-			void						remove_models_from_render	( );
+			bool						add_models_to_render		( );
+			bool						remove_models_from_render	( );
 
 		private:
 			bool						predicate_active_scene		( );

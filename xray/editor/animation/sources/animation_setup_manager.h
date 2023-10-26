@@ -84,6 +84,13 @@ namespace animation_editor {
 		void					on_view_menu_item_select		(System::Object^, System::EventArgs^);
 		void					show_anim_list_panel			(System::Object^, System::EventArgs^);
 		void					show_properties_panel			(System::Object^, System::EventArgs^);
+
+	public:
+		property animation_model^ active_model
+		{
+			animation_model^ get() { return m_model; }
+			void			 set(animation_model^ model) { m_model = model; }
+		}
 		
 	private:
 		animation_editor^					m_editor;
