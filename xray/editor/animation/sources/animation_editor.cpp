@@ -637,7 +637,7 @@ void animation_editor::tick()
 	if(m_viewer_editor && ac==m_viewer_editor)
 		m_viewer_editor->tick();
 
-	if(m_setup_manager && ac==m_setup_manager || m_setup_manager && m_view_window && ac == m_view_window)
+	if(m_setup_manager && ac==m_setup_manager || m_setup_manager && m_view_window && m_view_window->Visible)
 		m_setup_manager->tick();
 
 	if(m_groups_editor && ac==m_groups_editor)
@@ -744,27 +744,76 @@ void animation_editor::on_form_active_document_changed(System::Object^, System::
 
 	if(m_form->active_content!=nullptr)
 	{
-		if( m_form->active_content == m_setup_manager )
-			m_setup_manager->remove_model_from_render( );
-		else if( m_form->active_content == m_viewer_editor )
-			m_viewer_editor->remove_models_from_render( );
-		else if( m_form->active_content == m_collections_editor )
-			m_collections_editor->remove_models_from_render( );
-		else if (m_form->active_content == m_view_window)
-			m_setup_manager->remove_vmodel_from_render( m_view_window );
+		if (m_form->active_content == m_setup_manager || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_setup_manager && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			//m_viewer_editor->remove_models_from_render(m_view_window);
+			m_setup_manager->remove_model_from_render(m_view_window);
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_viewer_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_viewer_editor && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			m_viewer_editor->remove_models_from_render(m_view_window);
+			//m_setup_manager->remove_model_from_render(m_view_window);
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_collections_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_collections_editor)
+		{
+			m_collections_editor->remove_models_from_render();
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_groups_editor)
+		{
+			m_previous_content = m_form->active_content;
+		}
+		else if (m_form->active_content == m_channels_editor) 
+		{
+			m_previous_content = m_form->active_content;
+		}
+
+		if (m_form->active_content != m_setup_manager &&
+			m_form->active_content != m_viewer_editor &&
+			m_form->active_content != m_collections_editor && 
+			m_previous_content != m_viewer_editor &&
+			m_view_window->Visible  && !m_activated)
+			m_collections_editor->remove_models_from_render();
+
+		if ((m_form->active_content == m_groups_editor || m_form->active_content == m_channels_editor) &&
+			m_previous_content == m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->remove_models_from_render();
+		
 	}
 
 	m_form->active_content = new_content;
 	if( m_form->active_content != nullptr )
 	{
-		if( m_form->active_content == m_setup_manager )
-			m_setup_manager->add_model_to_render( );
-		else if( m_form->active_content == m_viewer_editor )
-			m_viewer_editor->add_models_to_render( );
-		else if( m_form->active_content == m_collections_editor )
-			m_collections_editor->add_models_to_render( );
-		else if (m_form->active_content == m_view_window)
-			m_setup_manager->add_vmodel_to_render( m_view_window );
+		if (m_form->active_content == m_setup_manager || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_setup_manager && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			m_activated = m_setup_manager->add_model_to_render(m_view_window);
+		}
+		else if (m_form->active_content == m_viewer_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_viewer_editor && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			m_activated = m_viewer_editor->add_models_to_render(m_view_window);
+		}
+		else if (m_form->active_content == m_collections_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_collections_editor)
+		{
+			m_activated = m_collections_editor->add_models_to_render();
+		}
+		
+		if (m_form->active_content != m_setup_manager &&
+			m_form->active_content != m_viewer_editor &&
+			m_form->active_content != m_collections_editor &&
+			m_previous_content != m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->add_models_to_render();
+
+		if ((m_form->active_content == m_groups_editor || m_form->active_content == m_channels_editor) &&
+			m_previous_content == m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->add_models_to_render();
 	}
 }
 
@@ -805,11 +854,11 @@ void animation_editor::switch_navigation_mode()
 			m_viewport_old_dock_state = m_view_window->DockState;
 			m_view_window->Show(m_form->main_dock_panel, WeifenLuo::WinFormsUI::Docking::DockState::Document);
 			if(m_form->active_content==m_setup_manager)
-				m_setup_manager->remove_model_from_render();
+				m_setup_manager->remove_model_from_render(m_view_window);
 			else if(m_form->active_content==m_viewer_editor)
-				m_viewer_editor->remove_models_from_render();
+				m_viewer_editor->remove_models_from_render(m_view_window);
 			else if (m_form->active_content == m_view_window)
-				m_setup_manager->remove_vmodel_from_render(m_view_window);
+				m_setup_manager->remove_vmodel_from_render();
 
 			m_pv = NEW(xray::resources::user_data_variant)();
 			xray::rtp::controller_resource_user_data data;

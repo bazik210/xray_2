@@ -47,10 +47,10 @@ namespace animation_editor {
 		void					set_target						(xray::animation::mixing::animation_lexeme& l, u32 const current_time_in_ms);
 		bool					predicate_save_scene			();
 		bool					model_loaded					();
-		void					add_model_to_render				();
-		void					remove_model_from_render		();
-		void					add_vmodel_to_render			(scene_view_panel^ m_view_window);
-		void					remove_vmodel_from_render		(scene_view_panel^ m_view_window);
+		bool					add_model_to_render				(scene_view_panel^ m_view_window);
+		bool					remove_model_from_render		(scene_view_panel^ m_view_window);
+		void					add_vmodel_to_render			();
+		void					remove_vmodel_from_render		();
 
 		//template <typename T = animation_setup_manager>
 		//void					add_model_to_render				(T caller);

@@ -309,29 +309,37 @@ bool animation_setup_manager::predicate_save_scene()
 
 //template <typename T>
 //void animation_setup_manager::add_model_to_render(T caller=T())
-void animation_setup_manager::add_model_to_render()
+bool animation_setup_manager::add_model_to_render(scene_view_panel^ m_view_window)
 {
-	if( m_model != nullptr && m_editor->form->active_content == this )
+	if( m_model != nullptr && (m_editor->form->active_content == this || m_editor->form->active_content == m_view_window))
+	{
 		m_model->add_to_render		( );
+		return true;
+	}
+return false;
 }
 
-void animation_setup_manager::add_vmodel_to_render(scene_view_panel^ m_view_window)
+void animation_setup_manager::add_vmodel_to_render()
 {
-	if (m_model != nullptr && m_editor->form->active_content == m_view_window)
+	if (m_model != nullptr)
 		m_model->add_to_render();
 }
 
 //template <typename T>
 //void animation_setup_manager::remove_model_from_render(T caller=T())
-void animation_setup_manager::remove_model_from_render()
+bool animation_setup_manager::remove_model_from_render(scene_view_panel^ m_view_window)
 {
-	if( m_model != nullptr && m_editor->form->active_content == this )
+	if( m_model != nullptr && (m_editor->form->active_content == this || m_editor->form->active_content == m_view_window))
+	{
 		m_model->remove_from_render	( );
+	return true;
+	}
+return false;
 }
 
-void animation_setup_manager::remove_vmodel_from_render(scene_view_panel^ m_view_window)
+void animation_setup_manager::remove_vmodel_from_render()
 {
-	if (m_model != nullptr && m_editor->form->active_content == m_view_window)
+	if (m_model != nullptr)
 		m_model->remove_from_render();
 }
 

@@ -91,16 +91,25 @@ void viewer_editor::use_detailed_weights_and_scales::set(bool new_val)
 		safe_cast<viewer_document^>(m_multidocument_base->active_document)->reset_target();
 }
 
-void viewer_editor::add_models_to_render()
+bool viewer_editor::add_models_to_render(scene_view_panel^ m_view_window)
 {
-	if(m_multidocument_base->active_document!=nullptr && m_animation_editor->form->active_content==this)
+	if (m_multidocument_base->active_document != nullptr && (m_animation_editor->form->active_content == this || m_animation_editor->form->active_content == m_view_window ))
+	{
 		safe_cast<viewer_document^>(m_multidocument_base->active_document)->add_models_to_render();
+		return true;
+	}
+	return false;
 }
 
-void viewer_editor::remove_models_from_render()
+bool viewer_editor::remove_models_from_render(scene_view_panel^ m_view_window)
 {
-	if(m_multidocument_base->active_document!=nullptr && m_animation_editor->form->active_content==this)
+	if(m_multidocument_base->active_document!=nullptr && (m_animation_editor->form->active_content==this || m_animation_editor->form->active_content == m_view_window))
+	{
+
 		safe_cast<viewer_document^>(m_multidocument_base->active_document)->remove_models_from_render();
+	return true;
+	}
+return false;
 }
 
 void viewer_editor::on_add_model_click(System::Object^, System::EventArgs^)

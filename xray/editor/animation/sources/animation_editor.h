@@ -345,6 +345,8 @@ namespace animation_editor {
 		
 		xray::editor_base::tool_window_holder^	m_holder;
 		bool									m_closed_;
+		bool									m_activated;
+		property WeifenLuo::WinFormsUI::Docking::IDockContent^	m_previous_content;
 
 // for test	
 		void						show_statistics();
