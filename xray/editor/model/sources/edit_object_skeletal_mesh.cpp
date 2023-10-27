@@ -25,6 +25,8 @@ using namespace xray::editor::wpf_controls;
 using namespace xray::editor::wpf_controls::control_containers;
 using namespace xray::editor_base;
 
+using namespace System::Runtime::InteropServices;
+
 namespace xray {
 namespace model_editor {
 
@@ -33,14 +35,7 @@ using editor_base::execute_delegate_managed;
 using editor_base::checked_delegate_managed;
 using editor_base::enabled_delegate_managed;
 
-ref class anim_instance_ui_type_editor : public xray::editor::wpf_controls::property_editors::i_external_property_editor
-{
-	typedef xray::editor::wpf_controls::property_descriptor property_descriptor;
-public:
-	virtual	void run_editor(xray::editor::wpf_controls::property_editors::property^ prop);
-
-}; // ref class anim_instance_ui_type_editor
-
+/*
 void anim_instance_ui_type_editor::run_editor(xray::editor::wpf_controls::property_editors::property^ prop)
 {
 	System::String^ current = nullptr;
@@ -57,7 +52,7 @@ void anim_instance_ui_type_editor::run_editor(xray::editor::wpf_controls::proper
 		prop->value = "resources/animations/" + selected;
 	}
 };
-
+*/
 edit_object_skeletal_mesh::edit_object_skeletal_mesh( model_editor^ me )
 :super( me )
 {
@@ -67,12 +62,17 @@ edit_object_skeletal_mesh::edit_object_skeletal_mesh( model_editor^ me )
 	m_collision_panel				= gcnew collision_property_grid_panel( );
 	m_collision_panel->Text			= "Collision";
 	m_motion_name					= "resources/animations/single/human/common_anim_slot_1/free/run_move_fwd_aim_1";
+	motion_name						= gcnew String(m_motion_name);
 }
 
 edit_object_skeletal_mesh::~edit_object_skeletal_mesh( )
 {
 	delete		m_model;
 	DELETE		( m_collision_cfg );
+
+	if (ptrStr != ptrStr.Zero) {
+		Marshal::FreeHGlobal(ptrStr);
+	}
 }
 
 bool edit_object_skeletal_mesh::has_preview_model( )
@@ -418,6 +418,34 @@ void edit_object_skeletal_mesh::anim_play( button ^ )
 	m_model->anim_play( m_motion_name );
 }
 
+void edit_object_skeletal_mesh::select_animation_name(xray::editor::wpf_controls::property_editors::property^ prop, Object^)
+{
+	System::String^ current = nullptr;
+	System::String^ filter = nullptr;
+	System::String^ selected = nullptr;
+
+	if (ptrStr != ptrStr.Zero) {
+		Marshal::FreeHGlobal(ptrStr);
+	}
+
+	if (prop->value)
+		current = safe_cast<System::String^>(prop->value);
+
+	bool result = false;
+	if (xray::editor_base::resource_chooser::choose("animations_list", current, filter, selected, false))
+	{
+		prop->value = "resources/animations/" + selected;
+		result = true;
+	}
+
+	auto sys_str = prop->value->ToString();
+	if (result)
+	{
+		ptrStr = Marshal::StringToHGlobalAnsi(sys_str);
+		m_motion_name = static_cast<char*>(ptrStr.ToPointer());
+	}
+}
+
 
 editor::wpf_controls::property_container^ edit_object_skeletal_mesh::get_collision_property_container( )
 {
@@ -442,56 +470,13 @@ editor::wpf_controls::property_container^ edit_object_skeletal_mesh::get_collisi
 //	desc0->select_behavior = select_behavior::select;
 //	result->properties->add(desc0);
 
-	motion_name = gcnew String(m_motion_name);
 	property_descriptor^ desc1 = gcnew property_descriptor("Animation path", container->category, "animation_name", motion_name, gcnew object_property_value<System::String^>(motion_name));
 	desc1->is_read_only = false;
 	desc1->select_behavior = select_behavior::select;
-	//System::String^ selected = nullptr;
-	//bool result = editor_base::resource_chooser::choose("solid_visual", motion_name, nullptr, selected, true);
-	desc1->set_external_editor_style(anim_instance_ui_type_editor::typeid, true);
+
+
+	desc1->set_external_editor_style(gcnew xray::editor::wpf_controls::property_editors::attributes::external_editor_event_handler(this, &edit_object_skeletal_mesh::select_animation_name), false);
 	result->properties->add(desc1);
-
-	//m_motion_name = prop->value;
-
-	//property_container^ sub = gcnew property_container;
-	//prim->m_current_desc = result->properties->add_container(name, "all", "no description", sub);
-	//sub->inner_value = gcnew property_descriptor("Anim Path", m_model, "animation_name");
-	//sub->inner_value->tag = path;
-	//sub->inner_value->set_external_editor_style(test_instance_ui_type_editor::typeid, true);
-
-	
-//	property_descriptor^ prop_descriptor = gcnew property_descriptor(this, "selected_value");
-//	prop_descriptor->dynamic_attributes->add(gcnew editor::wpf_controls::property_editors::attributes::combo_box_items_attribute( gcnew cli::array<System::String^, 1>(3) { "huinia", "govno", "musor" }));
-
-
-//	result->properties["AnimationFile"]->dynamic_attributes->add(
-//		gcnew editor::wpf_controls::property_editors::attributes::combo_box_items_attribute(gcnew cli::array<System::String^, 1>(3) { "huinia", "govno", "musor" })
-//	);
-
-	//container = result->add_dock_container(false);
-	//container->category = "Animation";
-	//System::String^ selected = nullptr;
-	//bool result = editor_base::resource_chooser::choose("solid_visual", path, nullptr, selected, true);
-	//test_instance_ui_type_editor create_path;
-	//property_container^ sub = gcnew property_container;
-	//editor_base::object_properties::initialize_property_container(path, sub);
-
-//	String^ name = "Animation path";
-//	String^ default_path = "resources/animations/single/human/common_anim_slot_1/free/run_move_fwd_aim_1";
-//	configs::lua_config_ptr config_ptr = configs::create_lua_config();
-//	configs::lua_config_value anim_path = config_ptr->get_root()["anim_path"];
-//	anim_path["anim_path"] = "resources/animations/single/human/common_anim_slot_1/free/run_move_fwd_aim_1";
-
-//	property_value_string^ prop_value = gcnew property_value_string("path", anim_path, default_path);
-//	property_descriptor^ desc = gcnew property_descriptor(name, container->category, "animation_name", default_path, prop_value);
-//	desc->is_read_only = true;
-//	desc->select_behavior = select_behavior::select;
-//	result->properties->add(desc);
-
-	//prim->m_current_desc = result->properties->add_container(name, "all", "no description", sub);
-	//sub->inner_value = gcnew property_descriptor("Anim Path", m_model, "animation_name");
-	//sub->inner_value->tag = path;
-	//sub->inner_value->set_external_editor_style(test_instance_ui_type_editor::typeid, true);
 
 	container						= result->add_dock_container( false );
 	container->category				= "Add new item";
