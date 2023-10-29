@@ -9,7 +9,7 @@ IF EXIST "CreateSln_Log.txt" (
 )
 
 echo Generating Visual Studio Solution...
-START /B /WAIT cmake --graphviz=dependency_graph.dot --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt" 2>&1
+START /B /WAIT cmake --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt" 2>&1
 
 >nul findstr /c:"CMake Error" CreateSln_Log.txt && (
 	echo CMake couldn't generate the solution! Opening the log file...
