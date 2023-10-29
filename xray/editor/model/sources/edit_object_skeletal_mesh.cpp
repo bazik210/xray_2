@@ -11,6 +11,8 @@
 #include "model_editor.h"
 #include "ide.h"
 #include "input_actions.h"
+#include "edit_object_mesh.h"
+//#include "properties_holder.h"
 
 #pragma managed( push, off )
 #	include <xray/render/facade/editor_renderer.h>
@@ -21,6 +23,9 @@
 
 using namespace xray::editor::wpf_controls;
 using namespace xray::editor::wpf_controls::control_containers;
+using namespace xray::editor_base;
+
+using namespace System::Runtime::InteropServices;
 
 namespace xray {
 namespace model_editor {
@@ -30,7 +35,24 @@ using editor_base::execute_delegate_managed;
 using editor_base::checked_delegate_managed;
 using editor_base::enabled_delegate_managed;
 
+/*
+void anim_instance_ui_type_editor::run_editor(xray::editor::wpf_controls::property_editors::property^ prop)
+{
+	System::String^ current = nullptr;
+	System::String^ filter = nullptr;
+	System::String^ selected = nullptr;
 
+	if (prop->value)
+		current = safe_cast<System::String^>(prop->value);
+
+	property_descriptor^ pd = safe_cast<property_descriptor^>(prop->descriptor);
+
+	if (xray::editor_base::resource_chooser::choose("animations_list", current, filter, selected, false))
+	{
+		prop->value = "resources/animations/" + selected;
+	}
+};
+*/
 edit_object_skeletal_mesh::edit_object_skeletal_mesh( model_editor^ me )
 :super( me )
 {
@@ -39,12 +61,18 @@ edit_object_skeletal_mesh::edit_object_skeletal_mesh( model_editor^ me )
 	m_collision_cfg					= NEW(configs::lua_config_ptr)();
 	m_collision_panel				= gcnew collision_property_grid_panel( );
 	m_collision_panel->Text			= "Collision";
+	m_motion_name					= "resources/animations/single/human/common_anim_slot_1/free/run_move_fwd_aim_1";
+	motion_name						= gcnew String(m_motion_name);
 }
 
 edit_object_skeletal_mesh::~edit_object_skeletal_mesh( )
 {
 	delete		m_model;
 	DELETE		( m_collision_cfg );
+
+	if (ptrStr != ptrStr.Zero) {
+		Marshal::FreeHGlobal(ptrStr);
+	}
 }
 
 bool edit_object_skeletal_mesh::has_preview_model( )
@@ -387,7 +415,35 @@ void edit_object_skeletal_mesh::goto_bind_pose( button^ )
 
 void edit_object_skeletal_mesh::anim_play( button ^ )
 {
-	m_model->anim_play( "resources/animations/single/human/common_anim_slot_1/free/run_move_fwd_aim_1" );
+	m_model->anim_play( m_motion_name );
+}
+
+void edit_object_skeletal_mesh::select_animation_name(xray::editor::wpf_controls::property_editors::property^ prop, Object^)
+{
+	System::String^ current = nullptr;
+	System::String^ filter = nullptr;
+	System::String^ selected = nullptr;
+
+	if (ptrStr != ptrStr.Zero) {
+		Marshal::FreeHGlobal(ptrStr);
+	}
+
+	if (prop->value)
+		current = safe_cast<System::String^>(prop->value);
+
+	bool result = false;
+	if (xray::editor_base::resource_chooser::choose("animations_list", current, filter, selected, false))
+	{
+		prop->value = "resources/animations/" + selected;
+		result = true;
+	}
+
+	auto sys_str = prop->value->ToString();
+	if (result)
+	{
+		ptrStr = Marshal::StringToHGlobalAnsi(sys_str);
+		m_motion_name = static_cast<char*>(ptrStr.ToPointer());
+	}
 }
 
 
@@ -407,6 +463,20 @@ editor::wpf_controls::property_container^ edit_object_skeletal_mesh::get_collisi
 
 	but = container->add_button		( "AnimPlay", gcnew Action<button^>( this, &edit_object_skeletal_mesh::anim_play ) );
 	but->width	= 100;
+
+//	System::String^ empty = " ";
+//	property_descriptor^ desc0 = gcnew property_descriptor(" ", container->category, "stub", empty, gcnew object_property_value<System::String^>(empty));
+//	desc0->is_read_only = true;
+//	desc0->select_behavior = select_behavior::select;
+//	result->properties->add(desc0);
+
+	property_descriptor^ desc1 = gcnew property_descriptor("Animation path", container->category, "animation_name", motion_name, gcnew object_property_value<System::String^>(motion_name));
+	desc1->is_read_only = false;
+	desc1->select_behavior = select_behavior::select;
+
+
+	desc1->set_external_editor_style(gcnew xray::editor::wpf_controls::property_editors::attributes::external_editor_event_handler(this, &edit_object_skeletal_mesh::select_animation_name), false);
+	result->properties->add(desc1);
 
 	container						= result->add_dock_container( false );
 	container->category				= "Add new item";

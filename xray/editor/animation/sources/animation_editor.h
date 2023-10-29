@@ -134,11 +134,13 @@ namespace animation_editor {
 				long							request_animation_clip			( String^ name, animation_clip_request_callback^ callback );
 				void							refresh_animation_node_clip		( String^ name );
 				animation_node_clip^			clip_by_name					( String^ clip_name );
+				void							update_view						( );
  
 	public:
 		static property String^						models_path
 		{
 			String^		get(){ return m_model_path; };
+			void		set(String^ model_path) { m_model_path = model_path; };
 		};
 		property String^						resources_path
 		{
@@ -345,6 +347,11 @@ namespace animation_editor {
 		
 		xray::editor_base::tool_window_holder^	m_holder;
 		bool									m_closed_;
+		bool									m_activated;
+		property WeifenLuo::WinFormsUI::Docking::IDockContent^	m_previous_content;
+
+	public:
+		bool									m_on_load;
 
 // for test	
 		void						show_statistics();

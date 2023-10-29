@@ -6,6 +6,10 @@
 #ifndef ANIMATION_SETUP_MANAGER_H_INCLUDED
 #define ANIMATION_SETUP_MANAGER_H_INCLUDED
 
+using namespace xray::editor_base;
+
+#include <xray/render/engine/base_classes.h>
+
 using namespace System;
 using namespace System::Windows::Forms;
 using namespace System::Collections;
@@ -43,8 +47,17 @@ namespace animation_editor {
 		void					set_target						(xray::animation::mixing::animation_lexeme& l, u32 const current_time_in_ms);
 		bool					predicate_save_scene			();
 		bool					model_loaded					();
-		void					add_model_to_render				();
-		void					remove_model_from_render		();
+		bool					add_model_to_render				(scene_view_panel^ m_view_window);
+		bool					remove_model_from_render		(scene_view_panel^ m_view_window);
+		void					add_vmodel_to_render			();
+		void					remove_vmodel_from_render		();
+
+		//template <typename T = animation_setup_manager>
+		//void					add_model_to_render				(T caller);
+
+		//template <typename T = animation_setup_manager>
+		//void					remove_model_from_render		(T caller);
+
 		void					document_saved					(System::String^ doc_name);
 		void					on_scene_created				( render::scene_ptr const& scene );
 		void					on_property_changed				(System::Object^ sender, value_changed_event_args^ e);
@@ -71,6 +84,13 @@ namespace animation_editor {
 		void					on_view_menu_item_select		(System::Object^, System::EventArgs^);
 		void					show_anim_list_panel			(System::Object^, System::EventArgs^);
 		void					show_properties_panel			(System::Object^, System::EventArgs^);
+
+	public:
+		property animation_model^ active_model
+		{
+			animation_model^ get() { return m_model; }
+			void			 set(animation_model^ model) { m_model = model; }
+		}
 		
 	private:
 		animation_editor^					m_editor;

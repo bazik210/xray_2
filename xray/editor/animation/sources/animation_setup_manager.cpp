@@ -11,6 +11,7 @@
 #include "animation_setup_document.h"
 #include "animation_model.h"
 #include "animation_editor_form.h"
+#include "animation_collections_editor.h"
 
 #pragma managed( push, off )
 #	include <xray/animation/api.h>
@@ -273,6 +274,11 @@ void animation_setup_manager::on_load_model_click(System::Object^, System::Event
 		delete m_model;
 		query_result_delegate* rq = NEW(query_result_delegate)(gcnew query_result_delegate::Delegate(this, &animation_setup_manager::on_resources_loaded), g_allocator);
 		m_model = gcnew animation_model( *m_scene, m_editor->get_renderer().scene(), m_editor->get_renderer().debug(), "model_0", selected, float4x4().identity(), rq);
+		m_editor->models_path = m_model->model_name;
+		m_editor->m_on_load = true;
+
+		animation_collections_editor^ cl_editor = m_editor->collections_editor;
+		cl_editor->update_model( m_model );
 	}
 }
 
@@ -284,8 +290,11 @@ void animation_setup_manager::on_resources_loaded(xray::resources::queries_resul
 		return;
 	}
 
+	m_editor->m_on_load = false;
 	if(m_editor->form->active_content==this)
 		m_model->add_to_render();
+
+	m_editor->update_view();
 }
 
 void animation_setup_manager::set_target(xray::animation::mixing::animation_lexeme& l, u32 const current_time_in_ms)
@@ -307,16 +316,40 @@ bool animation_setup_manager::predicate_save_scene()
 	return true;
 }
 
-void animation_setup_manager::add_model_to_render()
+//template <typename T>
+//void animation_setup_manager::add_model_to_render(T caller=T())
+bool animation_setup_manager::add_model_to_render(scene_view_panel^ m_view_window)
 {
-	if( m_model != nullptr && m_editor->form->active_content == this )
+	if( m_model != nullptr && (m_editor->form->active_content == this || m_editor->form->active_content == m_view_window))
+	{
 		m_model->add_to_render		( );
+		return true;
+	}
+return false;
 }
 
-void animation_setup_manager::remove_model_from_render()
+void animation_setup_manager::add_vmodel_to_render()
 {
-	if( m_model != nullptr && m_editor->form->active_content == this )
+	if (m_model != nullptr)
+		m_model->add_to_render();
+}
+
+//template <typename T>
+//void animation_setup_manager::remove_model_from_render(T caller=T())
+bool animation_setup_manager::remove_model_from_render(scene_view_panel^ m_view_window)
+{
+	if( m_model != nullptr && (m_editor->form->active_content == this || m_editor->form->active_content == m_view_window))
+	{
 		m_model->remove_from_render	( );
+	return true;
+	}
+return false;
+}
+
+void animation_setup_manager::remove_vmodel_from_render()
+{
+	if (m_model != nullptr)
+		m_model->remove_from_render();
 }
 
 bool animation_setup_manager::model_loaded() 

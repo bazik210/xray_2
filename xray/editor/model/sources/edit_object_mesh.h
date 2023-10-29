@@ -13,13 +13,13 @@
 #include "edit_portal.h"
 #include "collision_primitive_item.h"
 
-
 namespace xray {
 
 namespace model_editor {
 
 using namespace System;
 using namespace System::Windows;
+using namespace xray::editor::wpf_controls::property_editors;
 
 using xray::editor::wpf_controls::control_containers::button;
 
@@ -35,6 +35,15 @@ ref class skeletal_render_model_wrapper;
 ref class portal_generation_view;
 class sectors_generator;
 ref class sectors_view;
+
+/*
+public ref class anim_instance_ui_type_editor : public xray::editor::wpf_controls::property_editors::i_external_property_editor
+{
+	typedef xray::editor::wpf_controls::property_descriptor property_descriptor;
+public:
+	virtual	void			run_editor(xray::editor::wpf_controls::property_editors::property^ prop);
+}; // ref class anim_instance_ui_type_editor
+*/
 
 ref class lod_descriptor
 {
@@ -293,6 +302,7 @@ private:
 	void						switch_to_collision_clicked	( button^ );
 	void						goto_bind_pose				( button^ );
 	void						anim_play					( button ^ );
+	void						select_animation_name		(xray::editor::wpf_controls::property_editors::property^, Object^);
 	void						remove_collision_primitive_clicked( button^ );
 	void						duplicate_collision_primitive_clicked( button^ );
 	void						add_sphere_collision_primitive_clicked		( button^ );
@@ -308,6 +318,25 @@ private:
 	configs::lua_config_ptr*			m_collision_cfg;
 	collision_property_grid_panel^		m_collision_panel;
 	skeletal_render_model_wrapper^		m_model;
+	pcstr								m_motion_name;
+	System::String^						m_motion_str;
+	IntPtr								ptrStr;
+
+	[DisplayNameAttribute("motion"), CategoryAttribute("General")]
+	[DefaultValueAttribute(""), ReadOnlyAttribute(false)]
+	property System::String^ motion_name
+	{
+		System::String^ get()
+		{
+			return					m_motion_str;
+		}
+
+		void set(System::String^ motion)
+		{
+			m_motion_str = motion;
+		}
+	}
+
 }; // class edit_object_skeletal_mesh
 
 

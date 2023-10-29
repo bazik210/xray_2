@@ -637,7 +637,7 @@ void animation_editor::tick()
 	if(m_viewer_editor && ac==m_viewer_editor)
 		m_viewer_editor->tick();
 
-	if(m_setup_manager && ac==m_setup_manager)
+	if(m_setup_manager && ac==m_setup_manager || m_setup_manager && m_view_window && m_view_window->Visible)
 		m_setup_manager->tick();
 
 	if(m_groups_editor && ac==m_groups_editor)
@@ -651,6 +651,8 @@ void animation_editor::tick()
 	if(!m_view_window->Visible)
 		return;
 
+	//m_view_window->update_projection_matrix();
+
 	show_statistics();		// for test
 	m_view_window->tick();	// process camera effector(s)
 	m_renderer->scene().set_view_matrix(*m_scene_view, math::invert4x3(m_view_window->get_inverted_view_matrix()));
@@ -663,7 +665,10 @@ void animation_editor::tick()
 	}
 
 	m_renderer->draw_scene(*m_scene, *m_scene_view, *m_output_window, render::viewport_type(float2(0.f, 0.f), float2(1.f, 1.f)));
-//	STOP_PROFILE;
+
+	
+	
+	//	STOP_PROFILE;
 }
 
 void animation_editor::Show( System::String^, System::String^ )
@@ -733,29 +738,96 @@ animation_editor_form^ animation_editor::form::get()
 
 void animation_editor::on_form_active_document_changed(System::Object^, System::EventArgs^)
 {
+	this->update_view();
+}
+
+void animation_editor::update_view( ) 
+{
 	IDockContent^ new_content = m_form->main_dock_panel->ActiveContent;
-	if(new_content==nullptr || new_content==m_view_window)
+	if (new_content == nullptr || new_content == m_view_window)
 		new_content = m_form->main_dock_panel->ActiveDocument;
 
-	if(m_form->active_content!=nullptr)
+	if (m_form->active_content != nullptr)
 	{
-		if( m_form->active_content == m_setup_manager )
-			m_setup_manager->remove_model_from_render( );
-		else if( m_form->active_content == m_viewer_editor )
-			m_viewer_editor->remove_models_from_render( );
-		else if( m_form->active_content == m_collections_editor )
-			m_collections_editor->remove_models_from_render( );
+		if (m_setup_manager && m_view_window && m_on_load) {
+			m_setup_manager->remove_model_from_render(m_view_window);
+		}
+
+		if (m_form->active_content == m_setup_manager || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_setup_manager && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			m_setup_manager->remove_model_from_render(m_view_window);
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_viewer_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_viewer_editor && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+		{
+			m_viewer_editor->remove_models_from_render(m_view_window);
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_collections_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_collections_editor)
+		{
+			m_collections_editor->remove_models_from_render();
+			m_previous_content = m_form->active_content;
+			m_activated = false;
+		}
+		else if (m_form->active_content == m_groups_editor)
+		{
+			m_previous_content = m_form->active_content;
+		}
+		else if (m_form->active_content == m_channels_editor)
+		{
+			m_previous_content = m_form->active_content;
+		}
+
+		if (m_form->active_content != m_setup_manager &&
+			m_form->active_content != m_viewer_editor &&
+			m_form->active_content != m_collections_editor &&
+			m_previous_content != m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->remove_models_from_render();
+
+		if ((m_form->active_content == m_groups_editor || m_form->active_content == m_channels_editor) &&
+			m_previous_content == m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->remove_models_from_render();
+
 	}
 
 	m_form->active_content = new_content;
-	if( m_form->active_content != nullptr )
+	if (m_form->active_content != nullptr)
 	{
-		if( m_form->active_content == m_setup_manager )
-			m_setup_manager->add_model_to_render( );
-		else if( m_form->active_content == m_viewer_editor )
-			m_viewer_editor->add_models_to_render( );
-		else if( m_form->active_content == m_collections_editor )
-			m_collections_editor->add_models_to_render( );
+		if (m_on_load) {
+			if (m_setup_manager && m_view_window) {
+				m_setup_manager->add_model_to_render(m_view_window);
+			}
+		}
+		else {
+			if (m_form->active_content == m_setup_manager || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_setup_manager && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+			{
+				m_activated = m_setup_manager->add_model_to_render(m_view_window);
+			}
+			else if (m_form->active_content == m_viewer_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_viewer_editor && m_form->active_content != m_channels_editor && m_form->active_content != m_groups_editor)
+			{
+				m_activated = m_viewer_editor->add_models_to_render(m_view_window);
+			}
+			else if (m_form->active_content == m_collections_editor || m_previous_content != nullptr && m_form->active_content == m_view_window && m_previous_content == m_collections_editor)
+			{
+				m_activated = m_collections_editor->add_models_to_render();
+			}
+		}
+
+		if (m_form->active_content != m_setup_manager &&
+			m_form->active_content != m_viewer_editor &&
+			m_form->active_content != m_collections_editor &&
+			m_previous_content != m_viewer_editor &&
+			m_view_window->Visible && !m_activated)
+			m_collections_editor->add_models_to_render();
+
+		if ((m_form->active_content == m_groups_editor || m_form->active_content == m_channels_editor) &&
+			m_previous_content == m_viewer_editor &&
+			m_view_window->Visible && !m_activated && !m_on_load)
+			m_collections_editor->add_models_to_render();
 	}
 }
 
@@ -796,9 +868,11 @@ void animation_editor::switch_navigation_mode()
 			m_viewport_old_dock_state = m_view_window->DockState;
 			m_view_window->Show(m_form->main_dock_panel, WeifenLuo::WinFormsUI::Docking::DockState::Document);
 			if(m_form->active_content==m_setup_manager)
-				m_setup_manager->remove_model_from_render();
+				m_setup_manager->remove_model_from_render(m_view_window);
 			else if(m_form->active_content==m_viewer_editor)
-				m_viewer_editor->remove_models_from_render();
+				m_viewer_editor->remove_models_from_render(m_view_window);
+			else if (m_form->active_content == m_view_window)
+				m_setup_manager->remove_vmodel_from_render();
 
 			m_pv = NEW(xray::resources::user_data_variant)();
 			xray::rtp::controller_resource_user_data data;
@@ -907,11 +981,11 @@ void animation_editor::tick_navigation_mode()
 	const float length_factor = 0.5f;
 	const float3 root_pos = m.c.xyz();
 	const float3 control_path_end = root_pos + float3(m_control_path->x, 0, m_control_path->y) * length_factor * 3.f;
-	m_renderer->draw_3D_screen_line(*m_scene, root_pos, control_path_end, math::color(155, 0, 0), 2.0f, 0xFFFFFFFF);
+	m_renderer->draw_3D_screen_line(*m_scene, root_pos, control_path_end, math::color(155, 0, 0), 2.0f, 0xFFFFFFFF, false);
 	const float3 root_dir_end = m.c.xyz() - float3(m.k.x, 0, m.k.z) * length_factor * 0.8f;
-	m_renderer->draw_3D_screen_line(*m_scene, root_pos, root_dir_end, math::color(0, 155, 0), 2.0f, 0xFFFFFFFF);
+	m_renderer->draw_3D_screen_line(*m_scene, root_pos, root_dir_end, math::color(0, 155, 0), 2.0f, 0xFFFFFFFF, false);
 	const float3 view_dir_end = root_pos + float3(m_control_view_dir->x, 0, m_control_view_dir->y) * length_factor * 3.f;;
-	m_renderer->draw_3D_screen_line(*m_scene, root_pos, view_dir_end, math::color(0, 0, 155), 2.0f, 0xFFFFFFFF);
+	m_renderer->draw_3D_screen_line(*m_scene, root_pos, view_dir_end, math::color(0, 0, 155), 2.0f, 0xFFFFFFFF, false);
 }
 
 void animation_editor::move_controller()
@@ -1187,6 +1261,8 @@ void animation_editor::load_settings( RegistryKey^ product_key )
 
 	m_view_window->load_settings( editor_key );
 
+	m_model_path = editor_key->GetValue("model", "character/human/neutral/neutral_01/neutral_01")->ToString();
+
 	editor_key->Close		( );
 }
 
@@ -1195,6 +1271,8 @@ void animation_editor::save_settings( RegistryKey^ product_key )
 	RegistryKey^ editor_key		= xray::base_registry_key::get_sub_key(product_key, "animation_editor");
 
 	m_view_window->save_settings( editor_key );
+
+	editor_key->SetValue("model", m_model_path);
 
 	editor_key->Close		( );
 }

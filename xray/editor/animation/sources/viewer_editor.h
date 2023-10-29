@@ -6,6 +6,10 @@
 #ifndef XRAY_ANIMATION_EDITOR_VIEWER_EDITOR_H_INCLUDED
 #define XRAY_ANIMATION_EDITOR_VIEWER_EDITOR_H_INCLUDED
 
+using namespace xray::editor_base;
+
+#include <xray/render/engine/base_classes.h>
+
 using namespace System;
 using namespace System::Windows::Forms;
 using namespace System::Collections;
@@ -49,8 +53,8 @@ namespace animation_editor {
 		bool					predicate_save_scene_as					();
 		bool					predicate_has_target					();
 		void					save_document_as						();
-		void					add_models_to_render					();
-		void					remove_models_from_render				();
+		bool					add_models_to_render					(scene_view_panel^ m_view_window);
+		bool					remove_models_from_render				(scene_view_panel^ m_view_window);
 		void					change_locked							();
 		void					save_node_as_clip						();
 		bool					anim_node_selected						();

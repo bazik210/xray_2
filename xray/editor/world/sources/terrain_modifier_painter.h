@@ -14,7 +14,7 @@ namespace xray {
 
 namespace editor {
 
-enum class painter_mode{texture=0, diffuse=1, both=3};
+public enum class painter_mode{texture=0, diffuse=1, both=3};
 
 public ref class terrain_modifier_painter_base abstract : public terrain_modifier_control_base
 {

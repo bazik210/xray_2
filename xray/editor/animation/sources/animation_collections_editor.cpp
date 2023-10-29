@@ -356,16 +356,32 @@ void animation_collections_editor::scene_created ( xray::render::scene_ptr const
 	m_model						= gcnew animation_model( *m_scene, m_animation_editor->get_renderer( ).scene( ), m_animation_editor->get_renderer( ).debug( ), "model_0", animation_editor::models_path, float4x4( ).identity( ), rq );
 }
 
-void animation_collections_editor::add_models_to_render ( )
+bool animation_collections_editor::add_models_to_render ( )
 {
 	if( m_model != nullptr )
+	{
 		m_model->add_to_render		( );
+		return true;
+	}
+return false;
 }
 
-void animation_collections_editor::remove_models_from_render ( )
+void animation_collections_editor::update_model( animation_model^ model )
 {
-	if( m_model != nullptr )
+	m_model->remove_from_render();
+	delete m_model;
+	m_model = model;
+	query_result_delegate* rq = NEW(query_result_delegate)(gcnew query_result_delegate::Delegate(this, &animation_collections_editor::model_loaded), g_allocator);
+	m_model = gcnew animation_model(*m_scene, m_animation_editor->get_renderer().scene(), m_animation_editor->get_renderer().debug(), "model_0", m_model->model_name, float4x4().identity(), rq);
+}
+
+bool animation_collections_editor::remove_models_from_render ( )
+{
+	if( m_model != nullptr ) {
 		m_model->remove_from_render	( );
+		return true;
+	}
+return false;
 }
 
 ////////////////////////////////////////		 P R I V A T E				////////////////////////////////////////
