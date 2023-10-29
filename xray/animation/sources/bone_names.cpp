@@ -138,7 +138,8 @@ bone_index_type	bone_names::bone_index( pcstr name )const
 	//u32 crc = string_crc( name );
 	bone_name_index temp( u32(-1), name );
 
-	vector<bone_name_index>::const_iterator r = std::lower_bound( bone_names_idx(), bone_names_idx() + m_bone_count, temp, crc_cmp );
+	//vector<bone_name_index>::const_iterator r = std::lower_bound( bone_names_idx(), bone_names_idx() + m_bone_count, temp, crc_cmp );
+	auto r = std::lower_bound( bone_names_idx(), bone_names_idx() + m_bone_count, temp, crc_cmp );
 
 	if ( temp.crc == r->crc &&
 		name[ 0 ] == r->name[0] 
@@ -156,7 +157,8 @@ bone_index_type	bone_names::bone_index( pcstr name )const
 
 pcstr bone_names::bone_name		( bone_index_type index )const
 {
-	vector<bone_name_index>::const_iterator it = bone_names_idx();
+	//vector<bone_name_index>::const_iterator it = bone_names_idx();
+	auto it = bone_names_idx();
 	for (; it!=bone_names_idx() + m_bone_count; ++it)
 		if (it->index == index)
 			return it->name;

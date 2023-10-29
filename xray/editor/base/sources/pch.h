@@ -18,6 +18,8 @@
 #include "editor_base_memory.h"
 #pragma managed( pop )
 
+#pragma comment(lib, "legacy_stdio_definitions.lib")
+
 namespace xray {
 namespace editor_base {
 #	include <xray/editor/base/unmanaged_string.h>

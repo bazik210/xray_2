@@ -28,10 +28,10 @@ void   query_result::send_to_create_resource ()
 	// NO PROCESSING WAY
 
 	m_managed_resource				=	m_raw_managed_resource;
-	LOGI_INFO("resources",				"created %s", 
-										 resources::log_string(m_managed_resource.c_ptr()).c_str(),
-										 m_managed_resource.c_ptr(), 
-										 uid());
+//	LOGI_INFO("resources",				"created %s", 
+// 										 resources::log_string(m_managed_resource.c_ptr()).c_str(),
+// 										 m_managed_resource.c_ptr(), 
+// 										 uid());
 
 	set_create_resource_result			(cook_base::result_success, query_result_for_user::error_type_unset);
 	m_final_resource_size			=	m_managed_resource->get_size();
@@ -290,26 +290,26 @@ void   query_result::do_create_resource_end_part ()
 	else if ( m_create_resource_result == cook_base::result_requery )
 	{
 		set_error_type						(error_type_unset, false);
-		LOGI_INFO							("resources", "requerying resource '%s' [quid %d]", 
-											 m_raw_managed_resource ? m_raw_managed_resource->log_string().c_str() : get_requested_path(),
-											 uid());
+// 		LOGI_INFO							("resources", "requerying resource '%s' [quid %d]", 
+// 											 m_raw_managed_resource ? m_raw_managed_resource->log_string().c_str() : get_requested_path(),
+// 											 uid());
 	}
 	else
 	{
 		if ( has_flag(flag_zero_unmanaged_resource_was_set) )
 		{
-			LOGI_INFO						("resources",	"no resource was cooked by cook, request path was: '%s' [quid %d]", 
-											 get_requested_path(),
-											 uid());
+// 			LOGI_INFO						("resources",	"no resource was cooked by cook, request path was: '%s' [quid %d]", 
+// 											 get_requested_path(),
+// 											 uid());
 		}
 		else
 		{
-			LOGI_INFO						("resources",	"%s %s [quid %d]", 
-											 need_create_resource_if_no_file() ? "generated" : "cooked",
-											 resources::log_string(m_managed_resource ? 
-												(resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()
-																   ).c_str(),
-											 uid());
+// 			LOGI_INFO						("resources",	"%s %s [quid %d]", 
+// 											 need_create_resource_if_no_file() ? "generated" : "cooked",
+// 											 resources::log_string(m_managed_resource ? 
+// 												(resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()
+// 																   ).c_str(),
+// 											 uid());
 		}
 	}
 }
@@ -462,19 +462,19 @@ void   query_result::finish_translated_query (cook_base::result_enum result)
 
 	if ( has_flag(flag_zero_unmanaged_resource_was_set) )
 	{
-		LOGI_INFO							("resources", "no resource was cooked by cook: %s", log_string().c_str());
+//		LOGI_INFO							("resources", "no resource was cooked by cook: %s", log_string().c_str());
 	}
 	else if ( !is_requery_result && result == cook_base::result_success )
 	{
 		R_ASSERT							(m_managed_resource || m_unmanaged_resource);
 		if ( is_new_resource )
 		{
-			LOGI_INFO						("resources",	"cooked %s [quid %d] (cook id: %d)", 
-											 resources::log_string(m_managed_resource ? 
-																   (resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()).c_str(),
-											 uid(),
-											 m_class_id
-											);
+// 			LOGI_INFO						("resources",	"cooked %s [quid %d] (cook id: %d)", 
+// 											 resources::log_string(m_managed_resource ? 
+// 																   (resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()).c_str(),
+// 											 uid(),
+// 											 m_class_id
+// 											);
 		}
 	}
 

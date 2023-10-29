@@ -215,6 +215,8 @@ public:
 	render::scene_view*		get_scene_view			();
 	
 	speedtree_forest::tree_render_info_array_type	m_visible_trees;
+
+	bool					speedtree_cp_log	=	true;
 	
 private:
 

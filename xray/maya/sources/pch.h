@@ -86,7 +86,6 @@
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MFnMatrixAttribute.h>
-#include <maya/MFnPlugin.h>
 #include <maya/MFileObject.h>
 #include <maya/MEulerRotation.h>
 #include <maya/MAnimControl.h>

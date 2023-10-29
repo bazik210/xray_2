@@ -58,12 +58,17 @@ inline u32 xray::shared_string::size						( ) const
 	return		( length( ) );
 }
 
-inline xray::shared_string::operator unspecified_bool_type	( ) const
+// Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
+// inline xray::shared_string::operator unspecified_bool_type	( ) const
+// {
+// 	if ( !m_pointer )
+// 		return	( 0 );
+// 
+// 	return		( &shared_string::c_str );
+// }
+xray::shared_string::operator bool					( ) const
 {
-	if ( !m_pointer )
-		return	( 0 );
-
-	return		( &shared_string::c_str );
+	return m_pointer == nullptr ? false : true;
 }
 
 #endif // #ifndef XRAY_SHARED_STRING_INLINE_H_INCLUDED

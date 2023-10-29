@@ -137,24 +137,27 @@ void backend::update_input_layout()
 	}
 }
 
-void backend::set_render_target( enum_render_target_enum target, render_target const * rt)
-{
-	ID3DRenderTargetView * rt_view = (rt == NULL) ? NULL : rt->get_target_view();
+// Inlined
+// void backend::set_render_target( enum_render_target_enum target, render_target const * rt)
+// {
+// 	ID3DRenderTargetView * rt_view = (rt == NULL) ? NULL : rt->get_target_view();
+// 
+// 	if( m_targets[target] != rt_view)
+// 	{
+// 		m_targets[target] = rt_view;
+// 		m_dirty_targets.render_targets[target] = true;
+// 	}
+// }
 
-	if( m_targets[target] != rt_view)
-	{
-		m_targets[target] = rt_view;
-		m_dirty_targets.render_targets[target] = true;
-	}
-}
 
-void backend::set_depth_stencil_target( render_target const * zrt)
-{
-	ID3DDepthStencilView* zrt_view = (zrt == NULL) ? NULL : zrt->get_depth_stencil_view();
-
-	m_dirty_targets.depth_stencil |=	m_zb != zrt_view;
-	m_zb = zrt_view;
-}
+// Inlined
+// void backend::set_depth_stencil_target( render_target const * zrt)
+// {
+// 	ID3DDepthStencilView* zrt_view = (zrt == NULL) ? NULL : zrt->get_depth_stencil_view();
+// 
+// 	m_dirty_targets.depth_stencil |=	m_zb != zrt_view;
+// 	m_zb = zrt_view;
+// }
 
 void backend::flush()
 {

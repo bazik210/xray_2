@@ -178,12 +178,12 @@ void   quality_increase_functionality::schedule_to_increase_quality (increase_qu
 		resource->unset_flags				(resource_flag_in_grm_increase_quality_queue);
 
 		query_result * const query		=	resource->cast_query_result();
-		LOGI_DEBUG							("grm", "%s %s scheduling increase quality %d->%d (target satisfaction: %f)", 
-											query ? "query" : "resource", 
-											log_string(resource).c_str(), 
-											resource->current_quality_level(),
-											resource->target_quality_level(),
-											resource->target_satisfaction());
+// 		LOGI_DEBUG							("grm", "%s %s scheduling increase quality %d->%d (target satisfaction: %f)", 
+// 											query ? "query" : "resource", 
+// 											log_string(resource).c_str(), 
+// 											resource->current_quality_level(),
+// 											resource->target_quality_level(),
+// 											resource->target_satisfaction());
 
 		resource->increase_quality_to_target	(query);
 	}
@@ -198,13 +198,14 @@ void   quality_increase_functionality::log_increase_quality_queue ()
 													++it )
 	{
 		resource_base * const resource	=	& * it;
-		log_string.appendf("%s(", resources::log_string(resource).c_str());
+		//log_string.appendf("%s(", resources::log_string(resource).c_str());
+		log_string.appendf("PLACEHOLDER");
 		if ( resource->current_quality_level() == resource->target_quality_level() )
 			log_string.appendf("%0.2f) ", resource->target_satisfaction());
 		else
 			log_string.appendf("%0.2f->%0.2f) ", resource->current_satisfaction(), resource->target_satisfaction());
 	}
-	LOGI_DEBUG									("grm", "increase quality queue: %s", log_string.c_str());
+//	LOGI_DEBUG									("grm", "increase quality queue: %s", log_string.c_str());
 }
 
 void   quality_increase_functionality::tick ()

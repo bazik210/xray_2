@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( render_facade, lib ) )
+#pragma comment(lib, "xray_renderer_facade.lib" )
 
 #endif // #ifndef XRAY_RENDER_BASE_LIBRARY_LINKAGE_H_INCLUDED

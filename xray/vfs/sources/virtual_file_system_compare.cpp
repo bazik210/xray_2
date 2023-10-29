@@ -12,7 +12,8 @@
 #include <xray/std_containers.h>
 #undef USER_ALLOCATOR
 
-#include <hash_map>
+//#include <hash_map>
+#include <unordered_map>
 
 namespace xray {
 namespace vfs {
@@ -20,7 +21,8 @@ namespace vfs {
 struct hash_traits	{	size_t	operator () (base_node<> * node) const { return (size_t)node; }							};
 struct equal_traits	{	bool	operator () (base_node<> * left, base_node<> * right) const { return left == right;	}	};
 
-typedef ::std::hash_map< base_node<> *, base_node<> *, hash_traits, equal_traits, std_allocator< base_node<> * > >	node_hash_map;
+//typedef ::std::hash_map< base_node<> *, base_node<> *, hash_traits, equal_traits, std_allocator< base_node<> * > >	node_hash_map;
+typedef ::std::unordered_map< base_node<> *, base_node<> *, hash_traits, equal_traits, std_allocator< base_node<> * > >	node_hash_map;
 
 void   assert_equal_trees				(base_node<> *			left_node, 
 										 base_node<> *			right_node, 

@@ -80,8 +80,8 @@ u32 graph_generator_tessellator::get_similar_edge (
 		u32* edge_id1
 	) 
 {
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + 3 * triangle_id0;
-	u32 const* indices1 = m_triangles_mesh.indices.begin() + 3 * triangle_id1;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + 3 * triangle_id0];//m_triangles_mesh.indices.begin() + 3 * triangle_id0;
+	u32 const* indices1 = &m_triangles_mesh.indices[0 + 3 * triangle_id1];//m_triangles_mesh.indices.begin() + 3 * triangle_id1;
 
 	for ( u32 i = 0; i < 3; ++i ) {
 		u32 const vertex_index0 = indices0[i];

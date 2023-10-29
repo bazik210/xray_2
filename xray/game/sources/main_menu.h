@@ -16,7 +16,7 @@ namespace stalker2 {
 struct main_menu_ui;
 class game;
 
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 struct flash_movie;
 struct ui_mouse_position
 {
@@ -50,7 +50,7 @@ public:
 	virtual int		input_priority			( ) { return 100; }
 	
 private:
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 	void			create_main_menu_ui		();
 #else	
 	input::handler*	dialog_input_handler	();
@@ -60,7 +60,7 @@ private:
 			void	query_resources			( );
 			void	on_resources_ready		( xray::resources::queries_result& data );
 
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 	flash_movie*	m_main_menu_ui;
 	timing::timer	m_timer;
 	u32				m_main_menu_ui_last_time;

@@ -90,7 +90,7 @@ void graph_generator::remove_areas_in_cuboid( triangles_mesh_type& triangles_mes
 	triangle_set_type::iterator i = front->begin();
 	triangle_set_type::iterator e = front->end();
 	for ( ; i != e; ++i ) {
-		u32* indices = triangles_mesh.indices.begin() + (*i) * 3;
+		u32* indices = &triangles_mesh.indices[0 + (*i) * 3];//triangles_mesh.indices.begin() + (*i) * 3;
 		u32 count = 0;
 		for ( u32 j = 0; j < 3; ++j ) {
 			if ( is_in_cuboid( cuboid, triangles_mesh.vertices[ indices[j] ] ))

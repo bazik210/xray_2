@@ -21,7 +21,8 @@ namespace xray.editor.wpf_controls.animation_playback
 	{
 		public animation_item_name_view()
 		{
-			InitializeComponent();
+			//TODO Fix GSC code
+			//InitializeComponent();
 		}
 	}
 }

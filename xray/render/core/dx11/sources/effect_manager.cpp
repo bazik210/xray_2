@@ -159,6 +159,8 @@ void effect_manager::remove_effect(res_effect* in_effect)
 		if (it->effect == in_effect)
 		{
 			m_effects.erase(it);
+			// it shouldn't interate after erasing!
+			 break;
 		}
 	}
 }

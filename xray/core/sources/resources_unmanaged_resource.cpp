@@ -45,7 +45,7 @@ unmanaged_resource::~unmanaged_resource ()
 	if ( m_deleter )
 	{
 		R_ASSERT							(creation_source() != creation_source_unset);
-		LOGI_INFO							("resources", "deleted %s", resources::log_string(this).c_str());
+//		LOGI_INFO							("resources", "deleted %s", resources::log_string(this).c_str());
 		g_resources_manager->debug()->unregister_unmanaged_resource	(this);
 	}
 }

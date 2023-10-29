@@ -97,14 +97,14 @@ void   query_result::end_query_might_destroy_this_impl ()
 	}
 
 	if ( m_out_of_memory_retries_count )
-		LOGI_INFO							("grm", "successfully requeried out of memory query: '%s'", log_string().c_str());
+//		LOGI_INFO							("grm", "successfully requeried out of memory query: '%s'", log_string().c_str());
 
 	R_ASSERT								(!has_flag(flag_finished));
 	if ( is_successful() && has_flag(flag_reused_resource) )
 	{
-		LOGI_INFO							("resources",	"reused resource: %s", 
-											 resources::log_string(m_managed_resource ? 
-											   (resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()).c_str());
+//		LOGI_INFO							("resources",	"reused resource: %s", 
+// 											 resources::log_string(m_managed_resource ? 
+// 											   (resource_base *)m_managed_resource.c_ptr() : m_unmanaged_resource.c_ptr()).c_str());
 	}
 
 	g_resources_manager->debug()->unregister_pending_query	(this);	
@@ -263,7 +263,7 @@ void   query_result_for_cook::finish_query_impl (cook_base::result_enum		result,
 	if ( result == cook_base::result_error )
 	{
 		if ( m_parent->assert_on_fail() && assert_on_cook_failure )
-			LOGI_WARNING					("resources", "cook of %s failed", log_string().c_str());
+//			LOGI_WARNING					("resources", "cook of %s failed", log_string().c_str());
 
 		if ( assert_on_cook_failure && s_assert_on_cook_failure.is_set() )
 			DEBUG_BREAK						();

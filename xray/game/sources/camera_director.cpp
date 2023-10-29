@@ -24,7 +24,7 @@ m_active_camera		( NULL )
 	float aspect( 4.f/3.f );
 	float fov( 57.5f*math::pi/180.0f );
 
-	m_projection		= math::create_perspective_projection( fov/aspect, aspect, 0.2f, 5000.0f );
+	m_projection		= math::create_perspective_projection( fov/aspect, aspect, 0.1f, 5000.0f );
 }
 
 void camera_director::set_position_direction( math::float3 const& p, math::float3 const& d )

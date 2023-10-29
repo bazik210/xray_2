@@ -91,10 +91,10 @@ void   game_resources_manager::on_resource_freed_callback (query_result * destru
 
 void   game_resources_manager::out_of_memory_callback (query_result * query)
 {
-	LOGI_INFO								("grm", "%s : out of memory (query satisfaction: %0.2f) [needed: %s]", 
-											 log_string(query).c_str(),
-											 query->target_satisfaction(),
-											 query->get_out_of_memory().log_string().c_str());
+// 	LOGI_INFO								("grm", "%s : out of memory (query satisfaction: %0.2f) [needed: %s]", 
+// 											 log_string(query).c_str(),
+// 											 query->target_satisfaction(),
+// 											 query->get_out_of_memory().log_string().c_str());
 
 	if ( query->has_flag(query_result::flag_in_grm_out_of_memory_queue) )
 		return;
@@ -154,7 +154,7 @@ void   game_resources_manager::tick_memory_type (memory_type * const info)
 
 	info->listen_type					=	saved_listen_type;	
 	
-	LOGI_INFO								("grm", "couldn't free anything for %s", log_string(query).c_str());
+//	LOGI_INFO								("grm", "couldn't free anything for %s", log_string(query).c_str());
 
 	if ( info->listen_type == memory_type::listen_none )
 	{
@@ -172,8 +172,8 @@ void   game_resources_manager::tick_memory_type (memory_type * const info)
 	}
 	
 	info->queue.pop_front					();
-	LOGI_INFO								("grm", "%d sec passed and no deallocation - failing query %s", 
-											 sec_to_wait, log_string(query).c_str());
+// 	LOGI_INFO								("grm", "%d sec passed and no deallocation - failing query %s", 
+// 											 sec_to_wait, log_string(query).c_str());
 
 	query->end_query_might_destroy_this		();
 	

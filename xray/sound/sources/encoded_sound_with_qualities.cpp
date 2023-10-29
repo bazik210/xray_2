@@ -221,11 +221,11 @@ void encoded_sound_with_qualities::on_quality_loaded	(queries_result & resources
 		add_quality						(quality_child, current_result_quality);
 	}
 
-	LOG_DEBUG							("grm", "%s qualities(->%d) for %s %s", 
-										increasing ? "increasing" : "loading",
-										current_quality_level(),
-										resources::log_string(this).c_str(),
-										some_quality_loaded ? "successful" : "failed");
+// 	LOG_DEBUG							("grm", "%s qualities(->%d) for %s %s", 
+// 										increasing ? "increasing" : "loading",
+// 										current_quality_level(),
+// 										resources::log_string(this).c_str(),
+// 										some_quality_loaded ? "successful" : "failed");
 	if ( m_parent_query )
 	{
 		m_parent_query->finish_query	(some_quality_loaded ? 

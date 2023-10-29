@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( engine_pc_opengl, lib ) )
+#pragma comment(lib, "xray_engine_pc_opengl.lib" ) )
 
 #endif // #ifndef XRAY_ENGINE_PC_LIBRARY_LINKAGE_H_INCLUDED

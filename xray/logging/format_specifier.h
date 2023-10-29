@@ -32,7 +32,7 @@ typedef	bool	format_enabled_container[format_specifier_count];
 typedef fixed_string<512>												format_string_type;
 // this is node of a tree that represents an ordered list of format specifiers enums
 // that are used to format logging
-class format_specifier : private noncopyable
+class format_specifier/* : private noncopyable*/
 {
 public:
 	format_specifier					(format_specifier_enum specifier);

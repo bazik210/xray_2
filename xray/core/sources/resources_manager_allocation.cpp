@@ -394,7 +394,7 @@ managed_resource *   resources_manager::allocate_managed_resource (u32 size, cla
 	out_resource->set_is_unmovable			(true);
 
 #if DO_RESOURCE_LOGGING
-	LOGI_INFO("resources:allocator",		"%s %s", "allocated", res->log_string().c_str());
+//	LOGI_INFO("resources:allocator",		"%s %s", "allocated", res->log_string().c_str());
 #endif // #if DO_RESOURCE_LOGGING
 
 	return									out_resource;
@@ -420,14 +420,14 @@ void   resources_manager::free_managed_resource (managed_resource * resource)
 	vfs_sub_fat_resource_ptr const sub_fat_holder	=	resource->get_sub_fat();
 	resource->set_sub_fat_resource			(NULL);
 
-	LOGI_INFO								("resources", "deleted %s", log_string(resource).c_str());
-	memory::g_resources_managed_allocator.deallocate	(resource->grab_managed_node());
-	RES_DELETE								(resource);
+//	LOGI_INFO								("resources", "deleted %s", log_string(resource).c_str());
+ 	memory::g_resources_managed_allocator.deallocate	(resource->grab_managed_node());
+ 	RES_DELETE								(resource);
 
 	after_resource_deleted					(NULL, false, destruction_observer, memory_usage, class_id, request_name.c_str());
 
 #if DO_RESOURCE_LOGGING
-	LOGI_INFO("resources:allocator",		"deallocated %s", res->log_string().c_str());
+//	LOGI_INFO("resources:allocator",		"deallocated %s", res->log_string().c_str());
 #endif // #if DO_RESOURCE_LOGGING
 }
 

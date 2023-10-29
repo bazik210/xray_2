@@ -1,4 +1,6 @@
-add_library(debug STATIC
+project(debug LANGUAGES CXX)
+
+add_library(debugging STATIC
 	# core
 	"${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/pch.h"
@@ -40,13 +42,8 @@ add_library(debug STATIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/macros.cpp"
 	"${CMAKE_CURRENT_SOURCE_DIR}/platform.h"
 	"${CMAKE_CURRENT_SOURCE_DIR}/utils.h"
+	"${CMAKE_CURRENT_SOURCE_DIR}/boost_exception.cpp"
+	"${CMAKE_CURRENT_SOURCE_DIR}/boost_exception_inline.h"
 )
 
-# Put library to xray namespace
-add_library(xray::debug ALIAS debug)
-
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../../")
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-target_include_directories(debug PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../")
-
-set_target_properties(debug PROPERTIES FOLDER "engine/core")
+set_target_properties(debugging PROPERTIES FOLDER "engine/core")

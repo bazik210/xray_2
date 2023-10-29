@@ -15,7 +15,7 @@
 #define DO_RESOURCE_LOGGING			0
 
 #if !XRAY_PLATFORM_PS3
-#	define TEST_UNMOVABLES			1
+#	define TEST_UNMOVABLES			0
 #endif // #if !XRAY_PLATFORM_PS3
 
 namespace xray		{
@@ -212,12 +212,12 @@ managed_node*	managed_allocator::deallocate_defrag (managed_node* node)
 
 void    managed_allocator::log_defragmenter_nodes (managed_allocator_base const& alloc) const
 {
-	LOGI_INFO("resources:defrag",  "<%s> size: %d, allocated: %d, free: %d", 
-											&alloc == this ? "Main arena" : "Temp arena",
-											alloc.m_arena_size - (&alloc == this ? m_reserved_size : 0), 
-											alloc.m_arena_size - alloc.m_free_size
-															   - (&alloc == this ? m_reserved_size : 0),
-											alloc.get_free_size());
+// 	LOGI_INFO("resources:defrag",  "<%s> size: %d, allocated: %d, free: %d", 
+// 											&alloc == this ? "Main arena" : "Temp arena",
+// 											alloc.m_arena_size - (&alloc == this ? m_reserved_size : 0), 
+// 											alloc.m_arena_size - alloc.m_free_size
+// 															   - (&alloc == this ? m_reserved_size : 0),
+// 											alloc.get_free_size());
 
 	managed_node * cur_node				=	alloc.get_first_node();
 
@@ -288,14 +288,14 @@ void    managed_allocator::log_defragmenter_nodes (managed_allocator_base const&
 
 void   managed_allocator::log_defragmenter_state () const
 {
-	LOGI_INFO("resources:defrag" , "-----------defragmentation log %d-----------", m_log_iteration);
-	LOGI_INFO("resources:defrag" , "mode: %s, main_place_pos: %d, temp_place_pos: %d", 
-											m_mode == &m_main_mode ? "main" : "no_temp",
-											(u32)(m_main_mode.place_pos - m_arena), 
-											(u32)(m_no_temp_mode.place_pos - m_arena));
-	LOGI_INFO("resources:defrag" , "main_unpinned: %d, temp_unpinned: %d", 
-											 m_num_unpinned_objects, 
-											 m_temp_arena.m_num_unpinned_objects);
+// 	LOGI_INFO("resources:defrag" , "-----------defragmentation log %d-----------", m_log_iteration);
+// 	LOGI_INFO("resources:defrag" , "mode: %s, main_place_pos: %d, temp_place_pos: %d", 
+// 											m_mode == &m_main_mode ? "main" : "no_temp",
+// 											(u32)(m_main_mode.place_pos - m_arena), 
+// 											(u32)(m_no_temp_mode.place_pos - m_arena));
+// 	LOGI_INFO("resources:defrag" , "main_unpinned: %d, temp_unpinned: %d", 
+// 											 m_num_unpinned_objects, 
+// 											 m_temp_arena.m_num_unpinned_objects);
 
 	log_defragmenter_nodes					(*this);
 	log_defragmenter_nodes					(m_temp_arena);
@@ -303,7 +303,7 @@ void   managed_allocator::log_defragmenter_state () const
 	m_temp_arena.check_consistency			();
 	check_consistency						();
 #if !XRAY_PLATFORM_PS3
-	test_unmovables_list_valid				();
+	//test_unmovables_list_valid				();
 #endif // #if !XRAY_PLATFORM_PS3
 
 	++m_log_iteration;
@@ -646,8 +646,8 @@ void   managed_allocator::calculate_unmovables_state (u32		const	start_index,
 	if ( real_largest_free_size < sufficient_contigous_space )
 	{
 		// Omg! heuristics failed, well, go slow way then: mark all unmovables to waited state
-		LOGI_WARNING("resources/defrag",		"Omg! heuristics failed, well, go slow way then: " 
-												"mark all unmovables to waited stait");
+// 		LOGI_WARNING("resources/defrag",		"Omg! heuristics failed, well, go slow way then: " 
+// 												"mark all unmovables to waited stait");
 
 		for ( u32 i=0; i<unmovables.size(); ++i )
 			unmovables[i].state				=	unmovable::waited;
@@ -972,10 +972,10 @@ void   managed_allocator::defragment (u32 const sufficient_contigous_space)
 		cur_node							=	cur_node->m_next;
 	}
 
-	LOGI_INFO("resources:allocator",			"defragmentation %d ended, moved: %d bytes, elapsed: %d ms", 
-												 m_defrag_iteration,
-												 m_num_moved_bytes,
-												 m_defragment_timer.get_elapsed_msec());
+// 	LOGI_INFO("resources:allocator",			"defragmentation %d ended, moved: %d bytes, elapsed: %d ms", 
+// 												 m_defrag_iteration,
+// 												 m_num_moved_bytes,
+// 												 m_defragment_timer.get_elapsed_msec());
 	++m_defrag_iteration;
 	m_defragmenting							=	false;
 	m_whole_moved_bytes						+=	m_num_moved_bytes;

@@ -58,7 +58,9 @@ class stats_graph;
 //class human_npc;
 //class building_object;
 //class composite_building;
+#ifdef XRAY_RENDERER_FLASH
 class flash_factory;
+#endif
 class key_binder;
 
 //enum human_npc_behaviour_type_enum
@@ -139,7 +141,9 @@ public:
 //	xray::physics::world&			physics			( )			{ return *m_physics_world; }
 	xray::animation::world&			animation_world	( )			{ return *m_animation_world; }
 //	xray::ai::navigation::world& ai_navigation_world( ) const	{ return *m_ai_navigation_world; }
+#ifdef XRAY_RENDERER_FLASH
 	flash_factory&					get_flash_factory( );
+#endif
 	stats&							get_stats		( )			{ return *m_stats; }
 
 	xray::render::game::renderer&			renderer			( )			{ return m_renderer; }
@@ -265,8 +269,9 @@ private:
 	main_menu*								m_main_menu;
 	lobby_menu*								m_lobby_menu;
 	game_scene*								m_active_scene;
-
-	flash_factory*							m_flash_factory;
+	#ifdef	XRAY_RENDERER_FLASH
+		flash_factory*							m_flash_factory;
+	#endif
 
 #ifndef MASTER_GOLD
 //	xray::sound::sound_debug_stats*			m_sound_stats;

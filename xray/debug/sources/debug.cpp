@@ -54,14 +54,15 @@ void	xray::debug::enable_log_callback	( )
 	interlocked_decrement					(s_log_disable_counter);
 }
 
-#if !defined(_CPPUNWIND)
-void boost::throw_exception(std::exception const& exception)
-{
-	XRAY_UNREFERENCED_PARAMETERS(&exception);
-	FATAL("boost::throw_exception: %s", exception.what());
-}
-
-#endif // defined(_CPPUNWIND)
+// Moved to boost_exception.cpp
+// #if !defined(_CPPUNWIND)
+// void boost::throw_exception(std::exception const& exception)
+// {
+// 	XRAY_UNREFERENCED_PARAMETERS(&exception);
+// 	FATAL("boost::throw_exception: %s", exception.what());
+// }
+//
+//#endif // defined(_CPPUNWIND)
 
 void xray::debug::initialize		( debug::engine * engine )
 {

@@ -50,15 +50,17 @@
 #include "material_effects_instance_cook.h"
 #include "model_converter.h"
 #include "decal_instance.h"
-#include "flash_renderer.h"
-
+#ifdef XRAY_RENDERER_FLASH
+	#include "flash_renderer.h"
+#endif
 #include <xray/fs_watcher.h>
 
 #include <xray/console_command.h>
 #include <xray/console_command_processor.h>
 #include <xray/render/core/options.h>
-
-#include <GFx.h>
+#ifdef GFX_SCALEFORM
+	#include <GFx.h>
+#endif
 
 #pragma comment( lib,"dxgi.lib")
 
@@ -358,7 +360,9 @@ engine::world::world						( ) :
 
 	register_cooks					( );
 
+#ifdef GFX_SCALEFORM
 	LOG_INFO("render::engine::world() gfx heap is %x", Scaleform::Memory::GetGlobalHeap());
+#endif
 
 	XRAY_CONSTRUCT_REFERENCE		( s_singletons_on_preinitialize, singletons_on_preinitialize )( );
 	
@@ -1551,6 +1555,7 @@ void engine::world::draw_text					(
 	);
 }
 
+#ifdef XRAY_RENDERER_FLASH
 void engine::world::show_movie					( render_output_window_ptr const& base_render_output_window, stalker2::flash_movie* movie )
 {
 	render_output_window* const output_window = static_cast_checked< render_output_window* >( base_render_output_window.c_ptr() );
@@ -1563,6 +1568,6 @@ void engine::world::hide_movie					( render_output_window_ptr const& base_render
 	output_window->m_flash_renderer->hide_movie(movie);
 
 }
-
+#endif
 } // namespace render
 } // namespace xray

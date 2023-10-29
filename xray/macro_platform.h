@@ -14,11 +14,11 @@
 #	error do not define XRAY_PLATFORM_WINDOWS_32 macro
 #endif // #ifdef XRAY_PLATFORM_WINDOWS_32
 
-#ifdef WIN32
+#ifdef PLATFORM_WIN32
 #	define XRAY_PLATFORM_WINDOWS_32	1
-#else // #ifdef WIN32
+#else // #ifdef PLATFORM_WIN32
 #	define XRAY_PLATFORM_WINDOWS_32	0
-#endif // #ifdef WIN32
+#endif // #ifdef PLATFORM_WIN32
 
 ////////////////////////////////////////////////////////////////////////////
 // XRAY_PLATFORM_WINDOWS_64
@@ -27,11 +27,11 @@
 #	error do not define XRAY_PLATFORM_WINDOWS_64 macro
 #endif // #ifdef XRAY_PLATFORM_WINDOWS_64
 
-#ifdef WIN64
+#ifdef PLATFORM_WIN64
 #	define XRAY_PLATFORM_WINDOWS_64	1
-#else // #ifdef WIN32
+#else // #ifdef PLATFORM_WIN64
 #	define XRAY_PLATFORM_WINDOWS_64	0
-#endif // #ifdef WIN32
+#endif // #ifdef PLATFORM_WIN64
 
 ////////////////////////////////////////////////////////////////////////////
 // XRAY_PLATFORM_WINDOWS
@@ -151,7 +151,7 @@
 #		error you cannot specify several target platforms
 #	endif // #if XRAY_PLATFORM_WINDOWS_32 | XRAY_PLATFORM_XBOX_360 | XRAY_PLATFORM_XBOX_360
 #else								// #elif XRAY_PLATFORM_PS3
-#		error unknown target platform!
+//#		error unknown target platform!
 #endif // #if XRAY_PLATFORM_WINDOWS_32
 
 #endif // #ifndef XRAY_MACRO_PLATFORM_H_INCLUDED

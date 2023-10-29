@@ -9,6 +9,6 @@
 
 #include <xray/macro_library_name.h>
 
-#pragma comment(lib, XRAY_LIBRARY_NAME( render_core_pc_dx11, lib ) )
+#pragma comment(lib, "xray_renderer_core_pc_dx11.lib" )
 
 #endif // #ifndef XRAY_RENDER_CORE_LIBRARY_LINKAGE_H_INCLUDED

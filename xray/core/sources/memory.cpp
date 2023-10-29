@@ -77,7 +77,9 @@ static xray::uninitialized_reference<xray::threading::mutex>	s_process_heap_walk
 static xray::memory::crt_allocator_type	s_crt_allocator;
 #endif // #ifndef XRAY_STATIC_LIBRARIES
 
+#if XRAY_HEAP_PROCESS_ALLOCATOR
 static xray::memory::process_allocator	s_process_allocator;
+#endif
 
 struct allocator_data {
 	xray::memory::base_allocator*		allocator;
@@ -124,9 +126,14 @@ void xray::memory::preinitialize			( )
 #ifndef XRAY_STATIC_LIBRARIES
 	s_crt_allocator.do_register					(             0,	"C runtime library"		);
 #else // #ifndef XRAY_STATIC_LIBRARIES
-	g_crt_allocator->do_register				(			  0,	"C runtime library"		);
+	#if XRAY_USE_CRT_MEMORY_ALLOCATOR
+		g_crt_allocator->do_register				(			0,	"C runtime library"		);
+	#endif
 #endif // #ifndef XRAY_STATIC_LIBRARIES
-	s_process_allocator.do_register				(             0,	"process heap"			);
+
+	#if XRAY_HEAP_PROCESS_ALLOCATOR
+		s_process_allocator.do_register				(	   256*Kb,		"process heap"			);
+	#endif
 	strings::shared::g_allocator.do_register	(      256*Kb  ,	"shared strings"		);
 	g_fs_allocator.do_register					(		16*Mb  ,	"filesystem"			);
 
@@ -295,11 +302,12 @@ void xray::memory::dump_statistics		( bool const dump_stats_for_empty_arenas_as_
 			crt_allocated_size		= size;
 		else
 #endif // #ifndef XRAY_STATIC_LIBRARIES
+#if XRAY_HEAP_PROCESS_ALLOCATOR
 		{
 			if ( &s_process_allocator == (*i).allocator )
 				process_allocated_size	= size;
 		}
-
+#endif
 		if ( size || dump_stats_for_empty_arenas_as_well )
 			(*i).allocator->dump_statistics	( );
 	}
@@ -310,8 +318,13 @@ void xray::memory::dump_statistics		( bool const dump_stats_for_empty_arenas_as_
 	u64 const allocated_size	= (static_cast<base_allocator const&>(s_crt_allocator)).allocated_size( );
 #endif // #if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 
+#if XRAY_HEAP_PROCESS_ALLOCATOR
 	R_ASSERT_CMP				( allocated_size, >=, crt_allocated_size + process_allocated_size );
 	u64 const xray_used			= allocated_size - (crt_allocated_size + process_allocated_size);
+#else
+	R_ASSERT_CMP(allocated_size, >= , crt_allocated_size);
+	u64 const xray_used = allocated_size - (crt_allocated_size);
+#endif
 	LOG_INFO					( logging::format_message, "---------------overall memory stats---------------" );
 	LOG_INFO					( logging::format_message, "xray: " XRAY_PRINTF_SPEC_LONG_LONG(10) " (%6.2f%%)", xray_used, total_size == 0.f ? 0.f : float(xray_used)/float(total_size)*100.f );
 	LOG_INFO					( logging::format_message, "used: " XRAY_PRINTF_SPEC_LONG_LONG(10) " (%6.2f%%)", allocated_size, total_size == 0.f ? 0.f : float(allocated_size)/float(total_size)*100.f );

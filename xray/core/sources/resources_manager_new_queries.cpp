@@ -47,9 +47,9 @@ void   resources_manager::init_query_with_no_fat_it (query_result & query)
 			{
 				if ( strings::equal(query.get_requested_path(), active_query->get_requested_path()) )
 				{
-					LOGI_INFO				("resources:manager", "no fat_it query %s added as refering to [quid %d]", 
-											 resources::log_string(& query).c_str(),
-											 active_query->uid());
+// 					LOGI_INFO				("resources:manager", "no fat_it query %s added as refering to [quid %d]", 
+// 											 resources::log_string(& query).c_str(),
+// 											 active_query->uid());
 					active_query->add_referrer	(& query, false);
 					return;
 				}
@@ -57,7 +57,7 @@ void   resources_manager::init_query_with_no_fat_it (query_result & query)
 			}
 		}
 
-		LOGI_INFO							("resources:manager", "no fat_it query '%s' added for generate_if_no_file cook", resources::log_string(& query).c_str());
+//		LOGI_INFO							("resources:manager", "no fat_it query '%s' added for generate_if_no_file cook", resources::log_string(& query).c_str());
 		query.set_error_type				(query_result::error_type_file_not_found);
 		add_to_generate_if_no_file_queue	(query);
 		allocate()->prepare_raw_resource	(& query, reallocating_false);
@@ -68,7 +68,7 @@ void   resources_manager::init_query_with_no_fat_it (query_result & query)
 											query.get_owner_queries()->assert_on_fail();
 	if ( assert_on_not_found )
 	{
-		LOGI_WARNING						("resources", "cannot find file: '%s' (class id: %d)", query.get_requested_path(), query.get_class_id());
+//		LOGI_WARNING						("resources", "cannot find file: '%s' (class id: %d)", query.get_requested_path(), query.get_class_id());
 		//if ( debug::is_debugger_present() && !s_skip_file_not_found )
 		//	DEBUG_BREAK						();
 	}

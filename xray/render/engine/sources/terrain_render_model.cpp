@@ -19,9 +19,9 @@
 #include "material.h"
 
 #ifdef _DLL
-#	pragma comment(lib, "zlibN.lib")
+#	pragma comment(lib, "xray_zlibN.lib")
 #else // #ifdef _DLL
-#	pragma comment(lib, "zlib.lib")
+#	pragma comment(lib, "xray_zlib.lib")
 #endif // #ifdef _DLL
 
 namespace xray {

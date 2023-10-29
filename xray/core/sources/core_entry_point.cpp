@@ -40,10 +40,10 @@
 		&calloc,
 		&realloc,
 		&free,
-		&_malloc_crt,
+		/*&_malloc_crt,
 		&_calloc_crt,
 		&_realloc_crt,
-		&_recalloc_crt,
+		&_recalloc_crt,*/
 		&_msize
 	};
 #	pragma warning( pop )

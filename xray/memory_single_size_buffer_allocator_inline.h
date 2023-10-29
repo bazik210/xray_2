@@ -10,6 +10,7 @@
 namespace xray {
 namespace memory {
 
+//single_size_buffer_allocator
 template < int DataSize, class ThreadingPolicy >
 inline single_size_buffer_allocator< DataSize, ThreadingPolicy >::single_size_buffer_allocator(
 		pvoid arena,

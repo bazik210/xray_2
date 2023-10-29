@@ -114,6 +114,7 @@ xray::render::scene_renderer& renderer::scene				( ) const
 	return					*m_scene;
 }
 
+#ifdef XRAY_RENDERER_FLASH
 void renderer::show_movie						( render_output_window_ptr const& render_output_window, stalker2::flash_movie* movie )
 {
  	m_world.logic_channel().owner_push_back	( 
@@ -130,6 +131,7 @@ void renderer::hide_movie						( render_output_window_ptr const& render_output_w
 		) 
 		);
 }
+#endif
 
 } // namespace game
 } // namespace render

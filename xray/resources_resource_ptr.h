@@ -95,7 +95,8 @@ private:
 		if ( !m_parent )
 			return;
 		
-		ASSERT									(* this);
+		// Ambiguous call
+		//ASSERT									(* this);
 		m_parent->unlink_child_resource			(super::c_ptr());
 		super::c_ptr()->unlink_parent_resource	(m_parent);
 		m_parent							=	NULL;

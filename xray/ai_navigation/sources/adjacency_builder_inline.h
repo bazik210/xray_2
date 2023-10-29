@@ -16,7 +16,7 @@ graph_generator_adjacency_builder::graph_generator_adjacency_builder(
 		ContainerType0 const& indices, 
 		ContainerType1& adjacency_graph 
 	) :
-		m_indices			( indices.begin() )
+		m_indices			( &(*indices.begin())/*indices.begin()*/ )
 {
 	
 	R_ASSERT_CMP					( indices.size() % 3, ==, 0);
@@ -97,7 +97,7 @@ graph_generator_adjacency_builder::graph_generator_adjacency_builder(
 		ContainerType2 const& normals,
 		float const normal_epsilon
 	) :
-		m_indices			( indices.begin() )
+		m_indices			( &(*indices.begin())/*indices.begin()*/ )
 {
 	
 	R_ASSERT_CMP					( indices.size() % 3, ==, 0);

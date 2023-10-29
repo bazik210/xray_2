@@ -218,7 +218,7 @@ u32	navigation_world::get_node_id_at		( xray::math::float3 const& position )
 	u32 const coordinate_indices[2] = { 0, 2 };
 	u32 const triangles_count = m_navigation_mesh.data.size();
 	for ( u32 i = 0; i < triangles_count; ++i ) {
-		u32 const* indices = m_navigation_mesh.indices.begin() + i * 3;
+		u32 const* indices = &m_navigation_mesh.indices[0 + i * 3];//m_navigation_mesh.indices.begin() + i * 3;
 		float3 const& v0 = m_navigation_mesh.vertices[ indices[0] ];
 		float3 const& v1 = m_navigation_mesh.vertices[ indices[1] ];
 		float3 const& v2 = m_navigation_mesh.vertices[ indices[2] ];

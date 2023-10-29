@@ -13,7 +13,7 @@ game_camera::game_camera( game_scene& w )
 :/*super			( w ),*/
 m_game_scene	( w ),
 m_vertical_fov	( 57.5f ),
-m_near_plane	( 0.2f ),
+m_near_plane	( 0.1f ),
 m_far_plane		( 5000.0f )
 {
 }

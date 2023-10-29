@@ -1,0 +1,19 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created 	: 06.11.2007
+//	Author	: Dmitriy Iassenev
+//	Copyright (C) GSC Game World
+////////////////////////////////////////////////////////////////////////////
+
+#include “pch.h”
+#include “smart_cover_manager.h”
+
+using smart_cover::manager;
+
+manager::manager() :
+	m_member(false)
+{
+}
+
+manager::~manager()
+{
+}

@@ -31,7 +31,7 @@ struct operands_calculator
 	u32 						or_count;
 }; // struct operands_calculator
 
-class base_lexeme : private boost::noncopyable
+class base_lexeme// : private boost::noncopyable
 {
 	friend class base_lexeme_ptr;
 	

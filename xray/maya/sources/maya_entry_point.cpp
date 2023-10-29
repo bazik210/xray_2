@@ -33,6 +33,8 @@
 #include <xray/resources.h>
 #include <xray/fs/simple_synchronous_interface.h>
 
+#include <maya/MFnPlugin.h>
+
 xray::maya::allocator_type			xray::maya::g_allocator(xray::memory::thread_id_const_false);
 xray::maya::maya_engine				core_engine;
 xray::maya::maya_engine&			xray::maya::g_maya_engine = core_engine;

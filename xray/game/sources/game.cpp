@@ -53,8 +53,10 @@
 #include "key_binder.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
-#include <GFx.h>
-#include "flash_factory.h"
+	#ifdef XRAY_RENDERER_FLASH && GFX_SCALEFORM
+		#include <GFx.h>
+		#include "flash_factory.h"
+	#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 
 using xray::console_commands::cc_delegate;
@@ -213,7 +215,9 @@ game::game(		xray::engine_user::engine& engine,
 	);
 
 #ifdef XRAY_STATIC_LIBRARIES
-	LOG_INFO("stalker2::game() gfx heap is %x", Scaleform::Memory::GetGlobalHeap());
+	#ifdef GFX_SCALEFORM
+		LOG_INFO("stalker2::game() gfx heap is %x", Scaleform::Memory::GetGlobalHeap());
+	#endif
 #endif #ifdef XRAY_STATIC_LIBRARIES
 
 }
@@ -238,7 +242,9 @@ game::~game( )
 
 	DELETE						( m_game_world );
 #ifdef XRAY_STATIC_LIBRARIES
-	DELETE						( m_flash_factory );
+	#ifdef XRAY_RENDERER_FLASH
+		DELETE						( m_flash_factory );
+	#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 	DELETE						( m_key_binder );
 
@@ -271,7 +277,9 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_fps_graph					= NEW( stats_graph )( 1.f, math::infinity, 30.f, 60.f );
 //	m_active_npc_stats			= NEW( npc_stats )( *m_ui_world );
 #ifdef XRAY_STATIC_LIBRARIES
-	m_flash_factory				= NEW( flash_factory )( *this );
+	#ifdef XRAY_RENDERER_FLASH
+		m_flash_factory				= NEW( flash_factory )( *this );
+	#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 	m_main_menu					= NEW( main_menu )( *this, *m_game_world );
 	m_key_binder				= NEW( key_binder )( *this );
@@ -315,7 +323,7 @@ void game::query_render_scene( )
 {
 	xray::render::output_window_configuration		window_configuration;
 	window_configuration.m_hwnd						= m_engine.get_render_window_handle();
-	window_configuration.m_create_flash_renderer	= true;
+	window_configuration.m_create_flash_renderer	= false;
 
 	resources::user_data_variant window_data;
 	window_data.set				( window_configuration );
@@ -954,10 +962,12 @@ xray::render::scene_ptr const game::get_active_scene( )	const
 }
 
 #ifdef XRAY_STATIC_LIBRARIES
+#ifdef XRAY_RENDERER_FLASH
 flash_factory&					game::get_flash_factory	( )
 {
 	return *m_flash_factory;
 }
 #endif //#ifdef XRAY_STATIC_LIBRARIES
+#endif
 
 } // namespace stalker2

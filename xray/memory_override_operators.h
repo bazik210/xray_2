@@ -7,7 +7,9 @@
 #ifndef XRAY_MEMORY_OVERRIDE_OPERATORS_H_INCLUDED
 #define XRAY_MEMORY_OVERRIDE_OPERATORS_H_INCLUDED
 
-#define XRAY_USE_CRT_MEMORY_ALLOCATOR	0
+#define XRAY_USE_CRT_MEMORY_ALLOCATOR		0
+#define XRAY_HEAP_PROCESS_ALLOCATOR			0
+//#define XRAY_DISABLE_CRT_ALLOCATOR		1
 
 #ifdef _MSC_VER
 #	define XRAY_RESTRICT	__declspec( restrict )
@@ -21,6 +23,8 @@
 #	pragma warning( push )
 #	pragma warning( disable : 4273 )
 #endif // #if defined(_MSC_VER) && defined(_DLL)
+
+/*
 
 extern "C" {
 	XRAY_RESTRICT	XRAY_NOALIAS	pvoid	malloc					( size_t size );
@@ -38,12 +42,14 @@ extern "C" {
 	XRAY_RESTRICT	XRAY_NOALIAS	pvoid	_aligned_offset_realloc	( pvoid ptr, size_t size, size_t alignment, size_t offset );
 } // extern "C"
 
+*/
+
 #if defined(_MSC_VER) && defined(_DLL)
 #	pragma warning( pop )
 #endif // #endif // #if defined(_MSC_VER) && defined(_DLL)
 
 // to prevent memory functions redefinition
-#define _CRT_ALLOCATION_DEFINED
+//#define _CRT_ALLOCATION_DEFINED
 
 #if defined(_MSC_VER)
 #	include <malloc.h>
@@ -60,6 +66,7 @@ extern "C" {
 #include <algorithm>
 #include <map>
 
+/*
 #define malloc(...)						XRAY_UNREACHABLE_CODE( "CRT malloc detected!" );
 #define calloc(...)						XRAY_UNREACHABLE_CODE( "CRT calloc detected!" );
 #define realloc(...)					XRAY_UNREACHABLE_CODE( "CRT realloc detected!" );
@@ -78,14 +85,19 @@ extern "C" {
 
 #define strdup(...)						XRAY_UNREACHABLE_CODE( "CRT strdup detected!" );
 #define _strdup(...)					XRAY_UNREACHABLE_CODE( "CRT _strdup detected!" );
+*/
 
+/*
 #if defined(_MSC_VER)
 #	pragma deprecated(malloc,calloc,realloc,free,_malloc_crt,_calloc_crt,_realloc_crt,_recalloc_crt,strdup,_strdup)
 #endif // #if defined(_MSC_VER)
+*/
 
+/*
 pvoid	__cdecl	operator new			( size_t buffer_size );
 pvoid	__cdecl operator new [ ]		( size_t buffer_size );
 void	__cdecl operator delete			( pvoid pointer );
 void	__cdecl operator delete [ ]		( pvoid pointer ) throw ( );
+*/
 
 #endif // #ifndef XRAY_MEMORY_OVERRIDE_OPERATORS_H_INCLUDED

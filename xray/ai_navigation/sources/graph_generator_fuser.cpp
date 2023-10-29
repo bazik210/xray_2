@@ -75,8 +75,8 @@ inline void graph_generator_fuser::connect_triangles(
 		return;
 	}
 
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + triangle_id0 * 3;
-	u32 const* indices1 = m_triangles_mesh.indices.begin() + triangle_id1 * 3;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + triangle_id0 * 3];//m_triangles_mesh.indices.begin() + triangle_id0 * 3;
+	u32 const* indices1 = &m_triangles_mesh.indices[0 + triangle_id1 * 3];//m_triangles_mesh.indices.begin() + triangle_id1 * 3;
 	for ( u32 i = 0; i < 3; ++i ) {
 		if ( indices0[ edge_id ] == indices1[ (i+1) % 3 ]
 			&& indices0[ (edge_id + 1) % 3 ] == indices1[ i ] )

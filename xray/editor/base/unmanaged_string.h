@@ -7,7 +7,7 @@
 #ifndef UNMANAGED_STRING_H_INCLUDED
 #define UNMANAGED_STRING_H_INCLUDED
 
-class unmanaged_string : private boost::noncopyable {
+class unmanaged_string/* : private boost::noncopyable*/ {
 public:
 	inline			unmanaged_string	( System::String^ string );
 	inline			~unmanaged_string	( );

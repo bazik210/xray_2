@@ -69,6 +69,7 @@ engine_world::engine_world				(
 		logging::format_message
 	);
 
+//register allocators!
 	g_allocator.do_register				(  64*Kb,	"engine"	);
 	m_render_allocator.do_register		( 128*Mb,	"render"	);
 	m_network_allocator.do_register		(  64*Kb,	"network"	);
@@ -95,7 +96,9 @@ engine_world::~engine_world		( )
 {
 	finalize							( );
 	
+#ifdef GFX_SCALEFORM
 	destroy_scaleform	( );
+#endif
 	core::finalize						( );
 }
 

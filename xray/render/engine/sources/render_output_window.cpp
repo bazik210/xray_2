@@ -24,10 +24,12 @@ render_output_window::render_output_window( xray::render::output_window_configur
 {
 	if(window_configuration.m_create_flash_renderer)
 	{
+#ifdef XRAY_RENDERER_FLASH
 		m_flash_renderer								= NEW(flash_renderer)();
 		backend::ref().set_render_targets	( &*m_targets.m_rt_generic_0, 0, 0, 0);
 		backend::ref().flush();
 		m_flash_renderer->on_reset_device();
+#endif
 	}else
 		m_flash_renderer								= NULL;
 
@@ -45,8 +47,10 @@ void render_output_window::resize		( )
 	m_current_size	= new_size;
 	m_targets.resize( new_size );
 	m_output->resize( );
+#ifdef XRAY_RENDERER_FLASH
 	if(m_flash_renderer)
 		m_flash_renderer->on_reset_device();
+#endif
 }
 //DELETE			(m_flash_renderer );
 

@@ -15,8 +15,10 @@
 #include "key_binder.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
-#include "GFx.h"
-#include "flash_factory.h"
+#ifdef XRAY_RENDERER_FLASH && GFX_SCALEFORM
+	#include "GFx.h"
+	#include "flash_factory.h"
+#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 
 namespace stalker2{
@@ -74,6 +76,7 @@ bool main_menu::on_mouse_key_action( input::world* input_world, input::mouse_but
 
 	XRAY_UNREFERENCED_PARAMETERS( input_world, button, action );
 
+#ifdef GFX_SCALEFORM
 	Scaleform::GFx::Event::EventType ev_type = Scaleform::GFx::Event::Unknown;
 	if ( action == input::ms_key_down )
 		ev_type = Scaleform::GFx::Event::MouseDown;
@@ -82,6 +85,7 @@ bool main_menu::on_mouse_key_action( input::world* input_world, input::mouse_but
 
 	Scaleform::GFx::MouseEvent mevent( ev_type, 0, (float)m_mouse_pos.x, (float)m_mouse_pos.y );
 	m_main_menu_ui->m_movie->HandleEvent(mevent);
+#endif
 	return true;	
 #else
 	return dialog_input_handler()->on_mouse_key_action( input_world, button, action );
@@ -90,7 +94,7 @@ bool main_menu::on_mouse_key_action( input::world* input_world, input::mouse_but
 
 bool main_menu::on_mouse_move( input::world* input_world, int x, int y, int z )
 {
-#ifdef XRAY_STATIC_LIBRARIES
+#ifndef XRAY_STATIC_LIBRARIES
 
 	XRAY_UNREFERENCED_PARAMETERS( input_world, z );
 
@@ -101,8 +105,10 @@ bool main_menu::on_mouse_move( input::world* input_world, int x, int y, int z )
 	math::clamp<int>(m_mouse_pos.y, 0, m_window_size.height);
 
 	//	LOG_INFO("on_mouse_move[%d]:[%d]", m_mouse_pos.x,m_mouse_pos.y);
+#ifdef GFX_SCALEFORM
 	Scaleform::GFx::MouseEvent mevent( Scaleform::GFx::Event::MouseMove, 0, (float)m_mouse_pos.x, (float)m_mouse_pos.y );
 	m_main_menu_ui->m_movie->HandleEvent(mevent);
+#endif
 	return true;
 #else
 	return dialog_input_handler()->on_mouse_move( input_world, x, y, z );

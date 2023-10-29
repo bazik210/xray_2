@@ -88,7 +88,7 @@ static inline u32 select_equal_vertex_index (
 		float3 const& testee
 	)
 {
-	u32 const* indices = triangles_mesh.indices.begin() + 3 * triangle_id;
+	u32 const* indices = &triangles_mesh.indices[0 + 3 * triangle_id];//triangles_mesh.indices.begin() + 3 * triangle_id;
 	float3 const* vertices[] = {
 		&triangles_mesh.vertices[ indices[0] ],
 		&triangles_mesh.vertices[ indices[1] ],
@@ -143,7 +143,7 @@ void graph_generator_merger::collect_obstructed_constraint_edges ( u32 const tri
 		triangles.end()
 	);
 
-	u32 const* indices0 = m_triangles_mesh.indices.begin() + 3 * triangle_id;
+	u32 const* indices0 = &m_triangles_mesh.indices[0 + 3 * triangle_id];//m_triangles_mesh.indices.begin() + 3 * triangle_id;
 	float3 const vertices0[] = {
 			m_triangles_mesh.vertices[ indices0[0] ],
 			m_triangles_mesh.vertices[ indices0[1] ],
@@ -155,7 +155,7 @@ void graph_generator_merger::collect_obstructed_constraint_edges ( u32 const tri
 		triangle = triangles.end() - 1;
 		u32 const intersector_id = triangle->triangle_id;
 
-		u32 const* indices1 = m_triangles_mesh.indices.begin() + 3 * ( triangle->triangle_id );
+		u32 const* indices1 = &m_triangles_mesh.indices[0 + 3 * (triangle->triangle_id)];//m_triangles_mesh.indices.begin() + 3 * ( triangle->triangle_id );
 		float3 const* vertices1[] = {
 			&m_triangles_mesh.vertices[ indices1[0] ],
 			&m_triangles_mesh.vertices[ indices1[1] ],
