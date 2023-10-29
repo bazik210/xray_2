@@ -52,22 +52,22 @@ MStatus physics_exporter::writer(const MFileObject &file, const MString &options
 			curr_path.pop			();
 			MFnTransform dep_node_tr	(curr_path.node(), &stat);
 			export_body_node		(bodies_table[bodies_counter++], dep_node_tr, dep_node);
-		}else
-		if(dep_node.typeId() == joint_node::typeId)
-		{
-			display_info	("exporting joint" + curr_path.fullPathName());
-			curr_path.pop			();
-			MFnTransform dep_node_tr	(curr_path.node(), &stat);
-			export_joint_node		(joints_table[joints_counter++], dep_node_tr, dep_node);
 		}
 
-
+//		}else
+//		if(dep_node.typeId() == joint_node::typeId)
+//		{
+//			display_info	("exporting joint" + curr_path.fullPathName());
+//			curr_path.pop			();
+//			MFnTransform dep_node_tr	(curr_path.node(), &stat);
+//			export_joint_node		(joints_table[joints_counter++], dep_node_tr, dep_node);
+//		}
 
 		iter.next					();
 	}
 
 
-	cfg->save_as			(file.fullName().asChar());
+	cfg->save_as			(file.fullName().asChar(), xray::configs::target_sources);
 	return stat;
 }
 */

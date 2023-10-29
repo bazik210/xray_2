@@ -13,6 +13,7 @@
 #include <xray/sound/sound_emitter.h>
 #include "ai_sound_player.h"
 #include "human_npc.h"
+#include "monster_npc.h"
 
 namespace stalker2 {
 
@@ -126,7 +127,9 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 	R_ASSERT											( world_user );
 
 
-	human_npc const* npc								= 0;
+	ai::game_object const* npc								= 0;
+	human_npc const* npc_cast							    = 0;
+	monster_npc const* mob_cast								= 0;
 
 	resources::query_result_for_cook* const brain_unit_query	= parent->get_parent_query	( );
 	if ( brain_unit_query && brain_unit_query->get_class_id( ) == resources::brain_unit_class )
@@ -135,7 +138,15 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 		ai::brain_unit_cook_params params;
 		if ( user_data && user_data->try_get( params ) )
 		{
-			npc											= static_cast_checked<human_npc const* const>( params.npc );
+
+			if ((dynamic_cast<human_npc*>(params.npc)) != 0)
+			{
+				npc_cast											= static_cast_checked<human_npc const* const>( params.npc );
+			} 
+			else if ((dynamic_cast<monster_npc*>(params.npc)) != 0)
+			{
+				mob_cast											= static_cast_checked<monster_npc const* const>( params.npc );
+			}
 		}
 	}
 
@@ -143,11 +154,16 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 	u32 const sounds_size								= sizeof( ai_sound_player::sounds_collection_type ) * sounds_value.count;
 	u8* sound_player_buffer								= static_cast<u8*>( XRAY_MALLOC_IMPL( g_allocator, ai_sound_player_buffer_size + sounds_size, "ai_sound_player" ) );
 
-	ai_sound_player* player;
-	if ( m_dbg_input_world )
-		player			= new( sound_player_buffer )ai_sound_player( m_scene, sounds_value.count, *world_user, m_dbg_input_world, npc, npc );
-	else
-		player			= new( sound_player_buffer )ai_sound_player( m_scene, sounds_value.count, *world_user, npc, npc );
+	ai_sound_player* player = 0;
+
+	if (npc_cast != 0)
+	{
+		player = create_buffer(npc_cast, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
+	}
+	else if (mob_cast != 0)
+	{
+		player = create_buffer(mob_cast, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
+	}
 
 	ai_sound_player::sounds_collection_type* const begin = pointer_cast<ai_sound_player::sounds_collection_type*>( sound_player_buffer + ai_sound_player_buffer_size );
 	ai_sound_player::sounds_collection_type* const end	= begin + sounds_value.count;
@@ -169,6 +185,21 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 	
 	parent->set_unmanaged_resource						( player, resources::nocache_memory, sizeof( ai_sound_player ) + sounds_size );
 	parent->finish_query								( result_success );
+}
+
+template <typename T>
+ai_sound_player* sound_player_cook::create_buffer(T& npc, input::world* input_world, ai_sound_player* player, u8* sound_player_buffer, sound::world_user* world_user, configs::binary_config_value const& sounds_value)
+{
+	if (input_world)
+	{
+		player = new(sound_player_buffer)ai_sound_player(m_scene, sounds_value.count, *world_user, input_world, npc, npc);
+	}
+	else 
+	{
+		player = new(sound_player_buffer)ai_sound_player(m_scene, sounds_value.count, *world_user, npc, npc);
+	}
+
+	return player;
 }
 
 } // namespace stalker2
