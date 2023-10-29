@@ -509,10 +509,10 @@ void editor_world::tick( )
 				System::String^ cam_props		= System::String::Format("Cam: X={0:f1} Y={1:f1} Z={2:f1} Cur[{3} {4}]", p.x, p.y, p.z, cur.X, cur.Y );
 				ide()->set_status_label			( 0, cam_props );
 
-				//float4x4 const& projection_matrix	= m_view_window->get_projection_matrix();
-				//float4x4 const& view_matrix			= math::invert4x3( m_view_window->get_inverted_view_matrix() );
-				//m_ai_navigation_world->get_graph_generator()->set_frustum		( math::frustum( mul4x4(view_matrix, projection_matrix ) ) );
-				//m_ai_navigation_world->tick				( );
+				float4x4 const& projection_matrix	= m_view_window->get_projection_matrix();
+				float4x4 const& view_matrix			= math::invert4x3( m_view_window->get_inverted_view_matrix() );
+				m_ai_navigation_world->get_graph_generator()->set_frustum		( math::frustum( mul4x4(view_matrix, projection_matrix ) ) );
+				m_ai_navigation_world->tick				( );
 
 				if( m_console_wrapper->get_active() )
 					m_console_wrapper->tick		( scene_view());
@@ -858,7 +858,9 @@ void editor_world::editor_mode(bool beditor_mode)
 		
 		while ( ShowCursor(TRUE) <= 0 );
 
-		m_view_window->unclip_cursor();
+			m_view_window->unclip_cursor();
+		
+	//		m_view_window->Update();
 	}else
 	{
 		m_level_editor->get_project()->save_intermediate( ); 
@@ -931,7 +933,7 @@ void editor_world::on_render_resources_created(resources::queries_result& data)
 	m_console_wrapper->m_console	= m_engine.create_editor_console( *m_ui_world );
 	R_ASSERT						( m_console_wrapper->m_console );
 
-//	m_ai_navigation_world			= xray::ai::navigation::create_world( *this, *m_scene, get_renderer().debug() );
+	m_ai_navigation_world			= xray::ai::navigation::create_world( *this, *m_scene, get_renderer().debug() );
 
 	load_editors					( );
 

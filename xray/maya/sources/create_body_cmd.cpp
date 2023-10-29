@@ -56,7 +56,7 @@ MStatus createBodyCmd::doIt( const MArgList &args )
 { 
 	MStatus				stat;
 
-	MArgDatabase argData( syntax(), args );
+	MArgDatabase argData( newSyntax(), args );
 
 
 

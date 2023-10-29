@@ -56,7 +56,7 @@ object_sound::~object_sound()
 	DELETE ( m_callback );
 
 	if ( m_collision->initialized() )
-		m_collision->destroy( &debug::g_mt_allocator );
+		m_collision->destroy( /*&debug::g_mt_allocator */);
 }
 
 void object_sound::set_transform(float4x4 const& transform)
@@ -125,6 +125,16 @@ void object_sound::load_contents( )
 	LOG_INFO("load_contents");
 }
 
+void object_sound::load_props(configs::lua_config_value const& config_value)
+{
+	super::load_props(config_value);
+
+	String^ config_file_name = gcnew String(config_value["sound"]);
+
+	if (config_file_name != "")
+		wav_filename = config_file_name;
+}
+
 void object_sound::initialize_collision( )
 {
 	ASSERT( !m_collision->initialized() );
@@ -140,7 +150,7 @@ void object_sound::load_sound					( )
 	if ( m_wav_file_name == "" )
 		return;
 
-	query_result_delegate* q					= NEW( query_result_delegate )( gcnew query_result_delegate::Delegate( this, &object_sound::on_sound_loaded ), g_allocator );
+	query_result_delegate* q					= NEW(query_result_delegate)(gcnew query_result_delegate::Delegate(this, &object_sound::on_sound_loaded), g_allocator);
 
 	unmanaged_string wav_file_name				( m_wav_file_name );
 
@@ -177,13 +187,12 @@ void object_sound::load_sound					( )
 
 	query_resources								( params );
 
-	//resources::query_resource
-	//(
-	//	unmanaged_string(m_wav_file_name).c_str( ),
-	//	resources::single_sound_class,
-	//	boost::bind(&query_result_delegate::callback, q, _1),
-	//	g_allocator
-	//);
+//	resources::query_resource(
+//		unmanaged_string(m_wav_file_name).c_str(),
+//		resources::single_sound_class,
+//		boost::bind(&query_result_delegate::callback, q, _1),
+//		g_allocator
+//	);
 }
 
 void object_sound::on_sound_loaded( resources::queries_result& data )
@@ -192,15 +201,36 @@ void object_sound::on_sound_loaded( resources::queries_result& data )
 	*m_sound_emitter_ptr		= static_cast_resource_ptr<sound::sound_emitter_ptr>(data[0].get_unmanaged_resource());
 }
 
+void object_sound::save(configs::lua_config_value config_value)
+{
+	super::save(config_value);
+
+	config_value["sound"] = unmanaged_string(m_wav_file_name).c_str();
+	config_value["game_object_type"] = "object_sound";
+}
+
 void object_sound::play_clicked		( button^ )
 {
 
 	emit							( );
 
+	//test
+	//if ((*m_sound_emitter_ptr).c_ptr())
+	//{
+	//	*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+	//	(
+	//		get_editor_world().sound_scene(),
+	//		get_editor_world().engine().get_sound_world().get_editor_world_user(),
+	//		*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 0.5f),
+	//		300
+	//	));
+	//}
+
 	if ((*m_proxy).c_ptr( ) == 0)
 		return;
 
 	(*m_proxy)->set_callback		( boost::bind( &callback_handler::on_finish_playing, m_callback ) );
+	//disable for test
 	if ( m_sound_type == 0 )
 		(*m_proxy)->set_position				(*m_position);
 	else

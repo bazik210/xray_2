@@ -30,6 +30,7 @@ m_look_pitch		( 0.0f ),
 m_actor_input_controller( NULL ),
 m_animation_player	( NULL ),
 m_tmp_is_active		( false ),
+m_stop_query		(false ),
 m_game_world		( w )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
@@ -44,18 +45,20 @@ m_game_world		( w )
 
 actor::~actor( )
 {
-	m_actor_physics_controller->deactivate( );
-	DELETE							( m_actor_physics_controller );
-	m_actor_physics_controller		= NULL;
-	remove_models_from_scene		( );
+		m_actor_physics_controller->deactivate();
+		DELETE(m_actor_physics_controller);
+		m_actor_physics_controller = NULL;
 
-	m_character_model		= NULL;
+		if (m_character_model)
+			remove_models_from_scene();
+	
+		m_character_model = NULL;
 
-	m_idle_stand_animation	= NULL;
-	m_look_animation_add	= NULL;
-	DELETE					( m_animation_player );
-	m_animation_player		= NULL;
+		m_idle_stand_animation = NULL;
+		m_look_animation_add = NULL;
 
+		DELETE(m_animation_player);
+		m_animation_player = NULL;
 }
 
 void actor::set_input_source( actor_input_controller* s )
@@ -66,7 +69,7 @@ void actor::set_input_source( actor_input_controller* s )
 void actor::query_resources( )
 {
 	resources::request r[] ={
-		{ "character/human/neutral/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
+		{ "character/human/actor/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
 		{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
 		{ "ak_74",												resources::weapon_class },
@@ -84,6 +87,11 @@ void actor::on_resources_ready( resources::queries_result& data )
 	if(!data.is_successful())
 		return;
 
+	if (m_stop_query) {
+		data.empty();
+		return;
+	}
+
 	m_character_model		= static_cast_resource_ptr<render::skeleton_model_ptr>(data[0].get_unmanaged_resource());
 
 	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
@@ -95,6 +103,9 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[3].get_unmanaged_resource());
 	m_weapon->m_game_world	= &m_game_world;
 	
+	//some query system bug;
+	m_stop_query = true;
+
 	m_game_world.tmp_actor_ready( this );
 }
 
@@ -224,6 +235,9 @@ void actor::tick( )
 		return;
 
 	// from previous physic step
+	if (!m_actor_physics_controller)
+		return;
+
 	m_character_transform = m_actor_physics_controller->get_transform();
 
 	process_input_events	( );

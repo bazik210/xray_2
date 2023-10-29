@@ -92,11 +92,11 @@ void tree_view_files_source::refresh()
 	unmanaged_string unm_res_path(res_path);
 	xray::fs_new::virtual_path_string path = unm_res_path.c_str();
 	if(mode==tree_view_files_source_mode::show_single)
-		path += "single";
+		path += "/single";
 	else if(mode==tree_view_files_source_mode::show_composite)
-		path += "composite";
+		path += "/composite";
 	else if(mode==tree_view_files_source_mode::show_collections)
-		path += "collections";
+		path += "/collections";
 
 	fs_iterator_delegate* q = NEW(fs_iterator_delegate)(gcnew fs_iterator_delegate::Delegate(this, &tree_view_files_source::on_fs_iterator_ready), g_allocator);
 	resources::query_vfs_iterator(path.c_str(), boost::bind(&fs_iterator_delegate::callback, q, _1), g_allocator, resources::recursive_true);

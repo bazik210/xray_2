@@ -20,8 +20,9 @@ enum e_type_camera{
 
 class camera_director;
 
-class game_camera : public object_controlled, private boost::noncopyable 
+class game_camera : public game_object_, public object_controlled, private boost::noncopyable
 {
+	typedef game_object_ super;
 public:
 								game_camera					( game_scene& w );
 	math::float4x4				get_projection_matrix		( float2 const& window_size ) const;

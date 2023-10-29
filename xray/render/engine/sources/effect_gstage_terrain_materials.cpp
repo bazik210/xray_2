@@ -53,12 +53,28 @@ void effect_gstage_terrain_materials::compile( effect_compiler& compiler, const 
 
 			if (pass_index == 0)
 			{
-				if (configuration.use_normal_texture)
+				if (configuration.use_normal_texture )
 				{
-					compiler.set_texture("texture_normal_0", pcstr(custom_config["texture_normal_0"]));
-					compiler.set_texture("texture_normal_1", pcstr(custom_config["texture_normal_1"]));
-					compiler.set_texture("texture_normal_2", pcstr(custom_config["texture_normal_2"]));
-					compiler.set_texture("texture_normal_3", pcstr(custom_config["texture_normal_3"]));
+					char const* normal_0 = pcstr(custom_config["texture_normal_0"]);
+					if (!strings::equal(normal_0, "")) {
+						compiler.set_texture("texture_normal_0", normal_0);
+					}
+
+					char const* normal_1 = pcstr(custom_config["texture_normal_1"]);
+					if (!strings::equal(normal_1, "")) {
+						compiler.set_texture("texture_normal_1", normal_1);
+					}
+
+					char const* normal_2 = pcstr(custom_config["texture_normal_2"]);
+					if (!strings::equal(normal_2, "")) {
+						compiler.set_texture("texture_normal_2", normal_2);
+					}
+
+					char const* normal_3 = pcstr(custom_config["texture_normal_3"]);
+					if (!strings::equal(normal_3, "")) {
+						compiler.set_texture("texture_normal_3", normal_3);
+					}
+
 					compiler.set_constant("constant_tiles",  tiles);
 				}
 			}

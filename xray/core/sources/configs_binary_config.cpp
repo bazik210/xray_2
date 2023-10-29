@@ -22,14 +22,18 @@ binary_config::binary_config		(pcbyte const buffer, u32 const buffer_size, base_
 
 binary_config::~binary_config()
 {
-	XRAY_FREE_IMPL	( m_allocator, m_root );
+	//XRAY_FREE_IMPL	( m_allocator, m_root );
+
+	if(m_root != NULL)
+		 free(m_root);
 }
 
 void binary_config::load			( pcbyte const buffer, u32 const buffer_size )
 {
 	pcbyte reader	= buffer;
 
-	m_root			= static_cast<binary_config_value*>( XRAY_MALLOC_IMPL(m_allocator, buffer_size, "binary_config") );
+	//m_root			= static_cast<binary_config_value*>( XRAY_MALLOC_IMPL(m_allocator, buffer_size, "binary_config") );
+	m_root				= static_cast<binary_config_value*>(malloc(buffer_size));
 	memory::copy	( m_root, buffer_size, reader, buffer_size );
 
 	m_root->fix_up	( horrible_cast<binary_config_value*,size_t>(m_root).second );

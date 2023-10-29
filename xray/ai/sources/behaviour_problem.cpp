@@ -57,7 +57,7 @@ static void fill_action_instances	(
 	for ( ; it != it_end; ++it )
 	{
 		configs::binary_config_value const& instance_value	= *it;
-		u32	const action_type								= instance_value["id"];
+		u32 const action_type = instance_value.value_exists("id") ? instance_value["id"] : 11;
 		action_types_enum const type						= (action_types_enum)action_type;
 		generalized_action const* const prototype			= domain.get_action_by_type( type );
 		R_ASSERT											( prototype, "generalized action wasn't found in domain" );

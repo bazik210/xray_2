@@ -134,6 +134,8 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 		collision::primitive primitive;
 		primitive.type		= primitive_type;
 		primitive.data_		= scale;
+
+		m_transform = create_scale(scale) * create_rotation(rotation) * create_translation(position);
 		
 		float4x4 matrix		= create_rotation( rotation ) * create_translation( position ) * m_transform;
 
@@ -159,15 +161,22 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 			break;
 		case collision::primitive_truncated_sphere: 
 			{
+			if (mesh.value_exists("planes"))
+			{
 				configs::binary_config_value planes_value = mesh["planes"];
-				u32 count	= planes_value.size( );
+				u32 count = planes_value.size();
 
-				float4* planes = XRAY_ALLOC_IMPL( g_allocator, float4, count );
+				float4* planes = XRAY_ALLOC_IMPL(g_allocator, float4, count);
 
-				for ( u32 i = 0; i < count; ++i )
+				for (u32 i = 0; i < count; ++i)
 					planes[i] = planes_value[i];
 
-				instance	= &*collision::new_truncated_sphere_geometry_instance	( g_allocator, matrix, primitive.truncated_sphere( ).radius, planes, count );
+				instance = &*collision::new_truncated_sphere_geometry_instance(g_allocator, matrix, primitive.truncated_sphere().radius, planes, count);
+			}
+			else {
+				instance = &*collision::new_truncated_sphere_geometry_instance(g_allocator, matrix, primitive.truncated_sphere().radius, &float4(primitive.truncated_sphere().radius+1.0f, primitive.truncated_sphere().radius+1.0f, 1.0f, 1.0f), 1);
+			}
+
 				break;
 			}
 		}
@@ -215,15 +224,21 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 			case collision::primitive_capsule:	instance = &*collision::new_capsule_geometry_instance	( g_allocator, matrix, primitive.capsule( ).radius, primitive.capsule( ).half_length ); break;
 			case collision::primitive_truncated_sphere:
 			{
-				configs::binary_config_value planes_value = mesh["planes"];
-				u32 count	= planes_value.size( );
+				if (mesh.value_exists("planes"))
+				{
+					configs::binary_config_value planes_value = mesh["planes"];
+					u32 count = planes_value.size();
 
-				float4* planes = XRAY_ALLOC_IMPL( g_allocator, float4, count );
+					float4* planes = XRAY_ALLOC_IMPL(g_allocator, float4, count);
 
-				for ( u32 i = 0; i < count; ++i )
-					planes[i] = planes_value[i];
+					for (u32 i = 0; i < count; ++i)
+						planes[i] = planes_value[i];
 
-				instance	= &*collision::new_truncated_sphere_geometry_instance	 ( g_allocator, matrix, primitive.truncated_sphere( ).radius, planes, count );
+					instance = &*collision::new_truncated_sphere_geometry_instance(g_allocator, matrix, primitive.truncated_sphere().radius, planes, count);
+				}
+				else {
+					instance = &*collision::new_truncated_sphere_geometry_instance(g_allocator, matrix, primitive.truncated_sphere().radius, &float4(primitive.truncated_sphere().radius+1.0f, primitive.truncated_sphere().radius+1.0f, 1.0f, 1.0f), 1);
+				}
 				break;
 			}
 		}

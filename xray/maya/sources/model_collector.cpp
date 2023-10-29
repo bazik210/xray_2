@@ -182,12 +182,12 @@ struct geometry_collector_internal
 };
 
 geometry_collector::geometry_collector( )
-:m_data		( NEW(geometry_collector_internal)() ),
+:m_data		( new(geometry_collector_internal)() ),
 m_bbox		( math::create_zero_aabb() )
 {}
 geometry_collector::~geometry_collector( )
 {
-	DELETE( m_data );
+	delete( m_data );
 }
 
 bool geometry_collector::save_vertices( memory::writer& F) const
@@ -221,9 +221,15 @@ u32 geometry_collector::indices_count( ) const
 
 void geometry_collector::clear( )
 {
-	m_data->m_vertices.clear	( );
-	m_data->m_indices.clear		( );
-	m_data->m_lookup.clear		( );
+	if (m_data->m_vertices.size()) {
+		m_data->m_vertices.clear();
+	}
+	if (m_data->m_indices.size()) {
+		m_data->m_indices.clear();
+	}
+	if (m_data->m_lookup.size()) {
+		m_data->m_lookup.clear();
+	}
 }
 
 int geometry_collector_internal::find_vertex(	float3 const& position ) const

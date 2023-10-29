@@ -19,7 +19,7 @@ public:
  	virtual MStatus redoIt();
 	virtual bool isUndoable() const { return true; } 
 
-	static void *creator() { return CRT_NEW(createBodyCmd); }
+	static void *creator() { return new createBodyCmd; }
 	static MSyntax newSyntax();
 
 
@@ -32,7 +32,7 @@ private:
 //class create_body_cmd  : public MPxCommand 
 //{
 //public:
-//static void *creator() { return CRT_NEW(create_body_cmd); }
+//static void *creator() { return new(create_body_cmd); }
 //static MSyntax newSyntax();
 //
 // 	

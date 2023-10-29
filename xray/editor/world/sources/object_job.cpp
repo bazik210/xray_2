@@ -261,6 +261,7 @@ void object_job::initialize_logic_view		( )
 		node->type_id = "logic_behaviour";
 
 		node->input_link_place_enabled = true;
+		node->input_link_place_node_set(node);
 
 		node->name = behaviour->behaviour_name;
 
@@ -339,6 +340,7 @@ void object_job::add_new_behaviour			( )
  	node->type_id = "logic_behaviour";
  
  	node->input_link_place_enabled = true;
+	node->input_link_place_node_set(node);
  
  	node->name = new_behaviour_name;
 
@@ -512,7 +514,7 @@ void object_job::remove_link				( link^ lnk )
 
 bool object_job::has_static_resource						()
 {
-	if ( job_type == "camera_director" || job_type == "timing" )
+	if ( job_type == "camera_director" /* || job_type == "timing"*/)
 		return true;
 	return false;
 }

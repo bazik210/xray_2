@@ -6,7 +6,7 @@
 
 #include "pch.h"
 #include "composite_object_behaviour.h"
-//#include "object_values_storage.h"
+#include "object_values_storage.h"
 #include "object_scene.h"
 #include "game_world.h"
 
@@ -27,16 +27,16 @@ composite_object_behaviour::composite_object_behaviour( object_scene_job* owner,
 }
 void composite_object_behaviour::attach_to_object( object_controlled* o )
 {
-	NOT_IMPLEMENTED();
-	//m_object = o;
-	//super::attach_to_object		( o );	
-	//vector< storage_item >::iterator values_iterator = m_storage_items_list.begin();
-	//vector< storage_item >::iterator values_iterator_end = m_storage_items_list.end();
-	//for ( ; values_iterator != values_iterator_end; ++values_iterator )
-	//{
-	//	
-	//	dynamic_cast< object_values_storage* >( m_owner->get_game_world().get_object_by_name( (*values_iterator).name ).c_ptr() )->set_value( (*values_iterator).value );
-	//}
+	//NOT_IMPLEMENTED();
+	m_object = o;
+	super::attach_to_object		( o );	
+	vector< storage_item >::iterator values_iterator = m_storage_items_list.begin();
+	vector< storage_item >::iterator values_iterator_end = m_storage_items_list.end();
+	for ( ; values_iterator != values_iterator_end; ++values_iterator )
+	{
+		
+		dynamic_cast< object_values_storage* >( m_owner->get_game_world().get_object_by_name( (*values_iterator).name ).c_ptr() )->set_value( (*values_iterator).value );
+	}
 }
 
 void composite_object_behaviour::detach_from_object( object_controlled* o )

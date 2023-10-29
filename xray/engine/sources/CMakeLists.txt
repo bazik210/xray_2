@@ -48,7 +48,7 @@ target_include_directories(engine PRIVATE
 	"${DXSDK_DIR_PATH}/Include"
 )
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(engine PUBLIC
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	"${DXSDK_DIR_PATH}/Lib/x64"

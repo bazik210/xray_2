@@ -24,6 +24,7 @@ namespace editor{
 
 using xray::editor::wpf_controls::property_descriptor;
 using xray::editor::wpf_controls::property_editors::attributes::external_editor_event_handler;
+using System::Convert;
 
 
 volumetric_sound::volumetric_sound( tool_sound^ tool, render::scene_ptr const& scene )	:
@@ -34,7 +35,8 @@ volumetric_sound::volumetric_sound( tool_sound^ tool, render::scene_ptr const& s
 	m_proxy							( NEW(sound::sound_instance_proxy_ptr)() ),
 	m_volumetric_config_file_name	( gcnew System::String("") ),
 	m_sound_file_name				( gcnew System::String("") ),
-	m_radius						( 50.0f )
+	m_radius						( 50.0f ),
+	m_config_radius					( false )
 {
 }
 
@@ -125,20 +127,40 @@ void volumetric_sound::select_collision_geometry	( wpf_controls::property_editor
 
 void volumetric_sound::play_looped_clicked	( button^ )
 {
-	object_collision_geometry^ geom					= (object_collision_geometry^)( m_collision_geometry->get_object( ));
-	object_collision_geometry_mesh^	mesh			= geom->get_mesh( false, 0 );
-	collision::geometry_instance* instance			= mesh->get_geometry_instance( );
-	if ( (*m_sound_emitter_ptr).c_ptr() )
-	{
-		*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
-		(
-			get_editor_world().sound_scene(),
-			get_editor_world().engine().get_sound_world().get_editor_world_user(),
-			*instance,
-			m_radius
-		));
-		(*m_proxy)->play( sound::looped );
+	if (m_collision_geometry) {
+		object_collision_geometry^ geom = (object_collision_geometry^)(m_collision_geometry->get_object());
+		object_collision_geometry_mesh^ mesh = geom->get_mesh(false, 0);
+		collision::geometry_instance* instance = mesh->get_geometry_instance();
+
+		if ((*m_sound_emitter_ptr).c_ptr())
+		{
+			*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+			(
+				get_editor_world().sound_scene(),
+				get_editor_world().engine().get_sound_world().get_editor_world_user(),
+				*instance,
+				m_radius
+			));
+		}
+	} else {
+			if ((*m_sound_emitter_ptr).c_ptr())
+			{
+				*m_proxy = ((*m_sound_emitter_ptr)->emit_volumetric_sound
+				(
+					get_editor_world().sound_scene(),
+					get_editor_world().engine().get_sound_world().get_editor_world_user(),
+					*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
+					m_radius
+				));
+			}
+		//* m_proxy = ((*m_sound_emitter_ptr)->emit_point_sound
+		//(
+		//	get_editor_world().sound_scene(),
+		//	get_editor_world().engine().get_sound_world().get_editor_world_user()
+		//));
 	}
+			(*m_proxy)->play(sound::looped);
+
 }
 
 void volumetric_sound::on_sound_loaded( resources::queries_result& data )
@@ -155,7 +177,9 @@ void volumetric_sound::on_config_loaded( resources::queries_result& data )
 	R_ASSERT									(cfg.c_ptr());
 	configs::binary_config_value const& root	= cfg->get_root();
 	configs::binary_config_value const& vol_snd	= root		["volumetric_sound"];
+if(!m_config_radius) {
 	radius										= vol_snd	["radius"];
+}
 	configs::binary_config_value const& snd		= vol_snd	["sound"];
 	fs::path_string snd_filename				= snd		["filename"];
 	u32 type									= snd		["resource_type"];
@@ -182,6 +206,13 @@ void volumetric_sound::load_props ( configs::lua_config_value const& config_valu
 	if ( selected_collision_geometry != "")
 		owner_tool( )->get_level_editor( )->get_project( )->query_project_item( selected_collision_geometry, gcnew xray::editor::queried_object_loaded( this, &volumetric_sound::collision_geometry_loaded ) );
 	String^ config_file_name = gcnew String( config_value["sound"] );
+
+	String^ rstr = gcnew String(config_value["radius"]);
+	if (rstr) {
+		m_config_radius = true;
+		float   cfg_radius = (float)(Convert::ToSingle(rstr));
+		radius = cfg_radius;
+	}
 
 	if ( config_file_name != "" )
 		wav_filename			= config_file_name;

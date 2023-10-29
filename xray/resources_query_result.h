@@ -170,8 +170,10 @@ protected:
 	memory::base_allocator *		m_user_allocator;
 	queries_result *				m_parent;
 	user_data_variant *				m_user_data;
-	string_path						m_request_path_default_storage;
 	u32								m_request_path_max_size;
+
+public:
+	string_path						m_request_path_default_storage;
 
 	friend class					device_manager;
 	friend class					resources_manager;

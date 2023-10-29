@@ -160,11 +160,11 @@ void shader_binary_source_cook::all_tasks_finished(conveted_shader_loaded_data* 
 			)
 		);
 		
-#ifdef MASTER_GOLD
+//#ifdef MASTER_GOLD
 		MT_FREE										(data->data_to_save);
-#else // #ifdef MASTER_GOLD
-		DEBUG_FREE									(data->data_to_save);
-#endif // #ifdef MASTER_GOLD
+//#else // #ifdef MASTER_GOLD
+//		DEBUG_FREE									(data->data_to_save);
+//#endif // #ifdef MASTER_GOLD
 	}		
 	
 	if (data->new_resource->shader_byte_code)
@@ -313,11 +313,11 @@ void shader_binary_source_cook::compile_shader_task(conveted_shader_loaded_data*
 			sizeof(shader_file_info) * includer.includes_info.size() + 
 			shader_code->GetBufferSize();
 		
-#ifdef MASTER_GOLD
-		pbyte shader_data							= MT_ALLOC(byte, total_size);
-#else // #ifdef MASTER_GOLD
-		pbyte shader_data							= DEBUG_ALLOC(byte, total_size);
-#endif // #ifdef MASTER_GOLD
+//#ifdef MASTER_GOLD
+//		pbyte shader_data							= MT_ALLOC(byte, total_size);
+//#else // #ifdef MASTER_GOLD
+		pbyte shader_data							= MT_ALLOC(byte, total_size); //DEBUG_ALLOC(byte, total_size);
+//#endif // #ifdef MASTER_GOLD
 		
 		xray::memory::copy							(shader_data, sizeof(u32), (pcvoid)&num_size, sizeof(u32));
 		xray::memory::copy							(
@@ -523,14 +523,15 @@ mutable_buffer	shader_binary_source_cook::allocate_resource(resources::query_res
 {
 	XRAY_UNREFERENCED_PARAMETERS					(&file_exist, &raw_file_data, &in_query);
 	return											xray::mutable_buffer(
-		(pvoid)ALLOC(binary_shader_source, 1), 
+		malloc(sizeof(binary_shader_source)),		//(pvoid)ALLOC(binary_shader_source, 1), 
 		sizeof(binary_shader_source)
 	);
 }
 
 void   shader_binary_source_cook::deallocate_resource (pvoid buffer) 
 {
-	FREE											(buffer);
+	free(buffer);
+	//FREE											(buffer);
 }
 
 } // namespace render

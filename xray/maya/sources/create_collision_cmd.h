@@ -22,7 +22,7 @@ public:
  	virtual MStatus redoIt();
 	virtual bool isUndoable() const { return true; } 
 
-	static void *creator() { return CRT_NEW(createCollisionCmd); }
+	static void *creator() { return new createCollisionCmd; }
 	static MSyntax newSyntax();
 
 private:

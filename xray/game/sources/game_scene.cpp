@@ -21,7 +21,9 @@ extern xray::uninitialized_reference< xray::memory::doug_lea_allocator_type >	g_
 game_scene::game_scene( game& g ) 
 :m_is_active( false ),
 m_physics_world	( NULL ),
-m_game(g)
+m_game(g),
+m_sound_scene(g.get_sound_scene()),
+m_game_world(g.get_game_world())
 {
 }
 

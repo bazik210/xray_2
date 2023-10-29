@@ -284,17 +284,15 @@ target_link_libraries(editor_base PUBLIC
 	wpf_controls
 )
 
-target_link_directories(editor_base PUBLIC
-	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-)
-
 target_compile_options(editor_base PRIVATE
     /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
 )
-set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
     "PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xaml;System.Xml;WindowsBase"
 )
+
+set_property(TARGET editor_base PROPERTY VS_GLOBAL_RootNamespace editor_base)
 
 set_target_properties(editor_base PROPERTIES FOLDER "engine/editors")
 

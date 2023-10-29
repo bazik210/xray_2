@@ -17,7 +17,6 @@ using namespace System::Drawing;
 
 namespace xray{
 namespace model_editor {
-	ref class model_editor;
 	/// <summary>
 	/// Summary for lod_view_panel
 	/// </summary>
@@ -94,6 +93,7 @@ namespace model_editor {
 	private:
 	void				in_constructor			( );
 	};
+	ref class model_editor;
 } // namespace model_editor
 } // namespace xray
 

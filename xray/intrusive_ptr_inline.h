@@ -77,22 +77,23 @@ inline bool INTRUSIVE_PTR::operator!	( ) const
 	return			( !m_object );
 }
 
-
+#if _MSC_VER < 1600
 // Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
-// TEMPLATE_SIGNATURE
-// inline INTRUSIVE_PTR::operator INTRUSIVE_PTR::unspecified_bool_type	( ) const
-// {
-// 	if ( !m_object )
-// 		return		( 0 );
-// 
-// 	return			( &intrusive_ptr::c_ptr );
-// }
-
+TEMPLATE_SIGNATURE
+inline INTRUSIVE_PTR::operator typename INTRUSIVE_PTR::unspecified_bool_type() const
+ {
+ 	if ( !m_object )
+ 		return		( 0 );
+ 
+ 	return			( &intrusive_ptr::c_ptr );
+ }
+#else
 TEMPLATE_SIGNATURE
 inline INTRUSIVE_PTR::operator bool												( ) const
 {
 	return m_object == nullptr ? false : true;
 }
+#endif
 
 TEMPLATE_SIGNATURE
 inline typename INTRUSIVE_PTR::self_type &INTRUSIVE_PTR::operator=				( object_type* const object )

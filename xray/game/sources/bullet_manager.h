@@ -52,6 +52,7 @@ public:
 #ifndef MASTER_GOLD
 	void			render_debug					( render::debug::renderer& renderer, render::scene_ptr const& scene );
 	void			store_bullet_trajectory			( bullet* bullet );
+	void			toggle_is_fixed					( );
 	void			add_collision_point				( float3 const& point, math::color const& color );
 #endif // #ifndef MASTER_GOLD		
 
@@ -119,6 +120,10 @@ private:
 	debug::vector< decal_data >						m_decals;
 	vectora< render::vertex_colored >				m_bullet_trajectories_points;
 	debug::vector< u32 >							m_bullet_sequences_sizes;
+
+	float3											m_fixed_position;
+	float3											m_fixed_direction;
+	bool											m_is_fixed;
 
 	bool											m_is_draw_debug;
 	bool											m_is_draw_trajectories;

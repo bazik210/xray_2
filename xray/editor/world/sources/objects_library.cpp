@@ -229,6 +229,9 @@ lib_item^ objects_library::extract_library_item( configs::lua_config_value const
 	}else
 	{
 		System::String^ library_name	= gcnew System::String( cfg["lib_name"] );
+		char cStr[50] = { 0 }; sprintf(cStr, "%s", library_name);
+		LOG_ERROR("you have error in project file or something wrong with library '%s'", library_name);
+
 		lib_item^ li					= get_library_item_by_full_path( library_name, false );
 		R_ASSERT(li!=nullptr);
 		return li;

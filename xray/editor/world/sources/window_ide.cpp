@@ -48,7 +48,7 @@ void window_ide::in_constructor	( )
 	xray::editor_base::image_loader	loader;
 	m_images16x16				= loader.get_shared_images16();
 
-	install_hooks				();
+	//install_hooks				();
 	recentFilesToolStripMenuItem->Tag	= (int)8;
 	exitToolStripMenuItem->Tag			= (int)100;
 	toolStripMenuItem1->Tag				= (int)99;
@@ -59,7 +59,7 @@ void window_ide::custom_finalize( )
 	delete						m_view_window;
 	delete						m_camera_view_panel;
 	Application::Idle			-= gcnew System::EventHandler(this, &window_ide::on_idle);
-	remove_hooks				();
+	//remove_hooks				();
 }
 
 void window_ide::load_contents_layout( )

@@ -38,11 +38,11 @@ super( name, typename action_type::global_actions_params_type ( 0 ) ),
 {
 	
 //	super::base().global_params().m_set = w.create_controller_set( animation_set_path );
-	super::base().global_params().m_set->set_callback_on_loaded( 
+//	super::base().global_params().m_set->set_callback_on_loaded( 
 
-			boost::bind( &animation_controller< controller_type >::on_load_set_controller_create, this ) 
+//	boost::bind(&animation_controller< controller_type >::on_load_set_controller_create, this);
 
-		);
+//		);
 }
 
 template < class controller_type >
@@ -55,11 +55,11 @@ super( name, typename action_type::global_actions_params_type ( 0 ) ),
 {
 //		super::base().global_params().m_set = w.create_controller_set( animation_set_path, cfg  );
 
-		super::base().global_params().m_set->set_callback_on_loaded( 
+//		super::base().global_params().m_set->set_callback_on_loaded( 
 
-			boost::bind( &animation_controller< controller_type >::on_load_set_controller_create, this ) 
+//		boost::bind(&animation_controller< controller_type >::on_load_set_controller_create, this);
 
-		);
+//		);
 }
 
 template < class controller_type >
@@ -74,11 +74,11 @@ super( name, typename action_type::global_actions_params_type ( 0 ) ),
 	const xray::configs::binary_config_value cfg = m_config->get_root( );
 
 //	super::base().global_params().m_set = w.create_controller_set( cfg["controller"]["animation_set_path"] );
-	super::base().global_params().m_set->set_callback_on_loaded( 
+//	super::base().global_params().m_set->set_callback_on_loaded( 
 
-			boost::bind( &animation_controller< controller_type >::on_load_set_controller_load, this ) 
+//	boost::bind(&animation_controller< controller_type >::on_load_set_controller_load, this);
 
-		);
+//		);
 }
 
 template < class controller_type >

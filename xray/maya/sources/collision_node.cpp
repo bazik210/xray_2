@@ -205,7 +205,7 @@ MBoundingBox collision_node::boundingBox() const
 
 void* collision_node::creator()
 {
-	return CRT_NEW(collision_node)();
+	return new(collision_node)();
 }
 
 MStatus collision_node::initialize()

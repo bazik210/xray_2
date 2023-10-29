@@ -13,8 +13,8 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
- set(CMAKE_GENERATOR_PLATFORM x64)
-# set(CMAKE_GENERATOR_PLATFORM Win32)
+set(CMAKE_GENERATOR_PLATFORM x64)
+#set(CMAKE_GENERATOR_PLATFORM Win32)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #
@@ -34,6 +34,7 @@ if(NOT CMAKE_CSharp_COMPILER)
     return()
 endif()
 
+# /ZI
 SET(CMAKE_CXX_FLAGS "/EHs")
 
 ############################
@@ -62,7 +63,6 @@ set(FASTDELEGATE_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/fastdelegate/")
 # Stlport
 set(STLPORT_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/")
 
-
 #################################
 # GLOBAL SOLUTION CONFIGURATION #
 #################################
@@ -74,7 +74,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
-foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_INIT)
+foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_INIT)
     string(REGEX REPLACE "/EH[a-z]+" "" ${var} "${${var}}")
     string(REPLACE "/EHa" "" ${var} "${${var}}")
     string(REPLACE "/EHsc" "" ${var} "${${var}}")
@@ -83,7 +83,9 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_
     string(REPLACE "/RTCs" "" ${var} "${${var}}")
     string(REPLACE "/RTCu" "" ${var} "${${var}}")
     string(REPLACE "/RTC1" "" ${var} "${${var}}")
-endforeach()
+    string(REPLACE "/DNDEBUG" "/DDEBUG" ${var} "${${var}}")
+endforeach() 
+
 
 # Main engine directory
 add_subdirectory(xray)
@@ -93,8 +95,6 @@ add_subdirectory(third_party)
 
 # Enable folder hierarchy view
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-
 
 #############
 # UTILITIES #
@@ -112,6 +112,29 @@ function(xr_disable_target_exception_handling TARGET)
     string(REPLACE "/RTCu" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     string(REPLACE "/RTC1" "" ${TARGET_COMPILE_FLAGS} "${${TARGET_COMPILE_FLAGS}}")
     set_target_properties(${TARGET} PROPERTIES COMPILE_OPTIONS "${TARGET_COMPILE_FLAGS}")
+endfunction()
+
+# Remove NDEBUG and _DEBUG from preprocessor definitions
+# Useful only when running compiler directly - Visual Studio WILL ADD THESE on its own
+# Python script takes care of removing them from .vcxproj
+function(xr_remove_target_debug_definition TARGET)
+    get_target_property(TARGET_COMPILE_DEFINITIONS ${TARGET} COMPILE_DEFINITIONS )
+    # MSVC
+    string(REPLACE "/DNDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "/D_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    # GCC/Clang
+    string(REPLACE "-NDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "-_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    # Sanity check
+    string(REPLACE "NDEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    string(REPLACE "_DEBUG" "" ${TARGET_COMPILE_DEFINITIONS} "${${TARGET_COMPILE_DEFINITIONS}}")
+    set_target_properties(${TARGET} PROPERTIES COMPILE_DEFINITIONS "${TARGET_COMPILE_DEFINITIONS}")
+endfunction()
+
+# List all Target Compile Options
+function(xr_print_target_compile_definitions TARGET)
+    get_target_property(TARGET_COMPILE_DEFINITIONS ${TARGET} COMPILE_DEFINITIONS )
+    message(STATUS "\nPreprocessor definitions of ${TARGET}:\n${TARGET_COMPILE_DEFINITIONS}")
 endfunction()
 
 # List all Target Compile Options
@@ -189,13 +212,13 @@ function(xr_setup_editors)
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
 	
-    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
-    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 
     # Set Default Namespace
     set_property(TARGET WeifenLuo.WinFormsUI.Docking PROPERTY VS_GLOBAL_RootNamespace "WeifenLuo.WinFormsUI")
@@ -229,7 +252,7 @@ function(xr_setup_editors)
     )
 
     set_target_properties(WPFToolkit.Extended PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
+        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework"
     )
 
     set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
@@ -263,11 +286,14 @@ function(xr_setup_plugins)
     xr_set_target_defaults_plugin(maya2011)
     xr_set_target_defaults_plugin(maya_animation)
     xr_set_target_defaults_plugin(maya2012)
+    xr_set_target_defaults_plugin(maya2018)
+    xr_set_target_defaults_plugin(maya2019)
+    xr_set_target_defaults_plugin(maya2023)
 
     # Set individual configs
     set_target_properties(maya2011 PROPERTIES
-		OUTPUT_NAME "xray.maya2011"
-        SUFFIX ".mll"
+		OUTPUT_NAME "xray_maya2011"
+        	SUFFIX ".mll"
 	)
     target_include_directories(maya2011 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
@@ -277,7 +303,7 @@ if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
 #       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
     )
@@ -285,7 +311,7 @@ else()
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
 #       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
     )
@@ -296,7 +322,7 @@ endif()
 	)
 
     set_target_properties(maya2012 PROPERTIES
-	 OUTPUT_NAME "xray.maya2012"
+	 OUTPUT_NAME "xray_maya2012"
          SUFFIX ".mll"
 	)
     target_include_directories(maya2012 PRIVATE
@@ -307,7 +333,7 @@ if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
@@ -315,8 +341,80 @@ else()
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
 	${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib32
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+    )
+endif()
+
+    set_target_properties(maya2018 PROPERTIES
+	 OUTPUT_NAME "xray_maya2018"
+         SUFFIX ".mll"
+	)
+    target_include_directories(maya2018 PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2018
+    )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    target_link_directories(maya2018 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+    )
+else()
+    target_link_directories(maya2018 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+    )
+endif()
+
+    set_target_properties(maya2019 PROPERTIES
+	 OUTPUT_NAME "xray_maya2019"
+         SUFFIX ".mll"
+	)
+    target_include_directories(maya2019 PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2019
+    )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    target_link_directories(maya2019 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+    )
+else()
+    target_link_directories(maya2019 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+    )
+endif()
+
+    set_target_properties(maya2023 PROPERTIES
+	 OUTPUT_NAME "xray_maya2023"
+         SUFFIX ".mll"
+	)
+    target_include_directories(maya2023 PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2023
+    )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    target_link_directories(maya2023 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+    )
+else()
+    target_link_directories(maya2023 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
     )
 endif()
@@ -557,8 +655,11 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+    xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_static_lib_C TARGET)
@@ -615,8 +716,10 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_stalker2 TARGET)
@@ -654,7 +757,7 @@ endif()
     set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "" LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
 
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -672,8 +775,11 @@ endif()
     ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+    xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_static_lib_CPP TARGET)
@@ -700,7 +806,7 @@ else()
     )
 endif()
     # set compiler flags																				
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -724,8 +830,10 @@ endif()
     ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    # list all Target properties
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
     xr_print_target_compile_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_shared_lib TARGET)
@@ -750,7 +858,7 @@ else()
     )
 endif()
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -774,9 +882,6 @@ endif()
       ${SOLUTION_DIR_INCLUDE_PATH}/binaries
       )
 
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
@@ -799,7 +904,11 @@ else()
     )
 endif()
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_shared_lib_CLR TARGET)
@@ -863,9 +972,6 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
 	)
 
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
@@ -886,8 +992,13 @@ else()
         /FIXED:NO
         /MACHINE:X86
     )
-endif()  
+endif()
+
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 # The only difference between Static and Shared editor libs are Linkage settings
@@ -923,7 +1034,7 @@ endif()
    	set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "")
 
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
@@ -953,7 +1064,7 @@ endif()
     # Enable CLR again thanks to C# projects having separate property for that in VS2019 and higher :)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
-    xr_print_target_compile_flags(${TARGET})
+    #xr_print_target_compile_flags(${TARGET})
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /DEBUG
@@ -983,7 +1094,13 @@ endif()
 	wpf_controls
     )
 
+    target_compile_definitions(${TARGET} PUBLIC MBCS _MBCS)
+
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_network_32 TARGET)
@@ -1028,8 +1145,6 @@ function(xr_set_target_defaults_network_32 TARGET)
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -1045,7 +1160,11 @@ function(xr_set_target_defaults_network_32 TARGET)
         /DELAYLOAD:advapi32.dll
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_network_64 TARGET)
@@ -1088,8 +1207,6 @@ function(xr_set_target_defaults_network_64 TARGET)
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -1103,7 +1220,11 @@ function(xr_set_target_defaults_network_64 TARGET)
 		/MACHINE:X64
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 function(xr_set_target_defaults_plugin TARGET)
@@ -1142,6 +1263,7 @@ endif()
         /GS-
         /fp:fast
         /MP
+	/Yupch.h
     )
 
     xr_disable_target_exception_handling(${TARGET})
@@ -1157,17 +1279,21 @@ endif()
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
-    xr_print_target_compile_flags(${TARGET})
-
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /OPT:REF
         /OPT:ICF
         /DYNAMICBASE:NO
         /DELAY:UNLOAD
+	/delayload:openmayaanim.dll 
+	/delayload:xray_texture_compressor.dll
     )
 
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
     xr_print_target_linker_flags(${TARGET})
+
 endfunction()
 
 

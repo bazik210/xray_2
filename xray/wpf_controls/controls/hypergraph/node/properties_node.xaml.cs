@@ -168,8 +168,13 @@ namespace xray.editor.wpf_controls.hypergraph
 				m_output_link_point.Visibility = (value) ? Visibility.Visible : Visibility.Collapsed;
 			}
 		}
-		
-		public			Brush					background				
+
+        public void input_link_place_node_set ( node node )
+		{
+          m_input_link_point.node = node;
+        }
+
+        public			Brush					background				
 		{
 			get
 			{

@@ -164,7 +164,7 @@ MBoundingBox body_node::boundingBox() const
 
 void* body_node::creator()
 {
-	return CRT_NEW(body_node);
+	return new(body_node);
 }
 
 MStatus body_node::initialize()
@@ -430,8 +430,11 @@ void body_node::get_points(MPoint** points, unsigned short& points_count, unsign
 		
  }
 
- MMatrix get_displacement(  MFnTransform from,  MFnTransform to)
+ MMatrix get_displacement( body_node* ab, MObject obj /*MFnTransform from, MFnTransform to*/ )
  {
+	 MFnTransform from(ab->thisMObject());
+	 MFnTransform to(obj);
+
 	 MStatus stat;
 	 MDagPath from_path, to_path;
 	 stat = from.getPath( from_path ); 
@@ -519,7 +522,7 @@ MStatus		body_node::export_collision_to_actual_body	( lua_config_value table, bo
 	MFnDagNode	 this_body_dag_node	(thisMObject());	
 	MFnTransform this_body_transform_node( thisMObject() );
 
-	return export_body_collision( ab_table, this_body_transform_node, this_body_dag_node, get_displacement( actual_body_transform_node, this_body_transform_node ) );
+	return export_body_collision( ab_table, this_body_transform_node, this_body_dag_node, get_displacement( ab, thisMObject() /*actual_body_transform_node, this_body_transform_node*/ ) );
 }
 
 MStatus export_body_node(lua_config_value table, MFnTransform& node_tr, MFnDagNode& node);

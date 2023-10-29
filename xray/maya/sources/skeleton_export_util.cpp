@@ -37,7 +37,19 @@ MStatus		export_skeleton_node( MObject  &ik_anim_joint_object, xray::configs::lu
 
 	//if( all_claster_joints.hasItem( my_path, my_obj,  &stat ) )
 	//if( ik_anim_joint_object.hasFn( MFn::kJoint ) )
-	if( ik_anim_joint_object.hasFn( MFn::kJoint ) && all_claster_joints.hasItem( my_path, ik_anim_joint_object,  &stat ) )
+
+	MStringArray list;
+	all_claster_joints.getSelectionStrings(list);
+	std::string joints = "";
+	for (int i = 0; i < list.length(); i++) {
+		joints += list[i].asChar();
+		joints += "/";
+	}
+	//MString lst = "We got list: "; list += joints.c_str();
+	//display_info(list);
+
+	auto str = (std::string)name + "/";
+	if( ik_anim_joint_object.hasFn( MFn::kJoint ) && joints.find(str) != std::string::npos /*all_claster_joints.hasItem(my_path, ik_anim_joint_object, &stat)*/)
 	{
 		CHK_STAT_R		( stat );
 		my_cfg			= cfg[ name ];
@@ -150,7 +162,11 @@ MSyntax	skeleton_export_cmd::newSyntax()
 	using namespace xray::fs_new;
 	MStatus				stat;
 
-	MArgDatabase argData( syntax(), args );
+	if (!args.length()) {
+		return MS::kFailure;
+	}
+
+	MArgDatabase argData(syntax(), args );
 	MString				file_name = file_name_from_args( argData, &stat );
 	CHK_STAT_R			( stat );	
 	

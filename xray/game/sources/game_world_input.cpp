@@ -17,11 +17,11 @@ namespace stalker2{
 class camera_director;
 bool b_rtp_dbg_input = false;
 
-class rtp_debug_camera : public free_fly_camera
+class rtp_debug_camera : public free_fly_camera, game_world_object
 {
 	typedef free_fly_camera super;
 public:
-						rtp_debug_camera		( game_world& w );
+						rtp_debug_camera		( game_scene& w, camera_director_ptr& cd );
 	virtual void		tick					( );
 	virtual void		on_activate				( camera_director* cd )	{ super::on_activate(cd); }
 	virtual void		on_deactivate			( )							{ super::on_deactivate(); }
@@ -31,10 +31,12 @@ private:
 	game_camera*	m_prev_camera;
 };
 
-rtp_debug_camera::rtp_debug_camera( game_world& w )
-:super			( w ),
-m_prev_camera	( NULL )
-{};
+rtp_debug_camera::rtp_debug_camera( game_scene& w, camera_director_ptr& cd )
+:super			( w, cd ),
+m_prev_camera	( NULL ),
+game_world_object( game_world_object::get_game_world() )
+{
+};
 
 void rtp_debug_camera::start( )
 {

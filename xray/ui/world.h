@@ -28,6 +28,9 @@ struct XRAY_NOVTABLE world {
 	virtual render::ui::renderer& get_renderer			( )						= 0;
 //	virtual xray::render::scene_view_ptr const& get_scene_view( ) const			= 0;
 
+	virtual void			set_base_screen_size		( const float2& screen_size )	= 0;
+	virtual float2 const&	base_screen_size			( ) const						= 0;	
+
 protected:
 	XRAY_DECLARE_PURE_VIRTUAL_DESTRUCTOR( world )
 }; // class world

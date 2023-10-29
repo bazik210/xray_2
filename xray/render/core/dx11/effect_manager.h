@@ -45,7 +45,11 @@ class effect_manager: public quasi_singleton<effect_manager>
 public:
 		effect_manager	();
 		~effect_manager	();
-	
+
+private:
+		effect_manager(const effect_manager&);
+
+public:
 		struct effect_holder_struct
 		{
 			effect_descriptor*	descriptor;

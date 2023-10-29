@@ -141,7 +141,14 @@ void input_world::add_handler( xray::input::handler& handler )
 void input_world::remove_handler	( xray::input::handler& handler )
 {
 	handlers_type::iterator it	= std::find( m_handlers.begin(), m_handlers.end(), &handler );
-	ASSERT					( it!=m_handlers.end() );
+
+	if (it == m_handlers.end()) {
+		//LOG_ERROR("Do not use filters inside root_scene of your project! Fix old level!");
+		//we can get wrong handler in editor play too...
+		return;
+	}
+
+	//ASSERT				( it!=m_handlers.end() );
 	m_handlers.erase		( it );
 }
 

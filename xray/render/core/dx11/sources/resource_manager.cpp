@@ -51,6 +51,9 @@
 #	endif // #if !USE_DX10 
 #pragma warning( pop )
 
+typedef ID3D11Texture1D ID3DTexture1D;
+typedef D3D11_TEXTURE1D_DESC D3D_TEXTURE1D_DESC;
+
 namespace xray {
 namespace render {
 
@@ -200,14 +203,53 @@ static ID3DBaseTexture* make_copy_with_srgb_format(ID3DBaseTexture* in_texture)
 		
 		return					copy;
 	}
-	else
+	else if (type == D3D_RESOURCE_DIMENSION_TEXTURE3D)
 	{
-		R_ASSERT				(0, "sRGB for 3d and 1d types not implemented yet.");
-		return					0;
+		ID3DQuery* out_empty_query_ptr;
+		D3D_QUERY_DESC			query_desc;
+		query_desc.MiscFlags = 0;
+		query_desc.Query = D3D11_QUERY_EVENT;
+		begin_command_list(query_desc, out_empty_query_ptr);
+
+		D3D_TEXTURE3D_DESC		texDesc;
+		ID3DTexture3D* T = static_cast<ID3DTexture3D*>(in_texture);
+		T->GetDesc(&texDesc);
+
+		texDesc.Format = get_typeless_format(texDesc.Format);
+		ID3DTexture3D* copy = 0;
+		HRESULT result = device::ref().d3d_device()->CreateTexture3D(&texDesc, 0, &copy);
+		CHECK_RESULT(result);
+
+		device::ref().d3d_context()->CopyResource(copy, in_texture);
+
+		end_command_list(out_empty_query_ptr);
+
+		return					copy;
+	}
+	else if (type == D3D_RESOURCE_DIMENSION_TEXTURE1D)
+	{
+		ID3DQuery* out_empty_query_ptr;
+		D3D_QUERY_DESC			query_desc;
+		query_desc.MiscFlags = 0;
+		query_desc.Query = D3D11_QUERY_EVENT;
+		begin_command_list(query_desc, out_empty_query_ptr);
+
+		D3D_TEXTURE1D_DESC		texDesc;
+		ID3DTexture1D* T = static_cast<ID3DTexture1D*>(in_texture);
+		T->GetDesc(&texDesc);
+
+		texDesc.Format = get_typeless_format(texDesc.Format);
+		ID3DTexture1D* copy = 0;
+		HRESULT result = device::ref().d3d_device()->CreateTexture1D(&texDesc, 0, &copy);
+		CHECK_RESULT(result);
+
+		device::ref().d3d_context()->CopyResource(copy, in_texture);
+
+		end_command_list(out_empty_query_ptr);
+
+		return					copy;
 	}
 }
-
-
 
 // HRESULT	shader_compile( 
 // 	LPCSTR						name,

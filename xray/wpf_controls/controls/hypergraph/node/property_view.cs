@@ -108,10 +108,10 @@ namespace xray.editor.wpf_controls.hypergraph
 		{
 			get
 			{
-				if( m_input_link_point == null )
-				{
+				//if( m_input_link_point == null )
+				//{
 
-				}
+				//}
 				return m_input_link_point;
 			}
 		}

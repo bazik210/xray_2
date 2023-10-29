@@ -82,7 +82,7 @@ void human_npc_cook::on_npc_options_received			( configs::binary_config_value co
 												m_game.get_sound_world( ),
 												m_game.get_sound_scene( ),
 												m_game.get_spatial_tree( ),
-												m_game.get_render_scene( ),
+												m_game.get_active_scene( ),
 												m_game.renderer( ),
 												m_game.get_game_world( )
 											);

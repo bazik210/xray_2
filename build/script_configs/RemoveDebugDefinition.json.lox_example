@@ -1,0 +1,37 @@
+{
+	"included_directories" : [
+		"third_party"
+	],
+	"included_projects" : [
+		"bugtrap",
+		"bugtrapN",
+		"bullet",
+		"FreeImageDLL",
+		"FreeImage",
+		"LibJPEG",
+		"LibMNG",
+		"LibOpenJPEG",
+		"LibPNG",
+		"LibTIFF",
+		"lua.5.1.4",
+		"luabind.0.8.1",
+		"OpenEXR",
+		"maya2011",
+		"maya2012",
+		"maya2018",
+		"maya2019",
+		"maya2023",
+		"minizip",
+		"minizipN",
+		"nvcore",
+		"nvimage",
+		"nvtt",
+		"squish",
+		"ode",
+		"ogg",
+		"theora",
+		"vorbis",
+		"vorbisfile",
+		"zlib"
+	]
+}

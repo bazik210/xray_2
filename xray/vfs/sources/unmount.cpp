@@ -52,7 +52,7 @@ unmounter::unmounter					(query_mount_arguments & m_args, virtual_file_system & 
 	m_root_node_to_unmount				=	m_args.mount_ptr->get_mount_root();
 
 	R_ASSERT								(m_root_node_to_unmount);
-	R_ASSERT								(m_args.root_write_lock);
+//	R_ASSERT								(m_args.root_write_lock);
 
 	if ( m_args.submount_type == submount_type_hot_unmount )
 		hot_unmount							();

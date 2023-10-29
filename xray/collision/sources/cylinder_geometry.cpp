@@ -119,9 +119,9 @@ void cylinder_geometry::get_aabb		( math::aabb &bbox, const float4x4 &self_trans
 // given a pointer `p' to a dContactGeom, return the dContactGeom at
 // p + skip bytes.
 
-static const float  M_SIN_PI_3		=0.8660254037844386467637231707529362f;
-static const float  M_COS_PI_3		=0.5000000000000000000000000000000000f;
-static const float  M_SQRT1_2		=0.7071067811865475244008443621048490f;	
+static const float  M_SIN_PI_3		= 0.8660254037844386467637231707529362f;
+static const float  M_COS_PI_3		= 0.5000000000000000000000000000000000f;
+static const float  M_SQRT1_2		= 0.7071067811865475244008443621048490f;	
 //struct dxCylinder {	// cylinder
 //  float radius,lz;	// radius, length along y axis //
 //};

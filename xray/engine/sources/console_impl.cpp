@@ -30,9 +30,13 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	m_tips				( a ),
 	m_self_deactivate	( true )
 {
+	float2 screen_size = m_ui_world.base_screen_size();
+	screen_size.y = screen_size.y * 0.5f;
+
 	m_ui_dialog						= m_ui_world.create_dialog();
 	m_ui_dialog->w()->set_position	(float2(0,0));
-	m_ui_dialog->w()->set_size		(float2(1020,530));
+	m_ui_dialog->w()->set_size		(screen_size);
+	//m_ui_dialog->w()->set_size		(float2(1020,530));
 
 	ui::image* img					= m_ui_world.create_image();
 	img->init_texture				("ui_rect");
@@ -43,15 +47,25 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	img->w()->set_visible			(true);
 	m_ui_dialog->w()->add_child		(img->w(), true);
 
+	float2 view_screen_size(0.0f, 0.0f);
+	view_screen_size.x = screen_size.x - 2.0;
+	view_screen_size.y = screen_size.y - 30.0;
+
 	m_ui_view						= m_ui_world.create_scroll_view();
 	m_ui_view->w()->set_position	(float2(1,1));
-	m_ui_view->w()->set_size		(float2(1018,500));
+	m_ui_view->w()->set_size		(view_screen_size);
+	//m_ui_view->w()->set_size		(float2(1018,500));
 	m_ui_view->w()->set_visible		(true);
 	m_ui_dialog->w()->add_child		(m_ui_view->w(), true);
 
+	float2 edit_pos(1, 510);
+	edit_pos.y = screen_size.y - 20.0;
+
+	float2 edit_size(0.0f, 0.0f);
+	edit_size.x = screen_size.x - 2.0;
+	edit_size.y = 18.0f;
+
 	m_text_edit						= m_ui_world.create_text_edit();
-	float2 edit_pos					(1,510);
-	float2 edit_size				(1018,18);
 	m_text_edit->w()->set_position	(edit_pos);
 	m_text_edit->w()->set_size		(edit_size);
 	m_text_edit->w()->set_visible	(true);

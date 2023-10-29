@@ -127,6 +127,8 @@ target_link_libraries(model_editor PUBLIC
 	engine_pc_dx11
 )
 
+set_property(TARGET model_editor PROPERTY VS_GLOBAL_RootNamespace xray.model_editor)
+
 set_target_properties(model_editor PROPERTIES FOLDER "engine/editors")
 
 add_dependencies(model_editor editor_base editor_controls)

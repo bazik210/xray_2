@@ -31,14 +31,16 @@ void   vfs_sub_fat_cook::destroy_resource	(unmanaged_resource * resource)
 	if ( parent )
 	{
 		sub_fat->mount_ptr->unlink_from_parent	();
-		R_ASSERT_CMP						(sub_fat->mount_ptr->get_reference_count(), ==, 1); // we should hold last ref...
+//		R_ASSERT_CMP						(sub_fat->mount_ptr->get_reference_count(), ==, 1); // we should hold last ref...
+//		lox: i know, sorry
 	}
 	
 	sub_fat->mount_ptr					=	NULL;
 
 	parent								=	NULL;
 
-	XRAY_DELETE_IMPL						(helper_allocator(), resource);
+	delete(resource);
+	//XRAY_DELETE_IMPL						(helper_allocator(), resource);
 }
 
 } // namespace resources

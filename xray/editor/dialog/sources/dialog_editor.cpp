@@ -267,6 +267,7 @@ void dialog_editor_impl::save_string_table()
 		{
 			pcstr key = str_it->first;
 			references_table::iterator opt_it = m_references_table->find((char*)key);
+			LOG_INFO("%s", key);
 			R_ASSERT(opt_it!=m_references_table->end());
 			if(opt_it->second->references_count()==0 && str_it->second->check_on_empty_text())
 				continue;

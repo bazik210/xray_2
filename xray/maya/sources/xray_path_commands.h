@@ -14,7 +14,7 @@ public:
 public:
 
 	virtual MStatus			doIt		( const MArgList&);
-	static void*			creator		( )					{return CRT_NEW(xray_path_cmd);}
+	static void*			creator		( )					{return new xray_path_cmd;}
 	virtual bool			isUndoable	( ) const			{return false;} 
 	static MSyntax			newSyntax	( );
 }; // class xray_path_cmd

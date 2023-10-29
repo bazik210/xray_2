@@ -1,0 +1,8 @@
+{
+	"included_directories" : [
+		"third_party"
+	],
+	"included_projects" : [
+		"collision"
+	]
+}

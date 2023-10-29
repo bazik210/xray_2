@@ -29,13 +29,13 @@ collision::object* object_collision::get_collision_object( )
 	return m_collision_obj; 
 }
 
-void object_collision::destroy( memory::base_allocator* allocator )
+void object_collision::destroy( /*memory::base_allocator* allocator */)
 {
 	if ( initialized() )
 	{
 		remove						( );
-		m_collision_obj->destroy	( allocator );
-		DELETE						( m_collision_obj );
+		//m_collision_obj->destroy	( allocator );
+		delete						( m_collision_obj );
 		m_collision_obj				= NULL;
 	}
 }
@@ -79,7 +79,7 @@ void object_collision::create_from_geometry( bool user_geom, object_base^ o, col
 	if ( user_geom )
 		m_user_geometry	= geom;
 
-	m_collision_obj		= NEW (editor::collision_object_dynamic)( geom, o, t );
+	m_collision_obj		= new (editor::collision_object_dynamic)( geom, o, t );
 }
 
 } // namespace editor

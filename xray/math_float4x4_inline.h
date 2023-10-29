@@ -148,6 +148,16 @@ inline float4x4	operator *					( float4x4 const& left, float4x4 const& right )
 	R_ASSERT	( left.i.w  == 0.f );
 	R_ASSERT	( left.j.w  == 0.f );
 	R_ASSERT	( left.k.w  == 0.f );
+
+//	if (::isnan(right.i.w))
+//		const_cast<float4x4&>(right).i.w = 0.f;
+
+//	if (::isnan(right.j.w))
+//		const_cast<float4x4&>(right).j.w = 0.f;
+
+//	if (::isnan(right.k.w))
+//		const_cast<float4x4&>(right).k.w = 0.f;
+
 	R_ASSERT	( right.i.w == 0.f );
 	R_ASSERT	( right.j.w == 0.f );
 	R_ASSERT	( right.k.w == 0.f );

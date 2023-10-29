@@ -29,7 +29,6 @@
 #include "sound_buffer_factory.h"
 #include "sound_instance_proxy_order.h"
 #include "sound_world_parameters.h"
-#include "xaudio2.h"
 
 namespace xray {
 namespace sound {
@@ -44,7 +43,6 @@ enum
 };
 
 #if !XRAY_PLATFORM_PS3
-/*
 static void role_to_string ( XAUDIO2_DEVICE_ROLE const role, fixed_string2048& dest )
 {
 	if ( role == NotDefaultDevice )
@@ -66,7 +64,7 @@ static void role_to_string ( XAUDIO2_DEVICE_ROLE const role, fixed_string2048& d
 		if ( role & GlobalDefaultDevice )
 			dest += "GlobalDefaultDevice ";
 	}
-}*/
+}
 #endif // #if !XRAY_PLATFORM_PS3
 
 sound_world::sound_world	(
@@ -224,17 +222,17 @@ bool sound_world::initialize_xaudio		( )
 		R_ASSERT				( 0 );
 	}
 
-	//u32 device_count			= 0;
-	//m_xaudio->GetDeviceCount	( &device_count );
-	//LOG_INFO					( "devices count: %d", device_count );
+	u32 device_count			= 0;
+	m_xaudio->GetDeviceCount	( &device_count );
+	LOG_INFO					( "devices count: %d", device_count );
 
-	/*
-	if (device_count == 0)
+
+	if ( device_count == 0 )
 	{
 		LOG_ERROR				( "No audio device avalible" );
 		return false;
 	}
-	*/
+
 	if ( s_debug_audio )
 	{
 		XAUDIO2_DEBUG_CONFIGURATION dc;
@@ -248,7 +246,6 @@ bool sound_world::initialize_xaudio		( )
 		m_xaudio->SetDebugConfiguration(&dc);
 	}
 
-	/*
 	XAUDIO2_DEVICE_DETAILS		deviceDetails;
 	int preferred_device_id		= -1;
 	fixed_string2048			device_role;
@@ -268,21 +265,21 @@ bool sound_world::initialize_xaudio		( )
 	{
 		LOG_ERROR				( "There is no Default Multimedia Device in system" );
 		return false;
-	}*/
+	}
 
 	res							= m_xaudio->CreateMasteringVoice( 
 										&m_master_voice, 
 										XAUDIO2_DEFAULT_CHANNELS,
 										XAUDIO2_DEFAULT_SAMPLERATE, 
 										0, 
-										NULL, 
+										preferred_device_id, 
 										NULL 
 										);
 	ASSERT						( !FAILED( res ) );
 	//// initialize X3DAudio
-	//m_xaudio->GetDeviceDetails		( preferred_device_id, &deviceDetails );
+	m_xaudio->GetDeviceDetails		( preferred_device_id, &deviceDetails );
 	//u32 channelMask					= deviceDetails.OutputFormat.dwChannelMask;
-	//X3DAudioInitialize				( channelMask, X3DAUDIO_SPEED_OF_SOUND, m_x3d_instance );
+	//X3DAudioInitialize				( channelMask, X3DAUDIO_SPEED_OF_SOUND, (byte*)m_xaudio);
 	return true;
 }
 

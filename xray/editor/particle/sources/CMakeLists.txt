@@ -125,6 +125,8 @@ target_link_libraries(particle_editor PUBLIC
 	engine_pc_dx11
 )
 
+set_property(TARGET particle_editor PROPERTY VS_GLOBAL_RootNamespace particle_editor)
+
 set_target_properties(particle_editor PROPERTIES FOLDER "engine/editors")
 
 add_dependencies(particle_editor editor_base editor_controls)

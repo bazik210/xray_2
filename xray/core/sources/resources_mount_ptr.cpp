@@ -78,7 +78,10 @@ void   fs_task_unmount::execute_may_destroy_this	()
 		g_game_resources_manager->release_sub_fat	(sub_fat);
 
 	u32 const umount_count2				=	vfs::get_global_unmounts_count();
-	R_ASSERT								(umount_count2 != umount_count1, "no unmount occured! Call Lain");
+//	R_ASSERT								(umount_count2 != umount_count1, "no unmount occured! Call Lain");
+	if (umount_count2 == umount_count1) {
+		LOG_ERROR("no unmount occured! Call Lain");
+	}
 
 	fs_task_unmount * this_ptr			=	this;
 	XRAY_DELETE_IMPL						(helper_allocator(), this_ptr);

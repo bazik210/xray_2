@@ -192,6 +192,36 @@ float3 float4x4::get_angles_xyz				( ) const
 		);
 }
 
+float3 float4x4::get_i_xyz() const
+{
+	return i.xyz();
+}
+
+float3 float4x4::get_j_xyz() const
+{
+	return j.xyz();
+}
+
+
+float3 float4x4::get_c_xyz() const
+{
+	return c.xyz();
+}
+
+float3 float4x4::get_k_xyz() const
+{
+	return k.xyz();
+}
+
+//std::array<xray::math::float4_pod, 4> float4x4::get_matrix()
+//{
+//	matrix[0] = i;
+//	matrix[1] = j;
+//	matrix[2] = k;
+//	matrix[3] = c;
+//	return matrix;
+//}
+
 float4x4 xray::math::mul4x3						( float4x4 const& left, float4x4 const& right )
 {
 	float4x4	result;

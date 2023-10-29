@@ -44,6 +44,14 @@ bool main_menu::on_keyboard_action( input::world* input_world, input::enum_keybo
 			get_game().scene_close_query();
  			return				true;
  		}
+
+		if (key == xray::input::key_j)
+		{
+			m_game_world.delete_actor();
+			m_game_world.switch_to_free_fly_camera();
+			get_game().scene_close_query();
+			return				true;
+		}
  
  		if(key == xray::input::key_f)
  		{

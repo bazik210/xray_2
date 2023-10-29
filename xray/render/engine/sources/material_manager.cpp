@@ -462,8 +462,11 @@ void material_manager::remove_material_effects(material_effects_instance_ptr con
 	
 	for ( ; it != it_end; ++it)
 	{
-		if (*it->m_material_effects_instance_ptr == in_material_effects_instance)
+		if (*it->m_material_effects_instance_ptr == in_material_effects_instance) 
+		{
 			m_material_effects.erase(it);
+			break;
+		}
 	}
 }
 

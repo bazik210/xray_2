@@ -12,12 +12,12 @@
 #include "camera_behaviour.h"
 #include "event_generator_behaviour.h"
 #include "light_behaviour.h"
-//#include "proximity_trigger_behaviour.h"
-//#include "values_storage_behaviour.h"
+#include "proximity_trigger_behaviour.h"
+#include "values_storage_behaviour.h"
 #include "composite_object_behaviour.h"
-//#include "npc_play_animation_behaviour.h"
-//#include "npc_reach_position_behaviour.h"
-//#include "npc_empty_switcher_behaviour.h"
+#include "npc_play_animation_behaviour.h"
+#include "npc_reach_position_behaviour.h"
+#include "npc_empty_switcher_behaviour.h"
 
 namespace stalker2
 {
@@ -27,7 +27,9 @@ object_behaviour::object_behaviour( object_scene_job* owner, configs::binary_con
 m_owner	( owner ),
 m_prev_time ( 0.0f ),
 m_name	( name ),
-m_controlled_object( NULL )
+m_controlled_object( NULL ),
+m_cycled ( 0 ),
+m_length ( 0 )
 {	
 	//LOG_INFO( "object_behaviour construct [%x]", this );
 
@@ -224,18 +226,18 @@ object_behaviour* create_behaviour( object_scene_job* owner, configs::binary_con
 	object_behaviour* result	= NULL;
 	pcstr type					= t["behaviour_type"];
 
-	//if(strings::equal(type, "camera_track"))
-	//{
-	//	result = NEW(camera_follow_by_track_behaviour)( owner, t, name );
-	//}else
-	//if(strings::equal(type, "camera_free_fly"))
-	//{
-	//	result = NEW(camera_free_fly_behaviour)( owner, t, name );
-	//}else
-	//if(strings::equal(type, "active_camera"))
-	//{
-	//	result = NEW(camera_director_behaviour)( owner, t, name );
-	//}else
+	if(strings::equal(type, "camera_track"))
+	{
+		result = NEW(camera_follow_by_track_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "camera_free_fly"))
+	{
+		result = NEW(camera_free_fly_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "active_camera"))
+	{
+		result = NEW(camera_director_behaviour)( owner, t, name );
+	}else
 	if(strings::equal(type, "event_generator"))
 	{
 		result = NEW(event_generator_behaviour)( owner, t, name );
@@ -247,30 +249,30 @@ object_behaviour* create_behaviour( object_scene_job* owner, configs::binary_con
 	if(strings::equal(type, "light_anim"))
 	{
 		result = NEW(light_anim_behaviour)( owner, t, name );
-	//}else
-	//if(strings::equal(type, "proximity_trigger_default"))
-	//{
-	//	result = NEW(proximity_trigger_behaviour)( owner, t, name );
-	//}else
-	//if(strings::equal(type, "values_storage_default"))
-	//{
-	//	result = NEW(values_storage_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "proximity_trigger_default"))
+	{
+		result = NEW(proximity_trigger_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "values_storage_default"))
+	{
+		result = NEW(values_storage_behaviour)( owner, t, name );
 	}else
 	if(strings::equal(type, "composite_default"))
 	{
 		result = NEW(composite_object_behaviour)( owner, t, name );
-	//}else
-	//if(strings::equal(type, "npc_play_animation"))
-	//{
-	//	result = NEW(npc_play_animation_behaviour)( owner, t, name );
-	//}else	
-	//if(strings::equal(type, "npc_reach_location"))
-	//{
-	//	result = NEW(npc_reach_position_behaviour)( owner, t, name );
-	//}else	
-	//if(strings::equal(type, "npc_patrol"))
-	//{
-	//	result = NEW(npc_empty_switcher_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "npc_play_animation"))
+	{
+		result = NEW(npc_play_animation_behaviour)( owner, t, name );
+	}else	
+	if(strings::equal(type, "npc_reach_location"))
+	{
+		result = NEW(npc_reach_position_behaviour)( owner, t, name );
+	}else	
+	if(strings::equal(type, "npc_patrol"))
+	{
+		result = NEW(npc_empty_switcher_behaviour)( owner, t, name );
 	}else	
 	{
 		UNREACHABLE_CODE();

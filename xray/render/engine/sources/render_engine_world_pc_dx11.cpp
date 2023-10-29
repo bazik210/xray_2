@@ -176,7 +176,6 @@ struct singletons_on_preinitialize {
 	xray::render::backend					backend;
 	xray::render::scene_manager				scene_manager;
 	xray::render::shader_macros				shader_macros;
-	xray::render::effect_manager			effect_manager;
 	xray::render::effect_constant_storage	effect_constant_storage;
 }; // struct singletons_on_preinitialize
 
@@ -194,6 +193,7 @@ static xray::uninitialized_reference< singletons_on_preinitialize >		s_singleton
 static xray::uninitialized_reference< singletons_on_initialize >		s_singletons_on_initialize;
 //static xray::uninitialized_reference< xray::render::renderer >			s_renderer;
 static xray::uninitialized_reference< xray::render::system_renderer >	s_system_renderer;
+static xray::uninitialized_reference< xray::render::effect_manager >	s_effect_manager;
 
 namespace xray {
 namespace render {
@@ -365,6 +365,7 @@ engine::world::world						( ) :
 #endif
 
 	XRAY_CONSTRUCT_REFERENCE		( s_singletons_on_preinitialize, singletons_on_preinitialize )( );
+	XRAY_CONSTRUCT_REFERENCE		( s_effect_manager, effect_manager);
 	
 	// TODO
 	material::initialize_nomaterial_material( );
@@ -484,8 +485,8 @@ engine::world::~world						( )
 	DELETE							( m_renderer );
 	XRAY_DESTROY_REFERENCE			( s_singletons_on_initialize );
 	XRAY_DESTROY_REFERENCE			( s_singletons_on_preinitialize );
-	XRAY_DESTROY_REFERENCE			( s_options );
-	
+	XRAY_DESTROY_REFERENCE			( s_effect_manager );
+	XRAY_DESTROY_REFERENCE			(s_options);
 	unregister_cooks				( );
 	
 	particle::finalize				( );

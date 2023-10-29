@@ -33,8 +33,9 @@ private:
 public: // really private
 	task_type *									m_next_task_type;
 
-private:
+//temporally!
 	pcstr										m_description;
+private:
 	char										m_flags;
 
 	friend					class				task_manager;

@@ -16,7 +16,7 @@ typedef xray::editor::wpf_controls::hypergraph::link_id	hypergraph_link;
 
 void lod_descriptor::load_settings( configs::lua_config_value const& v )
 {
-	configs::lua_config_value surfaces_list = v["surfaces"];
+	configs::lua_config_value surfaces_list = const_cast<configs::lua_config_value&>(v)["surfaces"];
 	configs::lua_config_iterator it = surfaces_list.begin();
 	configs::lua_config_iterator it_e = surfaces_list.end();
 
@@ -45,7 +45,8 @@ void lod_descriptor::save_settings( configs::lua_config_value& v )
 		edit_surface^ snext		= s->next_lod;
 		unmanaged_string sname	(s->name);
 
-		surfaces_list[sname.c_str()]	= (snext==nullptr) ? "" : unmanaged_string(snext->name).c_str();
+		configs::lua_config_value surface_name = surfaces_list[sname.c_str()];
+		surface_name = (snext == nullptr) ? "" : unmanaged_string(snext->name).c_str();
 	}
 }
 
@@ -104,7 +105,7 @@ void edit_object_mesh::fill_lod_view( )
 			n->Height			= 20;
 			d->m_hypergraph_node= n;
 		}
-		h						+= n->Height + 5;
+		h						+= n->Height + 10;
 		
 
 		for each ( edit_surface^ s in d->m_surfaces )
@@ -115,8 +116,8 @@ void edit_object_mesh::fill_lod_view( )
 			{
 				n							= hg->create_properties_node(s->name);
 				n->name						= s->name;
-				n->Width					= 100;
-				n->Height					= 40;
+				n->Width					= 135;
+				n->Height					= 20;
 				s->m_hypergraph_node		= n;
 			}
 

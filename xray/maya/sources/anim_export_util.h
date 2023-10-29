@@ -51,7 +51,7 @@ public:
 	virtual MStatus			doIt		( const MArgList& );
 	virtual bool			isUndoable	() const			{return false;} 
 
-	static void*			creator		()					{return CRT_NEW( anim_export_cmd );}
+	static void*			creator		()					{return new anim_export_cmd;}
 	static MSyntax			newSyntax	();
 
 

@@ -338,7 +338,7 @@ void object_collision_geometry_mesh::load( configs::lua_config_value const& t )
 void object_collision_geometry_mesh::save( configs::lua_config_value& t )
 {
 	t["type"]			= (int)m_primitive->type;
-	t["position"]		= m_matrix->c.xyz();
+	t["position"]		= m_matrix->get_c_xyz();
 	t["rotation"]		= m_matrix->get_angles_xyz();
 	t["scale"]			= m_primitive->data_;
 

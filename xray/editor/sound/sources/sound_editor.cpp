@@ -38,8 +38,8 @@ m_render_world(render_world),
 m_state(editor_state::none)
 {
 	m_name = "sound_editor";
-	sound_resources_path = "resources/sounds/";
-	absolute_sound_resources_path = res_path+"/sources/sounds/";
+	sound_resources_path = "resources/sounds";
+	absolute_sound_resources_path = res_path+"/sources/sounds";
 	m_input_engine = gcnew input_engine(input_keys_holder::ref, gcnew sound_editor_contexts_manager(this));
   	m_gui_binder = gcnew gui_binder(m_input_engine);
 	m_single_sounds = gcnew single_sounds_list();

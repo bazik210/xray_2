@@ -36,6 +36,8 @@ public:
 		}
 	}
 
+	queries_result& operator= (const queries_result&);
+
 private:
 							queries_result				(u32						num_queries, 
 														 query_callback				callback,

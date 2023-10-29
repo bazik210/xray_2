@@ -117,6 +117,8 @@ target_link_libraries(sound_editor PUBLIC
 	engine_pc_dx11
 )
 
+set_property(TARGET sound_editor PROPERTY VS_GLOBAL_RootNamespace sound_editor)
+
 set_target_properties(sound_editor PROPERTIES FOLDER "engine/editors")
 
 add_dependencies(sound_editor editor_base editor_controls)

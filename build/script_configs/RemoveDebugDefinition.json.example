@@ -1,0 +1,9 @@
+{
+	"included_directories" : [
+		"exampleDir"
+	],
+	"included_projects" : [
+		"exampleProj0",
+		"exampleProj1"
+	]
+}

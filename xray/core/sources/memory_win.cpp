@@ -155,9 +155,9 @@ void iterate_regions		( u32 const start_address, u32 const allocation_granularit
 #if XRAY_PLATFORM_32_BIT
 	u64 const max_address		= u64(1) << 32;
 #elif XRAY_PLATFORM_64_BIT // #if XRAY_PLATFORM_WINDOWS_32
-	u64 const max_address		= u64(1) << 40;
+	u64 const max_address		= u64(1) << 44;
 #else // #if XRAY_PLATFORM_64_BIT
-	u64 const max_address		= u64(1) << 40;
+	u64 const max_address		= u64(1) << 44;
 #endif // #if XRAY_PLATFORM_WINDOWS_32
 
 	for ( ; i < max_address; ) {
@@ -918,9 +918,14 @@ void xray::memory::on_after_memory_initialized	( )
 #if XRAY_DEBUG_ALLOCATOR
 void xray::memory::register_debug_allocator	( u64 const maximum_memory_size )
 {
-	u64 const max_memory_size		= 768*Mb;
-	//u64 memory_size					= math::max( maximum_memory_size ? maximum_memory_size : max_memory_size, 1*Mb );
-	//memory_size						= math::min( memory_size, max_memory_size );
-	xray::debug::g_mt_allocator.do_register(max_memory_size, "debug multithreaded allocator" );
+	MEMORYSTATUSEX statex; statex.dwLength = sizeof(statex); GlobalMemoryStatusEx(&statex);
+	u64 const max_avaliable_memory = statex.ullAvailPhys;
+	u64 const max_debug_memory_size		= 1024*Mb;
+	// memory_size = the_biggest(between(if exist maximum_memory_size (8Mb) else 192Mb) and 1*Mb) = 8*Mb
+	u64 memory_size					= math::max( maximum_memory_size ? maximum_memory_size : max_debug_memory_size, 1*Mb );
+	//memory_size = the_smallest( memory_size (8Mb), 192*Mb); 
+	memory_size						= math::min( memory_size, max_debug_memory_size);
+	memory_size						= math::min(memory_size, max_avaliable_memory);
+	xray::debug::g_mt_allocator.do_register(memory_size, "debug multithreaded allocator" );
 }
 #endif // #if XRAY_DEBUG_ALLOCATOR

@@ -16,7 +16,7 @@ const MString body_node_manip::typeName( body_node_manip_type_name );
 
 void* body_node_manip::creator()
 {
-	return CRT_NEW(body_node_manip)();
+	return new(body_node_manip)();
 }
 
 MStatus body_node_manip::createChildren()

@@ -459,7 +459,17 @@ void terrain_modifier_detail_painter::load_settings(RegistryKey^ key)
 
 	RegistryKey^ self_key		= get_sub_key(key, name);
 
-	mode						= (painter_mode)((int)System::Enum::Parse(painter_mode::typeid, (self_key->GetValue("mode", (int)painter_mode::both)->ToString()->ToString()) ));
+	/*LOG_INFO("terrain settings key: %s", name);
+
+	System::String^ load_reg = "0";
+	auto get_reg = self_key->GetValue("mode", "both")->ToString();
+	if (get_reg == "both") {
+		load_reg = "3";
+	} else if(get_reg == "diffuse") {
+		load_reg = "1";
+	}*/
+	
+		mode						= (painter_mode)((int)System::Enum::Parse(painter_mode::typeid, "3"));
 //.. active index
 	self_key->Close				();
 }
@@ -470,7 +480,17 @@ void terrain_modifier_detail_painter::save_settings(RegistryKey^ key)
 
 	RegistryKey^ self_key		= get_sub_key(key, name);
 
-	self_key->SetValue			("mode", (int)mode);
+	/*System::String^ cur_mode = "texture";
+	LOG_INFO("save mode: %s", mode);
+	if ((int)mode == 3) {
+		cur_mode = "both";
+	}
+	else if ((int)mode == 1) {
+		cur_mode = "diffuse";
+	}
+	LOG_INFO("cur mode: %s", cur_mode);*/
+
+	self_key->SetValue			("mode", "both");
 
 //.. active index
 	self_key->Close				();

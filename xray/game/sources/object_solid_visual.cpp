@@ -317,7 +317,7 @@ object_speedtree_visual::object_speedtree_visual( game_scene& w )
 void object_speedtree_visual::unload_contents( )
 {
 	if (m_speedtree_instance_ptr.c_ptr())
-		m_game_scene.renderer().scene().remove_speedtree_instance(m_game_scene.get_render_scene(), m_speedtree_instance_ptr, false/*!m_game_world.is_loading_or_unloading()*/ );	
+		m_game_scene.renderer().scene().remove_speedtree_instance(m_game_scene.get_render_scene(), m_speedtree_instance_ptr, !m_game_scene.get_game_world().is_loading_or_unloading());
 	
 	m_speedtree_instance_ptr = NULL;
 }
@@ -337,6 +337,6 @@ void object_speedtree_visual::on_visual_ready( resources::queries_result& data )
  	R_ASSERT	( data.is_successful() );
  	
 	m_speedtree_instance_ptr = static_cast_resource_ptr<xray::render::speedtree_instance_ptr>( data[0].get_unmanaged_resource() );
-	m_game_scene.renderer().scene().add_speedtree_instance( m_game_scene.get_render_scene(), m_speedtree_instance_ptr, m_transform, false/*!m_game_world.is_loading_or_unloading()*/ );
+	m_game_scene.renderer().scene().add_speedtree_instance( m_game_scene.get_render_scene(), m_speedtree_instance_ptr, m_transform, !m_game_scene.get_game_world().is_loading_or_unloading());
 }
 } //namespace stalker2

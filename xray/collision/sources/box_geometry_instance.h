@@ -57,7 +57,15 @@ public:
 	virtual	float			get_surface_area		( ) const;
 	virtual	float3			get_random_surface_point( math::random32& randomizer ) const;
 	virtual	float3			get_closest_point_to	( float3 const& source, float4x4 const& origin = float4x4().identity() ) const;
-	XRAY_IMPLEMENT_COLLISION_GEOMETRY_VISIT_FUNCTIONS
+
+		virtual void accept(geometry_double_dispatcher& dispatcher, geometry_instance const& instance) const { instance.visit(dispatcher, *this); }
+		virtual void visit(geometry_double_dispatcher& dispatcher, box_geometry_instance const& node) const { dispatcher.dispatch(node, *this); }
+		virtual void visit(geometry_double_dispatcher& dispatcher, sphere_geometry_instance const& node) const { dispatcher.dispatch(node, *this); }
+		virtual void visit(geometry_double_dispatcher& dispatcher, cylinder_geometry_instance const& node) const { dispatcher.dispatch(node, *this); }
+		virtual void visit(geometry_double_dispatcher& dispatcher, capsule_geometry_instance const& node) const { dispatcher.dispatch(node, *this); }
+		virtual void visit(geometry_double_dispatcher& dispatcher, truncated_sphere_geometry_instance const& node) const { dispatcher.dispatch(node, *this); }
+
+	//XRAY_IMPLEMENT_COLLISION_GEOMETRY_VISIT_FUNCTIONS
 private:
 	float4x4	m_matrix;
 	float4x4	m_inverted_matrix;

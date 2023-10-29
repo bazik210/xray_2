@@ -22,7 +22,7 @@ const MString skinned_visual_exporter::Name	( "xray_skin_export" );
 
 void* skinned_visual_exporter::creator()
 {
-	return CRT_NEW(skinned_visual_exporter)();
+	return new skinned_visual_exporter;
 }
 
 MSyntax skinned_visual_exporter::newSyntax()
@@ -83,13 +83,17 @@ MStatus skinned_visual_exporter::check_args( MArgDatabase& arg_data )
 	return MStatus::kSuccess;
 }
 
-MStatus skinned_visual_exporter::doIt( const MArgList& arglist )
+MStatus skinned_visual_exporter::doIt( const MArgList& args )
 {
 	g_uniq_surface_counter		= 0;
 
 	MStatus						result;
 
-	MArgDatabase arg_data		( syntax(), arglist, &result );
+	if (!args.length()) {
+		return MS::kFailure;
+	}
+
+	MArgDatabase arg_data		( syntax(), args, &result );
 	CHK_STAT_R					( result );
 	
 	result						= check_args( arg_data );
@@ -109,7 +113,7 @@ MStatus skinned_visual_exporter::doIt( const MArgList& arglist )
 	result						= collector.extract_locators( locators_path, MMatrix::identity );
 	CHK_STAT_R					( result );
 
-	MString skin_cluster_path	= skin_name;// + "|vis";
+	MString skin_cluster_path	= skin_name + "|vis";
 	result						= collector.export_skin_visual	( skin_cluster_path );
 	CHK_STAT_R					(result);
 

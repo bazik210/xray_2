@@ -19,6 +19,7 @@ namespace editor_base {
 
 System::Windows::Forms::ImageList^ image_loader::load_images(System::String^ resource_id, System::String^ resource_name, u32 width, u32 should_be_count, System::Reflection::Assembly^ assembly)
 {
+	LOG_INFO("image_loader assembly '%s'", assembly->GetName()->Name);
 	System::Resources::ResourceManager^ mgr		= gcnew System::Resources::ResourceManager(resource_name, assembly);
 	System::Drawing::Bitmap^ strip				= safe_cast<System::Drawing::Bitmap^>(mgr->GetObject(resource_id));
 	delete mgr;

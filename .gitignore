@@ -48,3 +48,5 @@ build/*.sln
 build/*.cmake
 # Visual Studio
 build/.vs/*
+# Build script configs
+build/script_configs/*.json

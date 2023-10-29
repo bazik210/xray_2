@@ -9,7 +9,6 @@
 #include "object_behaviour.h"
 #include "game_world.h"
 #include "logic_action.h"
-#include "object_behaviour.h"
 #include "event_manager.h"
 
 
@@ -42,8 +41,8 @@ void object_scene::load( configs::binary_config_value const& t )
 
 void object_scene::start( )
 {
-	NOT_IMPLEMENTED();
-//.	get_game_world().on_scene_start						( this );
+//	NOT_IMPLEMENTED();
+	get_game_world().on_scene_start						( this );
 
 	configs::binary_config_value t_jobs					= m_data["jobs"];
 	configs::binary_config_value::const_iterator it		= t_jobs.begin();
@@ -51,6 +50,10 @@ void object_scene::start( )
 	for( ;it!=it_e; ++it)
 	{
 		object_scene_job* job	= NEW(object_scene_job)( this, *it );
+
+		//if (!strcmp(job->name(), "timing")) 
+		//	continue;
+
 		m_jobs.push_back	( job );
 	}
 
@@ -165,9 +168,9 @@ void object_scene::stop( bool unloading )
 	}
 	m_actions.clear							( );
 
-	//if(!unloading)
-	//	get_game_world().on_scene_stop		( this );
-	NOT_IMPLEMENTED();
+	if(!unloading)
+		get_game_world().on_scene_stop		( this );
+//	NOT_IMPLEMENTED();
 }
 
 void object_scene::tick( )
@@ -217,26 +220,25 @@ void object_scene_job::start( )
 	pcstr start_behaviour_name			= m_data["start_behaviour_name"];
 	pcstr start_event_name				= m_data["start_event_name"];
 
-	m_job_resource						= get_game_world().get_object_by_name(job_resource_name);
-	object_controlled* o				= dynamic_cast<object_controlled*>(m_job_resource.c_ptr());
+	m_job_resource = get_game_world().get_object_by_name(job_resource_name);
+	object_controlled* o = dynamic_cast<object_controlled*>(m_job_resource.c_ptr());
 
 	// start initial behaviour
-	object_behaviour* start_behaviour	= get_behaviour( start_behaviour_name );
-	logic_action_ptr a		= NEW(action_set_object_behaviour)( get_event_manager(), o, start_behaviour, this );
-	game_event e( start_event_name );
+	object_behaviour* start_behaviour = get_behaviour(start_behaviour_name);
+	logic_action_ptr a = NEW(action_set_object_behaviour)(get_event_manager(), o, start_behaviour, this);
+	game_event e(start_event_name);
 
-	if(strings::equal(start_event_name, start_scene_event_name) )
+	if (strings::equal(start_event_name, start_scene_event_name))
 	{
-		a->execute		( e );
-		a				= NULL;
-	}else
-	{
-
-		fixed_string<128> desc;
-		desc.assignf("start behaviour: beh=%s event=%s", start_behaviour->name(), start_event_name );
-		get_event_manager()->subscribe_event_handler	( e, NULL, a, desc.c_str(), true );
+		a->execute(e);
+		a = NULL;
 	}
-
+	else
+	{
+		fixed_string<128> desc;
+		desc.assignf("start behaviour: beh=%s event=%s", start_behaviour->name(), start_event_name);
+		get_event_manager()->subscribe_event_handler(e, NULL, a, desc.c_str(), true);
+	}
 }
 
 void object_scene_job::stop( )

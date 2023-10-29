@@ -111,8 +111,8 @@ void cell_manager::game_cell_loaded( resources::queries_result& data )
 		cell->load_contents	( this );
 	}
 
-//	load_scenes		( );
-	m_game_world.start_game		( );
+	load_scenes		( );
+	//m_game_world.start_game		( );
 }
 
 void cell_manager::unload( )
@@ -285,7 +285,7 @@ void cell_manager::register_object( shared_string const& name, game_object_ptr_ 
 
 void cell_manager::load_scenes( )
 {
-	UNREACHABLE_CODE();
+//	UNREACHABLE_CODE();
 	configs::binary_config_value t_objects		= (*m_game_project->m_config)["scenes"];
 	
 	configs::binary_config_value::const_iterator it			= t_objects.begin();
@@ -311,7 +311,7 @@ void cell_manager::load_scenes( )
 
 void cell_manager::on_scenes_loaded(  resources::queries_result& data )
 {
-	UNREACHABLE_CODE();
+//	UNREACHABLE_CODE();
 	R_ASSERT		( data.is_successful() );
 	u32 count		= data.size();
 
@@ -327,7 +327,7 @@ void cell_manager::on_scenes_loaded(  resources::queries_result& data )
 		DELETE								( ud );
 	}
 	
-	m_game_world.start_game		( );
+	m_game_world.m_scenes_check = true;
 }
 
 } // namespace stalker2

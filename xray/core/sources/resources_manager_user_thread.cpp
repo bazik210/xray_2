@@ -115,10 +115,12 @@ queries_result *   resources_manager::create_queries_result (query_resource_para
 	u32 const transforms_size			=	sizeof(math::float4x4) * transforms_count;
 	u32 const full_allocation_size		=	queries_size + user_data_size + transforms_size + additional_strings_length;
 	
-	queries_result * const queries		=	(queries_result *)
-											XRAY_ALLOC_IMPL(params.allocator, 
-															char, 
-															full_allocation_size);
+	//queries_result * const queries		=	(queries_result *)
+	//										XRAY_ALLOC_IMPL(params.allocator, 
+	//														char, 
+	//														full_allocation_size);
+	queries_result* const queries			= (queries_result*)malloc(full_allocation_size);
+
 
 	bool const parent_is_helper_for_mount	=	params.parent && params.parent->is_helper_query_for_mount();
 	bool const self_is_helper_for_mount		=	params.query_type == query_type_helper_for_mount;
@@ -415,8 +417,10 @@ private:
 		if ( iterator.is_end() )
 		{
 			u32 const user_thread_id	=	threading::current_thread_id();
-			queries_result*	queries		=	(queries_result*)
-											XRAY_ALLOC_IMPL(*m_params.allocator, queries_result, 1);
+			queries_result* queries = (queries_result*)malloc(1);
+
+			//queries_result*	queries		=	(queries_result*)
+			//								XRAY_ALLOC_IMPL(*m_params.allocator, queries_result, 1);
 
 			new (queries) queries_result	(0, 
 											 m_params.callback, 
@@ -434,7 +438,8 @@ private:
 			m_params.callback				(*queries);
 
 			queries->~queries_result		();
-			XRAY_FREE_IMPL					(m_params.allocator, queries);
+			free(queries);
+			//XRAY_FREE_IMPL					(m_params.allocator, queries);
 			return;
 		}
 
@@ -651,11 +656,11 @@ void   resources_manager::translate_queries (queries_list const &, query_result 
 
 void   resources_manager::translate_query (query_result * const query)
 {
-	if (query != nullptr) {
+//	if (query != nullptr) {
 		bool const translated_query = query->translate_query_if_needed();
 		XRAY_UNREFERENCED_PARAMETER(translated_query);
 	R_ASSERT						(translated_query);
-	}
+//	}
 }
 
 void   resources_manager::dispatch_tasks_finished_callback (query_result * query, bool finalizing_thread)

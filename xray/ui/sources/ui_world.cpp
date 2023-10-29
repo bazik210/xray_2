@@ -40,5 +40,10 @@ void ui_world::on_device_reset()
 	m_font_manager.on_device_reset();
 }
 
+void ui_world::set_base_screen_size(const float2& screen_size)
+{
+	m_base_screen_size = screen_size;
+}
+
 } // namespace xray
 } // namespace ui

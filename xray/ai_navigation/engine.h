@@ -14,6 +14,7 @@ namespace navigation {
 struct XRAY_NOVTABLE engine
 {
 	virtual	void	set_navmesh_info	( pcstr text ) const = 0;
+	virtual bool	get_editor			(			 ) = 0;
 	XRAY_DECLARE_PURE_VIRTUAL_DESTRUCTOR( engine )
 }; // class engine
 

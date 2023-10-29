@@ -13,7 +13,11 @@ namespace xray.editor.wpf_controls.property_editors
 {
 	public class property_items_control: expandable_items_control
 	{
-		public property_items_control( property property, item_editor_selector item_editor_selector, value_editor_selector value_editor_selector, Int32 level )
+        private property_items_control()
+        {
+        }
+        
+        public property_items_control( property property, item_editor_selector item_editor_selector, value_editor_selector value_editor_selector, Int32 level )
 		{
 			m_level					= level;
 			m_item_editor_selector	= item_editor_selector;

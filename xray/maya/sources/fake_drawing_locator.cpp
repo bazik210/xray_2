@@ -61,7 +61,7 @@ void fake_drawing_locator::draw(M3dView& view, const MDagPath& dagPath,
 
 void* fake_drawing_locator::creator()
 {
-	return CRT_NEW(fake_drawing_locator)();
+	return new(fake_drawing_locator)();
 }
 
 MStatus fake_drawing_locator::initialize()

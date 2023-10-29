@@ -68,8 +68,12 @@ void effect_lighting_stage_organic_base_materials::compile( effect_compiler& com
 				solid_color_specular_used	= true;
 			}
 			
-			if( configuration.use_normal_texture)
-				compiler.set_texture("t_normal", pcstr(custom_config["texture_normal"]));
+			if (configuration.use_normal_texture) {
+				char const* normal = pcstr(custom_config["texture_normal"]);
+				if (!strings::equal(normal, "")) {
+					compiler.set_texture("t_normal", normal);
+				}
+			}
 			
 			if( configuration.use_specular_intensity_texture)
 				compiler.set_texture("t_specular_intensity", pcstr(custom_config["texture_specular_intensity"]));
@@ -181,8 +185,12 @@ void effect_lighting_stage_organic_base_materials::compile( effect_compiler& com
 			
 			solid_color_specular = float4(custom_config["constant_diffuse"]);
 			
-			if( configuration.use_normal_texture)
-				compiler.set_texture("t_normal", pcstr(custom_config["texture_normal"]));
+			if (configuration.use_normal_texture) {
+				char const* normal = pcstr(custom_config["texture_normal"]);
+				if (!strings::equal(normal, "")) {
+					compiler.set_texture("t_normal", normal);
+				}
+			}
 			
 			if (configuration.use_organic_scattering_amount_mask && custom_config.value_exists("texture_scattering_amount"))
 				compiler.set_texture("t_sss_amount", pcstr(custom_config["texture_scattering_amount"]));

@@ -77,8 +77,12 @@ void effect_lighting_stage_skin_base_materials::compile( effect_compiler& compil
 				solid_color_specular_used	= true;
 			}
 			
-			if( configuration.use_normal_texture)
-				compiler.set_texture("t_normal", pcstr(custom_config["texture_normal"]));
+			if (configuration.use_normal_texture) {
+				char const* normal = pcstr(custom_config["texture_normal"]);
+				if (!strings::equal(normal, "")) {
+					compiler.set_texture("t_normal", normal);
+				}
+			}
 			
 			if( configuration.use_specular_intensity_texture)
 				compiler.set_texture("t_specular_intensity", pcstr(custom_config["texture_specular_intensity"]));

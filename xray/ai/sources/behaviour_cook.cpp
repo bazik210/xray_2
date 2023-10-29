@@ -202,7 +202,7 @@ static u32 get_count_of_needed_resources	( configs::binary_config_value const& b
 		for ( ; it != it_end; ++it )
 		{
 			configs::binary_config_value const& goal_value		= *it;
-			u32	const goal_type									= goal_value["type"];
+			u32 const goal_type = goal_value.value_exists("type") ? goal_value["type"] : 0xffffffff;
 			planning::goal_types_enum const type				= (planning::goal_types_enum)goal_type;
 			
 			if ( ( resource_type == resource_type_animation && type == planning::goal_type_play_animation ) ||

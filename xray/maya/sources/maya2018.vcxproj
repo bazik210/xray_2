@@ -1,0 +1,540 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3B4E4F46-803D-489D-86CD-367DD16B0F33}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>maya2018</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:\Projects\xray\binaries\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">maya2018.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">xray.maya2018</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.mll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:\Projects\xray\binaries\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">maya2018.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">xray.maya2018</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.mll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:\Projects\xray\binaries\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">maya2018.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">xray.maya2018</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.mll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:\Projects\xray\binaries\RelWithDebInfo\maya2018\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">maya2018.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">xray_maya</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.mll</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4005;4131;4275;4458;4459;4945</DisableSpecificWarnings>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="Debug";maya2018_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR=\"Debug\";maya2018_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>F:\Projects\xray\binaries\Debug\xray_vfs.lib;F:\Projects\xray\binaries\Debug\xray_physics.lib;F:\Projects\xray\binaries\Debug\xray_animation.lib;F:\Projects\xray\binaries\Debug\xray_renderer_facade.lib;F:\Projects\xray\binaries\Debug\xray_renderer_engine_pc_dx11.lib;F:\Projects\xray\binaries\Debug\xray_particle.lib;F:\Projects\xray\binaries\Debug\xray_collision.lib;F:\Projects\xray\binaries\Debug\xray_LibFoundation.lib;F:\Projects\xray\binaries\Debug\xray_LibPNG.lib;F:\Projects\xray\binaries\Debug\xray_bullet.lib;opengl32.lib;OpenMayaUI.lib;OpenMayaAnim.lib;OpenMayaRender.lib;TootleSoftwareOnlyStatic_2k8_MTDLL64.lib;F:\Projects\xray\binaries\Debug\xray_fs.lib;F:\Projects\xray\binaries\Debug\xray_ode.lib;F:\Projects\xray\binaries\Debug\xray_maya_animation.lib;F:\Projects\xray\binaries\Debug\xray_renderer_core_pc_dx11.lib;F:\Projects\xray\binaries\Debug\xray_core.lib;F:\Projects\xray\binaries\Debug\xray_debugging.lib;F:\Projects\xray\binaries\Debug\xray_logging.lib;F:\Projects\xray\binaries\Debug\xray_opcode.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:/Projects/xray/xray/maya/maya2018_lib_x64;F:/Projects/xray/xray/maya/maya2018_lib_x64/$(Configuration);F:/Projects/xray/binaries;F:/Projects/xray/binaries/$(Configuration);F:/Projects/xray/third_party/amd/tootle/libraries;F:/Projects/xray/third_party/amd/tootle/libraries/$(Configuration);F:/Projects/xray/third_party/maya2018/lib64;F:/Projects/xray/third_party/maya2018/lib64/$(Configuration);F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64;F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64/$(Configuration);E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64;E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Projects/xray/binaries/Debug/xray.maya2018.lib</ImportLibrary>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDataBaseFile>F:/Projects/xray/binaries/Debug/xray.maya2018.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DisableSpecificWarnings>4005;4131;4275;4458;4459;4945</DisableSpecificWarnings>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="Release";maya2018_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR=\"Release\";maya2018_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>F:\Projects\xray\binaries\Release\xray_vfs.lib;F:\Projects\xray\binaries\Release\xray_physics.lib;F:\Projects\xray\binaries\Release\xray_animation.lib;F:\Projects\xray\binaries\Release\xray_renderer_facade.lib;F:\Projects\xray\binaries\Release\xray_renderer_engine_pc_dx11.lib;F:\Projects\xray\binaries\Release\xray_particle.lib;F:\Projects\xray\binaries\Release\xray_collision.lib;F:\Projects\xray\binaries\Release\xray_LibFoundation.lib;F:\Projects\xray\binaries\Release\xray_LibPNG.lib;F:\Projects\xray\binaries\Release\xray_bullet.lib;opengl32.lib;OpenMayaUI.lib;OpenMayaAnim.lib;OpenMayaRender.lib;TootleSoftwareOnlyStatic_2k8_MTDLL64.lib;F:\Projects\xray\binaries\Release\xray_fs.lib;F:\Projects\xray\binaries\Release\xray_ode.lib;F:\Projects\xray\binaries\Release\xray_maya_animation.lib;F:\Projects\xray\binaries\Release\xray_renderer_core_pc_dx11.lib;F:\Projects\xray\binaries\Release\xray_core.lib;F:\Projects\xray\binaries\Release\xray_debugging.lib;F:\Projects\xray\binaries\Release\xray_logging.lib;F:\Projects\xray\binaries\Release\xray_opcode.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:/Projects/xray/xray/maya/maya2018_lib_x64;F:/Projects/xray/xray/maya/maya2018_lib_x64/$(Configuration);F:/Projects/xray/binaries;F:/Projects/xray/binaries/$(Configuration);F:/Projects/xray/third_party/amd/tootle/libraries;F:/Projects/xray/third_party/amd/tootle/libraries/$(Configuration);F:/Projects/xray/third_party/maya2018/lib64;F:/Projects/xray/third_party/maya2018/lib64/$(Configuration);F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64;F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64/$(Configuration);E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64;E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Projects/xray/binaries/Release/xray.maya2018.lib</ImportLibrary>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDataBaseFile>F:/Projects/xray/binaries/Release/xray.maya2018.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DisableSpecificWarnings>4005;4131;4275;4458;4459;4945</DisableSpecificWarnings>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);NDEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="MinSizeRel";maya2018_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;NDEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR=\"MinSizeRel\";maya2018_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>F:\Projects\xray\binaries\MinSizeRel\xray_vfs.lib;F:\Projects\xray\binaries\MinSizeRel\xray_physics.lib;F:\Projects\xray\binaries\MinSizeRel\xray_animation.lib;F:\Projects\xray\binaries\MinSizeRel\xray_renderer_facade.lib;F:\Projects\xray\binaries\MinSizeRel\xray_renderer_engine_pc_dx11.lib;F:\Projects\xray\binaries\MinSizeRel\xray_particle.lib;F:\Projects\xray\binaries\MinSizeRel\xray_collision.lib;F:\Projects\xray\binaries\MinSizeRel\xray_LibFoundation.lib;F:\Projects\xray\binaries\MinSizeRel\xray_LibPNG.lib;F:\Projects\xray\binaries\MinSizeRel\xray_bullet.lib;opengl32.lib;OpenMayaUI.lib;OpenMayaAnim.lib;OpenMayaRender.lib;TootleSoftwareOnlyStatic_2k8_MTDLL64.lib;F:\Projects\xray\binaries\MinSizeRel\xray_fs.lib;F:\Projects\xray\binaries\MinSizeRel\xray_ode.lib;F:\Projects\xray\binaries\MinSizeRel\xray_maya_animation.lib;F:\Projects\xray\binaries\MinSizeRel\xray_renderer_core_pc_dx11.lib;F:\Projects\xray\binaries\MinSizeRel\xray_core.lib;F:\Projects\xray\binaries\MinSizeRel\xray_debugging.lib;F:\Projects\xray\binaries\MinSizeRel\xray_logging.lib;F:\Projects\xray\binaries\MinSizeRel\xray_opcode.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>F:/Projects/xray/xray/maya/maya2018_lib_x64;F:/Projects/xray/xray/maya/maya2018_lib_x64/$(Configuration);F:/Projects/xray/binaries;F:/Projects/xray/binaries/$(Configuration);F:/Projects/xray/third_party/amd/tootle/libraries;F:/Projects/xray/third_party/amd/tootle/libraries/$(Configuration);F:/Projects/xray/third_party/maya2018/lib64;F:/Projects/xray/third_party/maya2018/lib64/$(Configuration);F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64;F:/Projects/xray/third_party/SpeedTree/Lib/Windows/VC9.x64/$(Configuration);E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64;E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Projects/xray/binaries/MinSizeRel/xray.maya2018.lib</ImportLibrary>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ProgramDataBaseFile>F:/Projects/xray/binaries/MinSizeRel/xray.maya2018.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018\;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4005;4131;4275;4458;4459;4945</DisableSpecificWarnings>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <LanguageStandard>stdcpp14</LanguageStandard>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitFramePointers>true</OmitFramePointers>
+      <Optimization>Full</Optimization>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <StringPooling>true</StringPooling>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level4</WarningLevel>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);PLATFORM_WIN64;WIN64;WINDOWS;DEBUG;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR="RelWithDebInfo";maya2018_EXPORTS</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;DEBUG;PLATFORM_WIN64;WIN64;WINDOWS;_HAS_EXCEPTIONS=0;BOOST_NO_EXCEPTIONS;CMAKE_INTDIR=\"RelWithDebInfo\";maya2018_EXPORTS</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>F:\Projects\xray;F:\Projects\xray\third_party;F:\Projects\xray\third_party\maya2018;E:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;F:\Projects\xray\third_party\bullet;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>E:/Program Files (x86)/Microsoft DirectX SDK (June 2010)/Lib/x64;F:\Projects\xray\xray\maya\maya2018_lib_x64;F:/Projects/xray/binaries;F:/Projects/xray/binaries/$(Configuration);F:/Projects/xray/third_party/amd/tootle/libraries;F:/Projects/xray/third_party/amd/tootle/libraries/$(Configuration);F:\Projects\xray\third_party\SpeedTree\Lib\Windows\VC9.x64;F:\Projects\xray\third_party\amd_tootle-master\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64 /delayload:openmayaanim.dll /delayload:xray_texture_compressor.dll</AdditionalOptions>
+      <EnableCOMDATFolding>false</EnableCOMDATFolding>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImportLibrary>F:/Projects/xray/binaries/RelWithDebInfo/xray_maya2018.lib</ImportLibrary>
+      <OptimizeReferences>false</OptimizeReferences>
+      <ProgramDataBaseFile>F:/Projects/xray/binaries/RelWithDebInfo/maya2018/xray_maya.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <SubSystem>NotSet</SubSystem>
+      <SupportUnloadOfDelayLoadedDLL>true</SupportUnloadOfDelayLoadedDLL>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="F:\Projects\xray\xray\maya\sources\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule F:/Projects/xray/xray/maya/sources/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"E:\Program Files\CMake\bin\cmake.exe" -SF:/Projects/xray -BF:/Projects/xray/build --check-stamp-file F:/Projects/xray/build/xray/maya/sources/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">F:\Projects\xray\build\xray\maya\sources\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule F:/Projects/xray/xray/maya/sources/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"E:\Program Files\CMake\bin\cmake.exe" -SF:/Projects/xray -BF:/Projects/xray/build --check-stamp-file F:/Projects/xray/build/xray/maya/sources/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">F:\Projects\xray\build\xray\maya\sources\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule F:/Projects/xray/xray/maya/sources/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"E:\Program Files\CMake\bin\cmake.exe" -SF:/Projects/xray -BF:/Projects/xray/build --check-stamp-file F:/Projects/xray/build/xray/maya/sources/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">F:\Projects\xray\build\xray\maya\sources\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule F:/Projects/xray/xray/maya/sources/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"E:\Program Files\CMake\bin\cmake.exe" -SF:/Projects/xray -BF:/Projects/xray/build --check-stamp-file F:/Projects/xray/build/xray/maya/sources/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">F:\Projects\xray\build\xray\maya\sources\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\maya_library_linkage.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\maya_memory.h" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\node_identifiers.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\pch.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\xray_body.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\xray_body.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\create_body_cmd.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\create_body_cmd.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\create_collision_cmd.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\create_collision_cmd.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\create_joint_cmd.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\create_joint_cmd.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\build_collision_cmd.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\build_collision_cmd.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\fake_drawing_locator.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\fake_drawing_locator.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\geom_sources.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\collision_node.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\collision_node.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\body_node.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\body_node.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\body_node_manip.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\body_node_manip.h" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\transform_drawable.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\joint_node.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\joint_node.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\node_exportable.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\node_exportable.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\physics_exporter.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\physics_exporter.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\tmp.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\export_defines.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\helpers.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\helpers.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\RenderRoutines.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\RenderRoutines.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\xray_path_commands.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\xray_path_commands.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\NvMender2003\NVMeshMender.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\NvMender2003\NVMeshMender.h" />
+    <ClInclude Include="F:\Projects\xray\third_party\amd\tootle\tootlelib.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\maya_engine.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\maya_engine.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skin_exporter.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\skin_exporter.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skin_visual_writer.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\skin_visual_writer.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skin_visual_writer_bone_extractor.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skin_visual_writer_geom_extractor.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skin_visual_writer_serialize.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skinned_surface.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\skinned_surface.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\solid_visual_collector.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\solid_visual_collector.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\solid_visual_exporter.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\solid_visual_exporter.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\solid_visual_writer_geom_extractor.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\solid_visual_writer_serialize.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\static_surface.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\static_surface.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\model_collector.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\model_collector.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\surface.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\surface.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\anim_export_util.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\anim_export_util.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\export_utils.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\export_utils.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\skeleton_export_util.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\skeleton_export_util.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\anim_text_file_export.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\anim_text_file_export.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\anim_track_assemble.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\xray_material.cpp" />
+    <ClInclude Include="F:\Projects\xray\xray\maya\sources\xray_material.h" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\xray_material_hw.cpp" />
+    <ClCompile Include="F:\Projects\xray\xray\maya\sources\maya_entry_point.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="F:\Projects\xray\build\ZERO_CHECK.vcxproj">
+      <Project>{A2991DDD-C279-339F-935B-0AE674BCCB35}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\third_party\WildMagic\LibFoundation\LibFoundation.vcxproj">
+      <Project>{E3B2E087-24EB-34D7-8287-D75EEBF094CE}</Project>
+      <Name>LibFoundation</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\third_party\freeimage\LibPNG\LibPNG.vcxproj">
+      <Project>{4E67907F-E411-3B05-9B6C-F529F1A879AA}</Project>
+      <Name>LibPNG</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\animation\sources\animation.vcxproj">
+      <Project>{7641D853-39B2-3D7D-8C63-5976972390C6}</Project>
+      <Name>animation</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\third_party\bullet\bullet.vcxproj">
+      <Project>{5CD443C6-974E-349D-AD2D-D7EE243FFFF5}</Project>
+      <Name>bullet</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\collision\sources\collision.vcxproj">
+      <Project>{292F2549-E3F1-3F55-9081-06D741DE1C5E}</Project>
+      <Name>collision</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\core\sources\core.vcxproj">
+      <Project>{19AE19CE-BA47-3D9B-9E82-A42244B0076D}</Project>
+      <Name>core</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\debug\sources\debugging.vcxproj">
+      <Project>{27648CE2-2A63-3115-B9D8-6B7820215F5C}</Project>
+      <Name>debugging</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\fs\sources\fs.vcxproj">
+      <Project>{84A44C9D-67AE-3954-A3CE-7B87B5C8A2C3}</Project>
+      <Name>fs</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\logging\sources\logging.vcxproj">
+      <Project>{BD6E071D-9FF5-3317-885F-6678D673FE98}</Project>
+      <Name>logging</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\maya_animation\sources\maya_animation.vcxproj">
+      <Project>{AEE8F195-A95B-3ECD-A03C-12D1FE3BBF64}</Project>
+      <Name>maya_animation</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\third_party\ode\sources\ode.vcxproj">
+      <Project>{FC67FE59-FFCB-378D-8812-7155FB735773}</Project>
+      <Name>ode</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\third_party\opcode\opcode.vcxproj">
+      <Project>{1F3867F0-2218-3CF7-BDDB-4414C6296438}</Project>
+      <Name>opcode</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\particle\sources\particle.vcxproj">
+      <Project>{FCEB35C4-24BE-35CA-B378-40964660BB06}</Project>
+      <Name>particle</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\physics\sources\physics.vcxproj">
+      <Project>{6275E7DC-7C15-3C82-81C0-843529781204}</Project>
+      <Name>physics</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\render\core\dx11\sources\renderer_core_pc_dx11.vcxproj">
+      <Project>{1655BBAC-9A7A-3595-954F-011DC945216E}</Project>
+      <Name>renderer_core_pc_dx11</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\render\engine\sources\renderer_engine_pc_dx11.vcxproj">
+      <Project>{AE410B26-5708-37E5-B1C2-235689F7C131}</Project>
+      <Name>renderer_engine_pc_dx11</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\render\facade\sources\renderer_facade.vcxproj">
+      <Project>{FBD97169-417D-3C0A-8266-FB1FF80A87CF}</Project>
+      <Name>renderer_facade</Name>
+    </ProjectReference>
+    <ProjectReference Include="F:\Projects\xray\build\xray\vfs\sources\vfs.vcxproj">
+      <Project>{28169791-0018-37DD-9B98-BD727C68B603}</Project>
+      <Name>vfs</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

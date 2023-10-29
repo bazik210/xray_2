@@ -31,6 +31,11 @@ object_timer::object_timer( tool_misc^ tool )
 :super(tool)
 {}
 
+void object_timer::load_props(configs::lua_config_value const& t)
+{
+	super::load_props(t);
+}
+
 void object_timer::save( configs::lua_config_value t )
 {
 	super::save				( t );

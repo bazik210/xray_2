@@ -82,7 +82,7 @@ human_npc::human_npc		(
 		render::game::renderer& renderer,
 		game_world& game_world
 	) :
-	game_object_			( game_world ),
+	game_world_object		( game_world ),
 	m_ai_world				( ai_world ),
 	m_sound_world			( sound_world ),
 	m_sound_scene			( sound_scene ),
@@ -123,7 +123,7 @@ void human_npc::clear_resources	( )
 {
 	m_sound_world.get_logic_world_user().unregister_receiver( m_sound_scene, *this );
 
-	m_renderer.scene().remove_model( m_scene, m_model_instance->m_render_model->m_model );
+	m_renderer.scene().remove_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model );
 	m_spatial_tree.erase		( m_collision_object );
 	
 	R_ASSERT					( m_collision_object );
@@ -186,7 +186,7 @@ void human_npc::enable			( )
 	R_ASSERT					( m_model_instance );
 
 	m_spatial_tree.insert		( m_collision_object, m_transform );
-	m_renderer.scene().add_model( m_scene, m_model_instance->m_render_model->m_model, m_transform );
+	m_renderer.scene().add_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform);
 	m_model_instance->m_animation_player->set_object_transform( m_transform );
 
 	setup_animations_controller	( );
@@ -273,18 +273,18 @@ void human_npc::draw		( render::game::renderer& render, render::scene_ptr const&
 {
 	//m_model_instance->m_damage_collision->draw_collision( scene, render.debug(), m_transform );
 
-	m_renderer.debug().draw_aabb(
-		m_scene,
-		m_collision_object->get_geom_instance().get_aabb().center(),
-		m_collision_object->get_geom_instance().get_aabb().extents(),
-		math::color( 0, 255, 0 )
-	);
+	//m_renderer.debug().draw_aabb(
+	//	m_scene,
+	//	m_collision_object->get_geom_instance().get_aabb().center(),
+	//	m_collision_object->get_geom_instance().get_aabb().extents(),
+	//	math::color( 0, 255, 0 )
+	//);
 
-	m_renderer.debug().draw_origin( m_scene, m_transform, 3.0f );
+	//m_renderer.debug().draw_origin( m_scene, m_transform, 3.0f );
 
 	float3 const& start_pos	= get_eyes_position();
 	float3 const& end_pos	= start_pos + get_eyes_direction() * 2.f;
-	m_renderer.debug().draw_arrow( m_scene, start_pos, end_pos, math::color( 255, 0, 0 ) );
+	//m_renderer.debug().draw_arrow( m_scene, start_pos, end_pos, math::color( 255, 0, 0 ) );
 
 	if ( m_sound_perceived )
 	{
@@ -300,13 +300,13 @@ void human_npc::draw		( render::game::renderer& render, render::scene_ptr const&
 #ifndef MASTER_GOLD
 	if ( m_target_vertex )
 	{
-		m_renderer.debug().draw_origin	( m_scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
+		//m_renderer.debug().draw_origin	( m_scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
 
 		typedef xray::ai::navigation::path_type	path_type;
 		for ( path_type::const_iterator b = m_navigation_path.begin(), e = m_navigation_path.end(), i = b; i != e; ++i ) {
-			m_renderer.debug().draw_aabb( m_scene, *i, float3( .1f, .1f, .1f ), xray::math::color( 255, 0, 0 ) );
-			if ( i != b )
-				m_renderer.debug().draw_arrow( m_scene, *(i-1), *i, xray::math::color( 0, 255, 0 ) );
+			//m_renderer.debug().draw_aabb( m_scene, *i, float3( .1f, .1f, .1f ), xray::math::color( 255, 0, 0 ) );
+			//if ( i != b )
+			//	m_renderer.debug().draw_arrow( m_scene, *(i-1), *i, xray::math::color( 0, 255, 0 ) );
 		}
 	}
 #endif // #ifndef MASTER_GOLD
@@ -327,7 +327,7 @@ void human_npc::set_transform	( float4x4 const& transform )
 	m_transform					= transform;
 	LOG_INFO					( "Position after set_transform: [%f][%f][%f]", m_transform.c.x, m_transform.c.y, m_transform.c.z );
 
-	m_renderer.scene().update_model( m_scene, m_model_instance->m_render_model->m_model, m_transform );
+	m_renderer.scene().update_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform );
 	m_model_instance->m_animation_player->set_object_transform( m_transform );
 }
 
@@ -344,7 +344,7 @@ void human_npc::tick			( u32 const current_time_in_ms )
 		play_animation			( m_current_animation );
 
 	if ( debug_draw_allowed() )
-		draw					( m_renderer, m_scene );
+		draw					( m_renderer, get_game_world().get_game().get_active_scene() );
 }
 
 void human_npc::render_model	( )
@@ -356,7 +356,7 @@ void human_npc::render_model	( )
 	float4x4* const bone_matrices		= static_cast< float4x4* >( ALLOCA( bone_matrices_count * sizeof( float4x4 ) ) );
 	animation_player->compute_bones_matrices( *skeleton, bone_matrices, bone_matrices + bone_matrices_count );
 
-	m_renderer.scene().update_model		( m_scene, m_model_instance->m_render_model->m_model, m_transform );
+	m_renderer.scene().update_model		 (get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform );
 	m_renderer.scene().update_skeleton	(
 		m_model_instance->m_render_model->m_model,
 		bone_matrices,

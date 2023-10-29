@@ -122,7 +122,7 @@ void stage_gbuffer::execute()
 	
 	render_surface_instances::iterator it_d			= m_dynamic_visuals.begin();
 	render_surface_instances::const_iterator	end_d	= m_dynamic_visuals.end();
-	int cnt = 0;
+//	int cnt = 0;
 	for ( ; it_d != end_d; ++it_d)
 	{
 		render_surface_instance& instance = *(*it_d);
@@ -189,7 +189,7 @@ void stage_gbuffer::execute()
 		if(tech_index==1)
 			statistics::ref().visibility_stat_group.num_models.value++;
 
-		cnt++;
+//		cnt++;
 	}
 	//m_context->scene()->get_grass()->render(m_context, (u32)geometry_render_stage);
 	
@@ -245,7 +245,6 @@ void stage_gbuffer::execute()
 	}
 	*/
 	
-#if 1	
 	//
 //////////////////////////////////////////////////////////////////////////
 	typedef render::vector<terrain_render_model_instance_ptr>		terrain_ptr_cells;
@@ -327,10 +326,7 @@ void stage_gbuffer::execute()
 			statistics::ref().visibility_stat_group.num_triangles.value += primitive_count / 3;
 		}
 	}
-
-#endif // #if 0	
 	
-#if 1	
 	// SpeedTree
 	if (options::ref().m_enabled_draw_speedtree && m_context->scene()->get_speedtree_forest())
 	{
@@ -479,8 +475,6 @@ void stage_gbuffer::execute()
 			}
 		}
 	}
-#endif // #if 0
-
 /*	
 	/*if (!m_is_pre_pass)
 	{

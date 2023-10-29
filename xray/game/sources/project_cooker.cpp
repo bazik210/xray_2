@@ -544,10 +544,10 @@ void process_object ( configs::lua_config_value const& current,
 	full_name.append			( name );
 	
 	pcstr game_object_type = current["game_object_type"];
-	if(strings::equal(game_object_type, "camera"))
-	{
-		// do not process camera
-	}else
+//	if(strings::equal(game_object_type, "camera"))
+//	{
+//		// do not process camera
+//	}else
 	if(strings::equal(game_object_type, "scene"))
 	{
 		process_scene		( folder_name, current, t_objects, t_scenes );

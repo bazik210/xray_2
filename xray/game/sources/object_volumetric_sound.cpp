@@ -15,10 +15,12 @@ namespace stalker2 {
 
 object_volumetric_sound::object_volumetric_sound( game_scene& w ) 
 :	super				( w ),
+	m_game_scene		( w ),
 	m_collision_geometry( 0 ),
 	m_world_user		( w.get_game().get_sound_world().get_logic_world_user() ),
-	m_sound_scene		( w.get_sound_scene() ),
-	m_radius			( 0.0f )
+	m_sound_scene		( 0 ),
+	m_radius			( 0.f )
+//	m_position			( 0.f,0.f,0.f )
 {}
 
 object_volumetric_sound::~object_volumetric_sound( )
@@ -30,13 +32,15 @@ void object_volumetric_sound::load( configs::binary_config_value const& config_v
 {
 	super::load							( config_value );
 
-	pcstr	collision_geometry_name		= config_value["collision_geometry"];
-
-// 	m_game_world.query_object_by_name(
-// 		collision_geometry_name,
-// 		object_loaded_callback_type( this, &object_volumetric_sound::on_collision_object_loaded )
-// 	);
+	pcstr collision_geometry_name		= config_value["collision_geometry"];
+//	m_position							= config_value["position"];
+	m_radius							= config_value["radius"];
 	m_sound_name						= config_value["sound"];
+
+	m_game_scene.get_game().get_game_world().query_object_by_name(
+		collision_geometry_name,
+		object_loaded_callback_type(this, &object_volumetric_sound::on_collision_object_loaded)
+	);
 }
 
 void object_volumetric_sound::load_contents				( )
@@ -49,7 +53,18 @@ void object_volumetric_sound::load_contents				( )
 		boost::bind(&object_volumetric_sound::on_config_loaded, this, _1),
 		g_allocator
 	);
+}
 
+void object_volumetric_sound::load_custom(fs::path_string m_sound_name)
+{
+	fs::path_string						config_path;
+	config_path.assignf("%s%s%s", "resources/sounds/volumetric/", m_sound_name.c_str(), ".volumetric_sound");
+	resources::query_resource(
+		config_path.c_str(),
+		resources::binary_config_class,
+		boost::bind(&object_volumetric_sound::on_config_loaded, this, _1),
+		g_allocator
+	);
 }
 
 void object_volumetric_sound::unload_contents			( )
@@ -78,7 +93,9 @@ void object_volumetric_sound::on_config_loaded			( resources::queries_result& da
 	R_ASSERT											( config.c_ptr( ) );
 	configs::binary_config_value const& root			= config->get_root( );
 	configs::binary_config_value const& vol_snd			= root		["volumetric_sound"];
-	m_radius											= vol_snd	["radius"];
+
+	//m_radius											= vol_snd	["radius"];
+
 	configs::binary_config_value const& snd				= vol_snd	["sound"];
 	fs::path_string snd_filename						= snd		["filename"];
 	u32 type											= snd		["resource_type"];
@@ -91,13 +108,47 @@ void object_volumetric_sound::on_config_loaded			( resources::queries_result& da
 	);
 }
 
-void object_volumetric_sound::on_sound_loaded			( resources::queries_result& data )
+void object_volumetric_sound::on_sound_loaded( resources::queries_result& data )
 {
-	m_emitter							= static_cast_resource_ptr<xray::sound::sound_emitter_ptr>( data[0].get_unmanaged_resource( ) );
-	R_ASSERT							( m_emitter.c_ptr( ) );
-	m_proxy								= m_emitter->emit( m_sound_scene, m_world_user );
+	m_emitter = static_cast_resource_ptr<xray::sound::sound_emitter_ptr>(data[0].get_unmanaged_resource());
+	R_ASSERT(m_emitter.c_ptr());
+	//m_game_scene.get_game().m_postload.push_back(this);
+	play();
+}
+
+void object_volumetric_sound::play			(  )
+{
+	m_sound_scene						= m_game_scene.get_sound_scene();
+
+
+	if (m_collision_geometry) {
+			m_proxy = m_emitter->emit_volumetric_sound
+			(
+				m_sound_scene,
+				m_world_user,
+				*m_collision_geometry,
+				m_radius
+			);
+
+		//m_proxy->set_matrix(m_collision_geometry->get_matrix());
+
+	} else {
+			m_proxy = m_emitter->emit_volumetric_sound
+			(
+				m_sound_scene,
+				m_world_user,
+				*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
+				m_radius
+			);
+
+		//m_proxy->set_matrix(float4x4().identity());
+	}
+
+	//m_proxy->set_position					( m_position );
+	//m_proxy			   = m_emitter->emit( m_sound_scene, m_world_user );
 	//m_proxy->set_collision_geometry		( *m_collision_geometry, m_radius );
-	m_proxy->play						( xray::sound::looped );
+
+	m_proxy->play							( xray::sound::looped );
 }
 
 } // namespace stalker2

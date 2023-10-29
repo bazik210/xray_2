@@ -31,7 +31,7 @@
 
 #ifdef DEBUG
 #	define XRAY_DEBUG_LIBRARIES
-#	define XRAY_CONFIGURATION_ID	-debug
+#	define XRAY_CONFIGURATION_ID	//-debug
 #else // #ifdef DEBUG
 #	define XRAY_CONFIGURATION_ID
 #endif // #ifdef DEBUG

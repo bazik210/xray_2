@@ -59,7 +59,22 @@ private:
 
 #else // #if XRAY_PLATFORM_32_BIT
 		enum {
-			bit_count = 40,
+			bit_count = 44,
+		};
+		struct
+		{
+			u64			dummy : bit_count;
+			u64			counter;
+		};
+		task *			m_pointer;
+		inline task* pointer	( )
+		{
+			return		reinterpret_cast<task*>( *reinterpret_cast<u64*>(&m_pointer));
+		}
+
+/*		
+		enum {
+			bit_count = 44,
 		};
 		struct
 		{
@@ -71,6 +86,7 @@ private:
 		{
 			return		reinterpret_cast<task*>( *reinterpret_cast<u64*>(&m_pointer) & ((u64(1) << bit_count) - 1) );
 		}
+*/
 #endif // #if XRAY_PLATFORM_32_BIT
 	};
 #	pragma warning(pop)

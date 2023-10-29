@@ -23,20 +23,20 @@
 
 using stalker2::game;
 
-//void game::initialize_physics		( )
-//{
-//	ASSERT							( !m_initialized );
-//
-//	ASSERT							( !m_physics_world );
-//#ifdef MASTER_GOLD
-//	m_physics_world					= physics::create_world( g_allocator, *this );
-//#else
-//	m_physics_world					= physics::create_world( &debug::g_mt_allocator, *this );
-//#endif
-//	ASSERT							( m_physics_world );
-//
-//	//m_physics_world->create_test_primitives( );
-//}
+void game::initialize_physics		( )
+{
+	ASSERT							( !m_initialized );
+
+	ASSERT							( !m_physics_world );
+#ifdef MASTER_GOLD
+	m_physics_world					= physics::create_world( g_allocator, *this );
+#else
+	m_physics_world					= physics::create_world( &debug::g_mt_allocator, *this );
+#endif
+	ASSERT							( m_physics_world );
+
+	//m_physics_world->create_test_primitives( );
+}
 
 void game::initialize_input			( )
 {
@@ -56,6 +56,17 @@ void game::initialize_animation		( )
 	ASSERT							( m_animation_world );
 }
 
+void game::initialize_rtp()
+{
+	ASSERT(!m_initialized);
+	ASSERT(m_animation_world);
+	ASSERT(!m_rtp_world);
+	m_rtp_world = rtp::create_world(*this, *m_animation_world, get_active_scene(), &m_renderer, m_engine.get_resources_path());
+
+	game_test_suite::singleton()->set_rtp_world(m_rtp_world);
+
+	ASSERT(m_rtp_world);
+}
 
 void game::initialize_ui			( )
 {
@@ -66,30 +77,51 @@ void game::initialize_ui			( )
 	ASSERT							( m_ui_world );
 }
 
+void game::initialize_ai_navigation()
+{
+	ASSERT(!m_initialized);
+	ASSERT(!m_ai_navigation_world);
+	m_ai_navigation_world = ai::navigation::create_world(*this, get_active_scene(), m_renderer.debug());
+	ASSERT(m_ai_navigation_world);
+}
+
+void game::initialize_ai()
+{
+	ASSERT(!m_initialized);
+
+	ASSERT(!m_spatial_tree);
+	m_spatial_tree = &*collision::new_space_partitioning_tree(g_allocator, 1.f, 1024);
+	ASSERT(m_spatial_tree);
+
+	ASSERT(!m_ai_world);
+	m_ai_world = ai::create_world(*this);
+	ASSERT(m_ai_world);
+}
 
 void game::initialize_modules		( )
 {
-//	initialize_physics				( );
+	initialize_physics				( );
 	initialize_input				( );
 	initialize_animation			( );
-	//initialize_rtp					( );
+	initialize_rtp					( );
 	initialize_ui					( );
-	//initialize_ai_navigation		( );
-	//initialize_ai					( );
+	initialize_ai_navigation		( );
+	initialize_ai					( );
 }
 
 void game::deinitialize_modules		( )
 {
-	//ai::destroy_world				( m_ai_world );
-	//ai::navigation::destroy_world	( m_ai_navigation_world );
+	ai::destroy_world				( m_ai_world );
+	ai::navigation::destroy_world	( m_ai_navigation_world );
 	ui::destroy_world				( m_ui_world );
-	//rtp::destroy_world				( m_rtp_world );
+	rtp::destroy_world				( m_rtp_world );
 	animation::destroy_world		( m_animation_world );
 	input::destroy_world			( m_input_world );
-//#ifdef MASTER_GOLD
-//	physics::destroy_world			( g_allocator, m_physics_world );
-//#else
-//	physics::destroy_world			( memory::g_crt_allocator, m_physics_world );
-//#endif
+#ifdef MASTER_GOLD
+	physics::destroy_world			( g_allocator, m_physics_world );
+#else
+	physics::destroy_world			(&debug::g_mt_allocator, m_physics_world);
+	//physics::destroy_world			( memory::g_crt_allocator, m_physics_world );
+#endif
 
 }

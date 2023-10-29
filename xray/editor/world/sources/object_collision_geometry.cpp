@@ -62,7 +62,7 @@ void object_collision_geometry::unload_contents ( Boolean is_destroy )
 	XRAY_UNREFERENCED_PARAMETER( is_destroy );
 
 	if( m_collision->initialized( ) )
-		m_collision->destroy( &debug::g_mt_allocator );
+		m_collision->destroy( /*&debug::g_mt_allocator */ );
 }
 
 void object_collision_geometry::load_props ( configs::lua_config_value const& config_value )
@@ -402,7 +402,7 @@ void object_collision_geometry::init_collision ( )
 
 void object_collision_geometry::update_collision ( )
 {
-	m_collision->destroy( &debug::g_mt_allocator );
+	m_collision->destroy( /*&debug::g_mt_allocator */ );
 	init_collision( );
 }
 

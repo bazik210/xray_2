@@ -18,9 +18,12 @@ public:
 	inline	T&			operator *			( ) const;
 	inline	T*			operator ->			( ) const;
 	inline	bool		operator !			( ) const;
+#if _MSC_VER < 1600
 	// Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
 	//inline	operator unspecified_bool_type	( ) const;
+#else
 	inline explicit     operator bool       ( ) const;
+#endif
 	inline	T*			c_ptr				( ) const;
 
 public:

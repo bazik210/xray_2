@@ -94,7 +94,7 @@ MObject get_node_by_name(MString const& name, MStatus& stat)
 
 MStatus createCollisionCmd::doIt( const MArgList &args )
 { 
-	MArgDatabase argData	(syntax(), args);
+	MArgDatabase argData	(newSyntax(), args);
 
 	MStatus					stat;
 	MObject object			= dagMod.createNode(collision_node::typeId, MObject::kNullObj, &stat);

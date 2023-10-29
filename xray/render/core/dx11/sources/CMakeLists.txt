@@ -218,7 +218,7 @@ target_include_directories(renderer_core_pc_dx11 PUBLIC
 	"${DXSDK_DIR_PATH}/Include"
 )
 
-if(x64)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(renderer_core_pc_dx11 PUBLIC
 	"${DXSDK_DIR_PATH}/Lib/x64"
 )

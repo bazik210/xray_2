@@ -1201,14 +1201,14 @@ void scene_view_panel::register_actions( input_engine^ ie, gui_binder^ binder, b
 		m_sun_light_id			= 1;
 	}
 
-	//{
-	//action_name				= "toggle WSAD mode";
-	//a						= gcnew action_delegate(action_name, gcnew execute_delegate_managed(this, &scene_view_panel::switch_wsad_mode) );
-	//a->set_checked			( gcnew checked_delegate_managed(this, &scene_view_panel::get_wsad_mode));
-	//ie->register_action		( a, "");
-	//binder->register_image	( "base", action_name,	camera_wasd_move );
-	//add_action_button_item	( binder, action_name, "RenderOptionsStrip", 11);
-	//}
+	{
+	action_name				= "toggle WSAD mode";
+	a						= gcnew action_delegate(action_name, gcnew execute_delegate_managed(this, &scene_view_panel::switch_wsad_mode) );
+	a->set_checked			( gcnew checked_delegate_managed(this, &scene_view_panel::get_wsad_mode));
+	ie->register_action		( a, "");
+	binder->register_image	( "base", action_name,	camera_wasd_move );
+	add_action_button_item	( binder, action_name, "RenderOptionsStrip", 11);
+	}
 
 	action_name				= "toggle post process";
 	a						= gcnew action_delegate(action_name, gcnew execute_delegate_managed(this, &scene_view_panel::switch_postprocess));

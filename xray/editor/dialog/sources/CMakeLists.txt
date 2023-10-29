@@ -157,7 +157,7 @@ add_library(dialog_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/excel_file.cpp"
 							"${CMAKE_CURRENT_SOURCE_DIR}/excel_file.h"
 							# resources
-							#"${CMAKE_CURRENT_SOURCE_DIR}/resources.resx"
+							"${CMAKE_CURRENT_SOURCE_DIR}/resources.resx"
 							# images
 							"${CMAKE_CURRENT_SOURCE_DIR}/images/images70x53.h"
 							"${CMAKE_CURRENT_SOURCE_DIR}/images/images70x53.png"
@@ -173,11 +173,13 @@ target_link_libraries(dialog_editor PUBLIC
 	editor_base
 )
 
-set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 
 set_target_properties(dialog_editor PROPERTIES VS_DOTNET_REFERENCES
     "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
 )
+
+set_property(TARGET dialog_editor PROPERTY VS_GLOBAL_RootNamespace dialog_editor)
 
 set_target_properties(dialog_editor PROPERTIES FOLDER "engine/editors")
 

@@ -117,13 +117,13 @@ void   query_result::do_unmanaged_create_resource (unmanaged_cook * cook)
 		unpin_raw_buffer							(raw_data);
 	}
 
-	if (m_create_resource_result == cook_base::result_undefined)
-	{
+	//if (m_create_resource_result == cook_base::result_undefined)
+	//{
 		//set_flag(flag_finished_create_resource);
 		//set_create_resource_result(cook_base::result_undefined, query_result_for_user::error_type_unset);
-		finish_query(query_result_for_user::error_type_invalid_file_content, assert_on_fail_false);
-		return;
-	}
+		//finish_query(query_result_for_user::error_type_invalid_file_content, assert_on_fail_false);
+		//return;
+	//}
 
 	if ( m_create_resource_result != cook_base::result_postponed && 
 		 m_create_resource_result != cook_base::result_requery && 
@@ -220,12 +220,12 @@ void   query_result::do_create_resource_impl ()
 		set_create_resource_result				(cook_base::result_success, query_result_for_user::error_type_unset);
 	}
 
-	if(m_create_resource_result == cook_base::result_undefined)
-		{
+	//if(m_create_resource_result == cook_base::result_undefined)
+	//	{
 			//set_flag(flag_finished_create_resource);
 			//set_create_resource_result(cook_base::result_undefined, query_result_for_user::error_type_unset);
-			finish_query(query_result_for_user::error_type_invalid_file_content, assert_on_fail_false);
-		}
+	//		finish_query(query_result_for_user::error_type_invalid_file_content, assert_on_fail_false);
+	//	}
 
 	//R_ASSERT									(m_create_resource_result != cook_base::result_undefined,
 	//											 "cooker should have called finish_query!");
@@ -364,8 +364,8 @@ void   query_result::on_create_resource_end ()
 		{
 
 		}
-		//else
-			//R_ASSERT						(get_save_generated_data());
+		else
+			R_ASSERT						(get_save_generated_data());
 	}
 	
 	if ( get_error_type() == error_type_unset )
@@ -421,53 +421,42 @@ void   query_result::finish_normal_query (cook_base::result_enum const create_re
 	try_push_created_resource_to_manager_might_destroy_this		();
 }
 
-void   query_result::set_deleter_object_if_needed (bool * out_is_new_resource)
+void   query_result::set_deleter_object_if_needed(bool* out_is_new_resource)
 {
-	if ( out_is_new_resource )
-		* out_is_new_resource			=	false;
+	if (out_is_new_resource)
+		*out_is_new_resource = false;
 
-	if ( m_unmanaged_resource)
+	if (m_unmanaged_resource)
 	{
-			if (this->m_unmanaged_resource.m_object != nullptr)
-			{
-				if (m_unmanaged_resource->creation_source() == resource_base::creation_source_unset)
-				{
-					if (out_is_new_resource)
-						*out_is_new_resource = true;
-					set_deleter_object(m_unmanaged_resource.c_ptr());
-					m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
-					set_creation_source_for_resource(m_unmanaged_resource);
-				}
-				else
-					R_ASSERT(m_unmanaged_resource->has_deleter_object());
-			}
-		else 
+		if (m_unmanaged_resource->creation_source() == resource_base::creation_source_unset)
 		{
-				if (out_is_new_resource)
-					*out_is_new_resource = true;
-				set_deleter_object(m_unmanaged_resource.c_ptr());
-				m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
-				set_creation_source_for_resource(m_unmanaged_resource);
+			if (out_is_new_resource)
+				*out_is_new_resource = true;
+			set_deleter_object(m_unmanaged_resource.c_ptr());
+			m_unmanaged_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
+			set_creation_source_for_resource(m_unmanaged_resource);
 		}
+		else
+			R_ASSERT(m_unmanaged_resource->has_deleter_object());
 	}
-	else if ( m_managed_resource )
+	else if (m_managed_resource)
 	{
-		if ( m_managed_resource->creation_source() == resource_base::creation_source_unset )
+		if (m_managed_resource->creation_source() == resource_base::creation_source_unset)
 		{
-			if ( out_is_new_resource )
-				* out_is_new_resource	=	true;
-			m_managed_resource->late_set_fat_it		(get_fat_it_zero_if_physical_path_it());
-			set_creation_source_for_resource		(m_managed_resource);
+			if (out_is_new_resource)
+				*out_is_new_resource = true;
+			m_managed_resource->late_set_fat_it(get_fat_it_zero_if_physical_path_it());
+			set_creation_source_for_resource(m_managed_resource);
 		}
 	}
 }
 
 void   query_result::finish_translated_query (cook_base::result_enum result)
 {
-	if (result == cook_base::result_undefined) { 
-		try_push_created_resource_to_manager_might_destroy_this();
-		return;
-	}
+	//if (result == cook_base::result_undefined) { 
+	//	try_push_created_resource_to_manager_might_destroy_this();
+	//	return;
+	//}
 
 	bool const is_requery_result		=	(result == cook_base::result_requery);
 	R_ASSERT								(result == cook_base::result_success || 

@@ -12,6 +12,6 @@ IF NOT %buildDir%==build\ (
 ) ELSE (
 	echo Deleting previous CMake project files...
 	for /f %%F in ('dir /b /a-d ^| findstr /vile ".bat .py CMakeGraphVizOptions.cmake"') do del "%%F"
-	for /f %%D in ('dir /b /ad') do rmdir /s /q "%%D"
+	for /f %%D in ('dir /b /ad ^| findstr /vile "script_configs"') do rmdir /s /q "%%D"
 	exit /b 0
 )

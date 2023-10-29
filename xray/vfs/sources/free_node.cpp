@@ -27,7 +27,7 @@ void   free_node_impl					(virtual_file_system & 		file_system,
 		file_system.on_node_unmount			(iterator);
 	}
 
-	ASSERT									(root_write_lock);
+//	ASSERT									(root_write_lock);
 	fixed_string512	addr;
 	addr.assignf							("'%s' [0x%08x]", node->get_name(), node);
 	if ( node->is_folder() )

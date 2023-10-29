@@ -32,7 +32,8 @@ class game_world;
 
 
 class hud :		public game_camera,
-				public xray::input::handler
+				public xray::input::handler,
+				public game_world_object
 
 {
 	typedef game_camera super;
