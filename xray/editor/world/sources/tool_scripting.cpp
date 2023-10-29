@@ -70,6 +70,10 @@ tool_scripting::tool_scripting(level_editor^ le)
 	available_behaviours->Add("npc_play_animation");
 	available_behaviours->Add("npc_patrol");
 	behaviour_types_by_object_types->Add("npc", available_behaviours );
+
+	available_behaviours = gcnew Generic::List<String^>( );
+	available_behaviours->Add("npc_play_animation");
+	available_behaviours->Add("npc_monster_move");
 	behaviour_types_by_object_types->Add("monster", available_behaviours);
 
 	load_library				( );	
