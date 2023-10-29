@@ -103,6 +103,7 @@ enum class_id_enum
 	game_object_scene_class,
 	brain_unit_class,
 	human_npc_class,
+	monster_npc_class,
 	weapon_class,
 	sound_player_logic_class,
 	sound_player_editor_class,

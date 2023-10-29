@@ -25,7 +25,7 @@
 #include "object_collision_geometry_set_plane_action.h"
 #include "object_values_storage.h"
 #include "object_wire_set.h"
-
+#include "object_monster_npc.h"
 
 namespace xray {
 namespace editor {
@@ -141,6 +141,10 @@ object_base^ tool_misc::create_raw_object( System::String^ id, render::scene_ptr
 	else if ( id == "base:wire_set" )
 	{
 		result					= gcnew object_wire_set( this );
+	}
+	else if (id == "base:monster_npc")
+	{
+		result					= gcnew object_monster_npc(this, scene);
 	}
 	
 	ASSERT						( result, "raw object not found", unmanaged_string( id ).c_str() );

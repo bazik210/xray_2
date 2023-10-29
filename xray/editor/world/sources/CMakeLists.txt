@@ -184,6 +184,8 @@ add_library(editor SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_camera.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_human_npc.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/object_human_npc.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_monster_npc.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/object_monster_npc.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/tool_animations.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/tool_animations.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/tool_misc.cpp"
@@ -360,6 +362,11 @@ add_library(editor SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_npc_patrol.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_npc_play_animation.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_npc_play_animation.h"
+					# mobs_behaviours
+					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_mob_walker.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_mob_walker.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_mob_remark.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/job_behaviour_mob_remark.h"
 					# scenes_view
 					# logic_scene_actions
 					"${CMAKE_CURRENT_SOURCE_DIR}/logic_event_action_start_scene.cpp"

@@ -19,6 +19,8 @@
 #include "sound_player_cook.h"
 #include "human_npc_cook.h"
 #include "human_npc.h"
+#include "monster_npc_cook.h"
+#include "monster_npc.h"
 #include "weapon_cook.h"
 #include "building_object.h"
 #include "composite_building.h"
@@ -646,6 +648,11 @@ static void kill_npc(human_npc_ptr& condemned)
 	condemned->clear_resources();
 }
 
+static void kill_mob(monster_npc_ptr& condemned)
+{
+	condemned->clear_resources();
+}
+
 void game::clear_resources				( )
 {
 	destroy_debug_window				( );
@@ -655,7 +662,12 @@ void game::clear_resources				( )
 	for ( human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
 		kill_npc						( it_npc );
 
+	for (monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+		kill_mob						( it_mob );
+
 	m_npcs.clear						( );
+
+	m_mobs.clear						( );
 
 	R_ASSERT							( m_spatial_tree );
 	xray::collision::delete_space_partitioning_tree( m_spatial_tree );
@@ -718,10 +730,17 @@ void game::unload( pcstr , bool destroying )
 	{
 		kill_npc( it_npc );
 	}
+
+	for (monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+	{
+		kill_mob( it_mob );
+	}
+
 	m_selected_npc		= NULL;
 	m_active_npc_set	= false;
 	m_npc_queries_count	= 0;
 	m_npcs.clear();
+	m_mobs.clear();
 
 	if(!destroying)
 		switch_to_scene					( m_main_menu );
@@ -756,6 +775,7 @@ void game::register_cooks( )
 	static sound_player_cook			s_logic_sound_player_cook		( m_sound_scene, &m_sound_world, m_input_world, resources::sound_player_logic_class );
 	static sound_player_cook			s_editor_sound_player_cook		( m_sound_scene, &m_sound_world, m_input_world, resources::sound_player_editor_class );
 	static human_npc_cook				s_human_npc_cook				( *this );
+	static monster_npc_cook				s_monster_npc_cook				( *this );
 	static animated_model_instance_cook	s_animated_model_instance_cook;
 	static weapon_cook					s_weapon_cook					( *this );
 
@@ -767,6 +787,7 @@ void game::register_cooks( )
 	register_cook						( &s_logic_sound_player_cook );
 	register_cook						( &s_editor_sound_player_cook );
 	register_cook						( &s_human_npc_cook );
+	register_cook						( &s_monster_npc_cook );
 	register_cook						( &s_animated_model_instance_cook );
 	register_cook						( &s_weapon_cook );
 }
@@ -1287,6 +1308,27 @@ void game::on_npc_attributes_received(configs::binary_config_value const& attrib
 	finish_npc_creation(owner, attributes);
 }
 
+void game::on_monster_attributes_received(configs::binary_config_value const& attributes_config, monster_npc_ptr owner)
+{
+
+	monster_npc::npc_game_attributes		attributes;
+	attributes.group_id = attributes_config["group_id"];
+	attributes.class_id = attributes_config["class_id"];
+	attributes.outfit_id = attributes_config["outfit_id"];
+	float3 color = (float3)attributes_config["debug_draw_color"];
+	attributes.debug_draw_color = math::color((u32)color.x, (u32)color.y, (u32)color.z);
+	attributes.initial_velocity = attributes_config["initial_velocity"];
+	attributes.initial_luminosity = attributes_config["initial_luminosity"];
+	attributes.description = attributes_config["description"];
+	attributes.initial_position = (float3)attributes_config["initial_position"];
+	attributes.initial_rotation = (float3)attributes_config["initial_rotation"];
+	attributes.initial_scale = (float3)attributes_config["initial_scale"];
+	attributes.name = attributes_config["name"];
+	attributes.id = attributes_config["id"];
+
+	finish_monster_creation(owner, attributes);
+}
+
 void game::on_queried_npc_attributes_received(resources::queries_result& data, human_npc_ptr owner)
 {
 	if (!data.is_successful())
@@ -1321,6 +1363,13 @@ void game::finish_npc_creation(human_npc_ptr& new_npc, human_npc::npc_game_attri
 	new_npc->set_attributes(attributes);
 	new_npc->enable();
 	m_npcs.push_back(new_npc);
+}
+
+void game::finish_monster_creation(monster_npc_ptr& new_npc, monster_npc::npc_game_attributes& attributes)
+{
+	new_npc->set_attributes(attributes);
+	new_npc->enable();
+	m_mobs.push_back(new_npc);
 }
 
 void game::rotate_selected_npc(float const y_angle)

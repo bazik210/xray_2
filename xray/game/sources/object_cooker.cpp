@@ -276,10 +276,17 @@ void object_scene_cooker::translate_query( resources::query_result_for_cook& par
 
 		resources::class_id_enum clsid = resources::unknown_data_class;
 
-		if ( strings::equal( (*it)["job_type"] , "npc" ))
+		if (strings::equal((*it)["job_type"], "npc"))
+		{
 			clsid = resources::human_npc_class;
-		else
+		}
+		else if (strings::equal((*it)["job_type"], "mob"))
+		{
+			clsid = resources::monster_npc_class;
+		}
+		else {
 			clsid = resources::game_object_class;
+		}
 
 		requests[count].id		= clsid;
 		requests[count].path	= resource_name;

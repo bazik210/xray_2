@@ -18,6 +18,7 @@
 #include <xray/ai/engine.h>
 #include "camera_director.h"
 #include "human_npc.h"
+#include "monster_npc.h"
 #include <xray/render/engine/base_classes.h>
 
 namespace xray {
@@ -56,6 +57,7 @@ class stats;
 class npc_stats;
 class stats_graph;
 class human_npc;
+class monster_npc;
 class building_object;
 class composite_building;
 #ifdef XRAY_RENDERER_FLASH
@@ -171,6 +173,7 @@ public:
 			void			rotate_selected_npc		( float const y_angle );
 			void			delete_selected_npc		( );
 			void			on_npc_attributes_received	( configs::binary_config_value const& attributes_config, human_npc_ptr owner );
+			void			on_monster_attributes_received ( configs::binary_config_value const& attributes_config, monster_npc_ptr owner );
 			void			assign_behaviour		( );
 
 			void			speedtree_loaded		(resources::queries_result& data, xray::render::game::renderer* r);
@@ -217,6 +220,7 @@ private:
 			void		fill_npc_attributes_randomly( human_npc_ptr owner, float3 const& initial_position );
 			void		fill_npc_attributes_manually( human_npc_ptr owner );
 			void		finish_npc_creation			( human_npc_ptr& new_npc, human_npc::npc_game_attributes& attributes );
+			void		finish_monster_creation		( monster_npc_ptr& new_npc, monster_npc::npc_game_attributes& attributes );
 			bool		is_npc_id_available			( u32 const npc_id ) const;
 			void		get_frustum_objects_callback(
 							xray::ai::update_frustum_callback_type const* update_callback,
@@ -240,6 +244,13 @@ private:
 							&human_npc::next_npc,
 							threading::single_threading_policy,
 							size_policy >	npcs_type;
+
+	typedef intrusive_list< monster_npc,
+							monster_npc_ptr,
+							&monster_npc::next_npc,
+							threading::single_threading_policy,
+							size_policy >	mobs_type;
+
 public:
 	xray::render::scene_view_ptr const		get_active_scene_view	( )	const;
 	xray::render::scene_ptr const			get_active_scene		( )	const;
@@ -297,6 +308,7 @@ private:
 	human_npc_ptr							m_selected_npc;
 	bool									m_active_npc_set;
 	npcs_type								m_npcs;
+	mobs_type								m_mobs;
 	u32										m_npc_queries_count;
 
 	float4x4								m_inverted_view_matrix;
