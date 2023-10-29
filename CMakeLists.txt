@@ -11,7 +11,10 @@ add_compile_options(/MP)
 add_compile_definitions(BOOST_NO_EXCEPTIONS)
 
 # Force Scaleform debug mode
-add_compile_definitions(SF_BUILD_DEBUG)
+# add_compile_definitions(SF_BUILD_DEBUG)
+
+ set(CMAKE_GENERATOR_PLATFORM x64)
+# set(CMAKE_GENERATOR_PLATFORM Win32)
 
 #################################
 # GLOBAL COMPILER CONFIGURATION #
@@ -186,13 +189,13 @@ function(xr_setup_editors)
         /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
     )
 	
-    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v2.0")
-    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
-    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
+    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
 
     # Set Default Namespace
     set_property(TARGET WeifenLuo.WinFormsUI.Docking PROPERTY VS_GLOBAL_RootNamespace "WeifenLuo.WinFormsUI")
@@ -206,15 +209,15 @@ function(xr_setup_editors)
     )
 
     set_target_properties(model_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(particle_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(sound_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
     )
 
     set_target_properties(test_form PROPERTIES VS_DOTNET_REFERENCES
@@ -222,15 +225,15 @@ function(xr_setup_editors)
     )
 
     set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml"
+        "System;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml"
     )
 
     set_target_properties(WPFToolkit.Extended PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
+        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework;"
     )
 
     set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration"
+        "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration"
     )
 
 endfunction()
@@ -248,7 +251,11 @@ function(xr_setup_network)
     xr_set_target_defaults_network_32(login_server)
 
     # x64
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     xr_set_target_defaults_network_64(game_server)
+else()
+    xr_set_target_defaults_network_32(game_server)
+endif()
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -265,31 +272,55 @@ function(xr_setup_plugins)
     target_include_directories(maya2011 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
     )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2011 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
-#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Release
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
     )
+else()
+    target_link_directories(maya2011 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+    )
+endif()
 
     set_target_properties(maya_animation PROPERTIES
-		OUTPUT_NAME "xray_maya_animation"
+	 OUTPUT_NAME "xray_maya_animation"
 	)
 
     set_target_properties(maya2012 PROPERTIES
-		OUTPUT_NAME "xray.maya2012"
-        SUFFIX ".mll"
+	 OUTPUT_NAME "xray.maya2012"
+         SUFFIX ".mll"
 	)
     target_include_directories(maya2012 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012
     )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2012 PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
+
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
+else()
+    target_link_directories(maya2012 PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/amd/tootle/libraries
+	${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib32
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+    )
+endif()
+
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -355,83 +386,65 @@ target_include_directories(stalker2_pc_dx11 PRIVATE
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
-target_link_libraries(stalker2_pc_dx11 PRIVATE
-	engine_pc_dx11
-	legacy_stdio_definitions.lib
-)
+#target_link_libraries(stalker2_pc_dx11 PRIVATE
+#	game
+#	engine_pc_dx11
+#	x3daudio.lib
+#	legacy_stdio_definitions.lib
+#	xaudio2.lib
+#)
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(stalker2_pc_dx11 PRIVATE
-#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
-	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${DXSDK_DIR_PATH}/Lib/x64
 )
+else()
+target_link_directories(stalker2_pc_dx11 PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+	${DXSDK_DIR_PATH}/Lib/x86
+)
+endif()
 
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
 target_compile_definitions(stalker2_pc_opengl PRIVATE
 	PLATFORM_WIN64
 	WIN64
 )
+else()
+xr_set_target_defaults_static_lib_CPP(stalker2_pc_opengl)
+target_compile_definitions(stalker2_pc_opengl PRIVATE
+	PLATFORM_WIN32
+	WIN32
+)
+endif()
+
 target_include_directories(stalker2_pc_opengl PRIVATE
 	${THIRDPARTY_DIR_INCLUDE_PATH}
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
 #	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	${DXSDK_DIR_PATH}/Include
 )
-target_link_libraries(stalker2_pc_opengl PRIVATE
-	engine_pc_opengl
-	legacy_stdio_definitions.lib
-	kernel32.lib
-	user32.lib
-	gdi32.lib
-	winspool.lib
-	shell32.lib
-	ole32.lib
-	oleaut32.lib
-	uuid.lib
-	advapi32.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlibN.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_script_cs.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_core_cs.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_lua.5.1.4.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_luabind.0.8.1.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_ui.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_vorbisfile.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_bullet.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_particle.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_FreeImage.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_texture_compressor.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibPNG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_OpenEXR.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibMNG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_zlib.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibTIFF.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibOpenJPEG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine_pc.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_engine.lib
-#	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_scaleform.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_LibJPEG.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_animation.lib
-	${SOLUTION_DIR_INCLUDE_PATH}/binaries/$(Configuration)/xray_maya_animation.lib
-#	libgfx.lib
-#	libgfx_air.lib
-#	libgfx_as2.lib
-#	libgfx_as3.lib
-#	libgfxexpat.lib
-#	libgfxplatform_gl.lib
-#	libgfxrender_gl.lib
-#	libgfxsound_fmod.lib
-	delayimp.lib
-	dxguid.lib
-	dinput8.lib
-	d3d11.lib
-	d3dx11d.lib
-	dxerr.lib
-	d3dcompiler.lib
-)
+#target_link_libraries(stalker2_pc_opengl PRIVATE
+#	engine_pc_opengl
+#	legacy_stdio_definitions.lib
+#)
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(stalker2_pc_opengl PRIVATE
-#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
-	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	${DXSDK_DIR_PATH}/Lib/x64
 )
+else()
+target_link_directories(stalker2_pc_opengl PRIVATE
+        ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+#       ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/Win32/Msvc90/Debug
+	    ${DXSDK_DIR_PATH}/Lib/x86
+)
+endif()
 
 endfunction()
 
@@ -439,9 +452,9 @@ endfunction()
 function(xr_set_game_name TARGET)
 	if (MSVC)
 		if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-			set(PLATFORM_NAME "win64")
+			set(PLATFORM_NAME "WIN64")
 		else()
-			set(PLATFORM_NAME "win64")
+			set(PLATFORM_NAME "WIN32")
 		endif()
 	endif()
 
@@ -475,8 +488,6 @@ function(xr_set_lib_name TARGET)
 	)
 endfunction()
 
-
-
 ###################
 # TARGET DEFAULTS #
 ###################
@@ -489,13 +500,23 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+         PLATFORM_WIN64
+         WIN64
+         WINDOWS
+         _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	     PLATFORM_WIN32
+         WIN32
+         WINDOWS
+         _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set properties for CLR
     target_compile_definitions(${TARGET} PRIVATE _MANAGED)
@@ -528,12 +549,12 @@ function(xr_set_target_defaults_static_lib_CLR TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+	${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
     )
 
     # list all Target properties
@@ -544,6 +565,7 @@ function(xr_set_target_defaults_static_lib_C TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64
@@ -551,142 +573,15 @@ function(xr_set_target_defaults_static_lib_C TARGET)
         WINDOWS
         _HAS_EXCEPTIONS=0
     )
-
-    # set compiler flags
-    target_compile_options(${TARGET} PRIVATE
-        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
-        /W4
-        /Zi
-        /Ox
-        /Ob2
-        /Oi
-        /Ot
-        /Oy
-        /GT
-        /GF
-        /MD
-        /GS-
-        /fp:fast
-        /Y-
-        /MP
-    )
-
-    xr_disable_target_exception_handling(${TARGET})
-
-    # set Additional Include Directories
-    target_include_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
-    )
-	
-    # set Additional Library Directories
-    target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-    )
-
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-endfunction()
-
-function(xr_set_target_defaults_stalker2 TARGET)
-    # set output file name
-    xr_set_lib_name(${TARGET})
-
-    # set platform as x64
+else()
+    # set platform as x86
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
-        XRAY_STATIC_LIBRARIES
-    )
-
-    xr_disable_target_exception_handling(${TARGET})
-
-    # set Additional Include Directories
-    target_include_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
-    )
-
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
-
-    # set compiler flags
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
-        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
-        /W4
-        /Zi
-        /Ob2
-        /MD
-        /Y-
-        /MP
-    )
-
-    target_link_options(${TARGET} PRIVATE
-        /INCREMENTAL:NO
-    )
-	
-    # set Additional Library Directories
-    target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-    )
-
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-endfunction()
-
-function(xr_set_target_defaults_static_lib_CPP TARGET)
-    # set output file name
-    xr_set_lib_name(${TARGET})
-
-    # set platform as x64
-	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
-        XRAY_STATIC_LIBRARIES
-    )
-
-    # set compiler flags																				
-    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
-        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
-        /W4
-        /Zi
-        /MD
-        /Y-
-        /MP
-    )
-
-    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE")
-
-    xr_disable_target_exception_handling(${TARGET})
-
-    # set Additional Include Directories
-    target_include_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
-    )
-	
-    # set Additional Library Directories
-    target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-    )
-
-    # list all Target properties
-    xr_print_target_compile_flags(${TARGET})
-endfunction()
-
-function(xr_set_target_defaults_shared_lib TARGET)
-    # set output file name
-    xr_set_lib_name(${TARGET})
-
-    # set platform as x64
-	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
+	PLATFORM_WIN32
+        WIN32
         WINDOWS
         _HAS_EXCEPTIONS=0
     )
+endif()
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE
@@ -716,6 +611,165 @@ function(xr_set_target_defaults_shared_lib TARGET)
     )
 	
     # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_stalker2 TARGET)
+    # set output file name
+    xr_set_lib_name(${TARGET})
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+endif()
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+
+    set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "" LINK_FLAGS "/LARGEADDRESSAWARE /BASE:0x00010000 /DYNAMICBASE:NO /FIXED:NO /NODEFAULTLIB:libcmt")
+
+    # set compiler flags
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /W4
+        /Zi
+        /MD
+        /Y-
+        /MP
+    )
+
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+    )
+	
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_static_lib_CPP TARGET)
+    # set output file name
+    xr_set_lib_name(${TARGET})
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+#         XRAY_STATIC_LIBRARIES
+    )
+endif()
+    # set compiler flags																				
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except>
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /W4
+        /Zi
+        /MD
+        /Y-
+        /MP
+    )
+
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE")
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+	
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+    )
+
+    # list all Target properties
+    xr_print_target_compile_flags(${TARGET})
+endfunction()
+
+function(xr_set_target_defaults_shared_lib TARGET)
+    # set output file name
+    xr_set_lib_name(${TARGET})
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+	  PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+else()
+    # set platform as x64
+	target_compile_definitions(${TARGET} PRIVATE
+	  PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
+    # set compiler flags
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GS- /GF /fp:fast> $<$<CONFIG:Debug>:/GF- /GS /fp:precise>
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /W4
+        /Zi
+        /GF
+        /MD
+        /fp:fast
+        /Y-
+        /MP
+    )
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+	
+    # set Additional Library Directories
       target_link_directories(${TARGET} PRIVATE
       ${SOLUTION_DIR_INCLUDE_PATH}/binaries
       )
@@ -723,7 +777,7 @@ function(xr_set_target_defaults_shared_lib TARGET)
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-    
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -733,6 +787,17 @@ function(xr_set_target_defaults_shared_lib TARGET)
         /FIXED:NO
         /MACHINE:X64
     )
+else()
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+        /DEBUG
+        /OPT:REF
+        /OPT:ICF
+        /DYNAMICBASE:NO
+        /FIXED:NO
+        /MACHINE:X86
+    )
+endif()
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()
@@ -741,12 +806,23 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+	      PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+	      PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set properties for CLR
     target_compile_definitions(${TARGET} PRIVATE _MANAGED)
@@ -790,7 +866,7 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
     # list all Target properties
     xr_print_target_compile_flags(${TARGET})
 
-    
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /INCREMENTAL:NO
         /DEBUG
@@ -800,7 +876,17 @@ function(xr_set_target_defaults_shared_lib_CLR TARGET)
         /FIXED:NO
         /MACHINE:X64
     )
-
+else()
+    target_link_options(${TARGET} PRIVATE
+        /INCREMENTAL:NO
+        /DEBUG
+        /OPT:REF
+        /OPT:ICF
+        /DYNAMICBASE:NO
+        /FIXED:NO
+        /MACHINE:X86
+    )
+endif()  
     xr_print_target_linker_flags(${TARGET})
 endfunction()
 
@@ -810,34 +896,38 @@ function(xr_set_target_defaults_editor TARGET)
     # set output file name
     xr_set_lib_name(${TARGET})
 
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
         _WIN32_WINNT=0x0501
-        PLATFORM_WIN64
-        WIN64
-        WINDOWS
-        _HAS_EXCEPTIONS=0
+          PLATFORM_WIN64
+          WIN64
+          WINDOWS
+          _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+	target_compile_definitions(${TARGET} PRIVATE
+        _WIN32_WINNT=0x0501
+          PLATFORM_WIN32
+          WIN32
+          WINDOWS
+          _HAS_EXCEPTIONS=0
+    )
+endif()
 
 	# set properties for CLR
 	target_compile_definitions(${TARGET} PRIVATE _MANAGED)
 	set_target_properties(${TARGET} PROPERTIES COMMON_LANGUAGE_RUNTIME "")
 
+   	set_target_properties(${TARGET} PROPERTIES LINK_LIBRARIES "")
+
     # set compiler flags
-    target_compile_options(${TARGET} PRIVATE
+    target_compile_options(${TARGET} PRIVATE $<$<CONFIG:Release>:/Ox /Ob2 /Oi /Ot /Oy /GT /GS- /GF /Gy- /fp:fast> $<$<CONFIG:Debug>:/GF- /Gy /GS /fp:precise>
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
         /Zi
-        /Ox
-        /Ob2
-        /Oi
-        /Ot
-        /Oy
-        /GT
-        /GF
         /MD
-        /GS-
-        /fp:fast
         /Y-
         /MP
     )
@@ -864,7 +954,7 @@ function(xr_set_target_defaults_editor TARGET)
     set_target_properties(${TARGET} PROPERTIES VS_GLOBAL_CLRSupport "true")
 
     xr_print_target_compile_flags(${TARGET})
-
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_options(${TARGET} PRIVATE
         /DEBUG
         /SUBSYSTEM:WINDOWS
@@ -873,7 +963,16 @@ function(xr_set_target_defaults_editor TARGET)
         /MACHINE:X64
         /CLRTHREADATTRIBUTE:STA
     )
-	
+else()
+    target_link_options(${TARGET} PRIVATE
+        /DEBUG
+        /SUBSYSTEM:WINDOWS
+        /DYNAMICBASE:NO
+        /DELAY:UNLOAD
+        /MACHINE:X86
+        /CLRTHREADATTRIBUTE:STA
+    )
+endif()
     # Visual Studio 17 (2022) and above require a flag to indicate .DLLs for CLR
     if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
     set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
@@ -893,7 +992,6 @@ function(xr_set_target_defaults_network_32 TARGET)
 
     # set platform as x86
     target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN32
         WIN32
         _CONSOLE
         _HAS_EXCEPTIONS=0
@@ -956,8 +1054,8 @@ function(xr_set_target_defaults_network_64 TARGET)
 
     # set platform as x64
     target_compile_definitions(${TARGET} PRIVATE
-        PLATFORM_WIN64
-        _HAS_EXCEPTIONS=0
+      PLATFORM_WIN64
+      _HAS_EXCEPTIONS=0
     )
 
     # set compiler flags
@@ -982,7 +1080,7 @@ function(xr_set_target_defaults_network_64 TARGET)
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-		${THIRDPARTY_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 
     # set Additional Library Directories
@@ -1002,13 +1100,15 @@ function(xr_set_target_defaults_network_64 TARGET)
         /DYNAMICBASE:NO
         /FIXED:NO
         /DELAY:UNLOAD
-        /MACHINE:X64
+		/MACHINE:X64
     )
 
     xr_print_target_linker_flags(${TARGET})
 endfunction()
 
 function(xr_set_target_defaults_plugin TARGET)
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
     target_compile_definitions(${TARGET} PRIVATE
         PLATFORM_WIN64
@@ -1016,6 +1116,15 @@ function(xr_set_target_defaults_plugin TARGET)
         WINDOWS
         _HAS_EXCEPTIONS=0
     )
+else()
+    # set platform as x86
+    target_compile_definitions(${TARGET} PRIVATE
+        PLATFORM_WIN32
+        WIN32
+        WINDOWS
+        _HAS_EXCEPTIONS=0
+    )
+endif()
 
     # set compiler flags
     target_compile_options(${TARGET} PRIVATE

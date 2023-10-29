@@ -35,4 +35,6 @@ namespace xray {
 	} // namespace render
 } // namespace xray
 
+#pragma comment(lib, "xray_texture_compressor.lib" )
+
 #endif // #ifndef PCH_H_INCLUDED

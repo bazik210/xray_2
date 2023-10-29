@@ -322,8 +322,10 @@ void project_cooker_simple::create_game_objects( xray::configs::binary_config_pt
 	for ( ;it!=it_e;++it ){
 		pcstr type								= (*it)["game_object_type"];
 
-		game_object_*	resource				= NULL;
+		int load = 1;
 
+		game_object_*	resource				= NULL;
+		
 		if( strings::equal("solid_visual", type))
 		{
 			resource = NEW(object_solid_visual)( *lobby );
@@ -377,12 +379,16 @@ void project_cooker_simple::create_game_objects( xray::configs::binary_config_pt
 			resource = NEW(object_wire)( *lobby );
 		}else	
 		{
-			NOT_IMPLEMENTED				( );
+			load = 0;
+			//NOT_IMPLEMENTED				( );
 		}
 
-		resource->load(	*it );
-		
-		proj->m_objects.push_back( resource );
+		if (load) {
+			resource->load(*it);
+
+			proj->m_objects.push_back(resource);
+		}
+		load = 1;
 
 	}
 

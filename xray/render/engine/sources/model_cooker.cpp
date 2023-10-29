@@ -116,7 +116,7 @@ void skeleton_model_instance_cook::on_skeleton_config_loaded( resources::queries
 	resources::query_result_for_cook* parent_query = cook_data->parent_query;
 	if (!result.is_successful())
 	{
-		parent_query->finish_query				( result_error );
+		parent_query->finish_query				( (resources::cook_base::result_enum)1 );
 		return;
 	}
 	
@@ -138,7 +138,7 @@ void skeleton_model_instance_cook::on_skeleton_loaded( resources::queries_result
 	if (!result.is_successful())
 	{
 		resources::query_result_for_cook* parent_query = cook_data->parent_query;
-		parent_query->finish_query				( result_error );
+		parent_query->finish_query				( (resources::cook_base::result_enum)1 );
 		return;
 	}
 	
@@ -155,7 +155,7 @@ void skeleton_model_instance_cook::on_render_model_loaded( resources::queries_re
 	if (!result.is_successful())
 	{
 		resources::query_result_for_cook* parent_query = cook_data->parent_query;
-		parent_query->finish_query ( result_error );
+		parent_query->finish_query ( (resources::cook_base::result_enum)1 );
 		return;
 	}
 

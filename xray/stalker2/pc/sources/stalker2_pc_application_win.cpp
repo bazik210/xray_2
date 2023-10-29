@@ -181,8 +181,10 @@ static void splash_screen_main		( )
 		return;
 	}
 
-	HMODULE const module			= GetModuleHandle( 0 );
-	s_splash_screen					= CreateDialog( module, MAKEINTRESOURCE( IDD_SPLASH_SCREEN ), 0, window_procedure );
+	s_splash_screen = CreateDialog(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_SPLASH_SCREEN), 0, window_procedure);
+
+	Sleep(100);
+
 	SetDlgItemText					( s_splash_screen, IDC_FINGER_PRINT, s_finger_print.c_str() );
 
 	HWND const picture_control		= GetDlgItem( s_splash_screen, IDC_SPLASH_SCREEN );

@@ -64,7 +64,7 @@ private:
 	inline	void			set				( object_type* object );
 	inline	void			set				( self_type const& object );
 
-private:
+public:
 	object_type*			m_object;
 }; // class intrusive_ptr
 

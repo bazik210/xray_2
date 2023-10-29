@@ -12,14 +12,16 @@
 namespace xray {
 namespace memory {
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 template <class Allocator>
 class memory_synchronized_allocator : public Allocator
 {
 public:	
-	typedef	Allocator	super;
+	typedef Allocator super;
 public:	
 					memory_synchronized_allocator () 
 						: m_synchronization_enabled(true), Allocator(thread_id_const_false) {}
+
 
 			void	enable_synchronization	() { m_synchronization_enabled	=	true; }
 			void	disable_synchronization	() { m_synchronization_enabled	=	false; }
@@ -29,7 +31,6 @@ public:
 	{
 		if ( synchronization_enabled() )
 			m_mutex.lock				();
-		
 		super::user_current_thread_id	();
 		pvoid out_result = super::malloc_impl(size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION XRAY_CORE_DEBUG_PARAMETERS);
 		
@@ -42,7 +43,6 @@ public:
 	{
 		if ( synchronization_enabled() )
 			m_mutex.lock				();
-
 		super::user_current_thread_id	();
 		pvoid out_result = super::realloc_impl(pointer, new_size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION XRAY_CORE_DEBUG_PARAMETERS);
 
@@ -55,7 +55,6 @@ public:
 	{
 		if ( synchronization_enabled() )
 			m_mutex.lock				();
-
 		super::user_current_thread_id	();
 		super::free_impl		(pointer XRAY_CORE_DEBUG_PARAMETERS);
 
@@ -82,6 +81,11 @@ private:
 	threading::mutex			m_mutex;
 	bool						m_synchronization_enabled;
 }; // class memory_synchronized_allocator
+#else
+
+	typedef crt_allocator memory_synchronized_allocator;
+
+#endif //!XRAY_USE_CRT_MEMORY_ALLOCATOR
 
 } // namespace memory
 } // namespace xray

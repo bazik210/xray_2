@@ -57,7 +57,7 @@ enum process_error_enum
 
 inline u32	assert_log_times_in_gold () { return 10; }
 
-#ifndef _MANAGED
+#ifndef _MANAGED //this will be disabled by clr
 	template <typename T>
 	inline T const & identity( T const & value ) { return value; }
 	template <typename T>

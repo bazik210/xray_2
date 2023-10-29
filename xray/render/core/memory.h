@@ -25,6 +25,7 @@ XRAY_RENDER_API extern render_allocator_type*	g_allocator;
 #define NEW( type )								XRAY_NEW_IMPL(		*::xray::render::g_allocator, type )
 #define NEW_ARRAY(type, count)					XRAY_NEW_ARRAY_IMPL(*::xray::render::g_allocator, type, count)
 #define DELETE( pointer, ... )					XRAY_DELETE_IMPL(	*::xray::render::g_allocator, pointer, __VA_ARGS__ )
+#define DELETE_THIS( pointer, ... )				XRAY_DELETE_THIS_IMPL(	*::xray::render::g_allocator, pointer, __VA_ARGS__ )
 #define DELETE_ARRAY(pointer)					XRAY_DELETE_ARRAY_IMPL(*::xray::render::g_allocator, pointer )
 #define MALLOC( size, description )				XRAY_MALLOC_IMPL(	*::xray::render::g_allocator, size, description )
 #define ALLOC( type, count )					XRAY_ALLOC_IMPL(	*::xray::render::g_allocator, type, count )

@@ -172,10 +172,10 @@ void game_cell::on_contents_loaded(  resources::queries_result& data )
 			configs::binary_config_value* ud	= (configs::binary_config_value*)user_data.c_ptr();
 
 			game_object_ptr_ object_ptr		= static_cast_resource_ptr<game_object_ptr_>(q.get_unmanaged_resource());
-			if (m_objects.size() != 0) {
+			//if (m_objects.size() != 0) {
 				m_objects.push_back(object_ptr);
 				m_cell_manager->register_object(object_ptr->reusable_request_name().c_str(), object_ptr);
-			}
+			//}
 			DELETE							( ud );
 		}
 	}

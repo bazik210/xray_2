@@ -43,18 +43,25 @@ add_library(engine STATIC
 )
 
 target_include_directories(engine PRIVATE
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	"${DXSDK_DIR_PATH}/Include"
 )
 
+if(x64)
 target_link_directories(engine PUBLIC
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/x64/Msvc90/Debug
 	"${DXSDK_DIR_PATH}/Lib/x64"
 )
+else()
+target_link_directories(engine PUBLIC
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Lib/win32/Msvc90/Debug
+	"${DXSDK_DIR_PATH}/Lib/x86"
+)
+endif()
 
 target_link_libraries(engine PUBLIC
-	scaleform
+#	scaleform
 	delayimp.lib
 )
 

@@ -53,7 +53,7 @@
 #include "key_binder.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
-	#ifdef XRAY_RENDERER_FLASH && GFX_SCALEFORM
+	#ifdef XRAY_RENDERER_FLASH
 		#include <GFx.h>
 		#include "flash_factory.h"
 	#endif

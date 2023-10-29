@@ -252,6 +252,12 @@ inline void delete_array_helper	( A& allocator, T*& pointer XRAY_CORE_DEBUG_PARA
 	}
 #endif // #ifdef _MANAGED
 
+	template < typename A, typename T >
+	inline void delete_this_helper(A& allocator, T* pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION)
+	{
+		detail::delete_helper_impl(allocator, pointer XRAY_CORE_DEBUG_PARAMETERS, detail::call_destructor_predicate());
+	}
+
 template <typename A>
 inline pvoid   malloc_helper			( A& allocator, size_t const size, pcstr description XRAY_CORE_DEBUG_PARAMETERS_DECLARATION )
 {

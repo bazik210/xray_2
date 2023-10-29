@@ -523,17 +523,19 @@ add_library(renderer_engine_pc_dx11 STATIC
 )
 
 target_include_directories(renderer_engine_pc_dx11 PUBLIC
-    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 )
 
 target_link_libraries(renderer_engine_pc_dx11 PUBLIC
 	renderer_core_pc_dx11
-	scaleform
+#	scaleform
 )
 
 set_target_properties(renderer_engine_pc_dx11 PROPERTIES FOLDER "engine/renderers/pc/dx11")
 
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_renderer.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_renderer.h PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
 
 
 ######################
@@ -570,13 +572,13 @@ add_library(renderer_engine_pc_opengl STATIC
 )
 
 target_include_directories(renderer_engine_pc_opengl PUBLIC
-    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#    ${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 )
 
 target_link_libraries(renderer_engine_pc_opengl PUBLIC
 	renderer_core_pc_dx11
-	scaleform
+#	scaleform
 )
 
 set_target_properties(renderer_engine_pc_opengl PROPERTIES FOLDER "engine/renderers/pc/opengl")

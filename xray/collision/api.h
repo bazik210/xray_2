@@ -8,20 +8,24 @@
 #define XRAY_COLLISION_API_H_INCLUDED
 
 #ifndef XRAY_COLLISION_API
-#	ifndef XRAY_STATIC_LIBRARIES
+#ifdef _EDITOR_STATIC
+	#define XRAY_COLLISION_API
+#else
+#	ifdef XRAY_STATIC_LIBRARIES
 #		define XRAY_COLLISION_API
 #	else // #ifdef XRAY_STATIC_LIBRARIES
 #		ifdef XRAY_COLLISION_BUILDING
 #			define XRAY_COLLISION_API				XRAY_DLL_EXPORT
 #		else // #ifdef XRAY_COLLISION_BUILDING
 #			ifndef XRAY_ENGINE_BUILDING
-#				define XRAY_COLLISION_API			//XRAY_DLL_IMPORT
+#					define XRAY_COLLISION_API		XRAY_DLL_IMPORT
 #			else // #ifndef XRAY_ENGINE_BUILDING
 #				define XRAY_COLLISION_API			XRAY_DLL_EXPORT
 #			endif // #ifndef XRAY_ENGINE_BUILDING
 #		endif // #ifdef XRAY_COLLISION_BUILDING
 #	endif // #ifdef XRAY_STATIC_LIBRARIES
 #endif // #ifndef XRAY_COLLISION_API
+#endif
 
 #include <xray/collision/common_types.h>			// for object_type
 #include <xray/animation/skeleton.h>

@@ -10,6 +10,8 @@
 #include <xray/memory_base_allocator.h>
 #include <xray/memory_debug_parameters.h>
 
+#define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
+
 namespace xray {
 namespace memory {
 

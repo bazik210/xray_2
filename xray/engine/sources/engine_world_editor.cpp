@@ -65,7 +65,9 @@ void engine_world::try_load_editor			( )
 	s_memory_allocator	= (xray::editor::memory_allocator_ptr)GetProcAddress(s_editor_module, "set_memory_allocator");
 	R_ASSERT			( s_memory_allocator );
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	m_editor_allocator.user_current_thread_id	( );
+#endif
 	s_memory_allocator	( m_editor_allocator );
 
 	// this function cannot be called before s_memory_allocator function called

@@ -77,8 +77,12 @@ public:
 			configs::binary_config_ptr const config_ptr	=	static_cast_checked<configs::binary_config *>
 															(config_result[0].get_unmanaged_resource().c_ptr());
 
-
-			ASSERT( config_ptr );
+			if (!config_ptr) {
+				m_mount_composite_task->unlock_children	();
+				g_resources_manager->change_count_of_pending_helper_query_for_mount(-1);
+				return;
+			}
+			//ASSERT( config_ptr );
 
 			configs::binary_config_value const & config	=	config_ptr->get_root();
 			query_by_config									(config);

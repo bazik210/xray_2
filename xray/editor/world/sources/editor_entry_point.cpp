@@ -115,6 +115,8 @@ void xray::editor::set_memory_allocator			( allocator_type& allocator )
 
 	ASSERT					( !g_allocator );
 	g_allocator				= &allocator;
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	allocator.user_current_thread_id();
+#endif
 }
 #pragma managed

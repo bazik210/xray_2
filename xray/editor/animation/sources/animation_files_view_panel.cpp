@@ -107,7 +107,7 @@ void animation_files_view_panel::on_tree_mouse_move( Object^, MouseEventArgs^ e 
 				operation = animation_collections_editor_drag_drop_operation::tree_view_folder;
 			
 			data->SetData( "item_type", node_type );
-			data->SetData( "animation_item_type", animation_item_type::animation_single_item );
+			data->SetData( "animation_item_type", static_cast<int>(animation_item_type::animation_single_item) );
 			if( ( ModifierKeys & Keys::Control ) == Keys::Control )
 				m_raw_files_tree_view->DoDragDrop( data, DragDropEffects::Copy );
 			else

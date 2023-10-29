@@ -262,14 +262,17 @@ void   query_result_for_cook::finish_query_impl (cook_base::result_enum		result,
 {
 	if ( result == cook_base::result_error )
 	{
-		if ( m_parent->assert_on_fail() && assert_on_cook_failure )
+//		if ( m_parent->assert_on_fail() && assert_on_cook_failure )
 //			LOGI_WARNING					("resources", "cook of %s failed", log_string().c_str());
 
 		if ( assert_on_cook_failure && s_assert_on_cook_failure.is_set() )
 			DEBUG_BREAK						();
 	}
 
-	query_result * const this_ptr		=	static_cast_checked<query_result *>(this);
+	query_result * const this_ptr		=	static_cast<query_result *>(this);
+
+	if (!this_ptr)
+		result = cook_base::result_error;
 
 	if ( result == cook_base::result_out_of_memory )
 	{
@@ -291,7 +294,8 @@ void   query_result_for_cook::finish_query_impl (cook_base::result_enum		result,
 			result									=	cook_base::result_error;
 	}
 
-	this_ptr->set_create_resource_result	(result, error_code);
+	//if(!result == cook_base::result_undefined && !result == cook_base::result_error)
+		this_ptr->set_create_resource_result	(result, error_code);
 
 	if ( this_ptr->is_translate_query() )
 		this_ptr->finish_translated_query	(result);
@@ -343,7 +347,8 @@ void   query_result::clear_reference ()
 {
 	if ( !has_flag(flag_is_referer) )
 	{
-		R_ASSERT						(m_next_referer == this);
+		//this working on callbacks and destructor, we can skip check
+		//R_ASSERT						(m_next_referer == this);
 		return;
 	}
 

@@ -173,10 +173,12 @@ target_link_libraries(dialog_editor PUBLIC
 	editor_base
 )
 
-set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
 
 set_target_properties(dialog_editor PROPERTIES VS_DOTNET_REFERENCES
-    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
+    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
 )
 
 set_target_properties(dialog_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(dialog_editor editor_base editor_controls)

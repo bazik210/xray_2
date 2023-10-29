@@ -18,6 +18,10 @@
 #	define XRAY_DELETE_IMPL( allocator, pointer, ... )					\
 			xray::memory::delete_helper			( xray::memory::strip_pointer(allocator), pointer, __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__ )
 
+#	define XRAY_DELETE_THIS_IMPL( allocator, pointer, ... )					\
+			xray::memory::delete_this_helper			( xray::memory::strip_pointer(allocator), pointer, __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__ )
+
+
 #	define XRAY_DELETE_ARRAY_IMPL( allocator, pointer, ... )			\
 			xray::memory::delete_array_helper	( xray::memory::strip_pointer(allocator), pointer, __FUNCTION__, __FILE__, __LINE__, ##__VA_ARGS__ )
 

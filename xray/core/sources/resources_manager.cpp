@@ -99,12 +99,13 @@ void   resources_manager::dump_unmanaged_resource_leaks ()
 
 resources_manager::~resources_manager ()
 {
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	if ( !threading::g_debug_single_thread )
 	{
 		memory::g_resources_helper_allocator.user_current_thread_id( );
 		memory::g_resources_unmanaged_allocator.user_current_thread_id( );
 	}
-
+#endif
 	dump_unmanaged_resource_leaks			();
 	memory::g_resources_managed_allocator.dump_resource_leaks	();
 
@@ -325,8 +326,10 @@ void   resources_manager::on_resources_thread_started ()
 	threading::interlocked_exchange			(m_resources_thread_id, threading::current_thread_id());
 
 	ASSERT									(!threading::g_debug_single_thread);
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	memory::g_resources_helper_allocator.user_current_thread_id();
 	memory::g_resources_unmanaged_allocator.user_current_thread_id();
+#endif
 
 	m_flush_timer.start						();
 

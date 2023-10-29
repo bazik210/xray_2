@@ -195,6 +195,10 @@ void   binary_config_cook::on_lua_config_loaded	(queries_result & data, query_re
 															( data[0].get_unmanaged_resource() );
 
 	memory::stream str						( &debug::g_mt_allocator );
+//	if (str.get_buffer_size() == NULL) {
+//		parent_query->finish_query(result_undefined);
+//		return;
+//	}
 	create_binary_config_buffer				( source_config_ptr->get_root(), str );
 	mutable_buffer buffer					= mutable_buffer( str.get_buffer(), str.get_buffer_size() );
 

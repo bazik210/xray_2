@@ -4,12 +4,17 @@
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
+#pragma once
+
 #ifndef XRAY_MEMORY_EXTENSIONS_H_INCLUDED
 #define XRAY_MEMORY_EXTENSIONS_H_INCLUDED
 
 #include <xray/macro_extensions.h>
 #include <xray/type_extensions.h>
 #include <xray/debug/extensions.h>
+#if !XRAY_DISABLE_CRT_ALLOCATOR
+#	include <xray/memory_crt_allocator.h>
+#endif // #if !XRAY_DISABLE_CRT_ALLOCATOR
 #include <xray/memory_pthreads3_allocator.h>
 
 #if XRAY_PLATFORM_WINDOWS
@@ -24,9 +29,7 @@
 
 #define XRAY_MAX_CACHE_LINE_PAD					char XRAY_STRING_CONCAT(m_cache_line_pad_$, __LINE__) [XRAY_MAX_CACHE_LINE_SIZE]
 
-#if !XRAY_DISABLE_CRT_ALLOCATOR
-#	include <xray/memory_crt_allocator.h>
-#endif // #if !XRAY_DISABLE_CRT_ALLOCATOR
+#define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
 
 namespace xray {
 namespace memory {
@@ -38,7 +41,12 @@ namespace memory {
 	typedef memory::crt_allocator				crt_allocator_type;
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
-	extern "C" XRAY_CORE_API crt_allocator_type * g_crt_allocator;
+#ifdef XRAY_STATIC_LIBRARIES
+	extern "C" XRAY_CORE_API crt_allocator_type* g_crt_allocator;
+#else
+	extern XRAY_CORE_API crt_allocator_type * g_crt_allocator;
+#endif
+
 } // namespace memory
 } // namespace xray
 
@@ -49,8 +57,12 @@ namespace xray {
 namespace memory {
 
 typedef pthreads3_allocator						pthreads_allocator_type;
-extern XRAY_CORE_API pthreads_allocator_type	g_mt_allocator;
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	extern XRAY_CORE_API pthreads_allocator_type	g_mt_allocator;
+#else
+	extern XRAY_CORE_API crt_allocator g_mt_allocator;
+#endif
 } // namespace memory
 } // namespace xray
 

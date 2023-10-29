@@ -110,8 +110,9 @@ void string_table_ids_storage::on_string_table_ids_loaded(xray::resources::queri
 			xray::fs_new::virtual_path_string file_path;
 			xray::fs_new::file_name_with_no_extension_from_path(&file_path, data[i].get_requested_path());
 			pcstr loc_name = file_path.c_str();
-
-			localization_languages_type::iterator loc_it = m_languages->find(loc_name);
+			localization_languages_type::iterator loc_it = m_languages->find((char*)loc_name);
+				
+				//(true, loc_name);
 			if(loc_it==m_languages->end())
 				continue;
 
@@ -119,7 +120,8 @@ void string_table_ids_storage::on_string_table_ids_loaded(xray::resources::queri
 			configs::lua_config::const_iterator	b = config->get_root()["string_table_ids"].begin();
 			for(; b!=config->get_root()["string_table_ids"].end(); ++b)
 			{
-				string_table_ids_type::iterator it_str_id = m_string_table_ids->find(b.key());
+				std::string it = b.key(); const char* cstr_it = it.c_str();
+				string_table_ids_type::iterator it_str_id = m_string_table_ids->find((char*)cstr_it);
 				if(it_str_id==m_string_table_ids->end())
 				{
 					string_table_id* new_id = NEW(string_table_id)();
@@ -133,7 +135,7 @@ void string_table_ids_storage::on_string_table_ids_loaded(xray::resources::queri
 
 bool string_table_ids_storage::check_id_on_empty_text(pcstr id)
 {
-	string_table_ids_type::iterator it_str_id = m_string_table_ids->find(id);
+	string_table_ids_type::iterator it_str_id = m_string_table_ids->find((char*)id);
 	if(it_str_id!=m_string_table_ids->end())
 		return it_str_id->second->check_on_empty_text();
 
@@ -142,7 +144,7 @@ bool string_table_ids_storage::check_id_on_empty_text(pcstr id)
 
 void string_table_ids_storage::add_new_id(pcstr new_id, pcstr new_text)
 {
-	string_table_ids_type::iterator it_str_id = m_string_table_ids->find(new_id);
+	string_table_ids_type::iterator it_str_id = m_string_table_ids->find((char*)new_id);
 	if(it_str_id!=m_string_table_ids->end())
 		return;
 
@@ -162,7 +164,7 @@ void string_table_ids_storage::add_new_id(pcstr new_id, pcstr new_text)
 
 void string_table_ids_storage::change_ids_text(pcstr id, pcstr new_text)
 {
-	string_table_ids_type::iterator it_str_id = m_string_table_ids->find(id);
+	string_table_ids_type::iterator it_str_id = m_string_table_ids->find((char*)id);
 	if(it_str_id==m_string_table_ids->end())
 		return add_new_id(id, new_text);
 
@@ -174,7 +176,7 @@ pcstr string_table_ids_storage::get_text_by_id(pcstr str_id)
 	if(str_id==NULL)
 		return NULL;
 
-	string_table_ids_type::iterator it_str_id = m_string_table_ids->find(str_id);
+	string_table_ids_type::iterator it_str_id = m_string_table_ids->find((char*)str_id);
 	if(it_str_id==m_string_table_ids->end())
 		return NULL;
 	
@@ -206,7 +208,7 @@ void string_table_ids_storage::new_language(pcstr lang_name)
 
 void string_table_ids_storage::remove_language(pcstr lang_name)
 {
-	localization_languages_type::iterator it_lang = m_languages->find(lang_name);
+	localization_languages_type::iterator it_lang = m_languages->find((char*)lang_name);
 	string_table_ids_type::iterator it_str_id = m_string_table_ids->begin();
 	for(; it_str_id!=m_string_table_ids->end(); ++it_str_id)
 		it_str_id->second->remove_text(*it_lang);

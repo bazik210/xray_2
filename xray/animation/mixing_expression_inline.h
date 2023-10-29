@@ -13,7 +13,7 @@ namespace xray {
 namespace animation {
 namespace mixing {
 
-#if XRAY_PLATFORM_XBOX_360
+//#if XRAY_PLATFORM_XBOX_360
 inline expression::expression					( expression& other ) :
 	m_node		( other.m_node ),
 	m_lexeme	( other.m_lexeme )
@@ -27,7 +27,7 @@ inline expression::expression					( T const& other ) :
 	m_lexeme	( other.m_lexeme )
 {
 }
-#endif // #if XRAY_PLATFORM_XBOX_360
+//#endif // #if XRAY_PLATFORM_XBOX_360
 
 template < typename T >
 inline expression::expression					( T& lexeme )

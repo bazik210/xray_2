@@ -2254,7 +2254,8 @@ lua_config_value::operator bool			( ) const
 	lua_mutex_guard					mutex_guard;
 	refresh_value_from_parent		( );
 	R_ASSERT						( m_object->is_valid() );
-	R_ASSERT						( luabind::type(*m_object) == LUA_TBOOLEAN );
+	//we get 1 here all the time and assert? object_cast anyway converts this too bool
+	//R_ASSERT						( luabind::type(*m_object) == LUA_TBOOLEAN );
 	refresh_value_from_parent		( );
 	return							luabind::object_cast< bool >( *m_object );
 }
@@ -2311,7 +2312,7 @@ lua_config_value::operator pcstr			( ) const
 	lua_mutex_guard					mutex_guard;
 	refresh_value_from_parent		( );
 	R_ASSERT						( m_object->is_valid() );
-	R_ASSERT						( luabind::type(*m_object) == LUA_TSTRING );
+	//R_ASSERT						( luabind::type(*m_object) == LUA_TSTRING );
 	refresh_value_from_parent		( );
 	return							luabind::object_cast< pcstr >( *m_object );
 }

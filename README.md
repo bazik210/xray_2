@@ -55,7 +55,8 @@ Source files of third party libraries aren't part of this repository. Consult wi
 ## Development
 ### Utility Tools
 - Build directory contains several utility tools that you can use in case new project has to be integrated into solution.
-- If you updating CMakeLists.txt project files, don't forget to run again SetupNothrownew.bat from build\ folder after or bugtrap build will be broken.
+- If you updating CMakeLists.txt project files, don't forget to run again SetupNothrownew.bat and SetupEditor.bat from build\ folder after or bugtrap and editor build will be broken. 
+- You can also disable ZERO_CHECK project, so it won't update your vs projects every time you touch cmake files, this is in case you have some critical changes in projects you didn't add yet to cmake.
 
 ## Debug
 - Go to stalker2_pc_dx11 configuration properties->Debugging and set your working directory to compiled binaries, for example: C:\xray\binaries\Debug. Then put resources\, mounts\ and user_data\ to your sources, now you can launch it.

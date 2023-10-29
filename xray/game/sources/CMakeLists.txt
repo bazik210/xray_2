@@ -218,13 +218,16 @@ add_library(game STATIC
 )
 
 target_include_directories(game PRIVATE
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
-	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Include
+#	${THIRDPARTY_DIR_INCLUDE_PATH}/scaleform/Src
 	"${DXSDK_DIR_PATH}/Include"
 )
 
 target_link_libraries(game PUBLIC
 	debugging
 )
+
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_factory.cpp PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/flash_factory.h PROPERTY VS_SETTINGS "ExcludedFromBuild=true")
 
 set_target_properties(game PROPERTIES FOLDER "stalker2")

@@ -291,9 +291,9 @@ target_link_directories(editor_base PUBLIC
 target_compile_options(editor_base PRIVATE
     /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
 )
-set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v3.5")
+set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.0")
 set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
-    "PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase"
+    "PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xaml;System.Xml;WindowsBase"
 )
 
 set_target_properties(editor_base PROPERTIES FOLDER "engine/editors")

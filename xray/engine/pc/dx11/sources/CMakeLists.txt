@@ -1,6 +1,6 @@
 project(engine_pc_dx11 LANGUAGES CXX)
 
-add_library(engine_pc_dx11 STATIC
+add_library(engine_pc_dx11 SHARED
 							# include
 							"${CMAKE_CURRENT_SOURCE_DIR}/../library_linkage.h"
 							# ./
@@ -10,12 +10,23 @@ add_library(engine_pc_dx11 STATIC
 
 target_include_directories(engine_pc_dx11 PRIVATE
     ${SOLUTION_DIR_INCLUDE_PATH}
-	${THIRDPARTY_DIR_INCLUDE_PATH}
+    ${THIRDPARTY_DIR_INCLUDE_PATH}
 )
+
+if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 target_link_directories(engine_pc_dx11 PRIVATE
 	${SOLUTION_DIR_INCLUDE_PATH}/binaries
 	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
+	${DXSDK_DIR_PATH}/Lib/x64
 )
+else()
+target_link_directories(engine_pc_dx11 PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}/binaries
+	${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
+	${DXSDK_DIR_PATH}/Lib/x86
+)
+endif()
+
 target_link_libraries(engine_pc_dx11 PUBLIC
 	zlibN
 	bugtrap
@@ -32,3 +43,5 @@ target_link_libraries(engine_pc_dx11 PUBLIC
 )
 
 set_target_properties(engine_pc_dx11 PROPERTIES FOLDER "engine")
+
+target_link_libraries(engine_pc_dx11 PRIVATE legacy_stdio_definitions.lib)

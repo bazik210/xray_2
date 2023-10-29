@@ -17,11 +17,12 @@ class base_lexeme;
 
 class XRAY_ANIMATION_API expression {
 public:
-#if XRAY_PLATFORM_XBOX_360
+//this copy constructors should be enabled by default!
+//#if XRAY_PLATFORM_XBOX_360
 	inline						expression		( expression& other );
 	template < typename T >
 	inline	IMPLICIT			expression		( T const& lexeme );
-#endif // #if XRAY_PLATFORM_XBOX_360
+//#endif // #if XRAY_PLATFORM_XBOX_360
 	template < typename T >
 	inline	IMPLICIT			expression		( T& lexeme );
 	inline	mutable_buffer&		buffer			( ) const;

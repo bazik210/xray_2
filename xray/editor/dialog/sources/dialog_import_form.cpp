@@ -41,13 +41,13 @@ void dialog_import_form::on_import_clicked(System::Object^, System::EventArgs^ )
 	u32 index_of_dot = lang_name->LastIndexOf(".");
 	lang_name = lang_name->Substring(index_of__, index_of_dot-index_of__);
 	
-	string_table_ids_storage::localization_languages_type::const_iterator lang_it = get_string_tables()->languages_list()->find(unmanaged_string(lang_name).c_str());
+	string_table_ids_storage::localization_languages_type::const_iterator lang_it = get_string_tables()->languages_list()->find((char*)(unmanaged_string(lang_name).c_str()));
 	R_ASSERT(lang_it!=get_string_tables()->languages_list()->end());
 	Int32 lines_counter = 2;
 	System::String^ str_id = xl_file->read_string("B"+lines_counter.ToString());
 	while(str_id!="")
 	{
-		string_table_ids_storage::string_table_ids_type::const_iterator str_ids_it = get_string_tables()->string_table_ids()->find(unmanaged_string(str_id).c_str());
+		string_table_ids_storage::string_table_ids_type::const_iterator str_ids_it = get_string_tables()->string_table_ids()->find((char*)(unmanaged_string(str_id).c_str()));
 		if(str_ids_it!=get_string_tables()->string_table_ids()->end())
 		{
 			System::String^ bfn = m_editor->batch_file_name(str_id, lang_name);

@@ -106,7 +106,9 @@ private:
 			void	initialize_editor_thread_ids	( );
 			void			initialize_render		( );
 			void			initialize_logic		( );
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 			void			initialize_logic_thread	( );
+#endif
 #ifdef GFX_SCALEFORM
 			void			initialize_scaleform	( );
 			void			destroy_scaleform		( );

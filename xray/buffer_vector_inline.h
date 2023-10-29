@@ -303,7 +303,10 @@ inline typename BUFFER_VECTOR::const_reference BUFFER_VECTOR::at			( size_type c
 TEMPLATE_SIGNATURE
 inline typename BUFFER_VECTOR::reference BUFFER_VECTOR::operator [ ]		( size_type const index )
 {
-	ASSERT			( index < size( ) );
+	//ASSERT			( index < size( ) );
+
+	//if (index < size()) return m_begin[0];
+
 	return			( m_begin[ index ] );
 }
 

@@ -18,13 +18,13 @@ using xray::debug::bugtrap_usage;
 using xray::debug::error_mode;
 
 static HMODULE			s_bugtrap_handle			= 0;
-#if XRAY_PLATFORM_WINDOWS_64
+//#if XRAY_PLATFORM_WINDOWS_64
+//	static pcstr		s_bugtrap_native_id			= "xray_bugtrap.dll";
+//	static pcstr		s_bugtrap_dotnet_id			= "xray_bugtrapN.dll";
+//#else // #if XRAY_PLATFORM_WINDOWS_64
 	static pcstr		s_bugtrap_native_id			= "xray_bugtrap.dll";
 	static pcstr		s_bugtrap_dotnet_id			= "xray_bugtrapN.dll";
-#else // #if XRAY_PLATFORM_WINDOWS_64
-	static pcstr		s_bugtrap_native_id			= "BugTrap.dll";
-	static pcstr		s_bugtrap_dotnet_id			= "BugTrapN.dll";
-#endif // #if XRAY_PLATFORM_WINDOWS_64
+//#endif // #if XRAY_PLATFORM_WINDOWS_64
 static error_mode		s_error_mode				= xray::debug::error_mode_verbose;
 static bugtrap_usage	s_bugtrap_usage				= xray::debug::native_bugtrap;
 static bool				s_initialized				= false;

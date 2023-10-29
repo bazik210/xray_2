@@ -57,7 +57,7 @@ private:
 	inline	void			set				( object_type* object );
 	inline	void			set				( self_type const& object );
 
-private:
+public:
 	loose_ptr_data*			m_object;
 }; // class loose_ptr
 

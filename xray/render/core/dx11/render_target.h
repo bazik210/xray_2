@@ -34,7 +34,7 @@ public:
 	ID3DRenderTargetView * get_target_view() const			{ return m_rt;}
 	ID3DDepthStencilView * get_depth_stencil_view() const	{ return m_zrt;}
 	
-	inline bool	valid()	{return static_cast<bool>(m_texture);}
+	inline bool	valid() { return (m_texture != nullptr); }
 
 	u32			width()		{ return m_width;}
 	u32			height()	{ return m_height;}

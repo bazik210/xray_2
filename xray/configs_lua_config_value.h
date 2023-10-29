@@ -192,7 +192,7 @@ private:
 	template < typename T >
 	inline lua_config_value	assign				( T const& value );
 
-private:
+public:
 	/*XRAY_DEFAULT_ALIGN*/ char	m_object_fake[ luabind_object_sizeof ];			// sizeof(luabind::object);
 	::luabind::object*		m_object;
 	/*XRAY_DEFAULT_ALIGN*/ char	m_table_object_fake[ luabind_object_sizeof ];	// sizeof(luabind::object);

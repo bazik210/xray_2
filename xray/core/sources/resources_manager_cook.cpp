@@ -29,9 +29,13 @@ void   resources_manager::register_cook	(cook_base * const cook)
 	class_id_enum const resource_class		=	cook->get_class_id();
 	R_ASSERT									(resource_class < last_resource_class);
 
-	R_ASSERT									(!find_cook(resource_class), 
-												 "cook for this kind of resource is already registered" );
-	m_cooks_registry[resource_class]		=	cook;
+	//R_ASSERT									(!find_cook(resource_class), 
+	//											 "cook for this kind of resource is already registered" );
+	if(resource_class && !find_cook(resource_class)) {
+		m_cooks_registry[resource_class]		=	cook;
+	} else {
+		LOG_INFO("FATAL: cook for this kind of resource is already registered");
+	}
 }
 
 bool   resources_manager::thread_can_exit ()
@@ -230,6 +234,11 @@ void   resources_manager::cooker_thread_tick	()
 
 	dispatch_callbacks							(false);
 	delete_delayed_unmanaged_resources			();
+
+	if (!resource_to_cook) {
+		return;
+	}
+
 	create_resources							(m_resources_to_create, resource_to_cook, false);
 
 	decompress_resources						();

@@ -11,8 +11,12 @@
 
 XRAY_DECLARE_LINKAGE_ID(engine_entry_point)
 
-typedef xray::memory::doug_lea_allocator_type	doug_lea_allocator_type;
-doug_lea_allocator_type							xray::engine::g_allocator;
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	typedef xray::memory::doug_lea_allocator_type	doug_lea_allocator_type;
+	doug_lea_allocator_type							xray::engine::g_allocator;
+#else
+	xray::memory::crt_allocator_type				xray::engine::g_allocator;
+#endif
 
 static xray::uninitialized_reference<xray::engine::engine_world>	s_world;
 

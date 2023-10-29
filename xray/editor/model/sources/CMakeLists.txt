@@ -128,3 +128,5 @@ target_link_libraries(model_editor PUBLIC
 )
 
 set_target_properties(model_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(model_editor editor_base editor_controls)

@@ -11,4 +11,6 @@
 
 #define XRAY_EDITOR_FILE_NAME	XRAY_LIBRARY_NAME( editor, dll )
 
+#pragma comment(lib, "xray_engine_pc.lib" )
+
 #endif // #ifndef XRAY_EDITOR_LIBRARY_LINKAGE_H_INCLUDED

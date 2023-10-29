@@ -27,10 +27,12 @@
 
 using xray::engine::engine_world;
 
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
 void engine_world::initialize_logic_thread	( )
 {
 	m_engine_user_module_proxy.allocator().user_current_thread_id ( );
 }
+#endif
 
 void engine_world::initialize_logic_modules( )
 {

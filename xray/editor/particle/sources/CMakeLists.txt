@@ -126,3 +126,5 @@ target_link_libraries(particle_editor PUBLIC
 )
 
 set_target_properties(particle_editor PROPERTIES FOLDER "engine/editors")
+
+add_dependencies(particle_editor editor_base editor_controls)

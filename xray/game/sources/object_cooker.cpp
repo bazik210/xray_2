@@ -37,6 +37,7 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 	pcstr type						= (*t_object)["game_object_type"];
 
 	u32 object_size = 0;
+	int load = 1;
 	if( strings::equal("solid_visual", type))
 	{
 		object_size = sizeof(object_solid_visual);
@@ -110,12 +111,21 @@ mutable_buffer object_cooker::allocate_resource( resources::query_result_for_coo
 		object_size = sizeof(object_wire);
 	}else
 	{
-		NOT_IMPLEMENTED				( );
+		load = 0;
+		//NOT_IMPLEMENTED				( );
 	}
-	
+	pvoid data;
 
-	pvoid data				= MALLOC( object_size, type );
-	mutable_buffer	result	( data, object_size );
+	if (load) {
+		load = 1;
+		data				= MALLOC( object_size, type );
+	}
+	else {
+
+		data = MALLOC(0, "values_storage");
+	}
+	 
+	mutable_buffer	result(data, object_size);
 	return result;
 
 }
@@ -133,6 +143,8 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 	pcstr type								= (*t_object)["game_object_type"];
 
 	game_object_*	resource				= NULL;
+
+	int load = 1;
 
 	if( strings::equal("solid_visual", type))
 	{
@@ -207,14 +219,20 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 		resource = new (in_out_unmanaged_resource_buffer.c_ptr()) object_wire( m_game_world );
 	}else	
 	{
-		NOT_IMPLEMENTED				( );
+		load = 0;
+		//NOT_IMPLEMENTED				( );
 	}
 
-	resource->load(	*t_object );
+	if (load) {
+		resource->load(*t_object);
 
-	in_out_query.set_unmanaged_resource( resource, resources::nocache_memory, in_out_unmanaged_resource_buffer.size() );
+		in_out_query.set_unmanaged_resource(resource, resources::nocache_memory, in_out_unmanaged_resource_buffer.size());
 	
 	in_out_query.finish_query		( result_success );
+	}
+	else {
+		in_out_query.finish_query(result_undefined);
+	}
 }
 
 void object_cooker::destroy_resource( resources::unmanaged_resource* resource )

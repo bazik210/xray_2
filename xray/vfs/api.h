@@ -32,11 +32,13 @@ typedef memory::pthreads_allocator_type		allocator_type;
 struct world;
 struct engine;
 
-XRAY_VFS_API	void	temp_helper		( );
+#if !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	XRAY_VFS_API	void	temp_helper		( );
 
-XRAY_VFS_API	world*	create_world	( engine& engine );
-XRAY_VFS_API	void	destroy_world	( world*& world );
-XRAY_VFS_API	void	memory_allocator( allocator_type& allocator );
+	XRAY_VFS_API	world*	create_world	( engine& engine );
+	XRAY_VFS_API	void	destroy_world	( world*& world );
+	XRAY_VFS_API	void	memory_allocator( allocator_type& allocator );
+#endif
 
 } // namespace vfs
 } // namespace xray

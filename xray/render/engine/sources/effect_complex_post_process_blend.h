@@ -38,6 +38,7 @@ public:
 				compiler.set_texture("t_light_scattering", r2_rt_light_scattering);
 				compiler.set_texture("t_sphere_falloff", "fx/sphere_falloff");
 				compiler.set_texture("t_bokeh_image", "fx/bokeh_image");
+				compiler.set_texture("t_distortion", r2_rt_distortion); 
 				//compiler.set_texture("t_skin_position", r2_rt_skin_scattering_position);
 				//compiler.set_texture("t_skin_scattering", r2_rt_skin_scattering);
 				//compiler.set_texture("t_skin_scattering_temp", r2_rt_skin_scattering_temp);
