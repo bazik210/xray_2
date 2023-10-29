@@ -473,7 +473,7 @@ void process_scene( pcstr folder_name,
 
 	for( ; jobs_it!=jobs_it_e; ++jobs_it )
 	{
-		if (  strings::equal( (*jobs_it)["job_type"], "npc" ) || strings::equal((*jobs_it)["job_type"], "monster") )
+		if (  strings::equal( (*jobs_it)["job_type"], "npc" ) || strings::equal((*jobs_it)["job_type"], "mob") )
 		{
 			configs::lua_config_value current_job_behaviours = (*jobs_it)["behaviours"];
 			configs::lua_config_value current_job_behaviours_copy = current_job_behaviours.copy( );
@@ -492,11 +492,11 @@ void process_scene( pcstr folder_name,
 					configs::lua_config_value patrol_behaviour_config = behaviours_config[ (pcstr)behaviours_it.key( )];
 					process_patrol_path_behaviour( patrol_graph_config, behaviours_config, patrol_behaviour_config, "npc_patrol" );					
 				} else
-					if (strings::equal(behaviour_type, "npc_monster_move"))
+					if (strings::equal(behaviour_type, "mob_walker"))
 					{
 						configs::lua_config_value patrol_graph_config = t_objects[(pcstr)(*behaviours_it)["patrol_graph_guid"]];
 						configs::lua_config_value patrol_behaviour_config = behaviours_config[(pcstr)behaviours_it.key()];
-						process_patrol_path_behaviour(patrol_graph_config, behaviours_config, patrol_behaviour_config, "npc_monster_move");
+						process_patrol_path_behaviour(patrol_graph_config, behaviours_config, patrol_behaviour_config, "mob_walker");
 					}
 			}	
 			current_job_behaviours.assign_lua_value( behaviours_config );			

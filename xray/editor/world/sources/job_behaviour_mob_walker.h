@@ -4,8 +4,8 @@
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef JOB_BEHAVIOUR_NPC_MONSTER_MOVE_H_INCLUDED
-#define JOB_BEHAVIOUR_NPC_MONSTER_MOVE_H_INCLUDED
+#ifndef JOB_BEHAVIOUR_MOB_WALKER_H_INCLUDED
+#define JOB_BEHAVIOUR_MOB_WALKER_H_INCLUDED
 
 #include "job_behaviour_base.h"
 
@@ -14,14 +14,14 @@ namespace editor {
 
 ref class object_job;
 
-public ref class job_behaviour_npc_monster_move : job_behaviour_base {
+public ref class job_behaviour_mob_walker : job_behaviour_base {
 
 	typedef xray::editor::wpf_controls::property_container				wpf_property_container;
 
 public:
-	job_behaviour_npc_monster_move( object_job^ parent_job );
+	job_behaviour_mob_walker( object_job^ parent_job );
 
-	~job_behaviour_npc_monster_move( )
+	~job_behaviour_mob_walker( )
 	{
 		DELETE( m_animation_behaviour_config );
 	}
@@ -51,4 +51,4 @@ private:
 } // namespace editor
 } // namespace xray
 
-#endif // #ifndef JOB_BEHAVIOUR_NPC_MONSTER_MOVE_H_INCLUDED
+#endif // #ifndef JOB_BEHAVIOUR_MOB_WALKER_H_INCLUDED

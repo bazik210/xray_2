@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include "job_behaviour_npc_monster_move.h"
+#include "job_behaviour_mob_walker.h"
 #include "object_job.h"
 #include "project_items.h"
 #include "select_library_class_form.h"
@@ -18,22 +18,22 @@ using namespace xray::editor::wpf_controls;
 namespace xray {
 namespace editor {
 
-job_behaviour_npc_monster_move::job_behaviour_npc_monster_move( object_job^ parent_job )
+job_behaviour_mob_walker::job_behaviour_mob_walker( object_job^ parent_job )
 	:job_behaviour_base(parent_job)
 {
 	selected_patrol			= "";
 	m_animation_behaviour_config = NEW(configs::lua_config_ptr)();
 
-	query_result_delegate* rq = XRAY_NEW_IMPL(g_allocator, query_result_delegate)(gcnew query_result_delegate::Delegate(this, &job_behaviour_npc_monster_move::on_behaviour_config_loaded), g_allocator);
+	query_result_delegate* rq = XRAY_NEW_IMPL(g_allocator, query_result_delegate)(gcnew query_result_delegate::Delegate(this, &job_behaviour_mob_walker::on_behaviour_config_loaded), g_allocator);
 	xray::resources::query_resource(
-		"resources/brain_units/behaviours/move.behaviour",
+		"resources/brain_units/behaviours/mob_walker.behaviour",
 		xray::resources::lua_config_class,
 		boost::bind(&query_result_delegate::callback, rq, _1),
 		g_allocator
 		);
 }
 
-void job_behaviour_npc_monster_move::load			( configs::lua_config_value const& config )
+void job_behaviour_mob_walker::load			( configs::lua_config_value const& config )
 {
 	job_behaviour_base::load(config);
 
@@ -41,7 +41,7 @@ void job_behaviour_npc_monster_move::load			( configs::lua_config_value const& c
 	
 }
 
-void job_behaviour_npc_monster_move::save( configs::lua_config_value& config )
+void job_behaviour_mob_walker::save( configs::lua_config_value& config )
 {
 	job_behaviour_base::save(config);
 
@@ -54,17 +54,17 @@ void job_behaviour_npc_monster_move::save( configs::lua_config_value& config )
 	config["patrol_graph_guid"] = unmanaged_string( patrol_item->m_guid.ToString( ) ).c_str();	
 }
 
-void job_behaviour_npc_monster_move::get_properties	( wpf_property_container^ to_container )
+void job_behaviour_mob_walker::get_properties	( wpf_property_container^ to_container )
 {
 	wpf_controls::property_descriptor^ prop_descriptor = gcnew wpf_controls::property_descriptor( this, "selected_patrol" );
 	prop_descriptor->dynamic_attributes->add( gcnew editor::wpf_controls::hypergraph::node_property_attribute( false, false ));	
-	prop_descriptor->dynamic_attributes->add( gcnew property_editors::attributes::external_editor_attribute(gcnew property_editors::attributes::external_editor_event_handler( this, &job_behaviour_npc_monster_move::on_select_patrol ), false) );
+	prop_descriptor->dynamic_attributes->add( gcnew property_editors::attributes::external_editor_attribute(gcnew property_editors::attributes::external_editor_event_handler( this, &job_behaviour_mob_walker::on_select_patrol ), false) );
 	to_container->properties->add(prop_descriptor);
 
 	job_behaviour_base::get_properties( to_container );
 }
 
-void job_behaviour_npc_monster_move::on_select_patrol	( wpf_controls::property_editors::property^ , Object^ )
+void job_behaviour_mob_walker::on_select_patrol	( wpf_controls::property_editors::property^ , Object^ )
 {
 
  	System::String^ selected = nullptr;
@@ -74,14 +74,14 @@ void job_behaviour_npc_monster_move::on_select_patrol	( wpf_controls::property_e
  	}
 }
 
-void job_behaviour_npc_monster_move::on_behaviour_config_loaded( resources::queries_result& data )
+void job_behaviour_mob_walker::on_behaviour_config_loaded( resources::queries_result& data )
 {
 	R_ASSERT(data.is_successful());
 	(*m_animation_behaviour_config) = static_cast_checked<configs::lua_config*>(data[0].get_unmanaged_resource().c_ptr());
 
 }
 
-System::Collections::Generic::List<System::String^>^  job_behaviour_npc_monster_move::get_available_events_list( )
+System::Collections::Generic::List<System::String^>^  job_behaviour_mob_walker::get_available_events_list( )
 {
 	System::Collections::Generic::List<System::String^>^ ret_lst = job_behaviour_base::get_available_events_list();
 

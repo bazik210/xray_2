@@ -21,8 +21,8 @@
 #include "job_behaviour_values_storage_default.h"
 #include "job_behaviour_npc_play_animation.h"
 #include "job_behaviour_npc_patrol.h"
-#include "job_behaviour_npc_monster_move.h"
-
+#include "job_behaviour_mob_walker.h"
+#include "job_behaviour_mob_remark.h"
 
 using namespace xray::editor::wpf_controls;
 
@@ -171,9 +171,13 @@ void	job_behaviour_wrapper::behaviour_type::set( System::String^ value )
 	{
 		behaviour = gcnew job_behaviour_npc_patrol( parent_job );
 	}
-	else if (type == "npc_monster_move")
+	else if (type == "mob_walker")
 	{
-		behaviour = gcnew job_behaviour_npc_monster_move(parent_job);
+		behaviour = gcnew job_behaviour_mob_walker(parent_job);
+	}
+	else if (type == "mob_remark")
+	{
+		behaviour = gcnew job_behaviour_mob_remark(parent_job);
 	}
 
 	behaviour->behaviour_type	= type;

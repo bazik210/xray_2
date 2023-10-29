@@ -32,7 +32,7 @@ tool_scripting::tool_scripting(level_editor^ le)
 	job_resource_type_by_job_type->Add("composite", "xray.editor.object_composite");
 	job_resource_type_by_job_type->Add("values_storage", "xray.editor.object_values_storage");
 	job_resource_type_by_job_type->Add("npc", "xray.editor.object_human_npc");
-	job_resource_type_by_job_type->Add("monster", "xray.editor.object_monster_npc");
+	job_resource_type_by_job_type->Add("mob", "xray.editor.object_monster_npc");
 
 	behaviour_types_by_object_types = gcnew Generic::Dictionary< String^, Generic::List<String^>^>( );
 	Generic::List<String^>^ available_behaviours  = gcnew Generic::List<String^>( );
@@ -72,9 +72,9 @@ tool_scripting::tool_scripting(level_editor^ le)
 	behaviour_types_by_object_types->Add("npc", available_behaviours );
 
 	available_behaviours = gcnew Generic::List<String^>( );
-	available_behaviours->Add("npc_play_animation");
-	available_behaviours->Add("npc_monster_move");
-	behaviour_types_by_object_types->Add("monster", available_behaviours);
+	available_behaviours->Add("mob_remark");
+	available_behaviours->Add("mob_walker");
+	behaviour_types_by_object_types->Add("mob", available_behaviours);
 
 	load_library				( );	
 }
