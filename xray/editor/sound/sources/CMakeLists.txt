@@ -113,12 +113,16 @@ add_library(sound_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/sound_editor_entry_point.cpp"
 )
 
-target_link_libraries(sound_editor PUBLIC
-	engine_pc_dx11
+set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+
+set_target_properties(sound_editor PROPERTIES VS_DOTNET_REFERENCES
+    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;WeifenLuo.WinFormsUI.Docking;wpf_controls;xray_editor_base;xray_editor_controls"
 )
 
-set_property(TARGET sound_editor PROPERTY VS_GLOBAL_RootNamespace sound_editor)
+set_property(TARGET sound_editor PROPERTY VS_GLOBAL_RootNamespace "sound_editor")
 
 set_target_properties(sound_editor PROPERTIES FOLDER "engine/editors")
 
-add_dependencies(sound_editor editor_base editor_controls)
+add_dependencies(sound_editor
+	editor_base
+)

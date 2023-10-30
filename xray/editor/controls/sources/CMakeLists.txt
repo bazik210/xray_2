@@ -88,4 +88,14 @@ add_library(editor_controls SHARED
 								# ./
 )
 
+add_dependencies(editor_controls
+	wpf_controls
+)
+
+set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+
+set_target_properties(editor_controls PROPERTIES VS_DOTNET_REFERENCES
+    "PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration;WeifenLuo.WinFormsUI.Docking;wpf_controls"
+)
+
 set_target_properties(editor_controls PROPERTIES FOLDER "engine/editors")

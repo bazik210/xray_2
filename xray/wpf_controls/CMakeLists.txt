@@ -394,9 +394,6 @@ add_library(wpf_controls SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/string_editor.xaml.cs"
 )
 
-set_target_properties(wpf_controls PROPERTIES FOLDER "engine/editors")
-
-
 # Add files that are used by WinForms
 csharp_set_windows_forms_properties(
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_item_name_view.xaml"
@@ -806,4 +803,24 @@ csharp_set_designer_cs_properties(
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout_host.Designer.cs"
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/host.cs"
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/host.Designer.cs"
+)
+
+set_target_properties(wpf_controls PROPERTIES FOLDER "engine/editors")
+
+# Set directories for #using directive
+target_compile_options(wpf_controls PUBLIC
+	/AI\"${CMAKE_RUNTIME_OUTPUT_DIRECTORY}\"
+)
+
+set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+
+set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
+    "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration;WeifenLuo.WinFormsUI;WPFToolkit.Extended"
+)
+
+set_property(TARGET wpf_controls PROPERTY VS_GLOBAL_RootNamespace "xray.editor.wpf_controls")
+
+add_dependencies(wpf_controls
+	WeifenLuo.WinFormsUI.Docking
+	WPFToolkit.Extended
 )

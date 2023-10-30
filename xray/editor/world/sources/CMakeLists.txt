@@ -594,23 +594,20 @@ add_library(editor SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/editor_entry_point.cpp"
 )
 
-target_link_libraries(editor PUBLIC
-	dialog_editor
-	model_editor
-	animation_editor
-	particle_editor
-	sound_editor
-	editor_controls
-)
-
 set_target_properties(editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 
 set_target_properties(editor PROPERTIES VS_DOTNET_REFERENCES
-    "Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_bugtrapN.dll;xray_editor_base.dll;xray_editor_controls.dll;xray_sound_editor.dll;xray_particle_editor.dll;xray_model_editor.dll;xray_dialog_editor.dll;xray_animation_editor.dll"
+    "Microsoft.Office.Interop.Excel;Microsoft.VisualBasic;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;WeifenLuo.WinFormsUI.Docking;wpf_controls;xray_bugtrapN;xray_editor_base;xray_editor_controls;xray_sound_editor;xray_particle_editor;xray_model_editor;xray_dialog_editor;xray_animation_editor"
 )
 
-set_property(TARGET editor PROPERTY VS_GLOBAL_RootNamespace xray.editor)
+set_property(TARGET editor PROPERTY VS_GLOBAL_RootNamespace "xray.editor")
 
 set_target_properties(editor PROPERTIES FOLDER "engine/editors")
 
-add_dependencies(editor editor_base editor_controls)
+add_dependencies(editor
+	animation_editor
+	dialog_editor
+	model_editor
+	particle_editor
+	sound_editor
+)
