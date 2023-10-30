@@ -805,6 +805,105 @@ csharp_set_designer_cs_properties(
 	"${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/host.Designer.cs"
 )
 
+# Group .xaml.cs files with .xaml files...
+# ...insanity
+# Group them in 5 per block for easier mental tracking or suffer death by thousand cuts
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_interval_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_interval_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_item_intervals_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_item_intervals_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_item_name_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_item_name_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_lexeme_item_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_lexeme_item_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_lexeme_panel.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_lexeme_panel/animation_lexeme_panel.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_item_name_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_item_name_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_item_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_item_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_playback_panel.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_playback/animation_playback_panel.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/animation_channel_list_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/animation_channel_list_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/animation_channel_name_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/animation_channel_name_view.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/event/animation_channel_events_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/event/animation_channel_events_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/event/animation_channel_event_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/event/animation_channel_event_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/interval/animation_channel_intervals_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/interval/animation_channel_intervals_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/interval/animation_channel_interval_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/interval/animation_channel_interval_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/partition/animation_channel_partitions_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/partition/animation_channel_partitions_view.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/partition/animation_channel_partition_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/channels/partition/animation_channel_partition_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/animation_setup_panel.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/animation_setup/animation_setup_panel.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/animation_curve_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/animation_curve_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_item.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_item.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/data_sources/data_sources_panel.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/data_sources/data_sources_panel.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/data_sources/data_source_item.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/data_sources/data_source_item.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_matrix_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_matrix_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/color_curve_key.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/color_curve.cs")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/color_matrix_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/color_matrix_control.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/control_point.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/control_point.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/gradient_rect.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_matrix_editor/gradient_rect.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/color_matrix_element.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/color_matrix.cs")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/color_palette.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/color_palette.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/dialog.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/dialog.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/hsv_circle.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/hsv_circle.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/hue_spectrum.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/hue_spectrum.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/hypergraph_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/hypergraph_control.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/graph_edge.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/graph.cs")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/graph_node.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/graph.cs")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/link/link.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/link/link.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node/properties_node.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node/properties_node.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/link/link_point.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/link/link_point.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/event_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/event_control.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_entity_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_entity_view.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_ramp.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/color_ramp.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/boolean_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/boolean_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/control_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/control_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_curve_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_curve_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/float_curve_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/float_curve_editor.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/combo_box_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/combo_box_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/default_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/default_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/enum_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/enum_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/i_list_collection_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/i_list_collection_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/int32_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/int32_editor.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/properties_collection_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/properties_collection_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/single_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/single_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/string_select_file_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/string_select_file_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/ruler.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/ruler.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout_host.Designer.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout_host.cs")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout_item_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/time_layout/time_layout_item_control.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/float_curve/float_curve_key.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/float_curve/float_curve_key")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/types/float_curve/float_curve_key_type.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/types/float_curve/float_curve_key_type")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key_tangent.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key_tangent.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/color_component_slider.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/color_picker/color_component_slider.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/property_grid_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/property_grid_control.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/host.Designer.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/property_grid/host.cs")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key_range_control.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/visual_curve_key_range_control.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_group.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_group.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node_above_header_content/groups_editor_node_above_header_content.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/hypergraph/node_above_header_content/groups_editor_node_above_header_content.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/color_editor.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/property_container_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/property_container_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/text_box_editor_extension.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/text_box_editor_extension.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/vector3_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/vector3_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_scenes_view.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/controls/logic_view/logic_scenes_view.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/effects/noise_effect/noise_effect_settings_window.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/effects/noise_effect/noise_effect_settings_window.xaml")
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_effect.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/panel_curve_effect.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/templates/sqrt_curve_template.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/templates/sqrt_curve_template.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/templates/sinusoid_curve_template.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/type_editors/curve_editor/templates/sinusoid_curve_template.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/string_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/string_editor.xaml")
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/external_editor.xaml.cs" PROPERTIES VS_CSHARP_DependentUpon "${CMAKE_CURRENT_SOURCE_DIR}/property_editors/value/external_editor.xaml")
+
 set_target_properties(wpf_controls PROPERTIES FOLDER "engine/editors")
 
 # Set directories for #using directive

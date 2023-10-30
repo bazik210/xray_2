@@ -22,7 +22,7 @@ START /B /WAIT cmake --graphviz=dependency_graph.dot --fresh -G "Visual Studio 1
 	CALL RemoveDebugNDebug.bat
 	CALL SetupNothrownew.bat
 	CALL SetupTools.bat
-	CALL SetupWPF_Controls.bat
+	::CALL SetupWPF_Controls.bat
 	echo Cleaning up...
 	CALL RemoveTempFiles.bat
 	echo Done!
