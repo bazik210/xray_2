@@ -253,3 +253,9 @@ set_target_properties(animation_editor PROPERTIES FOLDER "engine/editors")
 add_dependencies(animation_editor
 	editor_base
 )
+
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(animation_editor PUBLIC
+	editor_base
+)
+

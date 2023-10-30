@@ -610,4 +610,16 @@ add_dependencies(editor
 	model_editor
 	particle_editor
 	sound_editor
+	bugtrapN
 )
+
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(editor PUBLIC
+	animation_editor
+	dialog_editor
+	model_editor
+	particle_editor
+	sound_editor
+	bugtrapN
+)
+

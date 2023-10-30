@@ -136,3 +136,8 @@ set_target_properties(model_editor PROPERTIES FOLDER "engine/editors")
 add_dependencies(model_editor
 	editor_base
 )
+
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(model_editor PUBLIC
+	editor_base
+)

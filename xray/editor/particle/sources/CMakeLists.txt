@@ -134,3 +134,8 @@ set_target_properties(particle_editor PROPERTIES FOLDER "engine/editors")
 add_dependencies(particle_editor
 	editor_base
 )
+
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(particle_editor PUBLIC
+	editor_base
+)

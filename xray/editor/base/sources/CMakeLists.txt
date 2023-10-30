@@ -287,6 +287,11 @@ add_dependencies(editor_base
 	editor_controls
 )
 
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(editor_base PUBLIC
+	editor_controls
+)
+
 set_target_properties(editor_base PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 
 set_target_properties(editor_base PROPERTIES VS_DOTNET_REFERENCES
