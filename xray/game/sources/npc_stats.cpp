@@ -61,7 +61,7 @@ void npc_stats::draw					( xray::render::ui::renderer& ui_renderer, render::scen
 	m_main_window->draw					( ui_renderer, scene_view/*m_ui_world.get_scene_view()*/ );
 }
 
-void npc_stats::set_stats				( human_npc const* const owner )
+void npc_stats::set_stats				( monster_npc const* const owner )
 {
 	m_main_window->remove_all_childs	( );
 

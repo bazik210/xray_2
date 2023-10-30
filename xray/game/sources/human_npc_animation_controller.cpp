@@ -26,7 +26,7 @@ namespace stalker2 {
 
 static float const agent_radius	= .35f;
 
-void human_npc::setup_animations_controller	( )
+void monster_npc::setup_animations_controller	( )
 {
 #ifndef MASTER_GOLD
 	animation_space_graph::animation_pair_type const animations[] =
@@ -46,14 +46,14 @@ void human_npc::setup_animations_controller	( )
 
 	m_model_instance->m_animation_player->subscribe	(
 		xray::animation::channel_id_on_animation_interval_end,
-		boost::bind( &human_npc::on_animation_interval_end, this, _1, _2, _3, _4 ),
+		boost::bind( &monster_npc::on_animation_interval_end, this, _1, _2, _3, _4 ),
 		0
 	);
 
 	m_next_key_point			= u32(-1);
 }
 
-animation::callback_return_type_enum human_npc::on_animation_interval_end(
+animation::callback_return_type_enum monster_npc::on_animation_interval_end(
 		animation::skeleton_animation_ptr const& ended_animation,
 		pcstr const subscribed_channel,
 		u32 const callback_time_in_ms,
@@ -65,7 +65,7 @@ animation::callback_return_type_enum human_npc::on_animation_interval_end(
 	return						animation::callback_return_type_call_me_again;
 }
 
-void human_npc::setup_animations	( u32 const current_time_in_ms )
+void monster_npc::setup_animations	( u32 const current_time_in_ms )
 {
 	if ( !m_current_movement_target )
 		return;

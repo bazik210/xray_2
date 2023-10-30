@@ -71,7 +71,7 @@ animation_space_vertex_id get_movement	(
 		float const left_weight
 	);
 
-class animation_space_graph : private boost::noncopyable {
+class animation_space_graph /* : private boost::noncopyable*/ {
 public:
 	typedef std::pair< xray::animation::skeleton_animation_ptr, pcstr >		animation_pair_type;
 	typedef xray::debug::vector< animation_space_edge >						edges_type;

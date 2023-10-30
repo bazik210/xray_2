@@ -8,7 +8,7 @@
 
 #include "npc_play_animation_behaviour.h"
 #include "human_npc.h"
-#include "monster_npc.h"
+//#include "monster_npc.h"
 #include "object_scene.h"
 #include <xray/ai/world.h>
 
@@ -45,17 +45,17 @@ void npc_play_animation_behaviour::attach_to_object			( object_controlled* o )
 	{
 		if ( m_object )
 		{	
-			human_npc* npc = dynamic_cast<human_npc*>(m_object);
-			if (npc != 0) {
-				npc->set_behaviour(m_behaviour);
-			}
-			else {
+			//human_npc* npc = dynamic_cast<human_npc*>(m_object);
+			//if (npc != 0) {
+			//	npc->set_behaviour(m_behaviour);
+			//}
+			//else {
 				monster_npc* npc = dynamic_cast<monster_npc*>(m_object);
 				R_ASSERT(npc != NULL);
 				if (npc != 0) {
 					npc->set_behaviour(m_behaviour);
 				}
-			}
+			//}
 		}		
 	}
 }
@@ -73,16 +73,16 @@ void npc_play_animation_behaviour::on_behaviour_loaded		( resources::queries_res
 	m_behaviour							= data[0].get_unmanaged_resource();
 	if ( m_object )
 	{	
-		human_npc* npc = dynamic_cast<human_npc*>(m_object);
-		if (npc != 0) {
-			npc->set_behaviour(m_behaviour);
-		}
-		else {
+		//human_npc* npc = dynamic_cast<human_npc*>(m_object);
+		//if (npc != 0) {
+		//	npc->set_behaviour(m_behaviour);
+		//}
+		//else {
 			monster_npc* npc = dynamic_cast<monster_npc*>(m_object);
 			R_ASSERT(npc != NULL);
 			if (npc != 0) {
 				npc->set_behaviour(m_behaviour);
-			}
+		//	}
 		}
 			
 	}

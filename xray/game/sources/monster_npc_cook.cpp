@@ -12,8 +12,8 @@
 
 namespace stalker2 {
 
-monster_npc_cook::monster_npc_cook	( game& game ) :
-	translate_query_cook		( resources::monster_npc_class, reuse_true, use_current_thread_id ),
+human_npc_cook::human_npc_cook	( game& game ) :
+	translate_query_cook		( resources::human_npc_class, reuse_true, use_current_thread_id ),
 	m_game						( game )
 {
 }
@@ -23,7 +23,7 @@ monster_npc_cook::monster_npc_cook	( game& game ) :
 //  	new_request.assignf			( "resources/npc/monster/%s.npc", request );
 //  }
 
-void monster_npc_cook::translate_query	( resources::query_result_for_cook& parent )
+void human_npc_cook::translate_query	( resources::query_result_for_cook& parent )
 {
 	configs::binary_config_value* t_object	= ( configs::binary_config_value* )( parent.creation_data_from_user().c_ptr() );
 
@@ -33,7 +33,7 @@ void monster_npc_cook::translate_query	( resources::query_result_for_cook& paren
 		resources::query_resource		(
 			npc_brain_config_path,
 			resources::binary_config_class,
-			boost::bind( &monster_npc_cook::on_queried_data_received, this, _1 ),
+			boost::bind( &human_npc_cook::on_queried_data_received, this, _1 ),
 			g_allocator,
 			parent.user_data(),
 			&parent
@@ -45,19 +45,19 @@ void monster_npc_cook::translate_query	( resources::query_result_for_cook& paren
 	resources::query_resource			(
 		parent.get_requested_path(),
 		resources::binary_config_class,
-		boost::bind( &monster_npc_cook::on_queried_data_received, this, _1 ),
+		boost::bind( &human_npc_cook::on_queried_data_received, this, _1 ),
 		g_allocator,
 		parent.user_data(),
 		&parent
 	);
 }
 
-void monster_npc_cook::delete_resource	( resources::resource_base* resource )
+void human_npc_cook::delete_resource	( resources::resource_base* resource )
 {
  	XRAY_DELETE_IMPL					( g_allocator, resource );
 }
 
-void monster_npc_cook::on_queried_data_received			( resources::queries_result& data )
+void human_npc_cook::on_queried_data_received			( resources::queries_result& data )
 {
 	resources::query_result_for_cook* const	parent		= data.get_parent_query();
 	if ( !data.is_successful() )
@@ -72,12 +72,12 @@ void monster_npc_cook::on_queried_data_received			( resources::queries_result& d
 	on_npc_options_received								( config->get_root(), *parent );
 }
 
-void monster_npc_cook::on_npc_options_received			( configs::binary_config_value const& config_value , resources::query_result_for_cook& parent )
+void human_npc_cook::on_npc_options_received			( configs::binary_config_value const& config_value , resources::query_result_for_cook& parent )
 {
 	configs::binary_config_value const& attributes		= config_value["attributes"];
 	configs::binary_config_value* project_config		= ( configs::binary_config_value* )( parent.creation_data_from_user().c_ptr() );
 
-	monster_npc* const monster					= XRAY_NEW_IMPL( g_allocator, monster_npc )(
+	human_npc* const monster					= XRAY_NEW_IMPL( g_allocator, human_npc )(
 												m_game.get_ai_world( ),
 												m_game.get_sound_world( ),
 												m_game.get_sound_scene( ),
@@ -109,10 +109,14 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 	{
 		{ brain_unit_path, resources::brain_unit_class },
 		{ model_path, resources::game_animated_model_instance_class },
-		{ "resources/animations/single/monster/bloodsucker/locomotion/stand_idle_1", resources::animation_class },
-		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_move_fwd_idle_1", resources::animation_class },
-		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_left_idle_1", resources::animation_class },
-		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_right_idle_1", resources::animation_class }
+		{ "resources/animations/single/human/common_anim_slot_3/free/on_site_still_aim_1", resources::animation_class },
+		{ "resources/animations/single/human/common_anim_slot_3/free/walk_move_fwd_aim_1", resources::animation_class },
+		{ "resources/animations/single/human/common_anim_slot_3/free/walk_arc_fwd_left_aim_1", resources::animation_class },
+		{ "resources/animations/single/human/common_anim_slot_3/free/walk_arc_fwd_right_aim_1", resources::animation_class }
+//		{ "resources/animations/single/monster/bloodsucker/locomotion/stand_idle_1", resources::animation_class },
+//		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_move_fwd_idle_1", resources::animation_class },
+//		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_left_idle_1", resources::animation_class },
+//		{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_right_idle_1", resources::animation_class }
 	};
 
 	resources::user_data_variant const* params[] =
@@ -128,14 +132,14 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 	query_resources							(
 		requests,
 		array_size( requests ),
-		boost::bind( &monster_npc_cook::on_subresources_loaded, this, _1, monster),
+		boost::bind( &human_npc_cook::on_subresources_loaded, this, _1, monster),
 		g_allocator,
 		params,
 		&parent
 	);
 }
 
-void monster_npc_cook::on_subresources_loaded	( resources::queries_result& data, monster_npc* const monster )
+void human_npc_cook::on_subresources_loaded	( resources::queries_result& data, human_npc* const monster )
 {
 	resources::query_result_for_cook* const	parent	= data.get_parent_query();
 
@@ -173,7 +177,7 @@ void monster_npc_cook::on_subresources_loaded	( resources::queries_result& data,
 			);
 	parent->finish_query					( result_success );
 
-	m_game.on_monster_attributes_received	( monster_attributes_config, monster );
+	m_game.on_npc_attributes_received	( monster_attributes_config, monster );
 }
 
 } // namespace stalker2

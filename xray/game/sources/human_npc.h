@@ -80,10 +80,10 @@ struct npc_cook_params
 	physics::world*				physics_world;
 }; // struct npc_cook_params
 
-class human_npc;
-typedef resources::resource_ptr< human_npc, resources::unmanaged_intrusive_base > human_npc_ptr;
+class monster_npc;
+typedef resources::resource_ptr< monster_npc, resources::unmanaged_intrusive_base > monster_npc_ptr;
 
-class human_npc :
+class monster_npc :
 	public ai::npc,
 	public ai::game_object,
 	public sound::sound_producer,
@@ -92,7 +92,7 @@ class human_npc :
 	public game_world_object
 {
 public:
-								human_npc			(
+								monster_npc			(
 									ai::world& ai_world,
 									sound::world& sound_world,
 									sound::sound_scene_ptr const& sound_scene,
@@ -101,10 +101,10 @@ public:
 									xray::render::game::renderer& renderer,
 									game_world& game_world
 								);
-	virtual						~human_npc			( );
+	virtual						~monster_npc			( );
 
 public:
-	human_npc_ptr				next_npc;
+	monster_npc_ptr				next_npc;
 
 public:
 	typedef intrusive_list< object_weapon, object_weapon*, &object_weapon::m_next > weapons_type;
@@ -214,8 +214,8 @@ public:
 	inline	bool				get_sound_dbg_mode	( ) const { return m_dbg_sound; }
 
 private:			
-	// specially for human_npc_cook
-	friend class human_npc_cook;		
+	// specially for monster_npc_cook
+	friend class monster_npc_cook;		
 			void	set_brain_unit					( ai::brain_unit_res_ptr const& brain_unit );
 			void	set_model						( animated_model_instance_ptr const& model );
 			
@@ -244,8 +244,8 @@ private:
 						u32 const callback_time_in_ms,
 						u32 const domain_data
 					);
-			void	tick_animation_controller		( );
-			void	on_animation_controller_animations_arrived( xray::resources::queries_result const& result );
+//			void	tick_animation_controller		( );
+//			void	on_animation_controller_animations_arrived( xray::resources::queries_result const& result );
 			void	setup_animations				( u32 current_time_in_ms );
 
 private:

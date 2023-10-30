@@ -278,11 +278,11 @@ void object_scene_cooker::translate_query( resources::query_result_for_cook& par
 
 		if (strings::equal((*it)["job_type"], "npc"))
 		{
-			clsid = resources::human_npc_class;
+			clsid = resources::monster_npc_class;
 		}
 		else if (strings::equal((*it)["job_type"], "mob"))
 		{
-			clsid = resources::monster_npc_class;
+			clsid = resources::human_npc_class;
 		}
 		else {
 			clsid = resources::game_object_class;

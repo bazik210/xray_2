@@ -142,9 +142,9 @@ void game_cell::load_contents( cell_manager* cm )
 			resources::class_id_enum clsid = resources::game_object_class;
 			if (it->value_exists("game_object_type") && strings::equal((*it)["game_object_type"], "human_npc")) 
 			{
-				clsid = resources::human_npc_class;
+				clsid = resources::monster_npc_class;
 			}
-			else if (it->value_exists("game_object_type") && strings::equal((*it)["game_object_type"], "monster_npc")) 
+			if (it->value_exists("game_object_type") && strings::equal((*it)["game_object_type"], "monster_npc")) 
 			{
 				clsid = resources::monster_npc_class;
 			}

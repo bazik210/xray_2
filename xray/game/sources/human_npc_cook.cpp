@@ -12,8 +12,8 @@
 
 namespace stalker2 {
 
-human_npc_cook::human_npc_cook	( game& game ) :
-	translate_query_cook		( resources::human_npc_class, reuse_true, use_current_thread_id ),
+monster_npc_cook::monster_npc_cook	( game& game ) :
+	translate_query_cook		( resources::monster_npc_class, reuse_true, use_current_thread_id ),
 	m_game						( game )
 {
 }
@@ -23,7 +23,7 @@ human_npc_cook::human_npc_cook	( game& game ) :
 //  	new_request.assignf			( "resources/npc/human/%s.npc", request );
 //  }
 
-void human_npc_cook::translate_query	( resources::query_result_for_cook& parent )
+void monster_npc_cook::translate_query	( resources::query_result_for_cook& parent )
 {
 	configs::binary_config_value* t_object	= ( configs::binary_config_value* )( parent.creation_data_from_user().c_ptr() );
 
@@ -33,7 +33,7 @@ void human_npc_cook::translate_query	( resources::query_result_for_cook& parent 
 		resources::query_resource		(
 			npc_brain_config_path,
 			resources::binary_config_class,
-			boost::bind( &human_npc_cook::on_queried_data_received, this, _1 ),
+			boost::bind( &monster_npc_cook::on_queried_data_received, this, _1 ),
 			g_allocator,
 			parent.user_data(),
 			&parent
@@ -45,19 +45,19 @@ void human_npc_cook::translate_query	( resources::query_result_for_cook& parent 
 	resources::query_resource			(
 		parent.get_requested_path(),
 		resources::binary_config_class,
-		boost::bind( &human_npc_cook::on_queried_data_received, this, _1 ),
+		boost::bind( &monster_npc_cook::on_queried_data_received, this, _1 ),
 		g_allocator,
 		parent.user_data(),
 		&parent
 	);
 }
 
-void human_npc_cook::delete_resource	( resources::resource_base* resource )
+void monster_npc_cook::delete_resource	( resources::resource_base* resource )
 {
  	XRAY_DELETE_IMPL					( g_allocator, resource );
 }
 
-void human_npc_cook::on_queried_data_received			( resources::queries_result& data )
+void monster_npc_cook::on_queried_data_received			( resources::queries_result& data )
 {
 	resources::query_result_for_cook* const	parent		= data.get_parent_query();
 	if ( !data.is_successful() )
@@ -72,12 +72,12 @@ void human_npc_cook::on_queried_data_received			( resources::queries_result& dat
 	on_npc_options_received								( config->get_root(), *parent );
 }
 
-void human_npc_cook::on_npc_options_received			( configs::binary_config_value const& config_value , resources::query_result_for_cook& parent )
+void monster_npc_cook::on_npc_options_received			( configs::binary_config_value const& config_value , resources::query_result_for_cook& parent )
 {
 	configs::binary_config_value const& attributes		= config_value["attributes"];
 	configs::binary_config_value* project_config		= ( configs::binary_config_value* )( parent.creation_data_from_user().c_ptr() );
 
-	human_npc* const human					= XRAY_NEW_IMPL( g_allocator, human_npc )(
+	monster_npc* const human					= XRAY_NEW_IMPL( g_allocator, monster_npc )(
 												m_game.get_ai_world( ),
 												m_game.get_sound_world( ),
 												m_game.get_sound_scene( ),
@@ -128,14 +128,14 @@ void human_npc_cook::on_npc_options_received			( configs::binary_config_value co
 	query_resources							(
 		requests,
 		array_size( requests ),
-		boost::bind( &human_npc_cook::on_subresources_loaded, this, _1, human ), 
+		boost::bind( &monster_npc_cook::on_subresources_loaded, this, _1, human ), 
 		g_allocator,
 		params,
 		&parent
 	);
 }
 
-void human_npc_cook::on_subresources_loaded	( resources::queries_result& data, human_npc* const human )
+void monster_npc_cook::on_subresources_loaded	( resources::queries_result& data, monster_npc* const human )
 {
 	resources::query_result_for_cook* const	parent	= data.get_parent_query();
 
@@ -169,11 +169,11 @@ void human_npc_cook::on_subresources_loaded	( resources::queries_result& data, h
 
 	parent->set_unmanaged_resource			(
 				human, 
-				resources::memory_usage_type( resources::nocache_memory, sizeof( human_npc ) )
+				resources::memory_usage_type( resources::nocache_memory, sizeof( monster_npc ) )
 			);
 	parent->finish_query					( result_success );
 
-	m_game.on_npc_attributes_received		( human_attributes_config, human );
+	m_game.on_monster_attributes_received		( human_attributes_config, human );
 }
 
 } // namespace stalker2

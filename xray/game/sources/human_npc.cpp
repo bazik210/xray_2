@@ -35,13 +35,13 @@ static xray::console_commands::cc_bool s_npc_debug_draw_command( "npc_debug_draw
 
 namespace stalker2 {
 
-human_npc::npc_game_attributes::npc_game_attributes	( ) :
+monster_npc::npc_game_attributes::npc_game_attributes	( ) :
 	initial_position		( float3( 0.f, 0.f, 0.f ) ),
 	initial_scale			( float3( 1.f, 1.f, 1.f ) ),
 	initial_rotation		( float3( 0.f, 0.f, 0.f ) ),
 	debug_draw_color		( math::color( 0, 0, 0 ) ),
 	name					( "noname" ),
-	description				( "human" ),
+	description				( "monster" ),
 	initial_velocity		( 0.f ),
 	initial_luminosity		( 0.002f ),
 	id						( u32(-1) ),
@@ -51,7 +51,7 @@ human_npc::npc_game_attributes::npc_game_attributes	( ) :
 {
 }
 
-human_npc::npc_game_attributes& human_npc::npc_game_attributes::operator =	( npc_game_attributes& other )
+monster_npc::npc_game_attributes& monster_npc::npc_game_attributes::operator =	( npc_game_attributes& other )
 {
 	if ( this != &other )
 	{
@@ -73,7 +73,7 @@ human_npc::npc_game_attributes& human_npc::npc_game_attributes::operator =	( npc
 	return					*this;
 }
 
-human_npc::human_npc		(
+monster_npc::monster_npc		(
 		ai::world& ai_world,
 		sound::world& sound_world,
 		sound::sound_scene_ptr const& sound_scene,
@@ -82,7 +82,7 @@ human_npc::human_npc		(
 		render::game::renderer& renderer,
 		game_world& game_world
 	) :
-	game_world_object		( game_world ),
+	game_world_object		( game_world, monster ),
 	m_ai_world				( ai_world ),
 	m_sound_world			( sound_world ),
 	m_sound_scene			( sound_scene ),
@@ -103,14 +103,16 @@ human_npc::human_npc		(
 	m_current_movement_target( 0 ),
 	m_target_vertex			( 0 ),
 	m_search_service		( 0 ),
-	m_animation_space_graph	( 0 )
+	m_animation_space_graph	( 0 ),
+	m_collision_object		( 0 ),
+	m_next_key_point		( 0 )
 #ifdef MASTER_GOLD
 	,m_navigation_path		( g_allocator )
 #endif // #ifdef MASTER_GOLD
-{	
+{
 }
 
-human_npc::~human_npc		( )
+monster_npc::~monster_npc( )
 {
 #ifndef MASTER_GOLD
 	DELETE					( m_target_vertex );
@@ -119,7 +121,7 @@ human_npc::~human_npc		( )
 #endif // #ifndef MASTER_GOLD
 }
 
-void human_npc::clear_resources	( )
+void monster_npc::clear_resources	( )
 {
 	m_sound_world.get_logic_world_user().unregister_receiver( m_sound_scene, *this );
 
@@ -134,13 +136,13 @@ void human_npc::clear_resources	( )
 	m_ai_world.remove_brain_unit( m_brain_unit.c_ptr() );
 }
 
-void human_npc::set_brain_unit	( ai::brain_unit_res_ptr const& brain_unit )
+void monster_npc::set_brain_unit	( ai::brain_unit_res_ptr const& brain_unit )
 {
 	R_ASSERT					( !m_brain_unit );
 	m_brain_unit				= brain_unit;
 }
 
-void human_npc::set_model		( animated_model_instance_ptr const& model )
+void monster_npc::set_model		( animated_model_instance_ptr const& model )
 {
 	R_ASSERT					( !m_model_instance );
 	m_model_instance			= model;
@@ -155,27 +157,27 @@ void human_npc::set_model		( animated_model_instance_ptr const& model )
 								);
 }
 
-void human_npc::set_idle_animation			( animation::skeleton_animation_ptr const& idle_animation )
+void monster_npc::set_idle_animation			( animation::skeleton_animation_ptr const& idle_animation )
 {
 	m_idle_animation						= idle_animation;
 }
 
-void human_npc::set_walk_forward_animation	( animation::skeleton_animation_ptr const& fwd_walk_animation )
+void monster_npc::set_walk_forward_animation	( animation::skeleton_animation_ptr const& fwd_walk_animation )
 {
 	m_walk_forward_animation				= fwd_walk_animation;
 }
 
-void human_npc::set_arc_left_animation		( animation::skeleton_animation_ptr const& arc_left_animation )
+void monster_npc::set_arc_left_animation		( animation::skeleton_animation_ptr const& arc_left_animation )
 {
 	m_walk_forward_arc_left_animation		= arc_left_animation;
 }
 
-void human_npc::set_arc_right_animation		( animation::skeleton_animation_ptr const& arc_right_animation )
+void monster_npc::set_arc_right_animation		( animation::skeleton_animation_ptr const& arc_right_animation )
 {
 	m_walk_forward_arc_right_animation		= arc_right_animation;
 }
 
-void human_npc::enable			( )
+void monster_npc::enable			( )
 {
 	R_ASSERT					( m_brain_unit );
 	m_ai_world.add_brain_unit	( m_brain_unit.c_ptr() );
@@ -192,12 +194,12 @@ void human_npc::enable			( )
 	setup_animations_controller	( );
 }
 
-void human_npc::on_sound_event	( sound::sound_producer const& sound_source )
+void monster_npc::on_sound_event	( sound::sound_producer const& sound_source )
 {
 	m_sound_perceived			= true;
 
 	ai::sensed_sound_object		perceived_sound;
-	human_npc const* source		= static_cast_checked< human_npc const* >( &sound_source );
+	monster_npc const* source		= static_cast_checked< monster_npc const* >( &sound_source );
 	perceived_sound.object		= source->cast_game_object();
 	perceived_sound.position	= sound_source.get_source_position( float3( 0, 0, 0 ) );
 	perceived_sound.type		= (ai::sound_collection_types)sound_source.m_sound_type;
@@ -206,7 +208,7 @@ void human_npc::on_sound_event	( sound::sound_producer const& sound_source )
 	m_ai_world.on_sound_event	( *this, perceived_sound );
 }
 
-void human_npc::on_hit_event		( hit_object const& hit_source )
+void monster_npc::on_hit_event		( hit_object const& hit_source )
 {
 	ai::sensed_hit_object			perceived_hit;
 	perceived_hit.own_position		= get_position( hit_source.m_position );
@@ -219,32 +221,32 @@ void human_npc::on_hit_event		( hit_object const& hit_source )
 	m_sound_produced				= true;
 }
 
-math::aabb human_npc::get_aabb		( ) const
+math::aabb monster_npc::get_aabb		( ) const
 {	
 	return m_model_instance->m_damage_collision->get_aabb();
 }
 
-float3 human_npc::get_random_surface_point	( u32 const current_time ) const
+float3 monster_npc::get_random_surface_point	( u32 const current_time ) const
 {
 	return m_model_instance->m_damage_collision->get_random_surface_point( current_time );
 }
 
-ai::collision_object* human_npc::get_collision_object( ) const
+ai::collision_object* monster_npc::get_collision_object( ) const
 {
 	return m_collision_object;
 }
 
-float3 human_npc::get_position		( float3 const& requester ) const
+float3 monster_npc::get_position		( float3 const& requester ) const
 {
 	return local_to_cell( requester ).c.xyz();
 }
 
-float3 human_npc::get_position		( )	const
+float3 monster_npc::get_position		( )	const
 {
 	return m_transform.c.xyz		( );
 }
 
-math::float4x4 human_npc::get_eyes_matrix	( ) const
+math::float4x4 monster_npc::get_eyes_matrix	( ) const
 {
 	return math::create_camera_direction	(
 		get_eyes_position(),
@@ -253,23 +255,23 @@ math::float4x4 human_npc::get_eyes_matrix	( ) const
 	);
 }
 
-float3 human_npc::get_eyes_direction( ) const
+float3 monster_npc::get_eyes_direction( ) const
 {
 	return normalize( m_transform.transform_direction( m_model_instance->m_damage_collision->get_eyes_direction() ) );
 }
 
-float3 human_npc::get_eyes_position	( ) const
+float3 monster_npc::get_eyes_position	( ) const
 {
 	return m_transform.transform_position( m_model_instance->m_damage_collision->get_head_bone_center() );
 }
 
-float4x4 human_npc::local_to_cell	( float3 const& requester ) const
+float4x4 monster_npc::local_to_cell	( float3 const& requester ) const
 {
 	XRAY_UNREFERENCED_PARAMETER		( requester );	
 	return							m_transform;
 }
 
-void human_npc::draw		( render::game::renderer& render, render::scene_ptr const& scene ) const
+void monster_npc::draw		( render::game::renderer& render, render::scene_ptr const& scene ) const
 {
 	//m_model_instance->m_damage_collision->draw_collision( scene, render.debug(), m_transform );
 
@@ -312,17 +314,17 @@ void human_npc::draw		( render::game::renderer& render, render::scene_ptr const&
 #endif // #ifndef MASTER_GOLD
 }
 
-void human_npc::set_filter		( ai::ignorable_game_object const* begin, ai::ignorable_game_object const* end )
+void monster_npc::set_filter		( ai::ignorable_game_object const* begin, ai::ignorable_game_object const* end )
 {
 	m_ai_world.set_ignore_filter( m_brain_unit, begin, end );
 }
 
-void human_npc::clear_filter		( )
+void monster_npc::clear_filter		( )
 {
 	m_ai_world.clear_ignore_filter	( m_brain_unit );
 }
 
-void human_npc::set_transform	( float4x4 const& transform )
+void monster_npc::set_transform	( float4x4 const& transform )
 {
 	m_transform					= transform;
 	LOG_INFO					( "Position after set_transform: [%f][%f][%f]", m_transform.c.x, m_transform.c.y, m_transform.c.z );
@@ -331,7 +333,7 @@ void human_npc::set_transform	( float4x4 const& transform )
 	m_model_instance->m_animation_player->set_object_transform( m_transform );
 }
 
-void human_npc::tick			( u32 const current_time_in_ms )
+void monster_npc::tick			( u32 const current_time_in_ms )
 {
 	m_spatial_tree.move			( m_collision_object, m_transform ); 
 	sound_receiver::set_position( m_transform.c.xyz() );
@@ -347,7 +349,7 @@ void human_npc::tick			( u32 const current_time_in_ms )
 		draw					( m_renderer, get_game_world().get_game().get_active_scene() );
 }
 
-void human_npc::render_model	( )
+void monster_npc::render_model	( )
 {
 	animation::animation_player* animation_player	= m_model_instance->m_animation_player;
 	animation::skeleton_ptr	skeleton	= m_model_instance->m_physics_model->m_skeleton;
@@ -368,75 +370,75 @@ void human_npc::render_model	( )
 	m_model_instance->m_damage_collision->update					( bone_matrices, bone_matrices + bone_matrices_count );
 }
 
-void human_npc::add_weapon				( object_weapon* weapon )
+void monster_npc::add_weapon				( object_weapon* weapon )
 {
 	if ( !m_game_attributes.weapons.contains_object( weapon ) )
 		m_game_attributes.weapons.push_back	( weapon );
 }
 
-void human_npc::remove_weapon			( object_weapon* weapon )
+void monster_npc::remove_weapon			( object_weapon* weapon )
 {
 	m_game_attributes.weapons.erase		( weapon );
 }
 
-object_weapon* human_npc::pop_weapon	( )
+object_weapon* monster_npc::pop_weapon	( )
 {
 	return m_game_attributes.weapons.pop_front( );
 }
 
-bool human_npc::is_safe			( ) const
+bool monster_npc::is_safe			( ) const
 {
 	return m_ai_world.is_npc_safe( m_brain_unit );
 }
 
-bool human_npc::is_target_in_melee_range( npc const* const target ) const
+bool monster_npc::is_target_in_melee_range( npc const* const target ) const
 {
 	R_ASSERT					( target );
 	return math::length			( target->get_position( get_position() ) - get_position() ) <= 10;
 }
 
-bool human_npc::is_at_node		( ai::game_object const* const node ) const
+bool monster_npc::is_at_node		( ai::game_object const* const node ) const
 {
 	R_ASSERT					( node );
 	return math::length			( node->get_collision_object()->get_origin() - get_position() ) <= 4;
 }
 
-bool human_npc::is_playing_animation( ) const
+bool monster_npc::is_playing_animation( ) const
 {
 	return m_current_animation	!= 0;
 }
 
-bool human_npc::is_moving			( ) const
+bool monster_npc::is_moving			( ) const
 {
 	return m_current_movement_target != 0;
 }
 
-void human_npc::prepare_to_attack	( npc const* const target, ai::weapon const* const gun )
+void monster_npc::prepare_to_attack	( npc const* const target, ai::weapon const* const gun )
 {
 	LOG_INFO					( "%s: prepare to attack %s with %s", get_name(), target->cast_game_object()->get_name(), gun->cast_game_object()->get_name() );
 	m_current_target			= target;
 	m_current_weapon			= gun;
 }
 
-void human_npc::attack			( npc const* const target, ai::weapon const* const gun )
+void monster_npc::attack			( npc const* const target, ai::weapon const* const gun )
 {
 	XRAY_UNREFERENCED_PARAMETERS( target, gun );
 	LOG_INFO					( "%s: attacking %s with %s", get_name(), m_current_target->cast_game_object()->get_name(), m_current_weapon->cast_game_object()->get_name() );
 }
 
-void human_npc::attack_melee	( npc const* const target, ai::weapon const* const gun )
+void monster_npc::attack_melee	( npc const* const target, ai::weapon const* const gun )
 {
 	XRAY_UNREFERENCED_PARAMETERS( target, gun );
 	LOG_INFO					( "%s: melee attacking %s with %s", get_name(), m_current_target->cast_game_object()->get_name(), m_current_weapon->cast_game_object()->get_name() );
 }
 
-void human_npc::attack_from_cover	( npc const* const target, ai::weapon const* const gun )
+void monster_npc::attack_from_cover	( npc const* const target, ai::weapon const* const gun )
 {
 	XRAY_UNREFERENCED_PARAMETERS( target, gun );
 	LOG_INFO					( "%s: attacking from cover %s with %s", get_name(), m_current_target->cast_game_object()->get_name(), m_current_weapon->cast_game_object()->get_name() );
 }
 
-void human_npc::stop_attack		( npc const* const target, ai::weapon const* const gun )
+void monster_npc::stop_attack		( npc const* const target, ai::weapon const* const gun )
 {
 	XRAY_UNREFERENCED_PARAMETERS( target, gun );
 	LOG_INFO					( "%s: stopping attack", get_name() );
@@ -444,24 +446,24 @@ void human_npc::stop_attack		( npc const* const target, ai::weapon const* const 
 	m_current_weapon			= 0;
 }
 
-void human_npc::survey_area		( )
+void monster_npc::survey_area		( )
 {
 	LOG_INFO					( "%s: patrolling", get_name() );
 	m_is_patrolling				= true;
 }
 
-void human_npc::stop_patrolling	( )
+void monster_npc::stop_patrolling	( )
 {
 	LOG_INFO					( "%s: quit patrolling", get_name() );
 	m_is_patrolling				= false;
 }
 
-void human_npc::reload			( ai::weapon const* const gun )
+void monster_npc::reload			( ai::weapon const* const gun )
 {
 	LOG_INFO					( "%s: reloading %s", get_name(), gun->cast_game_object()->get_name() );
 }
 
-void human_npc::fill_stats		( ai::npc_statistics& stats ) const
+void monster_npc::fill_stats		( ai::npc_statistics& stats ) const
 {
 	stats.general_state.caption	= "general properties:";
 	
@@ -481,7 +483,7 @@ void human_npc::fill_stats		( ai::npc_statistics& stats ) const
 	m_ai_world.fill_npc_stats	( stats, m_brain_unit );
 }
 
-void human_npc::set_attributes	( npc_game_attributes& attributes )
+void monster_npc::set_attributes	( npc_game_attributes& attributes )
 {
 	m_game_attributes			= attributes;
 	m_transform					= create_scale( m_game_attributes.initial_scale ) *
@@ -489,13 +491,13 @@ void human_npc::set_attributes	( npc_game_attributes& attributes )
  								  create_translation( m_game_attributes.initial_position );
 }
 
-void human_npc::get_available_weapons	( ai::weapons_list& list_to_be_filled ) const
+void monster_npc::get_available_weapons	( ai::weapons_list& list_to_be_filled ) const
 {
-	for ( object_weapon* weapon = m_game_attributes.weapons.front(); weapon; weapon = human_npc::weapons_type::get_next_of_object( weapon ) )
+	for ( object_weapon* weapon = m_game_attributes.weapons.front(); weapon; weapon = monster_npc::weapons_type::get_next_of_object( weapon ) )
  		list_to_be_filled.push_back		( weapon );
 }
 
-void human_npc::set_rotation			( float4x4 const& new_rotation )
+void monster_npc::set_rotation			( float4x4 const& new_rotation )
 {
 	float4x4 const new_transform		= create_scale( m_transform.get_scale() ) *
 										  new_rotation *
@@ -504,17 +506,17 @@ void human_npc::set_rotation			( float4x4 const& new_rotation )
 	set_transform						( new_transform );
 }
 
-void human_npc::set_behaviour			( resources::unmanaged_resource_ptr new_behaviour )
+void monster_npc::set_behaviour			( resources::unmanaged_resource_ptr new_behaviour )
 {
 	m_ai_world.set_behaviour			( new_behaviour, m_brain_unit );
 }
 
-bool human_npc::debug_draw_allowed		( ) const
+bool monster_npc::debug_draw_allowed		( ) const
 {
 	return								s_npc_debug_draw;
 }
 
-void human_npc::move_to_position		( ai::movement_target const* const target )
+void monster_npc::move_to_position		( ai::movement_target const* const target )
 {
 	m_current_movement_target			= target;
 	LOG_INFO							(

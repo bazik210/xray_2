@@ -27,7 +27,7 @@ namespace ui {
 
 namespace stalker2 {
 
-class human_npc;
+class monster_npc;
 
 class npc_stats : private boost::noncopyable
 {
@@ -39,7 +39,7 @@ public:
 						xray::render::ui::renderer& ui_renderer,
 						xray::render::scene_view_ptr const& scene_view
 					);
-	void			set_stats					( human_npc const* const );
+	void			set_stats					( monster_npc const* const );
 
 private:
 	enum column_types_enum

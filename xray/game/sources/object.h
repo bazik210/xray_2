@@ -31,14 +31,24 @@ protected:
 	game_scene&		m_game_scene;
 };
 
+enum type_id
+{
+	u,
+	human,
+	monster
+}; //type_id
+
 class game_world_object :	public game_object_
 {
 	typedef game_object_ super;
 public:
-					game_world_object		( game_world& w );
+					game_world_object		( game_world& w, type_id m_type_id = u);
 	game_world&		get_game_world			( ) { return m_game_world; }
+	type_id			get_type_id				( ) { return m_type_id; }
 protected:
 	game_world&		m_game_world;
+private:
+	type_id			m_type_id;
 };
 
 class game_object_static :	public game_object_

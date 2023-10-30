@@ -126,10 +126,8 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 	}
 	R_ASSERT											( world_user );
 
-
-	ai::game_object const* npc								= 0;
-	human_npc const* npc_cast							    = 0;
-	monster_npc const* mob_cast								= 0;
+	human_npc const* human							    = 0;
+	monster_npc const* monster							= 0;
 
 	resources::query_result_for_cook* const brain_unit_query	= parent->get_parent_query	( );
 	if ( brain_unit_query && brain_unit_query->get_class_id( ) == resources::brain_unit_class )
@@ -138,14 +136,13 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 		ai::brain_unit_cook_params params;
 		if ( user_data && user_data->try_get( params ) )
 		{
-
-			if ((dynamic_cast<human_npc*>(params.npc)) != 0)
+			if (dynamic_cast<human_npc* const>(params.npc) != 0)
 			{
-				npc_cast											= static_cast_checked<human_npc const* const>( params.npc );
+				human											= static_cast_checked<human_npc const* const>( params.npc );
 			} 
-			else if ((dynamic_cast<monster_npc*>(params.npc)) != 0)
+			else
 			{
-				mob_cast											= static_cast_checked<monster_npc const* const>( params.npc );
+				monster											= static_cast_checked<monster_npc const* const>( params.npc );
 			}
 		}
 	}
@@ -156,13 +153,13 @@ void sound_player_cook::on_sounds_loaded	( resources::queries_result& data, conf
 
 	ai_sound_player* player = 0;
 
-	if (npc_cast != 0)
+	if (human)
 	{
-		player = create_buffer(npc_cast, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
+		player = create_buffer(human, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
 	}
-	else if (mob_cast != 0)
+	else if (monster)
 	{
-		player = create_buffer(mob_cast, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
+		player = create_buffer(monster, m_dbg_input_world, player, sound_player_buffer, world_user, sounds_value);
 	}
 
 	ai_sound_player::sounds_collection_type* const begin = pointer_cast<ai_sound_player::sounds_collection_type*>( sound_player_buffer + ai_sound_player_buffer_size );

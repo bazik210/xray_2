@@ -214,12 +214,12 @@ private:
 	// for AI tests	
 			void		query_npc_dictionary		( );
 			void		on_npc_dictionary_created	( resources::queries_result& data );
-			void		on_queried_npc_attributes_received	( resources::queries_result& data, human_npc_ptr owner );
+			void		on_queried_npc_attributes_received	( resources::queries_result& data, monster_npc_ptr owner );
 			void		on_behaviour_created		( resources::queries_result& data );
 			void		on_npc_created				( resources::queries_result& data, float3 const camera_position );
-			void		fill_npc_attributes_randomly( human_npc_ptr owner, float3 const& initial_position );
-			void		fill_npc_attributes_manually( human_npc_ptr owner );
-			void		finish_npc_creation			( human_npc_ptr& new_npc, human_npc::npc_game_attributes& attributes );
+			void		fill_npc_attributes_randomly( monster_npc_ptr owner, float3 const& initial_position );
+			void		fill_npc_attributes_manually( monster_npc_ptr owner );
+			void		finish_npc_creation			(human_npc_ptr& new_npc, human_npc::npc_game_attributes& attributes );
 			void		finish_monster_creation		( monster_npc_ptr& new_npc, monster_npc::npc_game_attributes& attributes );
 			bool		is_npc_id_available			( u32 const npc_id ) const;
 			void		get_frustum_objects_callback(
@@ -229,7 +229,7 @@ private:
 	
 			void			run_ai_tests			( u32 const current_frame_id );
 			void			update_npc_stats		( );
-			human_npc* find_npc_in_camera_direction	( ) const;
+			monster_npc* find_npc_in_camera_direction	( ) const;
 	
 	template < typename T >
 	inline	void			destroy					( T*& object_to_be_destroyed )
@@ -243,13 +243,12 @@ private:
 							human_npc_ptr,
 							&human_npc::next_npc,
 							threading::single_threading_policy,
-							size_policy >	npcs_type;
-
+							size_policy >	mobs_type;
 	typedef intrusive_list< monster_npc,
 							monster_npc_ptr,
 							&monster_npc::next_npc,
 							threading::single_threading_policy,
-							size_policy >	mobs_type;
+							size_policy >	npcs_type;
 
 public:
 	xray::render::scene_view_ptr const		get_active_scene_view	( )	const;
@@ -305,7 +304,7 @@ private:
 	// tests for AI
 	bool									m_is_dictionary_created;
 	bool									m_is_npc_auto_creation_enabled;
-	human_npc_ptr							m_selected_npc;
+	monster_npc_ptr							m_selected_npc;
 	bool									m_active_npc_set;
 	npcs_type								m_npcs;
 	mobs_type								m_mobs;
