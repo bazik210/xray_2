@@ -13,9 +13,6 @@ add_compile_definitions(BOOST_NO_EXCEPTIONS)
 # Force Scaleform debug mode
 # add_compile_definitions(SF_BUILD_DEBUG)
 
-set(CMAKE_GENERATOR_PLATFORM x64)
-#set(CMAKE_GENERATOR_PLATFORM Win32)
-
 #################################
 # GLOBAL COMPILER CONFIGURATION #
 #################################
@@ -68,10 +65,36 @@ set(STLPORT_INCLUDE_PATH "${THIRDPARTY_DIR_INCLUDE_PATH}/stlport/")
 #################################
 project(X-Ray-v2.0)
 
+# Determine platform
+math(EXPR PLATFORM_BITS "${CMAKE_SIZEOF_VOID_P} * 8")
+MESSAGE(STATUS "Platform bits: ${PLATFORM_BITS}")
+if("${PLATFORM_BITS}" STREQUAL "64")
+    set(CMAKE_GENERATOR_PLATFORM "x64")
+else()
+    set(CMAKE_GENERATOR_PLATFORM "x86")
+endif()
+MESSAGE(STATUS "Generator: ${CMAKE_GENERATOR_PLATFORM}")
+
 # Set output directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+    set(PLATFORM_SYSTEM "Win")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(PLATFORM_SYSTEM "Lin")
+else()
+    set(PLATFORM_SYSTEM ${CMAKE_SYSTEM_NAME})
+endif()
+
+set(PLATFORM_DIR ${PLATFORM_SYSTEM}${PLATFORM_BITS})
+#set(PLATFORM_DIR ${CMAKE_SYSTEM_NAME}${PLATFORM_BITS}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION})
+
+# Linux .a static libs
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>/lib)
+# Windows .lib static libs
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>/lib)
+# Shared .dll libs
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>)
+# .exe executables
+set(EXECUTABLE_OUTPUT_PATH ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
 foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_INIT)
@@ -189,7 +212,6 @@ function(xr_setup_shared_libs)
 endfunction()
 
 # Called at the bottom of this CMakeLists
-# TODO move configs to CMakeLists of each project
 function(xr_setup_editors)
     xr_set_target_defaults_editor(animation_editor)
     xr_set_target_defaults_editor(dialog_editor)
@@ -202,63 +224,6 @@ function(xr_setup_editors)
 
     # This is a test C# project
     xr_set_target_defaults_editor(test_form)
-
-    # Set dependencies of wpf_controls
-    target_link_libraries(wpf_controls PUBLIC WPFToolkit.Extended)
-    target_link_libraries(wpf_controls PUBLIC WeifenLuo.WinFormsUI.Docking)
-
-    # Set directories for #using directive
-    target_compile_options(wpf_controls PUBLIC
-        /AI\"${CMAKE_LIBRARY_OUTPUT_DIRECTORY}\"
-    )
-	
-    set_target_properties(editor_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(model_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(particle_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(sound_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(WPFToolkit.Extended PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-    set_target_properties(wpf_controls PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
-
-    # Set Default Namespace
-    set_property(TARGET WeifenLuo.WinFormsUI.Docking PROPERTY VS_GLOBAL_RootNamespace "WeifenLuo.WinFormsUI")
-    set_property(TARGET WPFToolkit.Extended PROPERTY VS_GLOBAL_RootNamespace "Microsoft.Windows.Controls")
-    set_property(TARGET wpf_controls PROPERTY VS_GLOBAL_RootNamespace "xray.editor.wpf_controls")
-
-    # Specify DOTNET assembly references
-
-    set_target_properties(editor_controls PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;WindowsBase;WindowsFormsIntegration"
-    )
-
-    set_target_properties(model_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
-    )
-
-    set_target_properties(particle_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
-    )
-
-    set_target_properties(sound_editor PROPERTIES VS_DOTNET_REFERENCES
-        "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Core;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
-    )
-
-    set_target_properties(test_form PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Drawing;System.Windows.Forms;System.Xml"
-    )
-
-    set_target_properties(WeifenLuo.WinFormsUI.Docking PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Design;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml"
-    )
-
-    set_target_properties(WPFToolkit.Extended PROPERTIES VS_DOTNET_REFERENCES
-        "System;System.Data;System.Xml;System.Core;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;UIAutomationProvider;WindowsBase;PresentationCore;PresentationFramework"
-    )
-
-    set_target_properties(wpf_controls PROPERTIES VS_DOTNET_REFERENCES
-        "PresentationFramework.Aero;System;System.Core;System.Drawing;System.Windows.Forms;System.Xml.Linq;System.Xaml;System.Data.DataSetExtensions;System.Data;System.Xml;UIAutomationProvider;UIAutomationTypes;WindowsBase;PresentationCore;PresentationFramework;WindowsFormsIntegration"
-    )
-
 endfunction()
 
 # Called at the bottom of this CMakeLists
@@ -647,12 +612,12 @@ endif()
     # set Additional Include Directories
     target_include_directories(${TARGET} PRIVATE
         ${SOLUTION_DIR_INCLUDE_PATH}
-	${THIRDPARTY_DIR_INCLUDE_PATH}
+	    ${THIRDPARTY_DIR_INCLUDE_PATH}
     )
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     )
 
     # List all target properties
@@ -713,7 +678,7 @@ endif()
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     )
 
     # List all target properties
@@ -772,7 +737,7 @@ endif()
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     )
 
     # List all target properties
@@ -827,7 +792,7 @@ endif()
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-    ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     )
 
     # List all target properties
@@ -879,7 +844,7 @@ endif()
 	
     # set Additional Library Directories
       target_link_directories(${TARGET} PRIVATE
-      ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
       )
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
@@ -969,7 +934,7 @@ endif()
 	
 	# set Additional Library Directories
 	target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
 	)
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
@@ -1010,7 +975,7 @@ function(xr_set_target_defaults_editor TARGET)
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(${TARGET} PRIVATE
-        _WIN32_WINNT=0x0501
+          _WIN32_WINNT=0x0501
           PLATFORM_WIN64
           WIN64
           WINDOWS
@@ -1019,7 +984,7 @@ if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
 else()
     # set platform as x86
 	target_compile_definitions(${TARGET} PRIVATE
-        _WIN32_WINNT=0x0501
+          _WIN32_WINNT=0x0501
           PLATFORM_WIN32
           WIN32
           WINDOWS
@@ -1053,7 +1018,8 @@ endif()
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 
     # disable macro Warnings
@@ -1088,11 +1054,6 @@ endif()
     if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 1[0-6]")
     set_property(TARGET ${TARGET} PROPERTY VS_GLOBAL_ManagedAssembly "true")
     endif()
-
-    # Set dependencies
-    target_link_libraries(${TARGET} PUBLIC 
-	wpf_controls
-    )
 
     target_compile_definitions(${TARGET} PUBLIC MBCS _MBCS)
 
@@ -1142,7 +1103,8 @@ function(xr_set_target_defaults_network_32 TARGET)
 
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 
     target_link_options(${TARGET} PRIVATE
@@ -1204,7 +1166,8 @@ function(xr_set_target_defaults_network_64 TARGET)
 
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     )
 
     target_link_options(${TARGET} PRIVATE
@@ -1276,7 +1239,7 @@ endif()
 	
     # set Additional Library Directories
     target_link_directories(${TARGET} PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     )
 
     target_link_options(${TARGET} PRIVATE

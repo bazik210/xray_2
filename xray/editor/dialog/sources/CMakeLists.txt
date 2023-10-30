@@ -168,19 +168,21 @@ add_library(dialog_editor SHARED
 							"${CMAKE_CURRENT_SOURCE_DIR}/dialog_editor_entry_point.cpp"
 )
 
-target_link_libraries(dialog_editor PUBLIC
-	engine_pc_dx11
-	editor_base
-)
-
 set_target_properties(dialog_editor PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 
 set_target_properties(dialog_editor PROPERTIES VS_DOTNET_REFERENCES
-    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;xray_editor_base.dll;xray_editor_controls.dll"
+    "Microsoft.Office.Interop.Excel;PresentationCore;PresentationFramework;System;System.Data;System.Drawing;System.Windows.Forms;System.Xml;System.Xaml;WindowsBase;WindowsFormsIntegration;WeifenLuo.WinFormsUI.Docking;wpf_controls;xray_editor_base;xray_editor_controls"
 )
 
-set_property(TARGET dialog_editor PROPERTY VS_GLOBAL_RootNamespace dialog_editor)
+set_property(TARGET dialog_editor PROPERTY VS_GLOBAL_RootNamespace "dialog_editor")
 
 set_target_properties(dialog_editor PROPERTIES FOLDER "engine/editors")
 
-add_dependencies(dialog_editor editor_base editor_controls)
+add_dependencies(dialog_editor
+	editor_base
+)
+
+# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
+target_link_libraries(dialog_editor PUBLIC
+	editor_base
+)
