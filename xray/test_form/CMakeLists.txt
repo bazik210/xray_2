@@ -19,4 +19,10 @@ add_executable(test_form
 					#"${CMAKE_CURRENT_SOURCE_DIR}/ReadMe.txt"
 )
 
+set_target_properties(test_form PROPERTIES DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
+
+set_target_properties(test_form PROPERTIES VS_DOTNET_REFERENCES
+    "System;System.Data;System.Drawing;System.Windows.Forms;System.Xml"
+)
+
 set_target_properties(test_form PROPERTIES FOLDER "engine/utilities")
