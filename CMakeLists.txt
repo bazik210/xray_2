@@ -88,13 +88,13 @@ set(PLATFORM_DIR ${PLATFORM_SYSTEM}${PLATFORM_BITS})
 #set(PLATFORM_DIR ${CMAKE_SYSTEM_NAME}${PLATFORM_BITS}-${CMAKE_CXX_COMPILER_ID}${CMAKE_CXX_COMPILER_VERSION})
 
 # Linux .a static libs
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/$<CONFIG>/lib)
 # Windows .lib static libs
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/$<CONFIG>/lib)
 # Shared .dll libs
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SOLUTION_DIR_INCLUDE_PATH}/binaries/$<CONFIG>)
 # .exe executables
-set(EXECUTABLE_OUTPUT_PATH ${SOLUTION_DIR_INCLUDE_PATH}/binaries/${PLATFORM_DIR}/$<CONFIG>)
+set(EXECUTABLE_OUTPUT_PATH ${SOLUTION_DIR_INCLUDE_PATH}/binaries/$<CONFIG>)
 
 # Disable Exception Handling and Runtime Checks using any means necessary
 foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_CXX_FLAGS_INIT CMAKE_C_FLAGS CMAKE_C_FLAGS_RELEASE CMAKE_C_FLAGS_DEBUG CMAKE_CXX_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_RELWITHDEBINFO CMAKE_C_FLAGS_INIT)
@@ -258,7 +258,7 @@ function(xr_setup_plugins)
     # Set individual configs
     set_target_properties(maya2011 PROPERTIES
 		OUTPUT_NAME "xray_maya2011"
-        	SUFFIX ".mll"
+        SUFFIX ".mll"
 	)
     target_include_directories(maya2011 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011
@@ -266,7 +266,7 @@ function(xr_setup_plugins)
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2011 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
@@ -274,7 +274,7 @@ if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     )
 else()
     target_link_directories(maya2011 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2011/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
@@ -283,12 +283,12 @@ else()
 endif()
 
     set_target_properties(maya_animation PROPERTIES
-	 OUTPUT_NAME "xray_maya_animation"
+	    OUTPUT_NAME "xray_maya_animation"
 	)
 
     set_target_properties(maya2012 PROPERTIES
-	 OUTPUT_NAME "xray_maya2012"
-         SUFFIX ".mll"
+	    OUTPUT_NAME "xray_maya2012"
+        SUFFIX ".mll"
 	)
     target_include_directories(maya2012 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012
@@ -296,25 +296,23 @@ endif()
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2012 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib64
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
 else()
     target_link_directories(maya2012 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
-	${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib32
+	    ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2012/lib32
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
     )
 endif()
 
     set_target_properties(maya2018 PROPERTIES
-	 OUTPUT_NAME "xray_maya2018"
-         SUFFIX ".mll"
+	    OUTPUT_NAME "xray_maya2018"
+        SUFFIX ".mll"
 	)
     target_include_directories(maya2018 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2018
@@ -322,23 +320,21 @@ endif()
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2018 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
 else()
     target_link_directories(maya2018 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
     )
 endif()
 
     set_target_properties(maya2019 PROPERTIES
-	 OUTPUT_NAME "xray_maya2019"
-         SUFFIX ".mll"
+	    OUTPUT_NAME "xray_maya2019"
+        SUFFIX ".mll"
 	)
     target_include_directories(maya2019 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2019
@@ -346,23 +342,21 @@ endif()
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2019 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
 else()
     target_link_directories(maya2019 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
     )
 endif()
 
     set_target_properties(maya2023 PROPERTIES
-	 OUTPUT_NAME "xray_maya2023"
-         SUFFIX ".mll"
+	    OUTPUT_NAME "xray_maya2023"
+        SUFFIX ".mll"
 	)
     target_include_directories(maya2023 PRIVATE
         ${THIRDPARTY_DIR_INCLUDE_PATH}/maya2023
@@ -370,15 +364,13 @@ endif()
 
 if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     target_link_directories(maya2023 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9.x64
     )
 else()
     target_link_directories(maya2023 PRIVATE
-        ${SOLUTION_DIR_INCLUDE_PATH}/binaries
-
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ${THIRDPARTY_DIR_INCLUDE_PATH}/amd_tootle-master/lib
         ${THIRDPARTY_DIR_INCLUDE_PATH}/SpeedTree/Lib/Windows/VC9
     )
