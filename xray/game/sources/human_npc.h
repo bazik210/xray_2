@@ -26,6 +26,7 @@
 #include <xray/animation/animation_expression_emitter.h>
 #include <xray/render/engine/base_classes.h>
 
+
 namespace xray {
 
 namespace render {
@@ -63,27 +64,19 @@ class search_service;
 struct animation_space_vertex_id;
 class game;
 
+class human_npc;
+typedef resources::resource_ptr< human_npc, resources::unmanaged_intrusive_base > human_npc_ptr;
+
 // dummy, just for testing purposes (till the collision/damage detectors will be implemented)
-struct hit_object
+struct hit_mob_object
 {
-	ai::game_object*			m_source;
+	ai::game_object* m_source;
 	float3						m_position;
 	u16							m_target_bone;
 	float						m_power;
 }; // struct hit_object
 
-struct npc_cook_params
-{
-	ai::brain_unit_cook_params	brain_unit_params;
-	xray::render::scene_ptr			scene;
-	sound::sound_scene_ptr		sound_scene;
-	physics::world*				physics_world;
-}; // struct npc_cook_params
-
-class monster_npc;
-typedef resources::resource_ptr< monster_npc, resources::unmanaged_intrusive_base > monster_npc_ptr;
-
-class monster_npc :
+class human_npc :
 	public ai::npc,
 	public ai::game_object,
 	public sound::sound_producer,
@@ -92,7 +85,7 @@ class monster_npc :
 	public game_world_object
 {
 public:
-								monster_npc			(
+								human_npc			(
 									ai::world& ai_world,
 									sound::world& sound_world,
 									sound::sound_scene_ptr const& sound_scene,
@@ -101,10 +94,10 @@ public:
 									xray::render::game::renderer& renderer,
 									game_world& game_world
 								);
-	virtual						~monster_npc			( );
+	virtual						~human_npc			( );
 
 public:
-	monster_npc_ptr				next_npc;
+	human_npc_ptr				next_npc;
 
 public:
 	typedef intrusive_list< object_weapon, object_weapon*, &object_weapon::m_next > weapons_type;
@@ -168,12 +161,12 @@ public:
 	virtual	void				reload				( ai::weapon const* const gun );
 	virtual	void				play_animation		( ai::animation_item const* const target );
 	virtual	void				move_to_position	( ai::movement_target const* const target );
-	virtual	void			stop_animation_playing	( );
+	virtual	void				stop_animation_playing	( );
 		
 	virtual void				on_sound_event		( sound::sound_producer const& sound_source );
 	virtual pcstr				get_description		( ) const { return m_game_attributes.description.c_str(); }
 	virtual	float3				get_source_position	( float3 const& requester ) const { return get_position( requester ); }
-	virtual void				on_hit_event		( hit_object const& hit_source );
+	virtual void				on_hit_event		( hit_mob_object const& hit_source );
 	
 	virtual	npc*				cast_npc			( )			{ return this; }
 	virtual	npc const*			cast_npc			( )	const	{ return this; }
@@ -196,7 +189,7 @@ public:
 			void				add_weapon			( object_weapon* weapon );
 			void				remove_weapon		( object_weapon* weapon );
 	object_weapon*				pop_weapon			( );
-			void			get_available_weapons	( ai::weapons_list& list_to_be_filled ) const;
+			void				get_available_weapons	( ai::weapons_list& list_to_be_filled ) const;
 
 			void				enable				( );
 			void				set_attributes		( npc_game_attributes& attributes );
@@ -214,8 +207,8 @@ public:
 	inline	bool				get_sound_dbg_mode	( ) const { return m_dbg_sound; }
 
 private:			
-	// specially for monster_npc_cook
-	friend class monster_npc_cook;		
+	// specially for human_npc_cook
+	friend class human_npc_cook;		
 			void	set_brain_unit					( ai::brain_unit_res_ptr const& brain_unit );
 			void	set_model						( animated_model_instance_ptr const& model );
 			

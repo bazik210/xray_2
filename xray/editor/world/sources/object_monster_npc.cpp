@@ -31,7 +31,7 @@ void animation_monster_name_ui_type_editor::run_editor( xray::editor::wpf_contro
 	
 	System::String^ selected		= nullptr;
 	
-	if ( editor_base::resource_chooser::choose( "animations_list", npc->animation_idle, "single/human"/*monster*/, selected, true ) )
+	if ( editor_base::resource_chooser::choose( "animations_list", npc->animation_idle, "single/monster", selected, true ) )
 		npc->animation_idle			= "resources/animations/" + selected;
 }
 
@@ -103,7 +103,7 @@ void object_monster_npc::save			( configs::lua_config_value config )
 	config["model"]					= unmanaged_string( m_animated_model_name/*m_model_name*/ ).c_str();
 	config["animation_idle"]		= unmanaged_string( m_animation_name ).c_str();
 
-	config["brain"]					= "resources/npc/human/default.npc";
+	config["brain"]					= "resources/npc/monster/bloodsucker/default.npc";
 
 	configs::lua_config_value attributes_config = config["attributes"].create_table();
 	

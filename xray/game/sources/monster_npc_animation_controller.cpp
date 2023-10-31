@@ -13,7 +13,7 @@
 #include <xray/animation/fermi_interpolator.h>
 #include <xray/ai/world.h>
 #include <xray/ai/movement_target.h>
-#include "monster_npc_animation_controller_planner.h"
+#include "human_npc_animation_controller_planner.h"
 #include "game.h"
 #include "game_world.h"
 #include <xray/ai_navigation/world.h>
@@ -26,18 +26,18 @@ namespace stalker2 {
 
 static float const agent_radius	= .35f;
 
-void human_npc::setup_animations_controller	( )
+void monster_npc::setup_animations_controller	( )
 {
 #ifndef MASTER_GOLD
-	manimation_space_graph::animation_pair_type const animations[] =
+	animation_space_graph::animation_pair_type const animations[] =
 	{
 		std::make_pair			( m_walk_forward_arc_left_animation, "left arc" ),
 		std::make_pair			( m_walk_forward_arc_right_animation, "right arc" ),
 	};
 
-	m_animation_space_graph		= NEW( manimation_space_graph )( m_game_world.get_game().ai_navigation_world(), agent_radius, m_walk_forward_animation, animations, 5 );
-	m_search_service			= NEW( ms_search_service )();
-	m_target_vertex				= NEW( manimation_space_vertex_id )();
+	m_animation_space_graph		= NEW( animation_space_graph )( m_game_world.get_game().ai_navigation_world(), agent_radius, m_walk_forward_animation, animations, 5 );
+	m_search_service			= NEW( search_service )();
+	m_target_vertex				= NEW( animation_space_vertex_id )();
 
 	m_target_vertex->rotation	= math::quaternion( float3( 0.f, 0.f, 0.f ) );
 	m_target_vertex->translation = m_transform.c.xyz();
@@ -46,14 +46,14 @@ void human_npc::setup_animations_controller	( )
 
 	m_model_instance->m_animation_player->subscribe	(
 		xray::animation::channel_id_on_animation_interval_end,
-		boost::bind( &human_npc::on_animation_interval_end, this, _1, _2, _3, _4 ),
+		boost::bind( &monster_npc::on_animation_interval_end, this, _1, _2, _3, _4 ),
 		0
 	);
 
 	m_next_key_point			= u32(-1);
 }
 
-animation::callback_return_type_enum human_npc::on_animation_interval_end(
+animation::callback_return_type_enum monster_npc::on_animation_interval_end(
 		animation::skeleton_animation_ptr const& ended_animation,
 		pcstr const subscribed_channel,
 		u32 const callback_time_in_ms,
@@ -65,7 +65,7 @@ animation::callback_return_type_enum human_npc::on_animation_interval_end(
 	return						animation::callback_return_type_call_me_again;
 }
 
-void human_npc::setup_animations	( u32 const current_time_in_ms )
+void monster_npc::setup_animations	( u32 const current_time_in_ms )
 {
 	if ( !m_current_movement_target )
 		return;
@@ -149,11 +149,11 @@ void human_npc::setup_animations	( u32 const current_time_in_ms )
 
 	m_target_vertex->translation = target_position;
 
-	manimation_space_vertex_id	start_vertex_id;
+	animation_space_vertex_id	start_vertex_id;
 	start_vertex_id.rotation	= math::quaternion( m_transform.get_angles_xyz() );
 	start_vertex_id.translation	= m_transform.c.xyz( );
 
-	ms_search_service::path_type	path;
+	search_service::path_type	path;
 	if ( !m_search_service->search( *m_animation_space_graph, &path, start_vertex_id, *m_target_vertex ) || path.empty() )
 	{
 		while ( m_next_key_point < m_navigation_path.size() - 1 )

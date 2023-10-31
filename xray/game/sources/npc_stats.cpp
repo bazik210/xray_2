@@ -10,7 +10,7 @@
 #include <xray/ui/ui.h>
 #include <xray/ui/world.h>
 #include <xray/ai/npc_statistics.h>
-#include "human_npc.h"
+#include "monster_npc.h"
 
 namespace stalker2 {
 

@@ -648,13 +648,13 @@ static void delete_mweapons(human_npc_ptr& owner)
 		DELETE(weapon);
 }
 
-static void kill_npc(monster_npc_ptr& condemned)
+static void kill_mob(monster_npc_ptr& condemned)
 {
 	delete_weapons(condemned);
 	condemned->clear_resources();
 }
 
-static void kill_mob(human_npc_ptr& condemned)
+static void kill_npc(human_npc_ptr& condemned)
 {
 	delete_mweapons(condemned);
 	condemned->clear_resources();
@@ -666,11 +666,11 @@ void game::clear_resources				( )
 
 	m_lobby_menu->clear_resources		( );
 
-	for ( monster_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
-		kill_npc						( it_npc );
-
-	for (human_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+	for ( monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object( it_mob ) )
 		kill_mob						( it_mob );
+
+	for (human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object(it_npc))
+		kill_npc						( it_npc );
 
 	m_npcs.clear						( );
 
@@ -733,12 +733,12 @@ void game::unload( pcstr , bool destroying )
 
 	m_game_world->unload				( );
 	
-	for ( monster_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
+	for ( human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
 	{
 		kill_npc( it_npc );
 	}
 
-	for (human_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+	for (monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
 	{
 		kill_mob( it_mob );
 	}
@@ -1069,8 +1069,11 @@ void game::get_available_weapons(ai::npc* owner, ai::weapons_list& list_to_be_fi
 
 void game::run_ai_tests(u32 const current_frame_id)
 {
-	for (monster_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object(it_npc))
+	for (human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object(it_npc))
 		it_npc->tick(current_frame_id);
+
+		for (monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+		it_mob->tick(current_frame_id);
 }
 
 
@@ -1222,7 +1225,7 @@ void game::query_npc(human_npc_behaviour_type_enum const behaviour_type, float3 
 
 bool game::is_npc_id_available(u32 const npc_id) const
 {
-	for (monster_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object(it_npc))
+	for (human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object(it_npc))
 		if (it_npc->get_id() == npc_id)
 			return						false;
 
@@ -1268,6 +1271,7 @@ void game::fill_npc_attributes_randomly(monster_npc_ptr owner, float3 const& ini
 	attributes.name = name_id.first;
 	attributes.id = name_id.second;
 
+	finish_monster_creation(owner, attributes);
 //	finish_npc_creation(owner, attributes);
 }
 
@@ -1283,7 +1287,6 @@ void game::fill_npc_attributes_manually(monster_npc_ptr owner)
 
 void game::on_npc_attributes_received(configs::binary_config_value const& attributes_config, human_npc_ptr owner)
 {
-
 	human_npc::npc_game_attributes		attributes;
 	attributes.group_id = attributes_config["group_id"];
 	attributes.class_id = attributes_config["class_id"];
@@ -1316,9 +1319,8 @@ void game::on_npc_attributes_received(configs::binary_config_value const& attrib
 }
 
 
-void game::on_monster_attributes_received(configs::binary_config_value const& attributes_config, monster_npc_ptr owner)
+void game::on_monster_attributes_received(configs::binary_config_value const& attributes_config, monster_npc_ptr owner, std::string m_type)
 {
-
 	monster_npc::npc_game_attributes		attributes;
 	attributes.group_id = attributes_config["group_id"];
 	attributes.class_id = attributes_config["class_id"];
@@ -1334,6 +1336,23 @@ void game::on_monster_attributes_received(configs::binary_config_value const& at
 	attributes.name = attributes_config["name"];
 	attributes.id = attributes_config["id"];
 
+	if (m_type != "bloodsucker")
+	{
+		configs::binary_config_value const& weapons = attributes_config["weapons"];
+
+		configs::binary_config_value::const_iterator it = weapons.begin();
+		configs::binary_config_value::const_iterator it_end = weapons.end();
+
+		for (; it != it_end; ++it)
+		{
+			configs::binary_config_value const& gun = *it;
+			u32 const type = gun["type"];
+			ai::weapon_types_enum const weapon_type = (ai::weapon_types_enum)type;
+			u32 const weapon_id = gun["id"];
+			attributes.weapons.push_back(NEW(object_weapon)(weapon_type, m_ai_world->get_weapon_name_by_id(weapon_type, weapon_id), weapon_id));
+		}
+	}
+
 	finish_monster_creation(owner, attributes);
 }
 
@@ -1348,7 +1367,7 @@ void game::on_queried_npc_attributes_received(resources::queries_result& data, m
 	configs::binary_config_ptr config = static_cast_resource_ptr< configs::binary_config_ptr >(data[0].get_unmanaged_resource());
 	configs::binary_config_value const& config_root = config->get_root();
 
-	on_monster_attributes_received(config_root, owner);
+	on_monster_attributes_received(config_root, owner, "human");
 }
 
 void game::on_npc_created(resources::queries_result& data, float3 const camera_position)
@@ -1370,14 +1389,14 @@ void game::finish_npc_creation(human_npc_ptr& new_npc, human_npc::npc_game_attri
 {
 	new_npc->set_attributes(attributes);
 	new_npc->enable();
-	m_mobs.push_back(new_npc);
+	m_npcs.push_back(new_npc);
 }
 
 void game::finish_monster_creation(monster_npc_ptr& new_mob, monster_npc::npc_game_attributes& attributes)
 {
 	new_mob->set_attributes(attributes);
 	new_mob->enable();
-	m_npcs.push_back(new_mob);
+	m_mobs.push_back(new_mob);
 }
 
 void game::rotate_selected_npc(float const y_angle)
@@ -1395,8 +1414,8 @@ void game::delete_selected_npc()
 {
 	if (m_selected_npc)
 	{
-		m_npcs.erase(m_selected_npc);
-		kill_npc(m_selected_npc);
+		m_mobs.erase(m_selected_npc);
+		kill_mob(m_selected_npc);
 		m_selected_npc = 0;
 		m_active_npc_set = false;
 		--m_npc_queries_count;

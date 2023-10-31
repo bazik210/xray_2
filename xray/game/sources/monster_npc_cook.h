@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
-//	Created		: 29.10.2023
-//	Author		: Loxotron
-//	Copyright (C) GSC Game World - 2023
+//	Created		: 23.03.2011
+//	Author		: Tetyana Meleshchenko
+//	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
 #ifndef MONSTER_NPC_COOK_H_INCLUDED
@@ -35,14 +35,14 @@ namespace game {
 namespace stalker2 {
 
 class game;
-class human_npc;
+class monster_npc;
 
-class human_npc_cook :
+class monster_npc_cook :
 	public resources::translate_query_cook,
 	private boost::noncopyable
 {
 public:
-					human_npc_cook			( game& game );
+					monster_npc_cook			( game& game );
 
 	//virtual	void	translate_request_path	( pcstr request, fs_new::virtual_path_string& new_request ) const;
 	virtual	void	translate_query			( resources::query_result_for_cook&	parent );
@@ -51,10 +51,11 @@ public:
 private:
 			void	on_queried_data_received( resources::queries_result& data );
 			void	on_npc_options_received	( configs::binary_config_value const& config , resources::query_result_for_cook& parent );
-			void	on_subresources_loaded	( resources::queries_result& data, human_npc* const monster );
+			void	on_subresources_loaded	( resources::queries_result& data, monster_npc* const human );
 
 private:
 	game&									m_game;	
+	std::string								m_type;
 }; // class monster_npc_cook
 
 } // namespace stalker2

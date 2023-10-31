@@ -173,7 +173,7 @@ public:
 			void			rotate_selected_npc		( float const y_angle );
 			void			delete_selected_npc		( );
 			void			on_npc_attributes_received	( configs::binary_config_value const& attributes_config, human_npc_ptr owner );
-			void			on_monster_attributes_received ( configs::binary_config_value const& attributes_config, monster_npc_ptr owner );
+			void			on_monster_attributes_received ( configs::binary_config_value const& attributes_config, monster_npc_ptr owner, std::string m_type );
 			void			assign_behaviour		( );
 
 			void			speedtree_loaded		(resources::queries_result& data, xray::render::game::renderer* r);
@@ -243,12 +243,12 @@ private:
 							human_npc_ptr,
 							&human_npc::next_npc,
 							threading::single_threading_policy,
-							size_policy >	mobs_type;
+							size_policy >	npcs_type;
 	typedef intrusive_list< monster_npc,
 							monster_npc_ptr,
 							&monster_npc::next_npc,
 							threading::single_threading_policy,
-							size_policy >	npcs_type;
+							size_policy >	mobs_type;
 
 public:
 	xray::render::scene_view_ptr const		get_active_scene_view	( )	const;

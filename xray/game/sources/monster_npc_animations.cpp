@@ -20,12 +20,12 @@ using xray::animation::mixing::weight_lexeme;
 using xray::animation::mixing::expression;
 using xray::animation::mixing::animation_lexeme_parameters;
 
-static bool s_mob_is_positive		= true;
-static xray::console_commands::cc_bool s_animation_mob_is_positive_time_scale_command( "animation_mob_is_positive_time_scale", s_mob_is_positive, false, xray::console_commands::command_type_engine_internal );
+static bool s_is_positive		= true;
+static xray::console_commands::cc_bool s_animation_is_positive_time_scale_command( "animation_is_positive_time_scale", s_is_positive, false, xray::console_commands::command_type_engine_internal );
 
 namespace stalker2 {
 
-animation::callback_return_type_enum human_npc::on_animation_end(
+animation::callback_return_type_enum monster_npc::on_animation_end(
 		animation::skeleton_animation_ptr const& ended_animation,
 		pcstr const subscribed_channel,
 		u32 const callback_time_in_ms,
@@ -46,7 +46,7 @@ animation::callback_return_type_enum human_npc::on_animation_end(
 	return							animation::callback_return_type_dont_call_me_anymore;
 }
 
-void human_npc::play_animation		( animation::animation_expression_emitter_ptr const& emitter )
+void monster_npc::play_animation		( animation::animation_expression_emitter_ptr const& emitter )
 {
 	u32 const current_time_in_ms	= m_ai_world.get_current_time_in_ms();
 	
@@ -58,7 +58,7 @@ void human_npc::play_animation		( animation::animation_expression_emitter_ptr co
 	
 	m_model_instance->m_animation_player->subscribe	(
 		xray::animation::channel_id_on_animation_end,
-		boost::bind( &human_npc::on_animation_end, this, _1, _2, _3, _4 ),
+		boost::bind( &monster_npc::on_animation_end, this, _1, _2, _3, _4 ),
 		0
 	);
 	
@@ -68,7 +68,7 @@ void human_npc::play_animation		( animation::animation_expression_emitter_ptr co
 	render_model					( );
 }
 
-void human_npc::play_animation	( ai::animation_item const* const target )
+void monster_npc::play_animation	( ai::animation_item const* const target )
 {
 	if ( m_current_animation && m_last_animation_emitted )
 		m_model_instance->m_animation_player->unsubscribe( xray::animation::channel_id_on_animation_end, 0 );
@@ -80,7 +80,7 @@ void human_npc::play_animation	( ai::animation_item const* const target )
 	LOG_INFO					( "%s: playing animation %s", get_name(), m_current_animation->name );
 }
 
-void human_npc::stop_animation_playing		( )
+void monster_npc::stop_animation_playing		( )
 {
 	m_last_animation_emitted	= true;
 	
@@ -92,14 +92,14 @@ void human_npc::stop_animation_playing		( )
 	stop_animation_playing_impl	( );
 }
 
-void human_npc::stop_animation_playing_impl	( )
+void monster_npc::stop_animation_playing_impl	( )
 {
 	LOG_INFO					( "%s: stop playing animation %s", get_name(), m_current_animation->name );
 	m_ai_world.on_animation_finish( m_current_animation, m_brain_unit );
 	m_current_animation			= 0;
 }
 
-void human_npc::tick_animation_player	( u32 const current_time_in_ms )
+void monster_npc::tick_animation_player	( u32 const current_time_in_ms )
 {
 	m_model_instance->m_animation_player->tick( current_time_in_ms );
 	m_transform							= m_model_instance->m_animation_player->get_object_transform();
