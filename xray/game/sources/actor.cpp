@@ -72,6 +72,7 @@ void actor::query_resources( )
 		{ "character/human/actor/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
 		{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
+		{ "resources/animations/single/human/hud/reload",		resources::animation_class },
 		{ "ak_74",												resources::weapon_class },
 	};
 
@@ -96,11 +97,12 @@ void actor::on_resources_ready( resources::queries_result& data )
 
 	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
 	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());
+	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
 
 	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
 	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
 
-	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[3].get_unmanaged_resource());
+	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[4].get_unmanaged_resource());
 	m_weapon->m_game_world	= &m_game_world;
 	
 	//some query system bug;
@@ -192,6 +194,7 @@ void actor::update_animations( )
 
 	animation::skeleton_animation_ptr current_idle_animation		= m_idle_stand_animation;
 	animation::skeleton_animation_ptr current_additive_animation	= m_look_animation_add;
+	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
 
 	// caclulate additive animation coefficient, based on pitch
 	float k								= 1.0f - (m_look_pitch+1.0f)/2.0f; // normalized to 0..1.0f
@@ -203,6 +206,14 @@ void actor::update_animations( )
 			"idle",
 			current_idle_animation
 		).time_scale( 0.f )
+	);
+
+	animation::mixing::animation_lexeme	current_reload_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer,
+			"reload",
+			current_reload_animation
+		).time_scale(1.f)
 	);
 
 	animation::mixing::animation_lexeme	current_additive_lexeme(
@@ -222,7 +233,7 @@ void actor::update_animations( )
 	animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
 
 	m_animation_player->set_target_and_tick	( 
-						current_idle_lexeme
+		current_idle_lexeme
 						+ current_additive_lexeme
 						+ weapon_target
 						,current_time );
@@ -269,6 +280,7 @@ void actor::tick( )
 
 	calculate_head_matrix		( matrices, m_character_head_transform );
 
+#if 0
 	// other stuff (test, temp etc)
 	{
 		float3 ray_from		= m_character_head_transform.c.xyz();
@@ -293,6 +305,32 @@ void actor::tick( )
 					float const impulse_strength	= 100.f;
 					result.m_object->apply_impulse	( ray_dir*impulse_strength, result.m_hit_point_world );
 				}
+			}
+		}
+	}
+#endif
+
+	render::debug::renderer& d	= r.debug();
+
+	// pressed fire action
+	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire())
+	{
+		float3 ray_from		= m_character_head_transform.c.xyz();
+		float3 ray_dir		= m_character_head_transform.k.xyz();
+		float ray_length	= 100.0f; // weapon config???
+		
+		physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test( ray_from, ray_dir, ray_length );
+		if (result.m_object) // we are pick something
+		{
+			d.draw_aabb( scene, result.m_hit_point_world, float3(0.01f,0.01f,0.01f), math::color(0,255,0,255));
+			
+			// shooting
+			// weapon snd(2d or 3d???)
+			if(!result.m_object->is_static_or_kinematic_object())
+			{
+				// play shootmark snd 3d!!!
+				float const impulse_strength	= 100.f;
+				result.m_object->apply_impulse	( ray_dir*impulse_strength, result.m_hit_point_world );
 			}
 		}
 	}
