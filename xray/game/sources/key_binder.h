@@ -46,7 +46,7 @@ enum	game_action_id
 // 	kWPN_ZOOM,
 // 	kWPN_ZOOM_INC,
 // 	kWPN_ZOOM_DEC,
-// 	kWPN_RELOAD,
+ 	kWPN_RELOAD,
 // 	kWPN_FUNC,
 // 	kWPN_FIREMODE_PREV,
 // 	kWPN_FIREMODE_NEXT,

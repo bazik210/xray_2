@@ -26,7 +26,7 @@ public:
 	virtual			~object_volumetric_sound( );
 	virtual void	load					( configs::binary_config_value const& t );
 	virtual void	load_contents			( );
-	virtual void    load_custom				( fs::path_string m_sound_name );
+	virtual void    load_custom				( fs::path_string m_sound_name, bool looped );
 	virtual void	unload_contents			( );
 
 //	virtual pcstr	get_description() const { return "volumetric sound"; };
@@ -47,6 +47,7 @@ private:
 	float									m_radius;
 //	float3									m_position;
 	game_scene&								m_game_scene;
+	bool									m_looped;
 }; // class volumetric_sound
 
 } // namespace stalker2

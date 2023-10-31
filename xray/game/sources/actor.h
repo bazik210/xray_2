@@ -11,6 +11,7 @@
 #include <xray/render/facade/model.h>
 #include <xray/animation/animation_player.h>
 #include <xray/animation/instant_interpolator.h>
+#include "object_volumetric_sound.h"
 #include "weapon.h"
 
 namespace xray{
@@ -52,9 +53,16 @@ private:
 	void			remove_models_from_scene	( );
 
 	void			process_input_events		( );
-	void			update_animations			( );
+	void			update_animations			( bool m_reload );
 	void			calculate_head_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_weapon_matrix		( float4x4* const matrices, float4x4& result ) const;
+
+	animation::callback_return_type_enum on_animation_end	(
+						animation::skeleton_animation_ptr const& ended_animation,
+						pcstr const subscribed_channel,
+						u32 const callback_time_in_ms,
+						u32 const domain_data
+					);
 
 	float4x4							m_character_transform;
 	float4x4							m_character_head_transform;
@@ -72,6 +80,10 @@ private:
 	animation::bone_index_type			m_head_bone_idx;
 	animation::bone_index_type			m_weapon_bone_idx;
 	bool								m_tmp_is_active;
+	bool								m_weapon_reload;
+	bool								m_subcribe;
+	u32									m_reload_anim_time;
+	object_volumetric_sound*			m_reload_snd;
 
 	xray::physics::bt_character_controller*	m_actor_physics_controller;
 

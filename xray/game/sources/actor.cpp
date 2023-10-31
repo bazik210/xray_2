@@ -31,7 +31,10 @@ m_actor_input_controller( NULL ),
 m_animation_player	( NULL ),
 m_tmp_is_active		( false ),
 m_stop_query		(false ),
-m_game_world		( w )
+m_game_world		( w ),
+m_weapon_reload		( false ),
+m_subcribe			( 0 ),
+m_reload_snd		( 0 )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
 	m_animation_player->set_no_delete();// ??
@@ -41,10 +44,15 @@ m_game_world		( w )
 	m_anim_timer.start			( );
 
 	query_resources				( );
+
 }
 
 actor::~actor( )
 {
+		if (m_reload_snd != NULL) {
+			DELETE(m_reload_snd);
+		}
+
 		m_actor_physics_controller->deactivate();
 		DELETE(m_actor_physics_controller);
 		m_actor_physics_controller = NULL;
@@ -185,9 +193,33 @@ void actor::process_input_events( )
 
 	if(m_actor_input_controller->onframe_jump())
 		m_actor_physics_controller->jump();
+
+	//pressed reload action
+	if (m_actor_input_controller && m_actor_input_controller->on_frame_reload() && !m_weapon_reload) {
+		if (m_reload_snd != NULL) {
+			DELETE(m_reload_snd);
+		}
+		update_animations(true);
+		m_weapon_reload = true;
+	}
 }
 
-void actor::update_animations( )
+animation::callback_return_type_enum actor::on_animation_end(
+	animation::skeleton_animation_ptr const& ended_animation,
+	pcstr const subscribed_channel,
+	u32 const callback_time_in_ms,
+	u32 const domain_data
+) 
+{
+	m_weapon_reload = false;
+	m_subcribe = false;
+
+	//m_animation_player->unsubscribe( xray::animation::channel_id_on_animation_end, 0 );
+
+	return							animation::callback_return_type_dont_call_me_anymore;
+}
+
+void actor::update_animations( bool m_reload = false )
 {
 
 	mutable_buffer buffer	( ALLOCA( animation::animation_player::stack_buffer_size ), animation::animation_player::stack_buffer_size );
@@ -232,12 +264,32 @@ void actor::update_animations( )
 	
 	animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
 
-	m_animation_player->set_target_and_tick	( 
-		current_idle_lexeme
-						+ current_additive_lexeme
-						+ weapon_target
-						,current_time );
+	if (!m_reload) {
+		m_animation_player->set_target_and_tick(
+			current_idle_lexeme
+			+ current_additive_lexeme
+			+ weapon_target
+			, current_time);
 
+	}
+	else {
+		if (!m_subcribe) {
+			m_subcribe = true;
+			m_reload_snd = NEW(object_volumetric_sound)(m_game_world);
+			m_reload_snd->load_custom("reload", false);
+			m_animation_player->set_target_and_tick(
+				current_reload_lexeme
+				+ weapon_target
+				, current_time);
+		//	m_animation_player->subscribe(
+		//		xray::animation::channel_id_on_animation_end,
+		//		boost::bind(&actor::on_animation_end, this, _1, _2, _3, _4),
+		//		0
+		//	);
+			m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
+		}
+		m_animation_player->tick(current_time);
+	}
 }
 
 void actor::tick( )
@@ -249,11 +301,21 @@ void actor::tick( )
 	if (!m_actor_physics_controller)
 		return;
 
+	if (m_subcribe && m_anim_timer.get_elapsed_msec() >= m_reload_anim_time) {
+		m_weapon_reload = false;
+		m_subcribe = false;
+	}
+
 	m_character_transform = m_actor_physics_controller->get_transform();
 
 	process_input_events	( );
 
-	update_animations		( );
+	if (!m_weapon_reload) {
+		update_animations();
+	}
+	else {
+		update_animations(true);
+	}
 
 	render::scene_ptr scene			= m_game_world.get_render_scene();
 	render::game::renderer& r		= m_game_world.renderer();
@@ -310,11 +372,10 @@ void actor::tick( )
 	}
 #endif
 
-	render::debug::renderer& d	= r.debug();
-
 	// pressed fire action
 	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire())
 	{
+		render::debug::renderer& d	= r.debug();
 		float3 ray_from		= m_character_head_transform.c.xyz();
 		float3 ray_dir		= m_character_head_transform.k.xyz();
 		float ray_length	= 100.0f; // weapon config???

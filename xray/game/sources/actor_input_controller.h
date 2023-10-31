@@ -59,6 +59,7 @@ public:
 	float				onframe_turn_x		( )	{ return m_frame_events.m_onframe_turn_x; };
 	bool				onframe_jump		( )	{ return m_frame_events.m_onframe_jump; };
 	bool				on_frame_fire		( );
+	bool				on_frame_reload		( );
 	
 	float				last_frame_time_delta( ) const { return m_frame_events.m_last_frame_time_delta; };
 

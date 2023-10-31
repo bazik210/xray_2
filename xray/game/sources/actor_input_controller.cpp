@@ -81,6 +81,11 @@ bool actor_input_controller::on_frame_fire		( )
 	return m_frame_events.action_present(kWPN_FIRE); 
 }
 
+bool actor_input_controller::on_frame_reload	( ) 
+{ 
+	return m_frame_events.action_present(kWPN_RELOAD); 
+}
+
 bool frame_events::action_present( game_action_id game_action_name ) const
 {
 	return std::find(m_game_actions.begin(), m_game_actions.end(), game_action_name) != m_game_actions.end();

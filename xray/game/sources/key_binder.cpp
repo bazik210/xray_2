@@ -87,7 +87,7 @@ game_action_descr  actions[]		= {
 // 	{ "wpn_zoom",			kWPN_ZOOM				,_both},	
 // 	{ "wpn_zoom_inc",		kWPN_ZOOM_INC			,_both},	
 // 	{ "wpn_zoom_dec",		kWPN_ZOOM_DEC			,_both},	
-// 	{ "wpn_reload",			kWPN_RELOAD				,_both},	
+ 	{ "wpn_reload",			kWPN_RELOAD				,_both, "kR"},
 // 	{ "wpn_func",			kWPN_FUNC				,_both},	
 // 	{ "wpn_firemode_prev",	kWPN_FIREMODE_PREV		,_both},	
 // 	{ "wpn_firemode_next",	kWPN_FIREMODE_NEXT		,_both},	
