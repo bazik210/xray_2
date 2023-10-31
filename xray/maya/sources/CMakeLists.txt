@@ -118,6 +118,12 @@ target_link_libraries(maya2011 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -258,6 +264,12 @@ target_link_libraries(maya2012 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -398,6 +410,12 @@ target_link_libraries(maya2018 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -537,6 +555,12 @@ target_link_libraries(maya2019 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -676,6 +700,12 @@ target_link_libraries(maya2023 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
