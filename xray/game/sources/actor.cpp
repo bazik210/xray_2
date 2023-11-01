@@ -77,10 +77,13 @@ void actor::set_input_source( actor_input_controller* s )
 void actor::query_resources( )
 {
 	resources::request r[] ={
-		{ "character/human/actor/neutral_01/neutral_01",		resources::skeleton_model_instance_class },
-		{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
-		{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
-		{ "resources/animations/single/human/hud/reload",		resources::animation_class },
+		{ "character/human/actor/neutral_03/neutral_03_actor_full",	resources::skeleton_model_instance_class },
+		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle",	resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/stand/on_site_add",	resources::animation_class },
+		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload_empty", resources::animation_class },
+		//{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
+		//{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
+		//{ "resources/animations/single/human/hud/reload",		resources::animation_class },
 		{ "ak_74",												resources::weapon_class },
 	};
 
@@ -108,6 +111,7 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
 
 	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
+	m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
 	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
 
 	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[4].get_unmanaged_resource());
@@ -342,11 +346,13 @@ void actor::tick( )
 
 	calculate_head_matrix		( matrices, m_character_head_transform );
 
+	calculate_camera_matrix		( matrices, m_character_camera_transform );
+
 #if 0
 	// other stuff (test, temp etc)
 	{
-		float3 ray_from		= m_character_head_transform.c.xyz();
-		float3 ray_dir		= m_character_head_transform.k.xyz();
+		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();
+		float3 ray_dir		= m_character_camera_transform.k.xyz(); //m_character_head_transform.k.xyz();
 		float ray_length	= 100.0f;
 
 		render::debug::renderer& d	= r.debug();
@@ -376,8 +382,8 @@ void actor::tick( )
 	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire())
 	{
 		render::debug::renderer& d	= r.debug();
-		float3 ray_from		= m_character_head_transform.c.xyz();
-		float3 ray_dir		= m_character_head_transform.k.xyz();
+		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();
+		float3 ray_dir		= m_character_camera_transform.k.xyz(); //m_character_head_transform.k.xyz();
 		float ray_length	= 100.0f; // weapon config???
 		
 		physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test( ray_from, ray_dir, ray_length );
@@ -395,6 +401,16 @@ void actor::tick( )
 			}
 		}
 	}
+}
+
+void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) const
+{
+	float4x4 character_render_transform = create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform;
+	result = (create_rotation(float3(0, 0, math::pi_d2)) *
+		matrices[m_camera_bone_idx] *
+		character_render_transform);
+
+	result.c.xyz() += result.j.xyz() * 0.1f;
 }
 
 void actor::calculate_head_matrix( float4x4* const matrices, float4x4& result ) const

@@ -28,7 +28,6 @@ namespace stalker2{
 class game_world;
 class actor_input_controller;
 
-
 class actor : private boost::noncopyable //public game_camera
 
 {
@@ -42,6 +41,7 @@ public:
 
 	collision::geometry_instance&	get_caracter_capsule		( );
 	float4x4 const&					character_head_transform	( ) const		{ return m_character_head_transform; }
+	float4x4 const&					character_camera_transform	( ) const { return m_character_camera_transform; }
 
 	void			activate			( math::float4x4 const& initial_matrix );
 
@@ -56,6 +56,8 @@ private:
 	void			update_animations			( bool m_reload );
 	void			calculate_head_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_weapon_matrix		( float4x4* const matrices, float4x4& result ) const;
+	void			calculate_camera_matrix		(float4x4* const matrices, float4x4& result) const;
+	
 
 	animation::callback_return_type_enum on_animation_end	(
 						animation::skeleton_animation_ptr const& ended_animation,
@@ -66,6 +68,7 @@ private:
 
 	float4x4							m_character_transform;
 	float4x4							m_character_head_transform;
+	float4x4							m_character_camera_transform;
 	float								m_look_pitch;
 
 	render::skeleton_model_ptr			m_character_model;
@@ -78,6 +81,7 @@ private:
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;
+	animation::bone_index_type			m_camera_bone_idx;
 	animation::bone_index_type			m_weapon_bone_idx;
 	bool								m_tmp_is_active;
 	bool								m_weapon_reload;

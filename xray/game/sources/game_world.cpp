@@ -142,7 +142,7 @@ void game_world::tick()
 	if (m_local_actor)
 	{
 		m_local_actor->tick();
-		m_actor_input_controller->inverted_view_matrix() = m_local_actor->character_head_transform();
+		m_actor_input_controller->inverted_view_matrix() = m_local_actor->character_camera_transform(); //character_head_transform();
 		//m_actor_input_controller->update_camera_matrix(	float2( m_frame_events.m_onframe_turn_x, m_frame_events.m_onframe_turn_y ), 
 		//										m_frame_events.m_onframe_move_fwd, 
 		//										m_frame_events.m_onframe_move_right,
