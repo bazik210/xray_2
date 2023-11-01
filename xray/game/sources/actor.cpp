@@ -84,7 +84,8 @@ void actor::query_resources( )
 		//{ "resources/animations/single/human/hud/stand_idle",	resources::animation_class },
 		//{ "resources/animations/single/human/hud/stand_add",	resources::animation_class },
 		//{ "resources/animations/single/human/hud/reload",		resources::animation_class },
-		{ "ak_74",												resources::weapon_class },
+		{ "assault_rifles/ak74m",								resources::weapon_class },
+//		{ "ak_74",												resources::weapon_class },
 	};
 
 	resources::query_resources(
@@ -344,7 +345,7 @@ void actor::tick( )
 		m_weapon->tick				( m_animation_player );
 	}
 
-	calculate_head_matrix		( matrices, m_character_head_transform );
+	//calculate_head_matrix		( matrices, m_character_head_transform );
 
 	calculate_camera_matrix		( matrices, m_character_camera_transform );
 
@@ -406,11 +407,11 @@ void actor::tick( )
 void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) const
 {
 	float4x4 character_render_transform = create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform;
-	result = (create_rotation(float3(0, 0, math::pi_d2)) *
+	result = (create_rotation(float3(0, math::pi, 0)) *
 		matrices[m_camera_bone_idx] *
 		character_render_transform);
 
-	result.c.xyz() += result.j.xyz() * 0.1f;
+	//result.c.xyz() += result.j.xyz() * 0.1f;
 }
 
 void actor::calculate_head_matrix( float4x4* const matrices, float4x4& result ) const
