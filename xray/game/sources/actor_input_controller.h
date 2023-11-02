@@ -60,6 +60,8 @@ public:
 	bool				onframe_jump		( )	{ return m_frame_events.m_onframe_jump; };
 	bool				on_frame_fire		( );
 	bool				on_frame_reload		( );
+	bool				on_frame_switch_1	( );
+	bool				on_frame_switch_2	( );
 	
 	float				last_frame_time_delta( ) const { return m_frame_events.m_last_frame_time_delta; };
 

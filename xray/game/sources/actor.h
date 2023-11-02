@@ -4,8 +4,8 @@
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
-#ifndef HUD_H_INCLUDED
-#define HUD_H_INCLUDED
+#ifndef ACTOR_H_INCLUDED
+#define ACTOR_H_INCLUDED
 
 //#include "game_camera.h"
 #include <xray/render/facade/model.h>
@@ -53,18 +53,20 @@ private:
 	void			remove_models_from_scene	( );
 
 	void			process_input_events		( );
-	void			update_animations			( bool m_reload );
+	void			update_animations			( bool m_reload, bool m_shoot );
 	void			calculate_head_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_weapon_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_camera_matrix		(float4x4* const matrices, float4x4& result) const;
-	
+	void			switch_weapon();
+	void			on_weapon_loaded(resources::queries_result& data);
+	void			query_new_weapon(pstr weapon_type, pstr new_anim);
 
-	animation::callback_return_type_enum on_animation_end	(
-						animation::skeleton_animation_ptr const& ended_animation,
-						pcstr const subscribed_channel,
-						u32 const callback_time_in_ms,
-						u32 const domain_data
-					);
+//	animation::callback_return_type_enum on_animation_end	(
+//						animation::skeleton_animation_ptr const& ended_animation,
+//						pcstr const subscribed_channel,
+//						u32 const callback_time_in_ms,
+//						u32 const domain_data
+//					);
 
 	float4x4							m_character_transform;
 	float4x4							m_character_head_transform;
@@ -78,20 +80,31 @@ private:
 	animation::skeleton_animation_ptr	m_idle_stand_animation;
 	animation::skeleton_animation_ptr	m_look_animation_add; //additive
 	animation::skeleton_animation_ptr	m_reload_animation;
+	animation::skeleton_animation_ptr	m_shoot_animation;
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;
 	animation::bone_index_type			m_camera_bone_idx;
 	animation::bone_index_type			m_weapon_bone_idx;
 	bool								m_tmp_is_active;
-	bool								m_weapon_reload;
-	bool								m_subcribe;
+	bool								m_start_reload_timer;
+	bool								m_start_shoot_timer;
+	bool								m_wpn_reload;
+	bool								m_wpn_switch;
+	bool								m_wpn_call;
+	u32									m_wpn_timer;
 	u32									m_reload_anim_time;
-	object_volumetric_sound*			m_reload_snd;
+	u32									m_shoot_anim_time;
+	bool								m_wpn_shoot;
+	object_volumetric_sound*			m_snd;
+
+
 
 	xray::physics::bt_character_controller*	m_actor_physics_controller;
 
 	weapon_ptr							m_weapon;
+	pstr								m_new_weapon;
+	pstr								m_new_anim;
 
 	actor_input_controller*				m_actor_input_controller;
 	game_world&							m_game_world;
@@ -99,4 +112,4 @@ private:
 
 } // namespace stalker2
 
-#endif // #ifndef HUD_H_INCLUDED
+#endif // #ifndef ACTOR_H_INCLUDED

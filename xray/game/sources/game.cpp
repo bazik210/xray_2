@@ -731,6 +731,17 @@ void game::unload( pcstr , bool destroying )
 {
 	ASSERT								( m_game_world );
 
+	snd_list::const_iterator it		= m_active_sounds.begin();
+	snd_list::const_iterator it_end	= m_active_sounds.end();
+
+	for (; it != it_end; ++it)
+	{
+		object_volumetric_sound *snd = *it;
+		snd->m_force_stop = true;
+	}
+
+	m_active_sounds.empty();
+
 	m_game_world->unload				( );
 	
 	for ( human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )

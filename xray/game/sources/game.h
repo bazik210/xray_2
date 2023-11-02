@@ -20,6 +20,7 @@
 #include "human_npc.h"
 #include "monster_npc.h"
 #include <xray/render/engine/base_classes.h>
+#include "object_volumetric_sound.h"
 
 namespace xray {
 
@@ -255,6 +256,11 @@ public:
 	xray::render::scene_ptr const			get_active_scene		( )	const;
 	bool									get_editor				( ) { return false; };
 	bool									gload;
+
+	typedef vector<object_volumetric_sound*>	snd_list;
+
+	snd_list								m_active_sounds;
+
 private:
 	timing::timer							m_timer;
 	threading::mutex						m_application_activation;

@@ -75,8 +75,8 @@ game_action_descr  actions[]		= {
  	{ "night_vision",		kNIGHT_VISION			,_both},	
  	{ "show_detector",		kDETECTOR				,_sp},		
  
- 	{ "wpn_1",				kWPN_1					,_both},	
- 	{ "wpn_2",				kWPN_2					,_both},	
+ 	{ "wpn_1",				kWPN_1					,_both, "k1"},
+ 	{ "wpn_2",				kWPN_2					,_both, "k2"},	
  	{ "wpn_3",				kWPN_3					,_both},	
  	{ "wpn_4",				kWPN_4					,_both},	
  	{ "wpn_5",				kWPN_5					,_both},	

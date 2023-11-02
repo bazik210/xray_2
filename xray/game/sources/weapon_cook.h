@@ -28,6 +28,7 @@ private:
 			void	on_weapon_parts_ready	(	resources::queries_result& data, 
 												configs::binary_config_ptr config_ptr, 
 												resources::query_result_for_cook* parent );
+		std::string	current_weapon;
 
 	game&			m_game;
 }; // class weapon_cook

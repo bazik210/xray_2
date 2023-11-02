@@ -48,6 +48,9 @@ private:
 //	float3									m_position;
 	game_scene&								m_game_scene;
 	bool									m_looped;
+
+public:
+	bool									m_force_stop;
 }; // class volumetric_sound
 
 } // namespace stalker2
