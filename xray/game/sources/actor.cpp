@@ -214,14 +214,14 @@ void actor::process_input_events( )
 	}
 
 	//pressed 1
-	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_1() && !m_wpn_switch && m_new_weapon != "ak_74")
+	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_1() && !m_wpn_switch  && !m_wpn_reload && m_new_weapon != "ak_74")
 	{
 		m_wpn_switch = true;
 		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
 	}
 
 	//pressed 2
-	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_2()  && !m_wpn_switch && m_new_weapon != "assault_rifles/ak74m")
+	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_2()  && !m_wpn_switch && !m_wpn_reload && m_new_weapon != "assault_rifles/ak74m")
 	{
 		m_wpn_switch = true;
 		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
@@ -245,6 +245,8 @@ void actor::query_new_weapon( pstr weapon_type, pstr new_anim )
 void actor::on_weapon_loaded(resources::queries_result& data)
 {
 	R_ASSERT(data.is_successful());
+
+	m_weapon->hide ( );
 
 	m_weapon = static_cast_resource_ptr< weapon_ptr >(data[0].get_unmanaged_resource());
 	m_weapon->m_game_world	= &m_game_world;
@@ -270,8 +272,6 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 }
 
 void actor::switch_weapon() {
-	m_weapon->hide ( );
-	
 	query_new_weapon(m_new_weapon, m_new_anim);
 }
 
@@ -354,42 +354,46 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 			, current_time);
 	}
 	else {
-		if (m_reload && !m_start_reload_timer) {
-			m_start_reload_timer = true;
-			if (m_snd != NULL) {
-				DELETE(m_snd);
+		if (m_reload) {
+			if (!m_start_reload_timer) {
+				m_start_reload_timer = true;
+				if (m_snd != NULL) {
+					DELETE(m_snd);
+				}
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				m_snd->load_custom("reload", false);
+				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
 			}
-			m_snd = NEW(object_volumetric_sound)(m_game_world);
-			m_game_world.get_game().m_active_sounds.push_back(m_snd);
-			m_snd->load_custom("reload", false);
 			m_animation_player->set_target_and_tick(
 				current_reload_lexeme
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
-		//	m_animation_player->subscribe(
-		//		xray::animation::channel_id_on_animation_end,
-		//		boost::bind(&actor::on_animation_end, this, _1, _2, _3, _4),
-		//		0
-		//	);
-			m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
+			//	m_animation_player->subscribe(
+			//		xray::animation::channel_id_on_animation_end,
+			//		boost::bind(&actor::on_animation_end, this, _1, _2, _3, _4),
+			//		0
+			//	);
 		}
-		if (m_shoot && !m_start_shoot_timer) {
-			m_start_shoot_timer = true;
-			if (m_snd != NULL) {
-				DELETE(m_snd);
+		if (m_shoot) {
+			if (!m_start_shoot_timer) {
+				m_start_shoot_timer = true;
+				if (m_snd != NULL) {
+					DELETE(m_snd);
+				}
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				m_snd->load_custom("shoot", false);
+				m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
 			}
-			m_snd = NEW(object_volumetric_sound)(m_game_world);
-			m_game_world.get_game().m_active_sounds.push_back(m_snd);
-			m_snd->load_custom("shoot", false);
 			m_animation_player->set_target_and_tick(
 				current_shoot_lexeme
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
-			m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
 		}
-		m_animation_player->tick(current_time);
+		//m_animation_player->tick(current_time);
 	}
 }
 
@@ -438,10 +442,10 @@ void actor::tick( )
 		m_weapon->action				( 0 );
 	}
 
-	if (!m_wpn_switch) {
-		//update timer consistenly until we are switching weapon
-		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
-	}
+//	if (!m_wpn_switch) {
+//		//update timer consistenly until we are switching weapon
+//		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
+//	}
 
 	render::scene_ptr scene			= m_game_world.get_render_scene();
 	render::game::renderer& r		= m_game_world.renderer();
