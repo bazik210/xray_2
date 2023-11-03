@@ -51,7 +51,6 @@ void actor_hud::init(stalker2::game& game)
 void actor_hud::destroy(stalker2::game& game)
 {
     ui::world& ui_world = game.ui_world();
-    ui_world.destroy_window(m_health_text->w());
     ui_world.destroy_window(m_wnd);
 }
 

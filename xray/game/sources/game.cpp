@@ -53,6 +53,7 @@
 #include "lobby_menu.h"
 #include "key_binder.h"
 #include "help_functions.h"
+#include "actor_hud.h"
 
 #ifdef XRAY_STATIC_LIBRARIES
 	#ifdef XRAY_RENDERER_FLASH
@@ -216,6 +217,8 @@ game::~game( )
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 	DELETE						( m_key_binder );
 
+	actor_hud::get_instance()->destroy(*this);
+
 	deinitialize_modules		( );
 }
 
@@ -232,6 +235,8 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	initialize_modules			( );
 	
 	m_ui_world->set_base_screen_size(m_engine.get_render_window_size());
+
+	actor_hud::get_instance()->init(*this);
 
 	register_cooks				( );
 
