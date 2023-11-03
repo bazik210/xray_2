@@ -69,7 +69,7 @@ add_library(fs STATIC
 				"${CMAKE_CURRENT_SOURCE_DIR}/windows_hdd_file_system_iteration.cpp"
 				# simple_interfaces
 				"${CMAKE_CURRENT_SOURCE_DIR}/simple_asynchronous_interface.cpp"
-				"${CMAKE_CURRENT_SOURCE_DIR}/../simple_synchronous_interace.cpp"
+				"${CMAKE_CURRENT_SOURCE_DIR}/simple_synchronous_interface.cpp"
 				# ./
 				"${CMAKE_CURRENT_SOURCE_DIR}/device_file_system_no_watcher.cpp"
 				"${CMAKE_CURRENT_SOURCE_DIR}/device_file_system_proxy_base.cpp"

@@ -118,6 +118,12 @@ target_link_libraries(maya2011 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -133,7 +139,13 @@ target_link_directories(maya2011 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+    target_compile_options(maya2011 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2011 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -258,6 +270,12 @@ target_link_libraries(maya2012 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -272,7 +290,13 @@ target_link_directories(maya2012 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2012 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2012 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -398,6 +422,12 @@ target_link_libraries(maya2018 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -412,7 +442,13 @@ target_link_directories(maya2018 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2018 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2018 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -537,6 +573,12 @@ target_link_libraries(maya2019 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -551,7 +593,13 @@ target_link_directories(maya2019 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2019 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2019 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -676,6 +724,12 @@ target_link_libraries(maya2023 PRIVATE
 	collision
 	LibFoundation
 	LibPNG
+	texture_compressor
+	zlibN
+	lua.5.1.4
+	luabind.0.8.1
+	core_cs
+	script_cs
 #	scaleform
 	bullet
 	opengl32.lib
@@ -690,7 +744,13 @@ target_link_directories(maya2023 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2023 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2023 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 

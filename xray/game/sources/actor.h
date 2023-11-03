@@ -66,6 +66,7 @@ private:
 	animation::instant_interpolator		m_interpolator;
 	animation::skeleton_animation_ptr	m_idle_stand_animation;
 	animation::skeleton_animation_ptr	m_look_animation_add; //additive
+	animation::skeleton_animation_ptr	m_reload_animation;
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;

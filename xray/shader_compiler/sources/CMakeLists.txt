@@ -48,18 +48,18 @@ if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
     # set platform as x64
 	target_compile_definitions(shader_compiler PRIVATE
 	  PLATFORM_WIN64
-          WIN64
-          WINDOWS
-          _HAS_EXCEPTIONS=0
+      WIN64
+      WINDOWS
+      _HAS_EXCEPTIONS=0
 	  BOOST_NO_EXCEPTIONS
     )
 else()
     # set platform as x86
 	target_compile_definitions(shader_compiler PRIVATE
 	  PLATFORM_WIN32
-          WIN32
-          WINDOWS
-          _HAS_EXCEPTIONS=0
+      WIN32
+      WINDOWS
+      _HAS_EXCEPTIONS=0
 	  BOOST_NO_EXCEPTIONS
     )
 endif()
@@ -68,6 +68,7 @@ target_link_libraries(shader_compiler PRIVATE
 	fs
 	vfs
 	core
+	lua.5.1.4
 	renderer_core_pc_dx11
 )
 
