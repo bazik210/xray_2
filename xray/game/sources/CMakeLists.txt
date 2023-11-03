@@ -127,9 +127,16 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animation_controller_planner.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animation_controller.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_animations.cpp"
+					# monster
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc_animation_controller.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc_animations.cpp"
 					# cook
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_cook.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/human_npc_cook.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc_cook.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/monster_npc_cook.h"
 					# game_material_visibility_parameters
 					"${CMAKE_CURRENT_SOURCE_DIR}/game_material_visibility_parameters.h"
 					# npc_behaviours

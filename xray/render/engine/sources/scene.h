@@ -46,6 +46,12 @@ typedef	resources::resource_ptr <
 	resources::unmanaged_intrusive_base
 > terrain_render_model_instance_ptr;
 
+class composite_render_model_instance;
+typedef	resources::resource_ptr <
+	composite_render_model_instance,
+	resources::unmanaged_intrusive_base
+> composite_render_model_instance_ptr;
+
 class speedtree_instance;
 typedef	resources::resource_ptr<
 	speedtree_instance,
@@ -85,6 +91,7 @@ public:
 	
 			void		select_models					( float4x4 const & mat_vp, render_surface_instances& selection );
 			void		select_terrain_cells			( float4x4 const & mat_vp, render::vector< terrain_render_model_instance_ptr > & cells);
+			void		select_game_cells			  ( float4x4 const & mat_vp, render::vector< composite_render_model_instance_ptr > & cells);
 			void		update_models					(  );
 
 			void		select_particle_system_instance	( particle::particle_system_instance_ptr const& instance, bool is_selected);

@@ -60,6 +60,7 @@ public:
 	bool					m_selected;
 	System::Guid			m_guid;
 	project^				m_project;
+	static System::String^	m_project_prev_name;
 	controls::tree_node_type			m_node_type;
 
 			void					assign_id			( u32 id);

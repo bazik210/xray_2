@@ -82,6 +82,7 @@ void model_editor::query_create_render_resources( )
 {
  	render::scene_configuration						scene_configuration;
  	scene_configuration.m_create_particle_world		= false;
+	scene_configuration.m_create_speedtree_world	= true;
  	
  	System::Int32 hwnd								= m_view_window->view_handle();
 	render::output_window_configuration				window_configuration;
@@ -218,9 +219,9 @@ void model_editor::Show( System::String^ context1, System::String^ context2 )
 	else
 	if(context1=="speedtree")
 		m_edit_object					= gcnew edit_object_speedtree( this );
-	//else
-	//if(context1=="composite_visual")
-	//	m_edit_object					= gcnew edit_object_composite_visual( this );
+	else
+	if(context1=="composite_visual")
+		m_edit_object					= gcnew edit_object_composite_visual( this );
 
 	m_edit_object->register_actions	( true );
 

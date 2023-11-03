@@ -14,7 +14,6 @@
 #pragma message( XRAY_TODO("dimetcm 2 dimetcm: this includes only needed to test, remove this constructor after test") )
 #include <xray/input/world.h>
 #include <xray/input/keyboard.h>
-#include "human_npc.h"
 #include <xray/render/facade/debug_renderer.h>
 #include <xray/render/facade/game_renderer.h>
 
@@ -171,9 +170,18 @@ void ai_sound_player::tick			( )
 	R_ASSERT_CMP					( current_time_in_ms, >=, m_dbg_last_current_time_in_ms );
 	//u32 const time_delta			= current_time_in_ms - m_dbg_last_current_time_in_ms;
 
-	human_npc const* npc			= static_cast_checked<human_npc const*>( m_sound_producer );
-	if ( !npc->get_sound_dbg_mode( ) )
-		return;
+	if (dynamic_cast<human_npc*>( const_cast<sound::sound_producer*>(m_sound_producer) ) != 0)
+	{ 
+		human_npc const* npc			= static_cast_checked<human_npc const*>( m_sound_producer );
+		if ( !npc->get_sound_dbg_mode( ) )
+			return;
+	}
+	else
+	{
+		monster_npc const* npc = static_cast_checked<monster_npc const*>(m_sound_producer);
+		if ( !npc->get_sound_dbg_mode( ) )
+			return;
+	}
 
 	if ( m_active_sound )
 	{
@@ -214,9 +222,20 @@ void ai_sound_player::process_input	( )
 	if ( m_dbg_input_world == 0 )
 		return;
 
-	human_npc* npc						= (human_npc*)m_sound_producer;
-	if ( !strings::equal( "aggressive_npc", npc->get_description() ) )
-		return;
+	if ((dynamic_cast<human_npc*>(const_cast<sound::sound_producer*>(m_sound_producer))) != 0)
+	{
+		m_npc = (human_npc*)m_sound_producer;
+
+		if (!strings::equal("aggressive_npc", m_npc->get_description()))
+			return;
+	}
+	else
+	{
+		m_mob = (monster_npc*)m_sound_producer;
+
+		if (!strings::equal("aggressive_npc", m_mob->get_description()))
+			return;
+	}
 
 	non_null<input::keyboard const>::ptr const k	= m_dbg_input_world->get_keyboard();
 
@@ -228,7 +247,13 @@ void ai_sound_player::process_input	( )
 		
 		m_active_sound							= type->emitter->emit( m_scene, m_user );
 		m_active_sound->set_callback			( boost::bind( &ai_sound_player::on_finish_playing, this ) );
-		m_active_sound->set_position			( npc->get_position( float3( 0.0f, 0.0f, 0.0f )));
+		if (m_npc) {
+			m_active_sound->set_position(m_npc->get_position(float3(0.0f, 0.0f, 0.0f)));
+		}
+		else
+		{
+			m_active_sound->set_position(m_mob->get_position(float3(0.0f, 0.0f, 0.0f)));
+		}
 		m_active_sound->play					( sound::once, m_sound_producer, m_ignorable_receiver );
 
 		key_i_pressed							= true;
@@ -243,7 +268,12 @@ void ai_sound_player::process_input	( )
 		R_ASSERT								( type, "such a type is absent in sound collections" );
 
 		m_active_sound							= type->emitter->emit( m_scene, m_user );
-		m_active_sound->set_position			( npc->get_position( float3( 0.0f, 0.0f, 0.0f )));
+		if (m_npc) {
+			m_active_sound->set_position(m_npc->get_position(float3(0.0f, 0.0f, 0.0f)));
+		}
+		else {
+			m_active_sound->set_position(m_mob->get_position(float3(0.0f, 0.0f, 0.0f)));
+		}
 		m_active_sound->play					( sound::looped, m_sound_producer, m_ignorable_receiver );
 
 		key_o_pressed							= true;
@@ -257,14 +287,26 @@ void ai_sound_player::process_input	( )
 		sounds_collection_type const* type		= find( ai::sound_collection_type_npc_pain );
 		R_ASSERT								( type, "such a type is absent in sound collections" );
 
-		type->emitter->emit_and_play_once		
-		(	
-			m_scene,
-			m_user,
-			npc->get_position( float3( 0.0f, 0.0f, 0.0f )),
-			m_sound_producer,
-			m_ignorable_receiver
-		);
+		if (m_npc) {
+			type->emitter->emit_and_play_once
+			(
+				m_scene,
+				m_user,
+				m_npc->get_position(float3(0.0f, 0.0f, 0.0f)),
+				m_sound_producer,
+				m_ignorable_receiver
+			);
+		}
+		else {
+			type->emitter->emit_and_play_once
+			(
+				m_scene,
+				m_user,
+				m_mob->get_position(float3(0.0f, 0.0f, 0.0f)),
+				m_sound_producer,
+				m_ignorable_receiver
+			);
+		}
 
 		key_p_pressed							= true;
 	}

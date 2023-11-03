@@ -225,6 +225,12 @@ void scene::select_terrain_cells	( float4x4 const & mat_vp, render::vector<terra
 	m_terrain->select_cells( mat_vp, cells);
 }
 
+void scene::select_game_cells	( float4x4 const & mat_vp, render::vector<composite_render_model_instance_ptr> & cells)
+{
+	ASSERT( m_terrain);
+	m_terrain->select_game_cells( mat_vp, cells);
+}
+
 void scene::add_light		( u32 id, render::light_props const& props)
 {
 	m_lights->add_light( id, props);

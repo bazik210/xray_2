@@ -73,7 +73,8 @@ private: // actions
 	void									register_actions				( );
 	void									action_open_solid_model			( );
 	void									action_open_tree_model			( );
-//	void									action_new_composite_model		( );
+	void									action_open_skinned_model		( );
+	void									action_new_composite_model		( );
 
 	void									apply_button_Click				( System::Object^  sender, System::EventArgs^  e);
 	void									cancel_button_Click				( System::Object^  sender, System::EventArgs^  e);

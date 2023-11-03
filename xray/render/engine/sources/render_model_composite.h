@@ -58,6 +58,11 @@ protected:
 	float4x4*						m_surface_matrices;
 };
 
+typedef	resources::resource_ptr<
+			composite_render_model_instance,
+			resources::unmanaged_intrusive_base
+		> composite_render_model_instance_ptr;
+
 } // namespace render
 } // namespace xray
 

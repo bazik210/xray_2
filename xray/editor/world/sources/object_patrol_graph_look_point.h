@@ -8,6 +8,7 @@
 #define OBJECT_PATROL_GRAPH_LOOK_POINT_H_INCLUDED
 
 #include "object_patrol_graph_part.h"
+#include "attribute.h"
 
 using namespace System;
 
@@ -52,7 +53,8 @@ namespace xray
 			property Single				duration;
 			property String^			signal_on_begin;
 			property String^			signal_on_end;
-			[external_editor_attribute( resource_chooser_external_editor::typeid, "animations_list" )]
+			[DefaultValueAttribute(""), ReadOnlyAttribute(false)]
+			[external_editor_attribute( resource_chooser_external_editor::typeid, "animations_list", true, false )]
 			property String^			animation;
 			[value_range_and_format_attribute( 0, 100, 0.01, 2 )]
 			property Single				probability

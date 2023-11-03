@@ -12,6 +12,8 @@
 #include "lua_config_value_editor.h"
 #include "resource_loading_dialog.h"
 
+using System::String;
+
 namespace xray{
 namespace editor{
 
@@ -20,7 +22,13 @@ project_item_base::project_item_base( project^ p )
 	m_tree_node_( nullptr ), 
 	m_parent	( nullptr ), 
 	m_selected	( false )
-{}
+{
+	if (!m_project_prev_name || m_project && m_project_prev_name && !String::Equals(p->project_name(), m_project_prev_name) ) 
+	{
+		m_project_prev_name = p->project_name();
+		s_id_to_object.Clear();
+	}
+}
 
 project_item_base::~project_item_base( )
 {

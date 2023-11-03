@@ -194,8 +194,8 @@ void project::save_project( System::String^ project_name )
 	System::String^ path			= "resources/projects/";
 	path							+= project_name;
 
-	//xray::ai::navigation::graph_generator* graph_generator = get_level_editor()->get_editor_world().get_ai_navigation_world().get_graph_generator();
-	//graph_generator->save_geometry	( unmanaged_string( path + "/navmesh.lua" ).c_str() );
+	xray::ai::navigation::graph_generator* graph_generator = get_level_editor()->get_editor_world().get_ai_navigation_world().get_graph_generator();
+	graph_generator->save_geometry	( unmanaged_string( path + "/navmesh.lua" ).c_str() );
 
 	path							+= "/project.xprj";
 

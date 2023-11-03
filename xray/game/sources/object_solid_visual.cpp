@@ -67,24 +67,19 @@ void object_solid_visual::load_contents( )
 	if( m_model )
 		return;
 
-	fs::path_string model_collision_path;
-	model_collision_path.assignf( "resources/models/%s.model/collision", m_visual_name.c_str() );
-
 	resources::request r[]=
 	{
-		{ m_visual_name.c_str(), resources::static_model_instance_class },
-		{ model_collision_path.c_str(), resources::collision_bt_shape_class_static },
+		{ m_visual_name.c_str(), resources::static_model_instance_class }
 	};
 
 	resources::query_resources(
 		r,
-		boost::bind(&object_solid_visual::on_resources_ready, this, _1),
+		boost::bind(&object_solid_visual::on_render_ready, this, _1),
 		g_allocator
 	);
-	
 }
 
-void object_solid_visual::on_resources_ready( resources::queries_result& data )
+void object_solid_visual::on_render_ready( resources::queries_result& data )
 {
 	if(!data.is_successful())
 		return;
@@ -99,6 +94,26 @@ void object_solid_visual::on_resources_ready( resources::queries_result& data )
 												m_model->m_render_model, 
 												m_transform );
 
+	fs::path_string model_collision_path;
+	model_collision_path.assignf( "resources/models/%s.model/collision", m_visual_name.c_str() );
+
+	resources::request r[]=
+	{
+		{ model_collision_path.c_str(), resources::collision_bt_shape_class_static }
+	};
+
+	resources::query_resources(
+		r,
+		boost::bind(&object_solid_visual::on_collision_ready, this, _1),
+		g_allocator
+	);
+}
+
+void object_solid_visual::on_collision_ready( resources::queries_result& data )
+{
+	if(!data.is_successful())
+		return;
+
 	//m_collision	= NEW(collision::collision_object_geometry)(g_allocator, collision_object_static_model, m_model->m_collision_geom.c_ptr());
 
 	//math::aabb					collision_aabb;
@@ -112,7 +127,7 @@ void object_solid_visual::on_resources_ready( resources::queries_result& data )
 
 	if(m_game_scene.get_physics_world())
 	{
-		m_collision_shape = static_cast_resource_ptr<physics::bt_collision_shape_ptr>(data[1].get_unmanaged_resource());
+		m_collision_shape = static_cast_resource_ptr<physics::bt_collision_shape_ptr>(data[0].get_unmanaged_resource());
 
 		physics::bt_rigid_body_construction_info	info;
 		info.m_collisionShape			= m_collision_shape;
@@ -128,6 +143,62 @@ void object_solid_visual::on_resources_ready( resources::queries_result& data )
 		
 		m_game_scene.get_physics_world()->add_rigid_body( m_physics_rigid_body );
 	}
+}
+
+object_composite_visual::object_composite_visual( game_scene& w )
+:super					( w ),
+m_physics_rigid_body	( NULL )
+{}
+
+void object_composite_visual::unload_contents( )
+{
+	if(m_physics_rigid_body)
+	{
+		m_game_scene.get_physics_world()->remove_rigid_body( m_physics_rigid_body );
+		physics::destroy_rigid_body		( m_physics_rigid_body );
+		m_physics_rigid_body			= NULL;
+		m_collision_shape				= NULL;
+	}
+
+	if( m_model )
+	{
+		m_game_scene.renderer().scene().remove_model	( m_game_scene.get_render_scene(), m_model->m_render_model );
+	}
+	m_model = NULL;
+}
+
+void object_composite_visual::load_contents( )
+{
+	if( m_model )
+		return;
+
+	resources::request r[]=
+	{
+		{ m_visual_name.c_str(), resources::static_model_instance_class },
+	};
+
+	resources::query_resources(
+		r,
+		boost::bind(&object_composite_visual::on_resources_ready, this, _1),
+		g_allocator
+	);
+	
+}
+
+void object_composite_visual::on_resources_ready( resources::queries_result& data )
+{
+	if(!data.is_successful())
+		return;
+
+	if( m_model )
+		return;
+
+	m_model		= static_cast_resource_ptr<render::static_model_ptr>(data[0].get_unmanaged_resource());
+	R_ASSERT	( m_model );
+
+	m_game_scene.renderer().scene().add_model( m_game_scene.get_render_scene(), 
+												m_model->m_render_model, 
+												m_transform );
 }
 
 object_dynamic_visual::object_dynamic_visual( game_scene& w )

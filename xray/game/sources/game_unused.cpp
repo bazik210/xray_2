@@ -243,7 +243,7 @@ void game::query_npc					( human_npc_behaviour_type_enum const behaviour_type, f
 
 	query_resource						(
 		config_name, 
-		resources::human_npc_class, 
+		resources::monster_npc_class, 
 		boost::bind( &game::on_npc_created, this, _1, initial_position ), 
 		g_allocator,
 		&npc_data,

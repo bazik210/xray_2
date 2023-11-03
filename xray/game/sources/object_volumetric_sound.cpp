@@ -19,7 +19,10 @@ object_volumetric_sound::object_volumetric_sound( game_scene& w )
 	m_collision_geometry( 0 ),
 	m_world_user		( w.get_game().get_sound_world().get_logic_world_user() ),
 	m_sound_scene		( 0 ),
-	m_radius			( 0.f )
+	m_radius			( 0.f ),
+	m_looped			( true ),
+	m_force_stop        ( false ),
+	m_sound_name		( "marsh" )
 //	m_position			( 0.f,0.f,0.f )
 {}
 
@@ -55,8 +58,10 @@ void object_volumetric_sound::load_contents				( )
 	);
 }
 
-void object_volumetric_sound::load_custom(fs::path_string m_sound_name)
+void object_volumetric_sound::load_custom(fs::path_string m_sound_name, bool looped)
 {
+	m_looped = looped;
+
 	fs::path_string						config_path;
 	config_path.assignf("%s%s%s", "resources/sounds/volumetric/", m_sound_name.c_str(), ".volumetric_sound");
 	resources::query_resource(
@@ -110,6 +115,10 @@ void object_volumetric_sound::on_config_loaded			( resources::queries_result& da
 
 void object_volumetric_sound::on_sound_loaded( resources::queries_result& data )
 {
+	if (m_force_stop) {
+		return;
+	}
+
 	m_emitter = static_cast_resource_ptr<xray::sound::sound_emitter_ptr>(data[0].get_unmanaged_resource());
 	R_ASSERT(m_emitter.c_ptr());
 	//m_game_scene.get_game().m_postload.push_back(this);
@@ -148,7 +157,12 @@ void object_volumetric_sound::play			(  )
 	//m_proxy			   = m_emitter->emit( m_sound_scene, m_world_user );
 	//m_proxy->set_collision_geometry		( *m_collision_geometry, m_radius );
 
-	m_proxy->play							( xray::sound::looped );
+	if(m_looped) {
+		m_proxy->play							( xray::sound::looped );
+	}
+	else {
+		m_proxy->play							( xray::sound::once );
+	}
 }
 
 } // namespace stalker2

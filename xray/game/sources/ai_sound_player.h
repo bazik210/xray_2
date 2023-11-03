@@ -10,6 +10,8 @@
 #include <xray/ai/sound_player.h>
 #include <xray/sound/sound.h>
 #include <xray/math_randoms_generator.h>
+#include "human_npc.h"
+#include "monster_npc.h"
 
 namespace xray {
 
@@ -130,6 +132,9 @@ private:
 	u32									m_dbg_time_to_play_new_sound;
 	sound::sound_scene_ptr				m_dbg_scene;
 	sound::sound_instance_proxy_ptr		m_dbg_active_sound;
+
+	human_npc*							m_npc = 0;
+	monster_npc*						m_mob = 0;
 
 }; // class ai_sound_player
 

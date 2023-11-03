@@ -39,7 +39,7 @@ animated_object::animated_object(
 		iter->skeleton_bone_index				= model_skeleton->get_bone_index( iter->bone_name.c_str() );
 		R_ASSERT_CMP							( iter->skeleton_bone_index, >=, root_bones_count );
 		iter->skeleton_bone_index				-= root_bones_count;
-		if ( iter->bone_name == "Head" )
+		if ( iter->bone_name == "Head" || iter->bone_name == "bn_head")
 			m_head_bone_index					= std::distance( m_geometries_data.begin(), iter );
 	}
 }

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
-//	Created		: 23.03.2011
-//	Author		: Tetyana Meleshchenko
-//	Copyright (C) GSC Game World - 2011
+//	Created		: 29.10.2023
+//	Author		: Tetyana Meleshchenko, Loxotron
+//	Copyright (C) GSC Game World - 2023
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
@@ -18,9 +18,9 @@ human_npc_cook::human_npc_cook	( game& game ) :
 {
 }
 
-//  void human_npc_cook::translate_request_path	( pcstr request, fs_new::virtual_path_string& new_request ) const
+//  void monster_npc_cook::translate_request_path	( pcstr request, fs_new::virtual_path_string& new_request ) const
 //  {
-//  	new_request.assignf			( "resources/npc/human/%s.npc", request );
+//  	new_request.assignf			( "resources/npc/monster/%s.npc", request );
 //  }
 
 void human_npc_cook::translate_query	( resources::query_result_for_cook& parent )
@@ -128,7 +128,7 @@ void human_npc_cook::on_npc_options_received			( configs::binary_config_value co
 	query_resources							(
 		requests,
 		array_size( requests ),
-		boost::bind( &human_npc_cook::on_subresources_loaded, this, _1, human ), 
+		boost::bind( &human_npc_cook::on_subresources_loaded, this, _1, human),
 		g_allocator,
 		params,
 		&parent
@@ -173,7 +173,7 @@ void human_npc_cook::on_subresources_loaded	( resources::queries_result& data, h
 			);
 	parent->finish_query					( result_success );
 
-	m_game.on_npc_attributes_received		( human_attributes_config, human );
+	m_game.on_npc_attributes_received	( human_attributes_config, human );
 }
 
 } // namespace stalker2

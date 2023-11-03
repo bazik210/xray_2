@@ -9,6 +9,9 @@
 
 #include <xray/resources_cook_classes.h>
 #include <xray/sound/sound.h>
+#include <xray/sound/world.h>
+#include <xray/sound/sound_emitter.h>
+#include "ai_sound_player.h"
 
 namespace xray {
 
@@ -39,6 +42,9 @@ public:
 private:
 			void	on_sounds_loaded		( resources::queries_result& data, configs::binary_config_ptr config );
 			void	on_config_loaded		( resources::queries_result& data );
+
+			template <typename T>
+			ai_sound_player* create_buffer			(T& npc, input::world* input_world, ai_sound_player* player, u8* sound_player_buffer, sound::world_user* world_user, configs::binary_config_value const& sounds_value);
 
 private:
 	sound::world*							m_world;

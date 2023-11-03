@@ -34,7 +34,7 @@ set_target_properties(stalker2_pc_dx11 PROPERTIES FOLDER "stalker2")
 
 add_dependencies(stalker2_pc_dx11
 	game
-	editor
+#	editor
 	engine_pc_dx11
 )
 

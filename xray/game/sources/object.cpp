@@ -18,9 +18,10 @@ m_loaded_cnt	( 0 )
 void game_object_::load( configs::binary_config_value const& )
 {
 }
-game_world_object::game_world_object( game_world& w )
+game_world_object::game_world_object( game_world& w, type_id m_type_id)
 :super(w),
-m_game_world(w)
+m_game_world(w),
+m_type_id(u)
 {};
 
 game_object_static::game_object_static(game_scene& s )

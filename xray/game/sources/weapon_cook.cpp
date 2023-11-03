@@ -18,7 +18,9 @@ m_game	( game )
 void weapon_cook::translate_query( resources::query_result_for_cook& parent )
 {
 	fs_new::virtual_path_string	weapon_config_name;
-	weapon_config_name.assignf("resources/weapons/%s.options", parent.get_requested_path());
+	weapon_config_name.assignf("resources/gameplay/items/weapons/%s.options", parent.get_requested_path());
+
+	current_weapon = parent.m_request_path_default_storage;
 
 	resources::query_resource(
 		weapon_config_name.c_str(),
@@ -37,27 +39,52 @@ void weapon_cook::on_weapon_config_ready( resources::queries_result& data, resou
 
 	configs::binary_config_value const& config = config_ptr->get_root();
 	
-	resources::request r[]={
-		// base part(animated)
-		{ config["base"]["model"],						resources::skeleton_model_instance_class },
-		{ "resources/animations/single/weapon/idle",	resources::animation_class },
-		{ "resources/animations/single/weapon/reload",	resources::animation_class },
-		{ "resources/animations/single/weapon/shoot",	resources::animation_class },
+	if (current_weapon != "ak_74") {
+		resources::request r[] = {
+			// base part(animated)
+			{ config["base"]["model"],						resources::skeleton_model_instance_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/idle",	resources::animation_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/reload",	resources::animation_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/shoot",	resources::animation_class },
 
-		{ config["cover"]["model"],						resources::static_model_instance_class },
-		{ config["stock"]["model"],						resources::static_model_instance_class },
-		{ config["handle"]["model"],					resources::static_model_instance_class },
-		{ config["ammo"]["model"],						resources::static_model_instance_class },
-		{ config["bolt"]["model"],						resources::static_model_instance_class },
-		{ config["fore_end"]["model"],					resources::static_model_instance_class },
-		{ config["barrel"]["model"],					resources::static_model_instance_class },
-		{ config["barrel_end"]["model"],				resources::static_model_instance_class },
-	};
-	resources::query_resources(
-		r,
-		boost::bind(&weapon_cook::on_weapon_parts_ready, this, _1, config_ptr, parent ),
-		g_allocator
+					{ config["cover"]["model"],						resources::static_model_instance_class },
+					{ config["stock"]["model"],						resources::static_model_instance_class },
+					{ config["handle"]["model"],					resources::static_model_instance_class },
+					{ config["ammo"]["model"],						resources::static_model_instance_class },
+					{ config["bolt"]["model"],						resources::static_model_instance_class },
+					{ config["fore_end"]["model"],					resources::static_model_instance_class },
+					{ config["barrel"]["model"],					resources::static_model_instance_class },
+					{ config["barrel_end"]["model"],				resources::static_model_instance_class },
+		};
+		resources::query_resources(
+			r,
+			boost::bind(&weapon_cook::on_weapon_parts_ready, this, _1, config_ptr, parent),
+			g_allocator
 		);
+	}
+	else {
+		resources::request r[] = {
+			// base part(animated)
+			{ config["base"]["model"],						resources::skeleton_model_instance_class },
+					{ "resources/animations/single/weapon/idle",	resources::animation_class },
+					{ "resources/animations/single/weapon/reload",	resources::animation_class },
+					{ "resources/animations/single/weapon/shoot",	resources::animation_class },
+
+					{ config["cover"]["model"],						resources::static_model_instance_class },
+					{ config["stock"]["model"],						resources::static_model_instance_class },
+					{ config["handle"]["model"],					resources::static_model_instance_class },
+					{ config["ammo"]["model"],						resources::static_model_instance_class },
+					{ config["bolt"]["model"],						resources::static_model_instance_class },
+					{ config["fore_end"]["model"],					resources::static_model_instance_class },
+					{ config["barrel"]["model"],					resources::static_model_instance_class },
+					{ config["barrel_end"]["model"],				resources::static_model_instance_class },
+		};
+		resources::query_resources(
+			r,
+			boost::bind(&weapon_cook::on_weapon_parts_ready, this, _1, config_ptr, parent),
+			g_allocator
+		);
+	}
 }
 
 void weapon_cook::on_weapon_parts_ready( resources::queries_result& data, 

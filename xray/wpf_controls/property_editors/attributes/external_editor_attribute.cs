@@ -60,7 +60,17 @@ namespace xray.editor.wpf_controls.property_editors.attributes
 			m_external_editor_type		= editor_type;
 			m_additional_data			= additional_data;
 		}
-		public external_editor_attribute( Type editor_type, Boolean can_directly_set )
+        public external_editor_attribute(Type editor_type, String additional_data, Boolean is_clear_visible, Boolean can_directly_set)
+        {
+            m_is_clear_visible = is_clear_visible;
+            m_can_directly_set = can_directly_set;
+            if (editor_type == null || !typeof(i_external_property_editor).IsAssignableFrom(editor_type))
+                throw new ArgumentException(" Editor Type not valid. Editor Type must implement i_external_property_editor. ");
+            external_editor_delegate = null;
+            m_external_editor_type = editor_type;
+            m_additional_data = additional_data;
+        }
+        public external_editor_attribute( Type editor_type, Boolean can_directly_set )
 		{
 			m_can_directly_set = can_directly_set;
 			m_is_clear_visible = false;

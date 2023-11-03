@@ -7,6 +7,7 @@
 #include "pch.h"
 #include "npc_reach_position_behaviour.h"
 #include "human_npc.h"
+#include "monster_npc.h"
 #include "object_scene.h"
 #include <xray/ai/world.h>
 
@@ -39,8 +40,16 @@ void npc_reach_position_behaviour::attach_to_object			( object_controlled* o )
 	m_object							 = o;
 	super::attach_to_object				( o );	
 
-	if ( m_behaviour )
-		static_cast_checked< human_npc* >( m_object )->set_behaviour( m_behaviour );	
+	if ( m_behaviour ) {
+		if (dynamic_cast<human_npc*>(m_object) != 0)
+		{
+			static_cast_checked< human_npc* >(m_object)->set_behaviour(m_behaviour);
+		}
+		else
+		{
+			static_cast_checked< monster_npc* >(m_object)->set_behaviour(m_behaviour);
+		}
+	}
 }
 
 void npc_reach_position_behaviour::detach_from_object		( object_controlled* o )
@@ -54,8 +63,15 @@ void npc_reach_position_behaviour::on_behaviour_loaded		( resources::queries_res
 	R_ASSERT												( data.is_successful() );
 
 	m_behaviour							= data[0].get_unmanaged_resource();
-	if ( m_object )
-		static_cast_checked< human_npc* >( m_object )->set_behaviour( m_behaviour );
+	if ( m_object ) {
+		if (dynamic_cast<human_npc*>(m_object) != 0)
+		{
+			static_cast_checked< human_npc* >( m_object )->set_behaviour( m_behaviour );
+		}
+		else {
+			static_cast_checked< monster_npc* >(m_object)->set_behaviour( m_behaviour );
+		}
+	}
 }
 
 } // namespace stalker2

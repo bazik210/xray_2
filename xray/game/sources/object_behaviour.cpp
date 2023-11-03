@@ -273,6 +273,14 @@ object_behaviour* create_behaviour( object_scene_job* owner, configs::binary_con
 	if(strings::equal(type, "npc_patrol"))
 	{
 		result = NEW(npc_empty_switcher_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "mob_remark"))
+	{
+		result = NEW(npc_play_animation_behaviour)( owner, t, name );
+	}else
+	if(strings::equal(type, "mob_walker"))
+	{
+		result = NEW(npc_empty_switcher_behaviour)( owner, t, name );
 	}else	
 	{
 		UNREACHABLE_CODE();
