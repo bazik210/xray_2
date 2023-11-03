@@ -187,8 +187,13 @@ void actor::process_input_events( )
 		if (m_actor_input_controller->on_frame_sprint())
 		{
 			move_delta_fw		= frame_time_sec * 1.66f * 8.f;
-			move_delta_right	= frame_time_sec * 0.83f * 4.f;
+			move_delta_right	= frame_time_sec * 0.83f * 8.f;
+
+			// reset if unpressed key
+			if (!m_actor_input_controller->is_doing_movement())
+				m_actor_input_controller->m_sprint_toggle = false;
 		}
+
 
 		float3 walk_direction			= m_character_transform.k.xyz() * m_actor_input_controller->onframe_move_fwd() * move_delta_fw;
 		walk_direction					+= m_character_transform.i.xyz() * m_actor_input_controller->onframe_move_right() * move_delta_right;

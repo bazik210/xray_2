@@ -60,6 +60,7 @@ public:
 	bool				onframe_jump		( )	{ return m_frame_events.m_onframe_jump; };
 	bool				on_frame_fire		( );
 	bool				on_frame_sprint		( )	{ return m_sprint_toggle; }
+	bool				is_doing_movement	( ) { return onframe_move_fwd() || onframe_move_right(); }
 	
 	float				last_frame_time_delta( ) const { return m_frame_events.m_last_frame_time_delta; };
 
