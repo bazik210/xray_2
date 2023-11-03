@@ -56,6 +56,8 @@ add_library(game STATIC
 					"${CMAKE_CURRENT_SOURCE_DIR}/actor_input_controller.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_anim_object.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/test_anim_object.h"
+					"${CMAKE_CURRENT_SOURCE_DIR}/actor_hud.cpp"
+					"${CMAKE_CURRENT_SOURCE_DIR}/actor_hud.h"
 					# old actor
 					"${CMAKE_CURRENT_SOURCE_DIR}/hud.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/hud.cpp"

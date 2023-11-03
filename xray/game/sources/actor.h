@@ -46,6 +46,9 @@ public:
 
 	bool			m_stop_query;
 
+
+	float			get_heath()	const { return m_health; }
+
 private:
 	void			on_resources_ready			( resources::queries_result& data );
 	void			add_models_to_scene			( );
@@ -79,6 +82,8 @@ private:
 
 	actor_input_controller*				m_actor_input_controller;
 	game_world&							m_game_world;
+
+	float								m_health;
 }; // class actor
 
 } // namespace stalker2

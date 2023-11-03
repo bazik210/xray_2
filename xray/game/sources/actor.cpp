@@ -41,6 +41,8 @@ m_game_world		( w )
 	m_anim_timer.start			( );
 
 	query_resources				( );
+
+	m_health = 100.f;
 }
 
 actor::~actor( )
