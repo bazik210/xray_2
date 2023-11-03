@@ -22,7 +22,12 @@
 #include "actor_input_controller.h"
 #include "weapon.h"
 
+#include <xray/console_command.h>
+
 namespace stalker2{
+
+static bool g_thirdperson_value = false;
+console_commands::cc_bool g_thirdperson("thirdperson", g_thirdperson_value, false, console_commands::command_type_user_specific);
 
 actor::actor( game_world& w )
 :m_character_transform( float4x4().identity() ),
@@ -496,16 +501,37 @@ void actor::tick( )
 
 	// im bad with math :(
 #if 0
-	bool const is_character_moving = m_actor_input_controller->onframe_move_fwd() ||
-		m_actor_input_controller->onframe_move_right();
-	if (is_character_moving)
+	if (m_actor_input_controller->is_doing_movement() && !g_thirdperson_value)
 	{
 		float const frame_time_sec = m_actor_input_controller->last_frame_time_delta() / 1000.0f;
-		float const bobbing_factor = frame_time_sec * 10.f;
+		float const bobbing_factor = frame_time_sec * 2.f;
 
-		float3 bobbing = float3(0.0, sin(sin(bobbing_factor)), cos(sin(bobbing_factor)));
+		static float s_bobbing_time = 0.f;
+
+		if (m_actor_input_controller->on_frame_sprint())
+			s_bobbing_time += bobbing_factor * 1.2f;
+		else
+			s_bobbing_time += bobbing_factor;
+		
+
+		float3 bobbing = float3(0.0, 0.0, cos(sin(s_bobbing_time)));
 		float4x4 bobbing_transform = create_translation(bobbing);
-		m_character_head_transform = m_character_head_transform * bobbing_transform;
+		m_character_head_transform = bobbing_transform * m_character_head_transform;
+	}
+#endif
+
+#if 0
+	if (g_thirdperson_value)
+	{
+		const float radius			= 2.f;
+		const float hover_radius	= 0.2f;
+		float3 character_position	= m_actor_physics_controller->get_transform().c.xyz();
+		float3 thirdperson_offset	= float3(radius, radius, radius);
+		float3 character_rotation	= m_character_head_transform.get_angles_xyz();
+		
+		float3 camera_position		= character_position + thirdperson_offset + float3(character_rotation.y + hover_radius, 0.f, 0.f);
+		float4x4 camera_transform	= create_translation(camera_position);
+		m_character_head_transform	= camera_transform;
 	}
 #endif
 
