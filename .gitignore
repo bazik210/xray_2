@@ -50,5 +50,7 @@ build/*.sln
 build/*.cmake
 # Visual Studio
 build/.vs/*
+# Visual Studio Code
+tools/maya_menu/pyth_scripts/.vscode
 # Build script configs
 build/script_configs/*.json

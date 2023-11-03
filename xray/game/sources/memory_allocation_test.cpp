@@ -4,6 +4,7 @@
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
+#include "pch.h"
 #include <xray/macro_platform.h>
 
 #if !XRAY_PLATFORM_PS3

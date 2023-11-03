@@ -92,6 +92,12 @@ target_include_directories(maya_animation PRIVATE
 	${SOLUTION_DIR_INCLUDE_PATH}/maya_animation/sources
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya_animation PRIVATE
+		"/Yupch.h"
+	)
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 set_target_properties(maya_animation PROPERTIES FOLDER "engine/plugins")
