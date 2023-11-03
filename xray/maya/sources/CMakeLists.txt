@@ -139,7 +139,13 @@ target_link_directories(maya2011 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+    target_compile_options(maya2011 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2011 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -284,7 +290,13 @@ target_link_directories(maya2012 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2012 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2012 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -430,7 +442,13 @@ target_link_directories(maya2018 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2018 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2018 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -575,7 +593,13 @@ target_link_directories(maya2019 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2019 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2019 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 
@@ -720,7 +744,13 @@ target_link_directories(maya2023 PRIVATE
 #	${SOLUTION_DIR_INCLUDE_PATH}/third_party/amd_tootle-master
 )
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+# Precompiled headers have to stay enabled for this one
+if(NOT ("${XRAY_ENABLE_PRECOMPILED_HEADERS}" STREQUAL "true"))
+	target_compile_options(maya2023 PRIVATE
+        "/Yupch.h"
+    )
+	set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp PROPERTY VS_SETTINGS "PrecompiledHeader=Create")
+endif()
 
 #target_precompile_headers(maya2023 PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/pch.h")
 

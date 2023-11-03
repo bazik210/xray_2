@@ -4,7 +4,7 @@
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
-#include "sources/pch.h"
+#include "pch.h"
 #include <xray/fs/simple_synchronous_interface.h>
 
 namespace xray { 
