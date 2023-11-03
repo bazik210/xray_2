@@ -35,8 +35,13 @@ void model_editor::register_actions( )
 // "View isolate selected"
 
 // "Open"
-	System::String^ action_name				= "open solid visual";
-	action_delegate^ a						= gcnew	action_delegate( action_name, gcnew execute_delegate_managed(this, &model_editor::action_open_solid_model) );
+	System::String^ action_name				= "open skinned visual";
+	action_delegate^ a						= gcnew	action_delegate( action_name, gcnew execute_delegate_managed(this, &model_editor::action_open_skinned_model) );
+	m_input_engine->register_action			( a, "" );
+	m_gui_binder->add_action_menu_item		( m_ide->top_menu, action_name, "ModelMenuItem", 0);
+
+	action_name								= "open solid visual";
+	a										= gcnew	action_delegate( action_name, gcnew execute_delegate_managed(this, &model_editor::action_open_solid_model) );
 	m_input_engine->register_action			( a, "" );
 	m_gui_binder->add_action_menu_item		( m_ide->top_menu, action_name, "ModelMenuItem", 0);
 
@@ -136,6 +141,31 @@ void model_editor::action_open_solid_model( )
 		}
 
 		Show( "solid_visual", selected );
+	}
+}
+
+void model_editor::action_open_skinned_model( )
+{
+	System::String^ selected	= nullptr;
+
+	bool result = editor_base::resource_chooser::choose(	"solid_visual", 
+															m_edit_object?m_edit_object->full_name():"", 
+															nullptr, 
+															selected,
+															true );
+
+	if(result)
+	{
+		if(!close_query())
+			return;
+
+		if(m_edit_object)
+		{
+			m_edit_object->clear_resources	( );
+			delete m_edit_object;
+		}
+
+		Show( "skinned_visual", selected );
 	}
 }
 

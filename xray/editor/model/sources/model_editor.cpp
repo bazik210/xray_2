@@ -82,6 +82,7 @@ void model_editor::query_create_render_resources( )
 {
  	render::scene_configuration						scene_configuration;
  	scene_configuration.m_create_particle_world		= false;
+	scene_configuration.m_create_speedtree_world	= true;
  	
  	System::Int32 hwnd								= m_view_window->view_handle();
 	render::output_window_configuration				window_configuration;
