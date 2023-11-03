@@ -39,7 +39,8 @@ public:
 	virtual void		load_contents			( );
 	virtual void		unload_contents			( );
 protected:
-	void				on_resources_ready		( resources::queries_result& data );
+	void				on_render_ready			( resources::queries_result& data );
+	void				on_collision_ready		( resources::queries_result& data );
 
 protected:
 	render::static_model_ptr				m_model;
@@ -47,6 +48,25 @@ protected:
 	physics::bt_collision_shape_ptr			m_collision_shape;
 	physics::bt_rigid_body*					m_physics_rigid_body;
 }; // class object_solid_visual
+
+//for future
+class object_composite_visual : public object_visual
+{
+	typedef object_visual	super;
+public:
+						object_composite_visual		( game_scene& w );
+
+	virtual void		load_contents			( );
+	virtual void		unload_contents			( );
+protected:
+	void				on_resources_ready		( resources::queries_result& data );
+
+protected:
+	render::static_model_ptr				m_model;
+//	collision::collision_object_geometry*	m_collision;
+	physics::bt_collision_shape_ptr			m_collision_shape;
+	physics::bt_rigid_body*					m_physics_rigid_body;
+}; // class object_composite_visual
 
 class object_dynamic_visual : public object_visual
 {

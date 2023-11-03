@@ -9,6 +9,8 @@
 
 #include "terrain_texture_pool.h"
 #include "terrain_render_model.h"
+#include "terrain_render_model.h"
+#include "render_model_composite.h"
 #include <xray/render/core/vertex_buffer.h>
 
 namespace xray {
@@ -77,7 +79,7 @@ public:
 	void 		exchange_texture		( fs_new::virtual_path_string const& old_texture, fs_new::virtual_path_string const& new_texture );
 
 // 	void 		select_editor_cells		( float4x4 const& mat_vp, render::vector<composite_render_model_instance_ptr>& editor_cells) const;
-// 	void 		select_game_cells		( float4x4 const& mat_vp, render::vector<composite_render_model_instance_ptr>& game_cells) const;
+ 	void 		select_game_cells		( float4x4 const& mat_vp, render::vector<composite_render_model_instance_ptr>& game_cells) const;
 	void 		select_cells			( float4x4 const& mat_vp, render::vector<terrain_render_model_instance_ptr>& game_cells) const;
 	
 	

@@ -50,10 +50,10 @@ void model_editor::register_actions( )
 	m_input_engine->register_action			( a, "" );
 	m_gui_binder->add_action_menu_item		( m_ide->top_menu, action_name, "ModelMenuItem", 0);
 
-	//action_name								= "new composite visual";
-	//a										= gcnew	action_delegate( action_name, gcnew execute_delegate_managed(this, &model_editor::action_new_composite_model) );
-	//m_input_engine->register_action			( a, "" );
-	//m_gui_binder->add_action_menu_item		( m_ide->top_menu, action_name, "ModelMenuItem", 0);
+	action_name								= "new composite visual";
+	a										= gcnew	action_delegate( action_name, gcnew execute_delegate_managed(this, &model_editor::action_new_composite_model) );
+	m_input_engine->register_action			( a, "" );
+	m_gui_binder->add_action_menu_item		( m_ide->top_menu, action_name, "ModelMenuItem", 0);
 
 // Maya style mouse actions 
 	m_input_engine->register_action( gcnew	editor_base::mouse_action_view_move_xy	( "view maya move xy",	m_view_window ), "Alt+MButton(View)" );
@@ -105,19 +105,19 @@ void model_editor::register_actions( )
 	execute_action							("select translate");
 }
 
-//void model_editor::action_new_composite_model( )
-//{
-//	if(!close_query())
-//		return;
-//
-//	if(m_edit_object)
-//	{
-//		m_edit_object->clear_resources	( );
-//		delete m_edit_object;
-//	}
-//
-//	Show( "composite_visual", "" );
-//}
+void model_editor::action_new_composite_model( )
+{
+	if(!close_query())
+		return;
+
+	if(m_edit_object)
+	{
+		m_edit_object->clear_resources	( );
+		delete m_edit_object;
+	}
+
+	Show( "composite_visual", "" );
+}
 
 void model_editor::action_open_solid_model( )
 {

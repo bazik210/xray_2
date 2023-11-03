@@ -219,9 +219,9 @@ void model_editor::Show( System::String^ context1, System::String^ context2 )
 	else
 	if(context1=="speedtree")
 		m_edit_object					= gcnew edit_object_speedtree( this );
-	//else
-	//if(context1=="composite_visual")
-	//	m_edit_object					= gcnew edit_object_composite_visual( this );
+	else
+	if(context1=="composite_visual")
+		m_edit_object					= gcnew edit_object_composite_visual( this );
 
 	m_edit_object->register_actions	( true );
 

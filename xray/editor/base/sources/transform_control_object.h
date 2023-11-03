@@ -24,7 +24,7 @@ public:
 
 	enum class mode{edit_transform, edit_pivot};
 
-	virtual				~transform_control_object( ){}
+//	virtual				~transform_control_object( ){}
 	
 	virtual bool		attach				( transform_control_base^ )	{ return true; };
 	virtual void		detach				( transform_control_base^ )	{};

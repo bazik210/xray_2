@@ -422,24 +422,24 @@ void terrain::select_cells	(float4x4 const & mat_vp, render::vector<terrain_rend
 	}
 }
 
-// void terrain::select_game_cells	( float4x4 const & mat_vp, render::vector<composite_render_model_instance_ptr> & game_cells) const
-// {
-// 	math::frustum view_frustum (mat_vp);	
-// 
-// 	game_cells.clear();
-// 
-// 	collision::objects_type query_result(render::g_allocator);
-// 	m_collision_tree_game->cuboid_query( u32(-1), view_frustum, query_result);
-// 
-// 	game_cells.reserve( game_cells.size() + query_result.size());
-// 
-// 	collision::objects_type::const_iterator end = query_result.end();
-// 	for( collision::objects_type::iterator it = query_result.begin(); it != end; ++it)
-// 	{
-// 		composite_render_model_instance* instance		= ((collision_object<composite_render_model_instance>*)(*it))->owner();
-// 		game_cells.push_back		( instance );
-// 	}
-// }
+ void terrain::select_game_cells	( float4x4 const & mat_vp, render::vector<composite_render_model_instance_ptr> & game_cells) const
+ {
+ 	math::frustum view_frustum (mat_vp);	
+ 
+ 	game_cells.clear();
+ 
+ 	collision::objects_type query_result(render::g_allocator);
+ 	m_collision_tree->cuboid_query( u32(-1), view_frustum, query_result);
+ 
+ 	game_cells.reserve( game_cells.size() + query_result.size());
+ 
+ 	collision::objects_type::const_iterator end = query_result.end();
+ 	for( collision::objects_type::iterator it = query_result.begin(); it != end; ++it)
+ 	{
+ 		composite_render_model_instance* instance		= ((collision_object<composite_render_model_instance>*)(*it))->owner();
+ 		game_cells.push_back		( instance );
+ 	}
+ }
 
 // terrain cook
 void extend_bounding_box( render::terrain_data* buffer, u32 const size, float physical_size, u32 vertex_row_size, float4x4 const & world_transform, math::aabb & bbox)
