@@ -177,8 +177,19 @@ void actor::process_input_events( )
 	{
 		float const frame_time_sec		= m_actor_input_controller->last_frame_time_delta()/1000.0f;
 		
-		float const move_delta_fw		= frame_time_sec * 1.66f * 2.f; //6km/h
-		float const move_delta_right	= frame_time_sec * 0.83f * 2.f; //3km/h
+
+		// kirill:	do smth with player speed
+		//			- fps affect on it
+		//			- hardcode bad, mkay
+
+		float move_delta_fw		= frame_time_sec * 1.66f * 2.f;
+		float move_delta_right	= frame_time_sec * 0.83f * 2.f;
+		if (m_actor_input_controller->on_frame_sprint())
+		{
+			move_delta_fw		= frame_time_sec * 1.66f * 8.f;
+			move_delta_right	= frame_time_sec * 0.83f * 4.f;
+		}
+
 		float3 walk_direction			= m_character_transform.k.xyz() * m_actor_input_controller->onframe_move_fwd() * move_delta_fw;
 		walk_direction					+= m_character_transform.i.xyz() * m_actor_input_controller->onframe_move_right() * move_delta_right;
 
