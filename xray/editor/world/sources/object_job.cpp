@@ -161,10 +161,19 @@ void object_job::render( )
 		float tmp			= 0.5f;
 		float3 position		= m_transform->c.xyz();
 		position.y			+= 1;
-		get_debug_renderer().draw_sphere( get_editor_world().scene(), position, tmp, clr);
+		get_debug_renderer().draw_sphere( get_editor_world().scene(), position, tmp, clr, false);
 	}
 
-	get_debug_renderer().draw_cross( get_editor_world().scene(), m_transform->c.xyz(), 1.f, math::color(0xffffff00) );
+	get_debug_renderer().draw_cross( get_editor_world().scene(), m_transform->c.xyz(), 1.f, math::color(0xffffff00), false );
+
+	if(m_logic_view != nullptr) 
+	{
+		if (m_job_resource != nullptr && m_job_resource->get_object() == nullptr) 
+		{
+			m_job_resource = nullptr;
+			m_logic_view->selected_resource->Text = "Selected Resource: none";
+		}
+	}
 }
 
 void object_job::on_selected				( bool bselected )

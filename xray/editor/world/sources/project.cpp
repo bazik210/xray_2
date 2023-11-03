@@ -257,7 +257,7 @@ void project::clear( )
 	fill_tree_view						( m_project_tab->treeView->nodes );
 	m_map_backgrounds.Clear				( );
 	m_missing_resource_registry->clear	( );
-//	m_level_editor->get_editor_world().get_ai_navigation_world().get_graph_generator()->clear_geometry	( );
+	m_level_editor->get_editor_world().get_ai_navigation_world().get_graph_generator()->clear_geometry	( );
 
 	for(u16 i=0; i<uid_size; ++i)
 		session_uid[i] = 'a' + (char)uid_random.random(u32('z'-'a'));
