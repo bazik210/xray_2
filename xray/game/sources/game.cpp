@@ -392,7 +392,8 @@ void game::enable( bool value )
 		m_input_world->acquire		( );
 
 		// select active scene
-		game_scene* scene_to_activate = /*m_lobby_menu;*/m_game_world;
+		//game_scene* scene_to_activate = /*m_lobby_menu;*/m_game_world;
+		game_scene* scene_to_activate = m_main_menu;
 #if 0		
 		if( m_game_world->empty() )
 			scene_to_activate		= m_main_menu;

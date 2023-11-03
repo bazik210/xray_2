@@ -32,8 +32,12 @@ void ui_image::init_texture( pcstr texture_name )
 	{
 		m_tex_coords.set(0,0,1,1);
 		m_point_type	=	2;
-	}else
-		UNREACHABLE_CODE();
+	}
+	else
+	{
+		m_tex_coords.set(0, 0, 1, 1);
+		m_point_type = 1;
+	}
 }
 
 void ui_image::draw( xray::render::ui::renderer& renderer, xray::render::scene_view_ptr const& scene_view )

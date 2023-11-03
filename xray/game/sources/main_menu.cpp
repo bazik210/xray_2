@@ -109,13 +109,20 @@ struct main_menu_ui :public boost::noncopyable
 main_menu_ui(xray::ui::world& ui_world)
 :m_ui_world(ui_world)
 {
+	float2 screen_size = ui_world.base_screen_size();
+
+	float2 dialog_size = screen_size;
+	dialog_size.y += 256.f;
+
 	m_ui_dialog						= m_ui_world.create_dialog( );
-	m_ui_dialog->w()->set_position	( float2(100, 100) );
-	m_ui_dialog->w()->set_size		( float2(500,500) );
+	//m_ui_dialog->w()->set_position	( float2(100, 100) );
+	//m_ui_dialog->w()->set_size		( float2(500,500) );
+	m_ui_dialog->w()->set_position(float2(0.f, 0.f));
+	m_ui_dialog->w()->set_size(dialog_size);
 
 	ui::image* img					= m_ui_world.create_image( );
-	img->init_texture				( "ui_rect" );
-	img->set_color					( 0xff409040 );
+	img->init_texture				( "ui_actor_main_menu" );
+	img->set_color					( 0xfff0f0f0 );
 	img->w()->set_size				( m_ui_dialog->w()->get_size() );
 	img->w()->set_position			( float2(0, 0) );
 	img->w()->set_visible			( true );
@@ -124,32 +131,46 @@ main_menu_ui(xray::ui::world& ui_world)
 	ui::text* text					= m_ui_world.create_text( );
 	text->set_font					( ui::fnt_arial );
 	text->set_text					( "Main menu" );
+	//text->w()->set_size				( float2(200, 40) );
+	//text->w()->set_position			( float2(20, 120) );
 	text->w()->set_size				( float2(200, 40) );
-	text->w()->set_position			( float2(20, 120) );
+
+	float2 base_pos = float2(150, 400);
+	text->w()->set_position			( base_pos );
 	text->w()->set_visible			( true );
 	m_ui_dialog->w()->add_child		( text->w(), true );
 
 	text							= m_ui_world.create_text( );
 	text->set_font					( ui::fnt_arial );
 	text->set_text					( "ESC - switch to Game" );
+	//text->w()->set_size				( float2(200, 40) );
+	//text->w()->set_position			( float2(20, 140) );
+
+	base_pos.y += 20.f;
 	text->w()->set_size				( float2(200, 40) );
-	text->w()->set_position			( float2(20, 140) );
+	text->w()->set_position			( base_pos );
 	text->w()->set_visible			( true );
 	m_ui_dialog->w()->add_child		( text->w(), true );
 
 	text							= m_ui_world.create_text( );
 	text->set_font					( ui::fnt_arial );
 	text->set_text					( "Q - quit" );
+	//text->w()->set_size				( float2(200, 40) );
+	//text->w()->set_position			( float2(20, 160) );
+	base_pos.y += 20.f;
 	text->w()->set_size				( float2(200, 40) );
-	text->w()->set_position			( float2(20, 160) );
+	text->w()->set_position			( base_pos );
 	text->w()->set_visible			( true );
 	m_ui_dialog->w()->add_child		( text->w(), true );
 
 	text							= m_ui_world.create_text( );
 	text->set_font					( ui::fnt_arial );
 	text->set_text					( "H/J- attach/detach hud camera" );
+	//text->w()->set_size				( float2(200, 40) );
+	//text->w()->set_position			( float2(20, 180) );
+	base_pos.y += 20.f;
 	text->w()->set_size				( float2(200, 40) );
-	text->w()->set_position			( float2(20, 180) );
+	text->w()->set_position			( base_pos );
 	text->w()->set_visible			( true );
 	m_ui_dialog->w()->add_child		( text->w(), true );
 }
