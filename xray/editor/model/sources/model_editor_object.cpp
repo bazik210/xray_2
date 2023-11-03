@@ -123,7 +123,7 @@ void model_editor_object::register_actions( bool bregister )
 		a									= gcnew action_delegate( action_name, gcnew execute_delegate_managed( this, &model_editor_object::revert) );
 		a->set_enabled						( gcnew enabled_delegate_managed( this, &model_editor_object::has_changes));
 		input_engine->register_action		( a, "" );
-		gui_binder->add_action_menu_item	( ide_menu_strip, action_name, "ModelMenuItem", 2);
+		gui_binder->add_action_menu_item	( ide_menu_strip, action_name, "ModelMenuItem", 4);
 	}else
 	{
 		input_engine->unregister_action	( action_name );
@@ -136,7 +136,7 @@ void model_editor_object::register_actions( bool bregister )
 		a									= gcnew	action_delegate( action_name, gcnew execute_delegate_managed( this, &model_editor_object::action_apply ) );
 		a->set_enabled						( gcnew enabled_delegate_managed( this, &model_editor_object::has_changes));
 		input_engine->register_action		( a, "" );
-		gui_binder->add_action_menu_item	( ide_menu_strip, action_name, "ModelMenuItem", 1);
+		gui_binder->add_action_menu_item	( ide_menu_strip, action_name, "ModelMenuItem", 3);
 	}else
 	{
 		input_engine->unregister_action		( action_name );
