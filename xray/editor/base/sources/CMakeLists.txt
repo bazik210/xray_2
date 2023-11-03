@@ -279,16 +279,8 @@ add_library(editor_base SHARED
 					#"${CMAKE_CURRENT_SOURCE_DIR}/resource.h"
 )
 
-target_link_libraries(editor_base PUBLIC
-	engine_pc_dx11
-)
-
 add_dependencies(editor_base
-	editor_controls
-)
-
-# In theory add_dependencies() should handle this, but in practice this dumb thing just doesn't respect build order
-target_link_libraries(editor_base PUBLIC
+	engine_pc_dx11
 	editor_controls
 )
 
