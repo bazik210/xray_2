@@ -72,7 +72,7 @@ bool one_way_render_channel::render_process_commands	( bool const wait_for_comma
 		}
 
 		u32 const frame_id					= m_current_frame_id;
-		i->execute							( );
+		if(i) i->execute							( );
 		R_ASSERT_CMP						( frame_id, <=, m_current_frame_id );
 
 		if ( !predicate(i) )

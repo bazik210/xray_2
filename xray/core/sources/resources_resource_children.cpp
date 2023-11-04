@@ -100,9 +100,11 @@ void   resource_children::unlink_from_parents	()
 	resource_base * const this_ptr		=	cast_resource_base();
 	while ( m_parent_resources.size() )
 	{
-		resource_base * const parent	=	m_parent_resources.front()->resource;
-		((resource_children *)parent)->unlink_child_resource	(this_ptr);
-		unlink_parent_resource				(parent);		
+		if (m_parent_resources.front() != NULL) {
+			resource_base* const parent = m_parent_resources.front()->resource;
+			((resource_children*)parent)->unlink_child_resource(this_ptr);
+			unlink_parent_resource(parent);
+		}
 	}
 }
 

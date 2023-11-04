@@ -744,6 +744,9 @@ void engine::world::remove_model( xray::render::scene_ptr const& in_scene, rende
 
 static enum_vertex_input_type speedtree_subsurface_name_to_vertex_input_type(fs_new::virtual_path_string const& subsurface_name)
 {
+	if (!subsurface_name.begin())
+		return null_vertex_input_type;
+
 	if (subsurface_name=="branch")			return speedtree_branch_vertex_input_type;
 	else if (subsurface_name=="frond")		return speedtree_frond_vertex_input_type;
 	else if (subsurface_name=="leafmesh")	return speedtree_leafmesh_vertex_input_type;

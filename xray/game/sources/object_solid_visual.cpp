@@ -45,8 +45,10 @@ void object_solid_visual::unload_contents( )
 {
 	if(m_physics_rigid_body)
 	{
-		m_game_scene.get_physics_world()->remove_rigid_body( m_physics_rigid_body );
-		physics::destroy_rigid_body		( m_physics_rigid_body );
+		if (m_game_scene.get_physics_world() != NULL) {
+			m_game_scene.get_physics_world()->remove_rigid_body(m_physics_rigid_body);
+			physics::destroy_rigid_body(m_physics_rigid_body);
+		}
 		m_physics_rigid_body			= NULL;
 		m_collision_shape				= NULL;
 	}

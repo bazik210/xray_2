@@ -198,7 +198,10 @@ void game_cell::unload_terrain( )
 {
 	if(m_terrain)
 	{
-		m_game_->renderer().scene().terrain_remove_cell( m_game_world->get_render_scene(), m_terrain->m_render_model );
+		if (m_terrain->m_render_model)
+		{
+			m_game_->renderer().scene().terrain_remove_cell(m_game_world->get_render_scene(), m_terrain->m_render_model);
+		}
 		m_game_world->get_collision_tree()->erase	( m_terrain_collision );
 		m_terrain_collision->destroy( g_allocator );
 		DELETE					( m_terrain_collision );

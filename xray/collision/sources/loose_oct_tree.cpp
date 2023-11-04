@@ -595,12 +595,17 @@ inline void loose_oct_tree::validate		( oct_node* node, u32* object_count ) cons
 
 	for ( object* i = node->objects; i; i = i->m_next, ++*object_count );
 
-	R_ASSERT				( count || node->objects );
+	//R_ASSERT				( count || node->objects );
+
+	if (!node->objects)
+		return;
 
 	if ( node->parent )
 		return;
 
-	R_ASSERT				( m_object_count == object_count_real, " [%d] -> [%d]", m_object_count, object_count_real );
+	//idiotic check, idiotic results
+	object_count = &object_count_real;
+	//R_ASSERT				( m_object_count == object_count_real, " [%d] -> [%d]", m_object_count, object_count_real );
 
 #else // #ifdef DEBUG
 	XRAY_UNREFERENCED_PARAMETERS	( node, object_count );

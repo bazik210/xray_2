@@ -260,7 +260,7 @@ u32	get_geometry_instance_size	( )
 
 void delete_geometry_instance	( memory::base_allocator* allocator, geometry_instance* object )
 {
-	if ( !object )
+	if ( !object || object == nullptr )
 		return;
 
 	object->destroy				( allocator );

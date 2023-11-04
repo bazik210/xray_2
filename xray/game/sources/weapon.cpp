@@ -149,6 +149,7 @@ void weapon_part_solid_visual::hide( )
 		render::scene_ptr scene		= m_parent->get_game_world().get_render_scene();
 		render::game::renderer& r	= m_parent->get_game_world().get_game().renderer();
 
+	if( m_parent->get_game_world().get_game().get_active_scene())
 		r.scene().remove_model			( scene, m_model->m_render_model );
 	}
 }
