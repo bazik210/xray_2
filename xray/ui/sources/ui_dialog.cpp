@@ -10,7 +10,7 @@
 namespace xray {
 namespace ui {
 
-ui_dialog::ui_dialog( memory::base_allocator& a )
+ui_dialog::ui_dialog( memory::doug_lea_allocator& a )
 :super		( a )
 {}
 

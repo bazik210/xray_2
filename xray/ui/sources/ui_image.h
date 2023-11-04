@@ -12,7 +12,7 @@ class ui_image :
 	public ui_window
 {
 public:
-					ui_image		( memory::base_allocator& a );
+					ui_image		( memory::doug_lea_allocator& a );
 	virtual			~ui_image		( );
 	virtual void	init_texture	( pcstr texture_name );
 	virtual void	draw			( xray::render::ui::renderer& renderer, xray::render::scene_view_ptr const& scene_view );

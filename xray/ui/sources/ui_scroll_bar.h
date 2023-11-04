@@ -17,7 +17,7 @@ class ui_scroll_bar :	public ui_image
 {
 	typedef ui_image	super;
 public:
-					ui_scroll_bar			( memory::base_allocator& a );
+					ui_scroll_bar			( memory::doug_lea_allocator& a );
 			void	init					(scroll_source* src, bool b_vertical);
 			void	update_self				();
 			void	move					(float size);

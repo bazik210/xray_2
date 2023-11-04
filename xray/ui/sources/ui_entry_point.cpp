@@ -8,7 +8,7 @@ XRAY_DECLARE_LINKAGE_ID(ui_entry_point)
 namespace xray {
 namespace ui {
 
-world* xray::ui::create_world(engine& engine, render::ui::renderer& renderer, memory::base_allocator& allocator/*, render::scene_view_ptr const& scene_view*/ )
+world* xray::ui::create_world(engine& engine, render::ui::renderer& renderer, memory::doug_lea_allocator& allocator/*, render::scene_view_ptr const& scene_view*/ )
 {
 	return						XRAY_NEW_IMPL( allocator, ui_world )( engine, renderer, allocator/*, scene_view*/ );
 }

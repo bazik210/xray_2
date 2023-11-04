@@ -14,7 +14,7 @@ namespace ui {
 ui_world::ui_world(
 		engine& engine,
 		render::ui::renderer& renderer,
-		memory::base_allocator& allocator
+		memory::doug_lea_allocator& allocator
 		//,render::scene_view_ptr const& scene_view
 	) :
 	m_engine			( engine ),

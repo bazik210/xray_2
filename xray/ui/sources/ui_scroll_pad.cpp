@@ -21,7 +21,7 @@ bool operator	()(float pos, window* w1)
 	}
 };
 
-ui_scroll_pad::ui_scroll_pad( memory::base_allocator& a )
+ui_scroll_pad::ui_scroll_pad( memory::doug_lea_allocator& a )
 :super	( a )
 {}
 

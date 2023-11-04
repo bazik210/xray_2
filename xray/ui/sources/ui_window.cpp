@@ -23,7 +23,7 @@ void client_to_screen(const ui_window& w, float2& src_and_dest)
 	}
 }
 
-ui_window::ui_window( memory::base_allocator& a )
+ui_window::ui_window( memory::doug_lea_allocator& a )
 :ui_base		( a ),
 m_position		( 0.0f, 0.0f ),
 m_size			( 0.0f,0.0f ),
@@ -39,6 +39,7 @@ m_event_manager	( a )
 ui_window::~ui_window( )
 {
 	remove_all_childs	( );
+	m_event_manager.clear( );
 }
 
 void ui_window::set_parent( window* w )

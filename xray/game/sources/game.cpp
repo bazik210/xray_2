@@ -167,6 +167,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_debug_window_type		( debug_window_none ),
 	m_debug_window			( NULL ),
 	m_rtp					( 0 ),
+	m_scene_to_activate		( 0 ),
 	gload					( 0 )
 {
 	query_render_scene		( );

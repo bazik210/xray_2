@@ -36,7 +36,7 @@ class ui_window :	public window,
 					public ui_base
 {
 public:
-							ui_window			( memory::base_allocator& a );
+							ui_window			( memory::doug_lea_allocator& a );
 	virtual					~ui_window			( );
 
 			void			set_position		( float2 const& pos );

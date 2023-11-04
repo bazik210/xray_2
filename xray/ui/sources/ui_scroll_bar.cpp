@@ -9,7 +9,7 @@
 namespace xray {
 namespace ui {
 
-ui_scroll_bar::ui_scroll_bar( memory::base_allocator& a )
+ui_scroll_bar::ui_scroll_bar( memory::doug_lea_allocator& a )
 :super			( a ),
 m_track_button	( a ),
 m_btn_lt		( a ),

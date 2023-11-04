@@ -12,7 +12,7 @@ namespace ui {
 
 extern float4 arial_21_symb [];
 
-ui_font::ui_font(memory::base_allocator& a)
+ui_font::ui_font(memory::doug_lea_allocator& a)
 :ui_base		( a ),
 m_char_map		( NULL )
 {}
@@ -68,7 +68,7 @@ float ui_font::get_height_ts()	const
 	return get_height()/m_ts_size.y;
 }
 
-font_manager::font_manager( memory::base_allocator& a )
+font_manager::font_manager( memory::doug_lea_allocator& a )
 :ui_base( a ),
 m_font	( a )
 {

@@ -22,7 +22,7 @@ class ui_dialog :	public dialog,
 {
 	typedef ui_window					super;
 public:
-					ui_dialog			( memory::base_allocator& a );
+					ui_dialog			( memory::doug_lea_allocator& a );
 	virtual			~ui_dialog			( );
 
 	virtual	bool	on_keyboard_action	( input::world* input_world, input::enum_keyboard key, input::enum_keyboard_action action );

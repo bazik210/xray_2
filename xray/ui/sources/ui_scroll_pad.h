@@ -16,7 +16,7 @@ class ui_scroll_pad : public ui_window
 {
 	typedef ui_window	super;
 public:
-					ui_scroll_pad			( memory::base_allocator& a );
+					ui_scroll_pad			( memory::doug_lea_allocator& a );
 	virtual void	draw					( xray::render::ui::renderer& renderer, xray::render::scene_view_ptr const& scene_view );
 	virtual void	tick					( );
 };

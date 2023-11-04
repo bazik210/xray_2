@@ -35,7 +35,7 @@ class ui_scroll_view :	public ui::scroll_view,
 {
 	typedef ui_window	super;
 public:
-	ui_scroll_view			( memory::base_allocator& a );
+	ui_scroll_view			( memory::doug_lea_allocator& a );
 	virtual				~ui_scroll_view			();
 	virtual void		add_item				(window* w, bool adopt);
 	virtual void		remove_item				(window* w);

@@ -10,7 +10,7 @@ namespace ui {
 class ui_font : public xray::ui::font, public ui_base
 {
 public:
-			ui_font			( memory::base_allocator& a );
+			ui_font			( memory::doug_lea_allocator& a );
 							~ui_font		( );
 	void					init_font		( pcstr name );
 protected:
@@ -31,7 +31,7 @@ class font_manager : public ui_base
 	ui_font					m_font;
 	void					initialize_fonts( );
 public:
-							font_manager	( memory::base_allocator& a );
+							font_manager	( memory::doug_lea_allocator& a );
 							~font_manager	( );
 	ui_font const *			get_font		( )	const	{return &m_font;}
 	void					on_device_reset	( );

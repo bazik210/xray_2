@@ -126,10 +126,10 @@ void world::end_frame_editor	( )
 
 void world::tick				( )
 {
-	if ( !m_is_logic_frame_ended )
+	if ( m_render_engine_world && !m_is_logic_frame_ended )
 		m_logic_channel.render_process_commands	( true );
 
-	if ( !m_is_editor_frame_ended )
+	if ( m_render_engine_world && !m_is_editor_frame_ended )
 		m_editor_channel.render_process_commands( true );
 }
 

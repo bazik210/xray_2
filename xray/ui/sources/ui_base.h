@@ -13,7 +13,7 @@ namespace ui {
 class ui_base :private boost::noncopyable
 {
 public:
-	ui_base	( memory::base_allocator& a ):m_allocator(a){};
+	ui_base(memory::doug_lea_allocator& a): m_allocator(a) {};
 
 	memory::base_allocator&		allocator() const		{ return m_allocator;}
 private:

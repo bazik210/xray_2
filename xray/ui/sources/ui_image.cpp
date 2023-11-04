@@ -11,7 +11,7 @@
 namespace xray {
 namespace ui {
 
-ui_image::ui_image( memory::base_allocator& a )
+ui_image::ui_image( memory::doug_lea_allocator& a )
 :ui_window		( a ),
 m_color			( 0xffffffff ),
 m_tex_coords	( 0.0f,0.0f,1.0f,1.0f ), 
