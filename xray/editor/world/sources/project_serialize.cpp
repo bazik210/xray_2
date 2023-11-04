@@ -52,7 +52,7 @@ void project::load_project_impl( )
 	fs_new::virtual_path_string pth;
 	pth.assignf				("resources/projects/%s/project.xprj", unmanaged_string(m_project_name).c_str());
 
-	//m_level_editor->get_editor_world().get_ai_navigation_world().load_navmesh	( unmanaged_string(m_project_name).c_str() );
+	m_level_editor->get_editor_world().get_ai_navigation_world().load_navmesh	( unmanaged_string(m_project_name).c_str() );
 
 	query_result_delegate* q = NEW(query_result_delegate)(gcnew query_result_delegate::Delegate(this, &project::on_project_config_loaded), g_allocator);
 
