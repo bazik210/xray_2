@@ -83,10 +83,10 @@ namespace memory {
 
 namespace debug {
 	enum {
-		underrun_guard			= 0xffbdFDFD,
-		overrun_guard			= 0xffbdFDFD,
-		uninitialized_memory	= 0xffbdCDCD,
-		freed_memory			= 0xffbdDDDD,
+		underrun_guard			= 0x1ee2925fd, //0xffbdFDFD,
+		overrun_guard			= 0x1ee28f5cd, //0xffbdFDFD,
+		uninitialized_memory	= 0x1ee28f5cd, //0xffbdCDCD,
+		freed_memory			= 0x1ee2905dd  //0xffbdDDDD
 	};
 } // namespace debug
 
