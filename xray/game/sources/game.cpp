@@ -283,12 +283,15 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	if ( load_level && !m_engine.command_line_editor() )
 		load					( project_path.c_str() );
 	else
-		switch_to_scene			( m_main_menu );
+		m_game_world->switch_to_free_fly_camera( );
 
 	R_ASSERT					( m_animation_world );
 //	animation_world().set_test_scene( get_active_scene() );
 
 	enable						( m_enabled );
+
+	//if (!load_level)
+	//	switch_to_scene(m_main_menu);
 
 	if ( m_is_active )
 	{
