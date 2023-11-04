@@ -278,20 +278,17 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_viewport.bottom			= 1.f;
 
 	fixed_string512				project_path;
-	bool const load_level		= s_level_key.is_set_as_string( &project_path );
+	m_load_level				= s_level_key.is_set_as_string( &project_path );
 	
-	if ( load_level && !m_engine.command_line_editor() )
+	if ( m_load_level && !m_engine.command_line_editor() )
 		load					( project_path.c_str() );
 	else
-		m_game_world->switch_to_free_fly_camera( );
+		switch_to_scene			( m_main_menu );
 
 	R_ASSERT					( m_animation_world );
 //	animation_world().set_test_scene( get_active_scene() );
 
 	enable						( m_enabled );
-
-	//if (!load_level)
-	//	switch_to_scene(m_main_menu);
 
 	if ( m_is_active )
 	{
@@ -397,12 +394,19 @@ void game::enable( bool value )
 		m_input_world->acquire		( );
 
 		// select active scene
-		game_scene* scene_to_activate = /*m_lobby_menu;*/m_game_world;
+		if (m_load_level && !m_engine.command_line_editor())
+		{
+			m_scene_to_activate = /*m_lobby_menu;*/m_game_world;
+		}
+		else
+		{
+			m_scene_to_activate = m_main_menu;
+		}
 #if 0		
 		if( m_game_world->empty() )
-			scene_to_activate		= m_main_menu;
+			m_scene_to_activate		= m_main_menu;
 #endif
-		switch_to_scene				( scene_to_activate );
+		switch_to_scene				( m_scene_to_activate );
 	}
 	else
 	{

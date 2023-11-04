@@ -205,12 +205,12 @@ void actor::process_input_events( )
 		//			- fps affect on it
 		//			- hardcode bad, mkay
 
-		float move_delta_fw		= frame_time_sec * 1.66f * 2.f;
-		float move_delta_right	= frame_time_sec * 0.83f * 2.f;
+		float move_delta_fw		= frame_time_sec * 1.66f * 4.f;
+		float move_delta_right	= frame_time_sec * 0.83f * 4.f;
 		if (m_actor_input_controller->on_frame_sprint())
 		{
-			move_delta_fw		= frame_time_sec * 1.66f * 8.f;
-			move_delta_right	= frame_time_sec * 0.83f * 8.f;
+			move_delta_fw		= frame_time_sec * 1.66f * 10.f;
+			move_delta_right	= frame_time_sec * 0.83f * 10.f;
 
 			// reset if unpressed key
 			if (!m_actor_input_controller->is_doing_movement())

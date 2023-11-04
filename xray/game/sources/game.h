@@ -329,7 +329,11 @@ private:
 
 	bool									m_rtp;
 
+	bool									m_load_level;
+
 	float3									m_movement_target;
+
+	game_scene*								m_scene_to_activate;
 
 //public:
 //	std::vector<game_object_*>				m_postload;
