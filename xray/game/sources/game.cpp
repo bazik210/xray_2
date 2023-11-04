@@ -283,7 +283,7 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	if ( load_level && !m_engine.command_line_editor() )
 		load					( project_path.c_str() );
 	else
-		m_game_world->switch_to_free_fly_camera( );
+		switch_to_scene			( m_main_menu );
 
 	R_ASSERT					( m_animation_world );
 //	animation_world().set_test_scene( get_active_scene() );
@@ -394,8 +394,7 @@ void game::enable( bool value )
 		m_input_world->acquire		( );
 
 		// select active scene
-		//game_scene* scene_to_activate = /*m_lobby_menu;*/m_game_world;
-		game_scene* scene_to_activate = m_main_menu;
+		game_scene* scene_to_activate = /*m_lobby_menu;*/m_game_world;
 #if 0		
 		if( m_game_world->empty() )
 			scene_to_activate		= m_main_menu;
