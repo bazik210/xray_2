@@ -45,6 +45,10 @@ ui_window::~ui_window( )
 void ui_window::set_parent( window* w )
 {
 	m_parent			= w;
+	
+	if (!m_parent) 
+	    return;
+
 	process_event		( ev_parent_changed, 0, 0 );
 }
 
