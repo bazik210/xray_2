@@ -39,9 +39,17 @@ m_stop_query		(false ),
 m_game_world		( w ),
 m_wpn_reload		( false ),
 m_wpn_shoot			( false ),
+m_wpn_draw			( false ),
+m_wpn_holster		( false ),
+m_wpn_hidden_1		( false ),
+m_wpn_hidden_2		( false ),
 m_snd				( 0 ),
 m_start_reload_timer ( 0 ),
 m_start_shoot_timer  ( 0 ),
+m_start_draw_timer	 ( 0 ),
+m_start_holster_timer ( 0 ),
+m_switch_snd_time_delay ( 0 ),
+m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
 m_new_weapon		("ak_74"),
@@ -91,9 +99,12 @@ void actor::query_resources( )
 	resources::request r[] ={
 		{ "character/human/actor/neutral_03/neutral_03_actor_full",	resources::skeleton_model_instance_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle",	resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle_01",  resources::animation_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_add",	resources::animation_class },
-		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload", resources::animation_class },
+		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload_empty", resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/fire_1",  resources::animation_class },
+		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",  resources::animation_class },
+		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",  resources::animation_class },
 		{ "assault_rifles/ak74m",								resources::weapon_class },
 	};
 
@@ -117,15 +128,18 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_character_model		= static_cast_resource_ptr<render::skeleton_model_ptr>(data[0].get_unmanaged_resource());
 
 	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
-	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());
-	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
-	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
+	m_idle_stand_01_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());
+	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
+	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
+	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[5].get_managed_resource());
+	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
+	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
 
 	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
 	m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
 	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
 
-	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[5].get_unmanaged_resource());
+	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[8].get_unmanaged_resource());
 	m_weapon->m_game_world	= &m_game_world;
 
 	//some query system bug;
@@ -141,6 +155,7 @@ void actor::add_models_to_scene( )
 
 	r.scene().add_model			( scene, m_character_model->m_render_model, m_character_transform );
 	m_weapon->show				( m_character_transform );
+	m_wpn_draw = true;
 }
 
 void actor::remove_models_from_scene( )
@@ -150,7 +165,7 @@ void actor::remove_models_from_scene( )
 
 	r.scene().remove_model		( scene, m_character_model->m_render_model );
 
-	if(!m_wpn_switch)
+	if(m_weapon && !m_weapon->m_hidden)
 		m_weapon->hide				( );
 }
 
@@ -228,26 +243,61 @@ void actor::process_input_events( )
 		m_actor_physics_controller->jump();
 
 	//pressed reload action
-	if (m_actor_input_controller && m_actor_input_controller->on_frame_reload() && !m_wpn_reload && !m_wpn_switch) {
-
+	if (m_actor_input_controller && m_actor_input_controller->m_reload && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw) 
+	{
+		m_actor_input_controller->m_reload = !m_actor_input_controller->m_reload;
 		m_weapon->action				( 2 );
-		update_animations(true, false);
+		update_animations(true, false, false, false, false);
 		m_wpn_reload = true;
 	}
 
 	//pressed 1
-	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_1() && !m_wpn_switch  && !m_wpn_reload && m_new_weapon != "ak_74")
+	else if (m_actor_input_controller && m_actor_input_controller->m_wpn_1 && !m_wpn_reload && !m_wpn_holster && !m_wpn_draw && !m_wpn_switch)
 	{
-		m_wpn_switch = true;
-		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
+		m_actor_input_controller->m_wpn_1 = !m_actor_input_controller->m_wpn_1;
+
+		if (m_new_weapon != "ak_74") {
+			m_wpn_switch = true;
+			m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
+
+		}
+		else {
+			if (!m_wpn_hidden_1) {
+				m_wpn_hidden_1 = true;
+				m_wpn_holster = true;
+			}
+			else {
+				m_wpn_hidden_1 = false;
+				m_wpn_draw = true;
+				m_weapon->show(m_character_transform);
+			}
+		}
 	}
 
 	//pressed 2
-	if (m_actor_input_controller && m_actor_input_controller->on_frame_switch_2()  && !m_wpn_switch && !m_wpn_reload && m_new_weapon != "assault_rifles/ak74m")
+	else if (m_actor_input_controller && m_actor_input_controller->m_wpn_2 && !m_wpn_reload && !m_wpn_holster && !m_wpn_draw && !m_wpn_switch)
 	{
-		m_wpn_switch = true;
-		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
+		m_actor_input_controller->m_wpn_2 = !m_actor_input_controller->m_wpn_2;
+
+		if (m_new_weapon != "assault_rifles/ak74m") {
+			m_wpn_switch = true;
+			m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
+		}
+		else {
+			if (!m_wpn_hidden_2) {
+				m_wpn_hidden_2 = true;
+				m_wpn_holster = true;
+			}
+			else {
+				m_wpn_hidden_2 = false;
+				m_wpn_draw = true;
+				m_weapon->show(m_character_transform);
+			}
+		}
 	}
+	m_actor_input_controller->m_reload = false;
+	m_actor_input_controller->m_wpn_1 = false;
+	m_actor_input_controller->m_wpn_2 = false;
 }
 
 void actor::query_new_weapon( pstr weapon_type, pstr new_anim )
@@ -268,7 +318,11 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 {
 	R_ASSERT(data.is_successful());
 
-	m_weapon->hide ( );
+	if (m_weapon && !m_weapon->m_hidden) {
+		if (!m_wpn_hidden_1 && !m_wpn_hidden_2) {
+			m_weapon->hide();
+		}
+	}
 
 	m_weapon = static_cast_resource_ptr< weapon_ptr >(data[0].get_unmanaged_resource());
 	m_weapon->m_game_world	= &m_game_world;
@@ -276,7 +330,6 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
 
 	m_weapon->action				( 0 );
-	m_weapon->show			( m_character_transform );
 
 	if (m_new_weapon == "ak_74") {
 		m_new_weapon = "assault_rifles/ak74m";
@@ -289,8 +342,10 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 		//old anim doesn't work
 	}
 
-	m_wpn_switch = false;
-	m_wpn_call = false;
+	m_wpn_draw = true;
+	update_animations(false, false, true, false, false);
+
+	m_weapon->show(m_character_transform);
 }
 
 void actor::switch_weapon() {
@@ -312,15 +367,18 @@ void actor::switch_weapon() {
 //	return							animation::callback_return_type_dont_call_me_anymore;
 //}
 
-void actor::update_animations( bool m_reload = false, bool m_shoot = false )
+void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool m_draw = false, bool m_holster = false, bool m_idle = false )
 {
 
 	mutable_buffer buffer	( ALLOCA( animation::animation_player::stack_buffer_size ), animation::animation_player::stack_buffer_size );
 
 	animation::skeleton_animation_ptr current_idle_animation		= m_idle_stand_animation;
+	animation::skeleton_animation_ptr current_idle_01_animation		= m_idle_stand_01_animation;
 	animation::skeleton_animation_ptr current_additive_animation	= m_look_animation_add;
 	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
 	animation::skeleton_animation_ptr current_shoot_animation		= m_shoot_animation;
+	animation::skeleton_animation_ptr current_draw_animation		= m_draw_animation;
+	animation::skeleton_animation_ptr current_holster_animation		= m_holster_animation;
 
 	// calculate additive animation coefficient, based on pitch
 	float k								= 1.0f - (m_look_pitch+1.0f)/2.0f; // normalized to 0..1.0f
@@ -331,6 +389,14 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 			buffer, 
 			"idle",
 			current_idle_animation
+		).time_scale( 0.f )
+	);
+
+	animation::mixing::animation_lexeme	current_idle_no_wpn_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer, 
+			"no_wpn",
+			current_idle_01_animation
 		).time_scale( 0.f )
 	);
 
@@ -347,6 +413,22 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 			buffer,
 			"shoot",
 			current_shoot_animation
+		).time_scale(1.f)
+	);
+
+	animation::mixing::animation_lexeme	current_draw_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer,
+			"draw",
+			current_draw_animation
+		).time_scale(1.f)
+	);
+
+	animation::mixing::animation_lexeme	current_holster_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer,
+			"holster",
+			current_holster_animation
 		).time_scale(1.f)
 	);
 
@@ -368,7 +450,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 
 	m_weapon->select_animation(buffer);
 
-	if (!m_reload && !m_shoot) {
+	if (!m_reload && !m_shoot && !m_draw && !m_holster && !m_idle) {
 		m_animation_player->set_target_and_tick(
 			current_idle_lexeme
 			+ current_additive_lexeme
@@ -398,7 +480,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 			//		0
 			//	);
 		}
-		if (m_shoot) {
+		else if (m_shoot) {
 			if (!m_start_shoot_timer) {
 				m_start_shoot_timer = true;
 				if (m_snd != NULL) {
@@ -415,13 +497,53 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false )
 				+ weapon_target
 				, current_time);
 		}
+		else if (m_draw) {
+			if (!m_start_draw_timer) {
+				m_start_draw_timer = true;
+				if (m_snd != NULL) {
+					DELETE(m_snd);
+				}
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				m_snd->load_custom("draw", false);
+				m_draw_anim_time = current_time + (current_draw_lexeme.animation_intervals_begin()->length() * 1000);
+			}
+			m_animation_player->set_target_and_tick(
+				current_draw_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
+		}
+		else if (m_holster) {
+			if (!m_start_holster_timer) {
+				m_start_holster_timer = true;
+				if (m_snd != NULL) {
+					DELETE(m_snd);
+				}
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				m_snd->load_custom("holster", false);
+				m_holster_anim_time = current_time + (current_holster_lexeme.animation_intervals_begin()->length() * 1000);
+			}
+			m_animation_player->set_target_and_tick(
+				current_holster_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
+		}
+		else if (m_idle) {
+			m_animation_player->set_target_and_tick(
+				current_idle_no_wpn_lexeme
+				+ current_additive_lexeme
+				, current_time);
+		}
 		//m_animation_player->tick(current_time);
 	}
 }
 
-void actor::tick( )
+void actor::tick()
 {
-	if(!m_tmp_is_active)
+	if (!m_tmp_is_active)
 		return;
 
 	// from previous physic step
@@ -431,30 +553,96 @@ void actor::tick( )
 	//if reload, wait till anim ends
 	if (m_start_reload_timer && m_anim_timer.get_elapsed_msec() >= m_reload_anim_time) {
 		m_start_reload_timer = false;
-		m_weapon->action				( 0 );
+		m_weapon->action(0);
 		m_wpn_reload = false;
+	}
+
+	if (m_start_draw_timer && m_anim_timer.get_elapsed_msec() >= m_draw_anim_time) {
+		m_start_draw_timer = false;
+		m_wpn_draw = false;
+
+		if (m_wpn_switch) {
+			m_wpn_switch = false;
+			m_wpn_call = false;
+			if (m_wpn_hidden_1)
+				m_wpn_hidden_1 = false;
+
+			if (m_wpn_hidden_2)
+				m_wpn_hidden_2 = false;
+		}
+
+	}
+
+	if (m_switch_snd_time_delay && m_anim_timer.get_elapsed_msec() >= m_switch_snd_time)
+	{
+		m_switch_snd_time_delay = false;
+
+		if (m_wpn_switch) {
+			switch_weapon();
+		}
+	}
+
+	if (m_start_holster_timer && m_anim_timer.get_elapsed_msec() >= m_holster_anim_time) {
+		m_start_holster_timer = false;
+		m_wpn_holster = false;
+
+		if (m_weapon && !m_weapon->m_hidden && !m_wpn_switch) {
+			m_weapon->hide();
+		}
+		else {
+			m_switch_snd_time = m_anim_timer.get_elapsed_msec() + 400;
+			m_switch_snd_time_delay = true;
+
+		}
+
 	}
 
 	m_character_transform = m_actor_physics_controller->get_transform();
 
-	process_input_events	( );
+	process_input_events();
 
-	if (!m_wpn_switch) {
-		if (m_wpn_reload) {
-			update_animations(true, false);
-		}
-		else if (m_wpn_shoot) {
-			update_animations(false, true);
+	if (m_weapon) {
+		if (!m_weapon->m_hidden) {
+			if (!m_wpn_switch && !m_wpn_draw && !m_wpn_holster) {
+				if (m_wpn_reload) {
+					update_animations(true, false);
+				}
+				else if (m_wpn_shoot) {
+					update_animations(false, true);
+				}
+				else {
+					update_animations();
+
+				}
+			}
+			if (m_wpn_draw) {
+				update_animations(false, false, true, false);
+			}
+			else if (m_wpn_holster) {
+				update_animations(false, false, false, true);
+			}
+			//else {
+				//update_animations();
+			//}
 		}
 		else {
-			update_animations();
+			update_animations(false, false, false, false, true);
 		}
 	}
 
 	//switching weapon
 	if (m_wpn_switch && m_anim_timer.get_elapsed_msec() >= m_wpn_timer && !m_wpn_call) {
 		m_wpn_call = true;
-		switch_weapon();
+		if (!m_wpn_hidden_1 && !m_wpn_hidden_2) {
+			m_wpn_holster = true;
+
+			///m_weapon->action				( 4 );
+			m_weapon->action				( 0 );
+			update_animations(false, false, false, true, false);
+		}
+		else {
+			switch_weapon();
+		}
 	}
 
 	//if shoot, wait till anim ends
@@ -483,16 +671,12 @@ void actor::tick( )
 
 	r.scene().update_skeleton		( m_character_model->m_render_model, matrices, non_root_bones_count );
 
-	if (!m_wpn_switch) {
+	if (m_weapon && !m_weapon->m_hidden) {
 		// update weapon
-		{
-			float4x4 weapon_matrix;
-			calculate_weapon_matrix(matrices, weapon_matrix);
-			if (!m_wpn_switch) {
-				m_weapon->set_transform(weapon_matrix);
-				m_weapon->tick(m_animation_player);
-			}
-		}
+		float4x4 weapon_matrix;
+		calculate_weapon_matrix(matrices, weapon_matrix);
+		m_weapon->set_transform(weapon_matrix);
+		m_weapon->tick(m_animation_player);
 	}
 
 	//calculate_head_matrix		( matrices, m_character_head_transform );

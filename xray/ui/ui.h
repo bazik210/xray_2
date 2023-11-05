@@ -66,6 +66,7 @@ struct XRAY_NOVTABLE window
 
 	virtual window*			get_parent			() const						= 0;
 	virtual void			set_parent			(window* w)						= 0;
+	virtual	bool			is_valid			()								= 0;
 	virtual window*			get_root			()								= 0;
 
 	virtual bool			get_orphan			() const						= 0;

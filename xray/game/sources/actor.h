@@ -56,7 +56,7 @@ private:
 	void			remove_models_from_scene	( );
 
 	void			process_input_events		( );
-	void			update_animations			( bool m_reload, bool m_shoot );
+	void			update_animations			( bool m_reload, bool m_shoot, bool m_draw, bool m_holster, bool m_idle );
 	void			calculate_head_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_weapon_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_camera_matrix		(float4x4* const matrices, float4x4& result) const;
@@ -84,6 +84,9 @@ private:
 	animation::skeleton_animation_ptr	m_look_animation_add; //additive
 	animation::skeleton_animation_ptr	m_reload_animation;
 	animation::skeleton_animation_ptr	m_shoot_animation;
+	animation::skeleton_animation_ptr	m_draw_animation;
+	animation::skeleton_animation_ptr	m_holster_animation;
+	animation::skeleton_animation_ptr	m_idle_stand_01_animation;
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;
@@ -92,12 +95,22 @@ private:
 	bool								m_tmp_is_active;
 	bool								m_start_reload_timer;
 	bool								m_start_shoot_timer;
+	bool								m_start_draw_timer;
+	bool								m_start_holster_timer;
+	bool								m_switch_snd_time_delay;
 	bool								m_wpn_reload;
+	bool								m_wpn_draw;
+	bool								m_wpn_holster;
 	bool								m_wpn_switch;
 	bool								m_wpn_call;
+	bool								m_wpn_hidden_1;
+	bool								m_wpn_hidden_2;
 	u32									m_wpn_timer;
 	u32									m_reload_anim_time;
 	u32									m_shoot_anim_time;
+	u32									m_draw_anim_time;
+	u32									m_holster_anim_time;
+	u32									m_switch_snd_time;
 	bool								m_wpn_shoot;
 	object_volumetric_sound*			m_snd;
 

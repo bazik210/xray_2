@@ -46,6 +46,8 @@ void weapon_cook::on_weapon_config_ready( resources::queries_result& data, resou
 					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/idle",	resources::animation_class },
 					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/reload",	resources::animation_class },
 					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/shoot",	resources::animation_class },
+					//{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",	resources::animation_class },
+					//{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",	resources::animation_class },
 
 					{ config["cover"]["model"],						resources::static_model_instance_class },
 					{ config["stock"]["model"],						resources::static_model_instance_class },
@@ -66,9 +68,11 @@ void weapon_cook::on_weapon_config_ready( resources::queries_result& data, resou
 		resources::request r[] = {
 			// base part(animated)
 			{ config["base"]["model"],						resources::skeleton_model_instance_class },
-					{ "resources/animations/single/weapon/idle",	resources::animation_class },
-					{ "resources/animations/single/weapon/reload",	resources::animation_class },
-					{ "resources/animations/single/weapon/shoot",	resources::animation_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/idle",	resources::animation_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/reload",	resources::animation_class },
+					{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/item/shoot",	resources::animation_class },
+					//{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",	resources::animation_class },
+					//{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",	resources::animation_class },
 
 					{ config["cover"]["model"],						resources::static_model_instance_class },
 					{ config["stock"]["model"],						resources::static_model_instance_class },
@@ -99,10 +103,12 @@ void weapon_cook::on_weapon_parts_ready( resources::queries_result& data,
 	animation::skeleton_animation_ptr idle_anim		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[++resource_idx].get_managed_resource());
 	animation::skeleton_animation_ptr reload_anim	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[++resource_idx].get_managed_resource());
 	animation::skeleton_animation_ptr shoot_anim	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[++resource_idx].get_managed_resource());
+	//animation::skeleton_animation_ptr draw_anim		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[++resource_idx].get_managed_resource());
+	//animation::skeleton_animation_ptr holster_anim	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[++resource_idx].get_managed_resource());
 
 	weapon* w			= NEW(weapon)();
 
-	w->m_base->load	( config["base"], base_model, idle_anim, reload_anim, shoot_anim );
+	w->m_base->load	( config["base"], base_model, idle_anim, reload_anim, shoot_anim/*, draw_anim, holster_anim*/);
 
 	w->m_cover->load	( config["cover"], 
 		static_cast_resource_ptr<render::static_model_ptr>(data[++resource_idx].get_unmanaged_resource()) );

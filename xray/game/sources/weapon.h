@@ -84,7 +84,10 @@ public:
 													render::skeleton_model_ptr model,
 													animation::skeleton_animation_ptr idle_anim,
 													animation::skeleton_animation_ptr reload_anim,
-													animation::skeleton_animation_ptr shoot_anim );
+													animation::skeleton_animation_ptr shoot_anim
+													//animation::skeleton_animation_ptr draw_anim,
+													//animation::skeleton_animation_ptr holster_anim 
+												);
 	virtual void		set_transform			( float4x4 const& transform );
 	virtual void		show					( float4x4 const& initial_transform );
 	virtual void		hide					( );
@@ -102,6 +105,8 @@ protected:
 	animation::skeleton_animation_ptr	m_idle;
 	animation::skeleton_animation_ptr	m_reload;
 	animation::skeleton_animation_ptr	m_shoot;
+	animation::skeleton_animation_ptr	m_draw;
+	animation::skeleton_animation_ptr	m_holster;
 };
 
 class weapon : public resources::unmanaged_resource,
@@ -140,6 +145,7 @@ public: // tmp
 public:
 	int							m_current_state;
 	u32							m_current_state_start_time;
+	bool						m_hidden;
 };
 
 typedef	resources::resource_ptr<

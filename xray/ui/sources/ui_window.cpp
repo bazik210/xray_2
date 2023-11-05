@@ -83,7 +83,7 @@ void ui_window::remove_child( window* w )
 	window_list_it it		= std::find(m_childs.begin(), m_childs.end(), w);
 	m_childs.erase			(it);
 
-	if(w->get_orphan())
+	if(w && w->get_orphan())
 		XRAY_DELETE_IMPL( allocator(), w );
 	else
 		w->set_parent		( NULL );

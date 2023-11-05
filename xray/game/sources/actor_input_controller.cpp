@@ -18,7 +18,10 @@ namespace stalker2
 
 actor_input_controller::actor_input_controller( game_scene& w )
 :super			( w ),
-m_sprint_toggle ( false )
+m_sprint_toggle ( false ),
+m_reload		( false ),
+m_wpn_1			( false ),
+m_wpn_2			( false )
 {
 };
 
@@ -34,10 +37,17 @@ bool actor_input_controller::on_keyboard_action(input::world* input_world,
 	if ( game_action == kNOTBINDED )
 		return false;
 	
-	if(action == xray::input::kb_key_hold)
-		m_frame_events.m_game_actions.push_back	( game_action );
-	else if ( action == xray::input::kb_key_down && game_action == kSPRINT_TOGGLE )
+	if (action == xray::input::kb_key_hold)
+		m_frame_events.m_game_actions.push_back(game_action);
+	else if (action == xray::input::kb_key_down && game_action == kSPRINT_TOGGLE)
 		m_sprint_toggle = !m_sprint_toggle;
+	else if (action == xray::input::kb_key_down && game_action == kWPN_1)
+		m_wpn_1 = !m_wpn_1;
+	else if (action == xray::input::kb_key_down && game_action == kWPN_2)
+		m_wpn_2 = !m_wpn_2;
+	else if (action == xray::input::kb_key_down && game_action == kWPN_RELOAD)
+		m_reload = !m_reload;
+
 	return false;
 }
 

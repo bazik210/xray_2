@@ -77,6 +77,9 @@ private:
 public:
 	timing::timer				m_timer;
 	bool						m_sprint_toggle;
+	bool						m_reload;
+	bool						m_wpn_1;
+	bool						m_wpn_2;
 };
 
 } // namespace stalker2

@@ -162,13 +162,18 @@ void weapon_part_skinned_visual::load( configs::binary_config_value const& confi
 										render::skeleton_model_ptr model,
 										animation::skeleton_animation_ptr idle_anim,
 										animation::skeleton_animation_ptr reload_anim,
-										animation::skeleton_animation_ptr shoot_anim )
+										animation::skeleton_animation_ptr shoot_anim													
+										//animation::skeleton_animation_ptr draw_anim,
+										//animation::skeleton_animation_ptr holster_anim 
+										)
 {
 	super::load			( config );
 	m_model		= model;
 	m_idle		= idle_anim;
 	m_reload	= reload_anim;
 	m_shoot		= shoot_anim;
+	//m_draw		= draw_anim;
+	//m_holster	= holster_anim;
 	u32 const non_root_bones_count	= m_model->m_skeleton->get_non_root_bones_count( );
 	m_matrices		= ALLOC(float4x4, non_root_bones_count);
 	float4x4 inentity = float4x4().identity();
@@ -259,6 +264,12 @@ xray::animation::mixing::animation_lexeme weapon_part_skinned_visual::select_ani
 	case 2:
 		animation = m_reload;
 		break;
+	//case 3:
+	//	animation = m_draw;
+	//	break;
+	//case 4:
+	//	animation = m_holster;
+	//	break;
 	default:
 		NODEFAULT();
 	}
@@ -288,7 +299,8 @@ bool weapon_part_skinned_visual::calculate_locator( render::model_locator_item c
 
 weapon::weapon( )
 :m_game_world( NULL ),
-m_current_state( -1 )
+m_current_state( -1 ),
+m_hidden(0)
 
 {
 	m_base				= NEW(weapon_part_skinned_visual)();
@@ -350,10 +362,12 @@ void weapon::show( float4x4 const& initial_transform )
 {
 	m_transform				= initial_transform;
 	m_base->show			(initial_transform);
+	m_hidden				= false;
 }
 
 void weapon::hide( )
 {
+	m_hidden				= true;
 	m_base->hide( );
 }
 

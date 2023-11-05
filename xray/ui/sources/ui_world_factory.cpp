@@ -47,7 +47,9 @@ scroll_view* ui_world::create_scroll_view( )
 
 void ui_world::destroy_window(window* w)
 {
-	XRAY_DELETE_IMPL( allocator(), w );
+	if (w && w->is_valid()) {
+		XRAY_DELETE_IMPL(allocator(), w);
+	}
 }
 
 xray::ui::font const* ui_world::default_font()
