@@ -475,7 +475,7 @@ void actor::tick( )
 	
 	float4x4 const m				= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform;
 	
-	r.scene().update_model			( scene, m_character_model->m_render_model, m * create_translation(float3(0.f, 0.02f, 0.f)));
+	r.scene().update_model			( scene, m_character_model->m_render_model, m * create_translation(float3(0.f, 0.04f, 0.f)));
 
 	u32 const non_root_bones_count	= m_character_model->m_skeleton->get_non_root_bones_count( );
 	float4x4* const matrices		= static_cast<float4x4*>( ALLOCA(non_root_bones_count*sizeof(float4x4)) );
@@ -596,7 +596,7 @@ void actor::tick( )
 
 void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) const
 {
-	float4x4 character_render_transform = create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform;
+	float4x4 character_render_transform = create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.04f, 0.f));
 	result = (create_rotation(float3(0, math::pi, 0)) *
 		matrices[m_camera_bone_idx] *
 		character_render_transform);
@@ -606,7 +606,7 @@ void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) 
 
 void actor::calculate_head_matrix( float4x4* const matrices, float4x4& result ) const
 {
-	float4x4 character_render_transform		= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.02f, 0.f));
+	float4x4 character_render_transform		= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.04f, 0.f));
 	result							= ( create_rotation(float3(0,0,math::pi_d2)) * 
 											matrices[m_head_bone_idx] * 
 											character_render_transform );
@@ -616,7 +616,7 @@ void actor::calculate_head_matrix( float4x4* const matrices, float4x4& result ) 
 
 void actor::calculate_weapon_matrix( float4x4* const matrices, float4x4& result  ) const
 {
-	float4x4 character_render_transform	= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.02f, 0.f));
+	float4x4 character_render_transform	= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.04f, 0.f));
 	result								= matrices[m_weapon_bone_idx] * character_render_transform;
 }
 

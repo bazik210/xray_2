@@ -66,9 +66,14 @@
 
 using xray::console_commands::cc_delegate;
 using xray::console_commands::cc_float3;
+using xray::console_commands::cc_float;
 
 static bool s_draw_stats_value = true;
 static console_commands::cc_bool s_draw_stats("draw_stats", s_draw_stats_value, true, xray::console_commands::command_type_user_specific);
+
+static float cam_fov = 58.5f; //70.5f
+ 
+static console_commands::cc_float cc_cam_fov("fov", cam_fov, 20.f, 140.0f, true, xray::console_commands::command_type_user_specific);
 
 static command_line::key		s_level_key			( "level", "", "", "level to load" );
 static command_line::key		s_run_sound_tests	( "run_sound_test", "", "", "test for sound system" );
@@ -551,7 +556,12 @@ void game::tick( u32 const current_frame_id )
  		m_input_world->tick			( );
 		m_active_scene->tick		( );	
 	}
-
+	
+	if (!math::is_similar(m_game_world->get_camera_director()->get_active_camera()->get_pov(), cam_fov))
+	{
+		m_game_world->get_camera_director()->get_active_camera()->set_pov(cam_fov);
+		m_game_world->get_camera_director()->apply();
+	}
 
 //	test							( );
 	m_ui_world->tick				( );

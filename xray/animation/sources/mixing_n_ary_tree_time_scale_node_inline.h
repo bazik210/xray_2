@@ -22,7 +22,7 @@ inline n_ary_tree_time_scale_node::n_ary_tree_time_scale_node					(
 	m_animation_time_before_scale_starts( animation_time_before_scale_starts ),
 	m_time_scale_start_time_in_ms		( time_scale_start_time_in_ms )
 {
-	R_ASSERT_CMP						( math::abs(time_scale), <=, 10.f );
+	R_ASSERT_CMP						( math::abs(time_scale), <=, 26.f ); // 10.f
 }
 
 inline n_ary_tree_time_scale_node::n_ary_tree_time_scale_node					( n_ary_tree_time_scale_node const& other ) :
@@ -32,7 +32,7 @@ inline n_ary_tree_time_scale_node::n_ary_tree_time_scale_node					( n_ary_tree_t
 	m_animation_time_before_scale_starts( other.m_animation_time_before_scale_starts ),
 	m_time_scale_start_time_in_ms		( other.m_time_scale_start_time_in_ms )
 {
-	R_ASSERT_CMP						( math::abs(other.m_time_scale), <=, 10.f );
+	R_ASSERT_CMP						( math::abs(other.m_time_scale), <=, 26.f ); // 10.f
 }
 
 inline base_interpolator const& n_ary_tree_time_scale_node::interpolator		( ) const

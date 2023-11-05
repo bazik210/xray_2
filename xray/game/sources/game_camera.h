@@ -25,10 +25,12 @@ class game_camera : public game_object_, public object_controlled, private boost
 	typedef game_object_ super;
 public:
 								game_camera					( game_scene& w );
-	math::float4x4				get_projection_matrix		( float2 const& window_size ) const;
+	math::float4x4				get_projection_matrix		( float2 const& window_size, float pov = m_vertical_fov ) const;
 	math::float4x4 const&		get_inverted_view_matrix	( ) const			{ return m_inverted_view_matrix; }
 	math::float4x4&				inverted_view_matrix		( )					{ return m_inverted_view_matrix; }
 	void						set_position_direction		( math::float3 const& p, math::float3 const& d );
+	float						get_pov						()					{ return m_vertical_fov; }
+	void						set_pov						(float pov)			{ m_vertical_fov = pov; }
 	virtual void				on_activate					( camera_director* cd );
 	virtual void				on_deactivate				( )					{ };
 	virtual void				on_focus					( bool /*b_focus_enter*/) {};
@@ -38,7 +40,7 @@ public:
 
 protected:
 	float4x4		m_inverted_view_matrix;
-	float			m_vertical_fov;
+	static float	m_vertical_fov;
 	float			m_near_plane;
 	float			m_far_plane;
 	game_scene&		m_game_scene;
