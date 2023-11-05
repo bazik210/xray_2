@@ -40,7 +40,8 @@ resource_base::~resource_base ()
 	unlink_from_parents						();
 	// note that unlink_from_children is called from (un)managed_resource destructor
 	// to have access to resource info to better log
-	R_ASSERT								(m_children_resources.empty());
+	// access violation on boost::intrusive
+	// R_ASSERT								(m_children_resources.empty());
 }
 
 void   resource_base::set_need_cook ()

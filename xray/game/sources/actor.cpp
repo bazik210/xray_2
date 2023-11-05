@@ -69,10 +69,6 @@ m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_pers
 
 actor::~actor( )
 {
-		if (m_snd != NULL) {
-			DELETE(m_snd);
-		}
-
 		m_actor_physics_controller->deactivate();
 		DELETE(m_actor_physics_controller);
 		m_actor_physics_controller = NULL;
@@ -256,7 +252,8 @@ void actor::process_input_events( )
 	{
 		m_actor_input_controller->m_wpn_1 = !m_actor_input_controller->m_wpn_1;
 
-		if (m_new_weapon != "ak_74") {
+		if (strcmp(m_new_weapon,"ak_74")) 
+		{
 			m_wpn_switch = true;
 			m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
 
@@ -279,7 +276,8 @@ void actor::process_input_events( )
 	{
 		m_actor_input_controller->m_wpn_2 = !m_actor_input_controller->m_wpn_2;
 
-		if (m_new_weapon != "assault_rifles/ak74m") {
+		if (strcmp(m_new_weapon,"assault_rifles/ak74m")) 
+		{
 			m_wpn_switch = true;
 			m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
 		}
@@ -331,11 +329,12 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 
 	m_weapon->action				( 0 );
 
-	if (m_new_weapon == "ak_74") {
+	if (!strcmp(m_new_weapon,"ak_74")) 
+	{
 		m_new_weapon = "assault_rifles/ak74m";
 		m_new_anim = "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload";
 	}
-	else if (m_new_weapon == "assault_rifles/ak74m")
+	else if (!strcmp(m_new_weapon,"assault_rifles/ak74m"))
 	{
 		m_new_weapon = "ak_74";
 		//m_new_anim = "resources/animations/single/human/hud/reload";
@@ -389,7 +388,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 			buffer, 
 			"idle",
 			current_idle_animation
-		).time_scale( 0.f )
+		).time_scale( 1.f )
 	);
 
 	animation::mixing::animation_lexeme	current_idle_no_wpn_lexeme(
@@ -397,7 +396,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 			buffer, 
 			"no_wpn",
 			current_idle_01_animation
-		).time_scale( 0.f )
+		).time_scale( 1.f )
 	);
 
 	animation::mixing::animation_lexeme	current_reload_lexeme(
@@ -461,11 +460,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		if (m_reload) {
 			if (!m_start_reload_timer) {
 				m_start_reload_timer = true;
-				if (m_snd != NULL) {
-					DELETE(m_snd);
-				}
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
-				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("reload", false);
 				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -483,11 +478,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_shoot) {
 			if (!m_start_shoot_timer) {
 				m_start_shoot_timer = true;
-				if (m_snd != NULL) {
-					DELETE(m_snd);
-				}
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
-				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("shoot", false);
 				m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -500,11 +491,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_draw) {
 			if (!m_start_draw_timer) {
 				m_start_draw_timer = true;
-				if (m_snd != NULL) {
-					DELETE(m_snd);
-				}
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
-				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("draw", false);
 				m_draw_anim_time = current_time + (current_draw_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -517,11 +504,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_holster) {
 			if (!m_start_holster_timer) {
 				m_start_holster_timer = true;
-				if (m_snd != NULL) {
-					DELETE(m_snd);
-				}
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
-				m_game_world.get_game().m_active_sounds.push_back(m_snd);
+				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("holster", false);
 				m_holster_anim_time = current_time + (current_holster_lexeme.animation_intervals_begin()->length() * 1000);
 			}

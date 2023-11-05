@@ -67,7 +67,7 @@ bool one_way_render_channel::render_process_commands	( bool const wait_for_comma
 
 	while ( base_command* const i = m_channel.user_pop_front(predicate) ) {
 		if ( i->is_deferred_command ) {
-			i->defer_execution			( );
+			if(i) i->defer_execution			( );
 			continue;
 		}
 

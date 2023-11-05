@@ -39,8 +39,6 @@ public:
 			void	play();
 private:
 	fs::path_string							m_sound_name;
-	xray::sound::sound_emitter_ptr			m_emitter;
-	xray::sound::sound_instance_proxy_ptr	m_proxy;
 	xray::sound::sound_scene_ptr			m_sound_scene;
 	xray::sound::world_user&				m_world_user;
 	xray::collision::geometry_instance*		m_collision_geometry;
@@ -50,6 +48,8 @@ private:
 	bool									m_looped;
 
 public:
+	xray::sound::sound_instance_proxy_ptr	m_proxy;
+	xray::sound::sound_emitter_ptr			m_emitter;
 	bool									m_force_stop;
 }; // class volumetric_sound
 

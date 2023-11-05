@@ -260,6 +260,11 @@ public:
 	typedef vector<object_volumetric_sound*>	snd_list;
 
 	snd_list								m_active_sounds;
+	bool									m_snds_cleaner;
+	timing::timer							m_snds_timer;
+	snd_list::const_iterator*				m_dead_snd_it;
+	object_volumetric_sound*				m_dead_sound;
+	u32										m_delay;
 
 private:
 	timing::timer							m_timer;

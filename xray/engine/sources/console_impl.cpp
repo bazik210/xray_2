@@ -262,6 +262,9 @@ void console_impl::tick( render::scene_view_ptr const& scene_view )
 	for(u32 i=0; i<need_lines_count; ++i)
 	{
 		txt						= get_item( );
+		if (!txt)
+			return;
+
 		if (txt->w()) {
 			txt->w()->set_position(float2(0, 0));
 			txt->w()->set_size(float2(line_width, line_height));

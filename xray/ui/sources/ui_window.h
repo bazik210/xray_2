@@ -57,7 +57,7 @@ public:
 	virtual u32				get_child_count		( )						const	{return m_childs.size();}
 
 	virtual window*			get_parent			( )						const	{return m_parent;}
-	virtual	bool			is_valid			( )								{return m_parent != nullptr;}
+	virtual	bool			is_valid			( )								{return this != nullptr;}
 	virtual void			set_parent			( window* w );
 	virtual window*			get_root			( )								{return (m_parent)?m_parent->get_root():this;};
 

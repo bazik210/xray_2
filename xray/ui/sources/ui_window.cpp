@@ -170,6 +170,9 @@ bool ui_window::emit_event(enum_window_events ev, window* w, int p1, int p2)
 
 bool ui_window::process_event(enum_window_events ev, int p1, int p2)
 {
+	if (this == nullptr) 
+		return 0;
+
 	return emit_event				(ev, this, p1, p2);
 }
 

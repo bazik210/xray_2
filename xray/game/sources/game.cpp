@@ -173,7 +173,11 @@ game::game(		xray::engine_user::engine& engine,
 	m_debug_window			( NULL ),
 	m_rtp					( 0 ),
 	m_scene_to_activate		( 0 ),
-	gload					( 0 )
+	gload					( 0 ),
+	m_snds_cleaner			( false ),
+	m_dead_snd_it			( NULL ),
+	m_dead_sound			( NULL ),
+	m_delay					( 0 )
 {
 	query_render_scene		( );
 	query_sound_scene		( );
@@ -534,6 +538,34 @@ void game::tick( u32 const current_frame_id )
 		return;
 	}
 
+	if (!m_active_sounds.empty())
+	{
+		if (!m_snds_cleaner) {
+			if (!m_dead_snd_it) {
+				m_dead_snd_it = &m_active_sounds.begin();
+				m_dead_sound = **m_dead_snd_it;
+
+				if (m_dead_sound && m_dead_sound->m_proxy && !m_dead_sound->m_proxy->is_playing())
+				{
+					m_snds_cleaner = true;
+					m_snds_timer.start();
+					m_delay = m_snds_timer.get_elapsed_msec() + 250;
+				}
+				else {
+					m_dead_snd_it = NULL;
+				}
+			}
+			else {
+				if (m_snds_timer.get_elapsed_msec() > m_delay) {
+					DELETE(m_dead_sound);
+					m_dead_snd_it = &m_active_sounds.begin();
+					m_snds_cleaner = false;
+					m_active_sounds.erase(*m_dead_snd_it);
+				}
+			}
+		}
+	}
+
 	if (!m_rtp) {
 		m_rtp = true;
 
@@ -761,16 +793,23 @@ void game::unload( pcstr , bool destroying )
 {
 	ASSERT								( m_game_world );
 
+	m_snds_cleaner = false;
+
 	snd_list::const_iterator it		= m_active_sounds.begin();
 	snd_list::const_iterator it_end	= m_active_sounds.end();
 
 	for (; it != it_end; ++it)
 	{
 		object_volumetric_sound *snd = *it;
-		snd->m_force_stop = true;
+		if (snd && snd->m_proxy) {
+			snd->m_force_stop = true;
+			DELETE(snd);
+		}
 	}
 
-	m_active_sounds.empty();
+	m_active_sounds.clear();
+
+	R_ASSERT(m_active_sounds.empty());
 
 	m_game_world->unload				( );
 	

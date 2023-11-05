@@ -75,6 +75,11 @@ void object_volumetric_sound::load_custom(fs::path_string m_sound_name, bool loo
 void object_volumetric_sound::unload_contents			( )
 {
 	m_emitter											= 0;
+
+	if (m_proxy && m_proxy->is_playing()) {
+		m_proxy->stop();
+	}
+
 	m_proxy												= 0;
 	if ( m_collision_geometry )
 	{
@@ -163,6 +168,8 @@ void object_volumetric_sound::play			(  )
 	else {
 		m_proxy->play							( xray::sound::once );
 	}
+
+	m_game_scene.get_game().m_active_sounds.push_back(this);
 }
 
 } // namespace stalker2
