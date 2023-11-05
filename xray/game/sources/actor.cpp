@@ -243,7 +243,7 @@ void actor::process_input_events( )
 		m_actor_physics_controller->jump();
 
 	//pressed reload action
-	if (m_actor_input_controller && m_actor_input_controller->m_reload && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw) 
+	if (m_actor_input_controller && m_actor_input_controller->m_reload && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2) 
 	{
 		m_actor_input_controller->m_reload = !m_actor_input_controller->m_reload;
 		m_weapon->action				( 2 );
@@ -750,7 +750,7 @@ void actor::tick()
 #endif
 
 	// pressed fire action
-	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload)
+	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload  && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
 		render::debug::renderer& d	= r.debug();
 		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();
