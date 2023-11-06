@@ -84,9 +84,11 @@ void brain_unit::stop_activity	( )
 	m_npc.stop_animation_playing( );
 	m_blackboard.clear			( );
 
-	m_goal_selector->finalize	( );
+	if( m_goal_selector )
+		m_goal_selector->finalize	( );
 
-	m_target_selectors.for_each	( clear_targets_predicate() );
+	if( !m_target_selectors.empty() )
+		m_target_selectors.for_each	( clear_targets_predicate() );
 }
 
 void brain_unit::clear_resources	( )

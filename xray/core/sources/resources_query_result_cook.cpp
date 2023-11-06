@@ -117,13 +117,12 @@ void   query_result::do_unmanaged_create_resource (unmanaged_cook * cook)
 		unpin_raw_buffer							(raw_data);
 	}
 
-	//if (m_create_resource_result == cook_base::result_undefined)
-	//{
-		//set_flag(flag_finished_create_resource);
-		//set_create_resource_result(cook_base::result_undefined, query_result_for_user::error_type_unset);
-		//finish_query(query_result_for_user::error_type_invalid_file_content, assert_on_fail_false);
-		//return;
-	//}
+	//if we have undefined results, finish creating and skipping a resource
+	if (m_create_resource_result == cook_base::result_undefined)
+	{
+		set_flag(flag_finished_create_resource);
+		return;
+	}
 
 	if ( m_create_resource_result != cook_base::result_postponed && 
 		 m_create_resource_result != cook_base::result_requery && 
@@ -364,8 +363,24 @@ void   query_result::on_create_resource_end ()
 		{
 
 		}
-		else
-			R_ASSERT						(get_save_generated_data());
+		else {
+			//R_ASSERT						(get_save_generated_data());
+
+			//here we can skip a resource in query if something goes wrong or we want intentionally to do it
+			if (!has_flag(flag_is_referer))
+			{
+				query_result* cur = m_next_referer;
+				while (cur != this)
+				{
+					query_result* next = cur->m_next_referer;
+					cur->on_refered_query_ended(this);
+					cur = next;
+				}
+			}
+
+			end_query_might_destroy_this			();
+			return;
+		}
 	}
 	
 	if ( get_error_type() == error_type_unset )
@@ -453,10 +468,6 @@ void   query_result::set_deleter_object_if_needed(bool* out_is_new_resource)
 
 void   query_result::finish_translated_query (cook_base::result_enum result)
 {
-	//if (result == cook_base::result_undefined) { 
-	//	try_push_created_resource_to_manager_might_destroy_this();
-	//	return;
-	//}
 
 	bool const is_requery_result		=	(result == cook_base::result_requery);
 	R_ASSERT								(result == cook_base::result_success || 

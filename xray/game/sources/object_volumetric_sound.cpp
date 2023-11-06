@@ -19,11 +19,12 @@ object_volumetric_sound::object_volumetric_sound( game_scene& w )
 	m_collision_geometry( 0 ),
 	m_world_user		( w.get_game().get_sound_world().get_logic_world_user() ),
 	m_sound_scene		( 0 ),
-	m_radius			( 0.f ),
+	m_radius			( 30.f ),
 	m_looped			( true ),
 	m_force_stop        ( false ),
-	m_sound_name		( "marsh" )
-//	m_position			( 0.f,0.f,0.f )
+	m_sound_name		( "marsh" ),
+	m_custom			( false ),
+	m_matrix			( float4x4().identity() )
 {}
 
 object_volumetric_sound::~object_volumetric_sound( )
@@ -36,7 +37,6 @@ void object_volumetric_sound::load( configs::binary_config_value const& config_v
 	super::load							( config_value );
 
 	pcstr collision_geometry_name		= config_value["collision_geometry"];
-//	m_position							= config_value["position"];
 	m_radius							= config_value["radius"];
 	m_sound_name						= config_value["sound"];
 
@@ -58,9 +58,16 @@ void object_volumetric_sound::load_contents				( )
 	);
 }
 
-void object_volumetric_sound::load_custom(fs::path_string m_sound_name, bool looped)
+void object_volumetric_sound::load_custom(fs::path_string sound_name, float4x4 matrix, bool looped, float radius)
 {
+	m_sound_name = sound_name;
 	m_looped = looped;
+	m_matrix = matrix;
+	m_custom = true;
+
+	//if user set non-zero radius, let's assign it
+	if (radius)
+		m_radius = radius;
 
 	fs::path_string						config_path;
 	config_path.assignf("%s%s%s", "resources/sounds/volumetric/", m_sound_name.c_str(), ".volumetric_sound");
@@ -104,7 +111,9 @@ void object_volumetric_sound::on_config_loaded			( resources::queries_result& da
 	configs::binary_config_value const& root			= config->get_root( );
 	configs::binary_config_value const& vol_snd			= root		["volumetric_sound"];
 
-	//m_radius											= vol_snd	["radius"];
+	//if we are loading custom sound and no radius was set, let's load it from config
+	if(m_custom && !m_radius)
+	   m_radius											= vol_snd	["radius"];
 
 	configs::binary_config_value const& snd				= vol_snd	["sound"];
 	fs::path_string snd_filename						= snd		["filename"];
@@ -126,14 +135,12 @@ void object_volumetric_sound::on_sound_loaded( resources::queries_result& data )
 
 	m_emitter = static_cast_resource_ptr<xray::sound::sound_emitter_ptr>(data[0].get_unmanaged_resource());
 	R_ASSERT(m_emitter.c_ptr());
-	//m_game_scene.get_game().m_postload.push_back(this);
 	play();
 }
 
 void object_volumetric_sound::play			(  )
 {
 	m_sound_scene						= m_game_scene.get_sound_scene();
-
 
 	if (m_collision_geometry) {
 			m_proxy = m_emitter->emit_volumetric_sound
@@ -144,8 +151,6 @@ void object_volumetric_sound::play			(  )
 				m_radius
 			);
 
-		//m_proxy->set_matrix(m_collision_geometry->get_matrix());
-
 	} else {
 			m_proxy = m_emitter->emit_volumetric_sound
 			(
@@ -154,13 +159,13 @@ void object_volumetric_sound::play			(  )
 				*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
 				m_radius
 			);
-
-		//m_proxy->set_matrix(float4x4().identity());
 	}
 
-	//m_proxy->set_position					( m_position );
 	//m_proxy			   = m_emitter->emit( m_sound_scene, m_world_user );
 	//m_proxy->set_collision_geometry		( *m_collision_geometry, m_radius );
+
+	if(m_custom)
+		m_proxy->set_matrix	( m_matrix );
 
 	if(m_looped) {
 		m_proxy->play							( xray::sound::looped );

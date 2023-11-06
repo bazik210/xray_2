@@ -79,7 +79,8 @@ void object_scene::start( )
 	for( ;j_it!=j_it_e; ++j_it)
 	{
 		object_scene_job* job	= *j_it;
-		job->job_resource().c_ptr()->on_scene_start();
+		if(job->job_resource() != NULL)
+			job->job_resource().c_ptr()->on_scene_start();
 	}
 
 
@@ -222,6 +223,7 @@ void object_scene_job::start( )
 
 	m_job_resource = get_game_world().get_object_by_name(job_resource_name);
 	object_controlled* o = dynamic_cast<object_controlled*>(m_job_resource.c_ptr());
+	if (!o) return;
 
 	// start initial behaviour
 	object_behaviour* start_behaviour = get_behaviour(start_behaviour_name);

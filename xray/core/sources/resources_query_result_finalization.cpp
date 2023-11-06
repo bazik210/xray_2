@@ -96,7 +96,7 @@ void   query_result::end_query_might_destroy_this_impl ()
 		}
 	}
 
-	if ( m_out_of_memory_retries_count )
+//	if ( m_out_of_memory_retries_count )
 //		LOGI_INFO							("grm", "successfully requeried out of memory query: '%s'", log_string().c_str());
 
 	R_ASSERT								(!has_flag(flag_finished));
@@ -347,7 +347,6 @@ void   query_result::clear_reference ()
 {
 	if ( !has_flag(flag_is_referer) )
 	{
-		//this working on callbacks and destructor, we can skip check
 		R_ASSERT						(m_next_referer == this);
 		return;
 	}
