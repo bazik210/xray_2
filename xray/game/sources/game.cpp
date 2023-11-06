@@ -547,22 +547,21 @@ void game::tick( u32 const current_frame_id )
 
 				if (m_dead_sound && m_dead_sound->m_proxy && !m_dead_sound->m_proxy->is_playing())
 				{
-					m_snds_cleaner = true;
 					m_snds_timer.start();
 					m_delay = m_snds_timer.get_elapsed_msec() + 250;
+					m_snds_cleaner = true;
 				}
 				else {
 					m_dead_snd_it = NULL;
 				}
 			}
-			else {
-				if (m_snds_timer.get_elapsed_msec() > m_delay) {
-					DELETE(m_dead_sound);
-					m_dead_snd_it = &m_active_sounds.begin();
-					m_snds_cleaner = false;
-					m_active_sounds.erase(*m_dead_snd_it);
-				}
-			}
+		}
+		else if (m_dead_snd_it && m_snds_timer.get_elapsed_msec() > m_delay)
+		{
+			DELETE(m_dead_sound);
+			m_dead_snd_it = &m_active_sounds.begin();
+			m_snds_cleaner = false;
+			m_active_sounds.erase(*m_dead_snd_it);
 		}
 	}
 

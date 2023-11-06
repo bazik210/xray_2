@@ -11,6 +11,7 @@
 
 namespace stalker2 {
 class game_world;
+class game_object_;
 
 class object_cooker :		public resources::unmanaged_cook,
 							private boost::noncopyable
@@ -32,6 +33,7 @@ public:
 
 private:
 	game_world&							m_game_world;
+	game_object_*						resource;
 }; //class object_cooker
 
 struct object_scene_cooker : public resources::translate_query_cook,

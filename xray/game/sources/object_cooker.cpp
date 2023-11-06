@@ -22,6 +22,7 @@
 #include "object_wire.h"
 #include "game_camera.h"
 #include "game_world.h" 
+#include "game.h"
 
 namespace stalker2 {
 
@@ -148,7 +149,7 @@ void object_cooker::create_resource( resources::query_result_for_cook& in_out_qu
 	configs::binary_config_value* t_object	= (configs::binary_config_value*)(raw_file_data.c_ptr());
 	pcstr type								= (*t_object)["game_object_type"];
 
-	game_object_*	resource				= NULL;
+	resource = NULL;
 
 	int load = 1;
 

@@ -174,7 +174,8 @@ void object_volumetric_sound::play			(  )
 		m_proxy->play							( xray::sound::once );
 	}
 
-	m_game_scene.get_game().m_active_sounds.push_back(this);
+	if(m_custom)
+		m_game_scene.get_game().m_active_sounds.push_back(this);
 }
 
 } // namespace stalker2
