@@ -59,10 +59,10 @@ void se_transform_value_object::execute_preview(transform_control_base^ control)
 	math::float4x4 m = control->calculate(*m_start_transform);
 
 	bool bneed_update = (
-		!math::is_similar(m.i.xyz(), (*m_value_transform).i.xyz()) ||
-		!math::is_similar(m.j.xyz(), (*m_value_transform).j.xyz()) ||
-		!math::is_similar(m.k.xyz(), (*m_value_transform).k.xyz()) ||
-		!math::is_similar(m.c.xyz(), (*m_value_transform).c.xyz())
+		!math::is_similar(m._i()->xyz(), (*m_value_transform)._i()->xyz()) ||
+		!math::is_similar(m._j()->xyz(), (*m_value_transform)._j()->xyz()) ||
+		!math::is_similar(m._k()->xyz(), (*m_value_transform)._k()->xyz()) ||
+		!math::is_similar(m._c()->xyz(), (*m_value_transform)._c()->xyz())
 	);
 
 	if(bneed_update)

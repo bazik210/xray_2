@@ -25,7 +25,7 @@ namespace sound_editor {
 									sound_object_wrapper	(String^ name);
 									~sound_object_wrapper	();
 		sound_object_instance^		create_instance			();
-		sound_instance_proxy_ptr	emit					(sound_scene_ptr& scene, world_user& user) {return (*m_sound)->emit(scene, user);};
+		sound_instance_proxy_ptr	emit					(sound_scene_ptr& scene, world_user& user) {  return m_sound->c_ptr() ? (*m_sound)->emit(scene, user) : 0; };
 		virtual void				apply_changes			(bool load_resources) = 0;
 		virtual void				revert_changes			() = 0;
 		virtual void				save					() = 0;

@@ -161,9 +161,9 @@ void sound_scene_document::on_sound_scene_created(xray::resources::queries_resul
 		m_editor->get_sound_world()->get_editor_world_user().set_active_sound_scene(get_sound_scene(), 1000, 0);
 		m_editor->get_sound_world()->get_editor_world_user().set_listener_properties_interlocked(
 			get_sound_scene(),
-			m_view_window->get_inverted_view_matrix().c.xyz(),
-			m_view_window->get_inverted_view_matrix().k.xyz(),
-			m_view_window->get_inverted_view_matrix().j.xyz() );
+			m_view_window->get_inverted_view_matrix()._c()->xyz(),
+			m_view_window->get_inverted_view_matrix()._k()->xyz(),
+			m_view_window->get_inverted_view_matrix()._j()->xyz() );
 	}
 }
 
@@ -184,7 +184,7 @@ void sound_scene_document::save()
 			return;
 	}
 
-	System::String^ file_path = sound_editor::sound_resources_path+"scenes/"+Name+".editor_sound_scene";
+	System::String^ file_path = sound_editor::sound_resources_path+"/scenes/"+Name+".editor_sound_scene";
 	unmanaged_string path = unmanaged_string(file_path);
 	xray::configs::lua_config_ptr cfg = xray::configs::create_lua_config(path.c_str());
 	u32 i = 0;
@@ -202,7 +202,7 @@ void sound_scene_document::load()
 {
 	fs_new::virtual_path_string path;
 	path += unmanaged_string(sound_editor::sound_resources_path).c_str();
-	path += "scenes/";
+	path += "/scenes/";
 	path += unmanaged_string(Name).c_str();
 	path += ".editor_sound_scene";
 
@@ -255,9 +255,9 @@ void sound_scene_document::tick()
 	{
 		m_editor->get_sound_world()->get_editor_world_user().set_listener_properties_interlocked(
 			get_sound_scene(),
-			m_view_window->get_inverted_view_matrix().c.xyz(),
-			m_view_window->get_inverted_view_matrix().k.xyz(),
-			m_view_window->get_inverted_view_matrix().j.xyz() );
+			m_view_window->get_inverted_view_matrix()._c()->xyz(),
+			m_view_window->get_inverted_view_matrix()._k()->xyz(),
+			m_view_window->get_inverted_view_matrix()._j()->xyz() );
 	}
 
 	m_renderer->scene().set_view_matrix(*m_scene_view, math::invert4x3(m_view_window->get_inverted_view_matrix()));
@@ -316,9 +316,9 @@ void sound_scene_document::on_document_activated(Object^, EventArgs^)
 			m_editor->get_sound_world()->get_editor_world_user().set_active_sound_scene(get_sound_scene(), 1000, 0);
 			m_editor->get_sound_world()->get_editor_world_user().set_listener_properties_interlocked(
 				get_sound_scene(),
-				m_view_window->get_inverted_view_matrix().c.xyz(),
-				m_view_window->get_inverted_view_matrix().k.xyz(),
-				m_view_window->get_inverted_view_matrix().j.xyz());
+				m_view_window->get_inverted_view_matrix()._c()->xyz(),
+				m_view_window->get_inverted_view_matrix()._k()->xyz(),
+				m_view_window->get_inverted_view_matrix()._j()->xyz());
 		}
 
 		if(m_selected_objects->Count>0)
@@ -507,8 +507,9 @@ sound_object_instance^ sound_scene_document::get_object_by_id(Guid obj_id)
 
 void sound_scene_document::play_selected()
 {
-	for each(sound_object_instance^ inst in m_selected_objects)
+	for each (sound_object_instance ^ inst in m_selected_objects) {
 		inst->play();
+	}
 }
 
 void sound_scene_document::pause_selected()

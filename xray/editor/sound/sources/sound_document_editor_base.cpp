@@ -86,19 +86,25 @@ void sound_document_editor_base::initialize_menu()
 void sound_document_editor_base::new_collection_document(Object^, EventArgs^)
 {
 	m_creating_mode = sound_document_type::collection_document;
-	create_document();
+	create_document(m_creating_mode);
 }
 
 void sound_document_editor_base::new_composite_document(Object^, EventArgs^)
 {
 	m_creating_mode = sound_document_type::composite_document;
-	create_document();
+	create_document(m_creating_mode);
 }
 
 void sound_document_editor_base::new_scene_document(Object^, EventArgs^)
 {
 	m_creating_mode = sound_document_type::scene_document;
-	create_document();
+	create_document(m_creating_mode);
+}
+
+void sound_document_editor_base::new_single_document()
+{
+	m_creating_mode = sound_document_type::scene_document;
+	create_document(m_creating_mode);
 }
 
 void sound_document_editor_base::open_scene()
@@ -111,7 +117,7 @@ void sound_document_editor_base::open_scene()
 	}
 }
 
-document_base^ sound_document_editor_base::create_document()
+document_base^ sound_document_editor_base::create_document(sound_document_type m_creating_mode)
 {
 	document_base^ doc;
 	if(m_creating_mode==sound_document_type::scene_document)
@@ -152,7 +158,7 @@ void sound_document_editor_base::load_document(System::String^ full_path)
 		}
 	}
 
-	document_base^ doc = create_document();
+	document_base^ doc = create_document(m_creating_mode);
 	doc->Text = doc->get_document_name(full_path);
 	doc->Name = doc->Text;
 	doc->load();	

@@ -7,8 +7,6 @@
 #ifndef XRAY_MATH_FLOAT4X4_H_INCLUDED
 #define XRAY_MATH_FLOAT4X4_H_INCLUDED
 
-//#include <array>
-
 namespace xray {
 namespace math {
 
@@ -66,15 +64,18 @@ public:
 			float3		get_angles						( axis_rotation_order const order ) const;
 			float3		get_angles_xyz					( ) const;
 
-			//access to union variables from cli
+			//access to variables from cli
+				float4_pod* _i();
+				float4_pod* _j();
+				float4_pod* _k();
+				float4_pod* _c();
+
 			float3		get_i_xyz						( ) const;
 			float3		get_j_xyz						( ) const;
 			float3		get_k_xyz						( )	const;
 			float3		get_c_xyz						( ) const;
 
-//			std::array<float4_pod, 4> matrix { {i, j, k, c} };
-
-//			std::array<float4_pod, 4> get_matrix();
+			float4x4*   get_instance                    ( );
 
 	#ifndef MASTER_GOLD
 	inline	bool		valid							( ) const;
@@ -129,7 +130,6 @@ XRAY_CORE_API float4x4	create_camera_direction			( float3 const& from, float3 co
 
 XRAY_CORE_API bool		try_solve_linear_equations_system( float3 const& first, float3 const& second, float3 const& third, float3 const& b, float3& result );
 XRAY_CORE_API bool		try_solve_linear_equations_system( float4 const& first,	float4 const& second, float4 const& third, float4 const& fourth, float4 const& b, float4& result );
-
 
 } // namespace math
 } // namespace xray

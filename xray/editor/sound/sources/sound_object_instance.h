@@ -11,6 +11,9 @@
 using namespace System;
 using namespace System::ComponentModel;
 using xray::editor::wpf_controls::property_container;
+using xray::math::float3;
+using xray::math::float4_pod;
+using xray::math::float4x4;
 
 namespace xray {
 namespace render {
@@ -19,7 +22,7 @@ namespace debug {
 } // namespace debug
 } // namespace render
 namespace sound_editor {
-	
+
 	ref class sound_object_wrapper;
 	ref class sound_scene_document;
 	ref struct sound_object_collision;
@@ -32,7 +35,7 @@ namespace sound_editor {
 						~sound_object_instance	();
 		void			save					(xray::configs::lua_config_value cfg);
 		void			load					(xray::configs::lua_config_value const& cfg);
-		void			set_transform			(float4x4 const& transform);
+		void			set_transform			(float4x4& transform);
 		float4x4*		get_transform			() {return m_transform;};
 		void			set_parent				(sound_scene_document^ doc);
 sound_object_wrapper^	get_sound_object		() {return m_sound_object;};
@@ -53,7 +56,7 @@ sound_object_wrapper^	get_sound_object		() {return m_sound_object;};
 	[CategoryAttribute("Instance properties"), DisplayNameAttribute("position"), ValueAttribute(ValueAttribute::value_type::e_def_val, 0.0f, 0.0f, 0.0f)]
 	property Float3 position
 	{
-		Float3 get() {return Float3(m_transform->c.xyz());}
+		Float3 get() {return Float3(m_transform->_c()->xyz());}
 		void set(Float3 new_val) {set_position_revertible(float3(new_val));}
 	}
 
@@ -73,11 +76,12 @@ sound_object_wrapper^	get_sound_object		() {return m_sound_object;};
 		float3			rad2deg					(float3 const& rad) {return rad*(180.0f/math::pi);};
 		float3			deg2rad					(float3 const& deg) {return deg*(math::pi/180.0f);};
 
+	public:
+		sound_scene_document^				m_parent;
 	private:
 		sound_object_wrapper^				m_sound_object;
 		sound_object_collision^				m_collision;
 		sound::sound_instance_proxy_ptr*	m_proxy;
-		sound_scene_document^				m_parent;
 		float4x4*							m_transform;
 		property_container^					m_container;
 	}; // class sound_object_instance

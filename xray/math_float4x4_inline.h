@@ -7,6 +7,7 @@
 #ifndef XRAY_MATH_FLOAT4X4_INLINE_H_INCLUDED
 #define XRAY_MATH_FLOAT4X4_INLINE_H_INCLUDED
 #include	"math_quaternion.h"
+#include	"math_float4x4.h"
 namespace xray {
 namespace math {
 

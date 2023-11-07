@@ -87,7 +87,7 @@ void single_sound_wrapper::load(Action<sound_object_wrapper^>^ options_callback,
 	String^ raw_path = gcnew String(sound_editor::sound_resources_path + "/single/" + m_name + ".raw_options");
 	String^ ss_path = gcnew String(sound_editor::sound_resources_path + "/single/" + m_name + ".single_sound_options");
 	fs::path_string source_wav_path;
-	source_wav_path.assignf			(	"%ssingle/%s.wav",
+	source_wav_path.assignf			(	"%s/single/%s.wav",
 										unmanaged_string( sound_editor::sound_resources_path ).c_str(),
 										unmanaged_string( m_name ).c_str()
 									);
@@ -95,7 +95,7 @@ void single_sound_wrapper::load(Action<sound_object_wrapper^>^ options_callback,
 	fs_new::physical_path_info source_wav_info = 
 		resources::get_physical_path_info( source_wav_path.c_str(), resources::sources_mount );
 
-	if (source_wav_info.is_file())
+	if (!source_wav_info.is_file())
 	{
 		m_is_exist				= false;
 		return;

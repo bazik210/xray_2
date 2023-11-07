@@ -57,6 +57,11 @@ void sound_editor_form::instance_properties_click(Object^, EventArgs^)
 		m_editor->instance_properties->Show(m_multidocument_base->main_dock_panel);
 }
 
+void sound_editor_form::create_document()
+{
+	m_multidocument_base->new_single_document();
+}
+
 void sound_editor_form::object_properties_click(Object^, EventArgs^)
 {
 	if(m_menu_view_object_properties->Checked)

@@ -36,10 +36,12 @@ namespace sound_editor {
 				void			new_collection_document		(Object^, EventArgs^);
 				void			new_composite_document		(Object^, EventArgs^);
 				void			new_scene_document			(Object^, EventArgs^);
-				document_base^	create_document				();
+				document_base^	create_document				(sound_document_type m_creating_mode);
 
 	public:
 		ToolStripMenuItem^  m_menu_file_open;
+
+				void			new_single_document			();
 
 	private:
 		sound_editor^		m_editor;

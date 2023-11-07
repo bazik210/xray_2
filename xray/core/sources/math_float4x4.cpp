@@ -5,9 +5,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#include <complex>
 
 using xray::math::float4x4;
 using xray::math::float3;
+using xray::math::float4_pod;
 
 static float4x4 invert_impl								( float4x4 const& other, float const determinant )
 {
@@ -192,6 +194,26 @@ float3 float4x4::get_angles_xyz				( ) const
 		);
 }
 
+float4_pod* float4x4::_i()
+{
+	return &i;
+}
+
+float4_pod* float4x4::_j()
+{
+	return &j;
+}
+
+float4_pod* float4x4::_k()
+{
+	return &k;
+}
+
+float4_pod* float4x4::_c()
+{
+	return &c;
+}
+
 float3 float4x4::get_i_xyz() const
 {
 	return i.xyz();
@@ -211,6 +233,11 @@ float3 float4x4::get_c_xyz() const
 float3 float4x4::get_k_xyz() const
 {
 	return k.xyz();
+}
+
+float4x4* float4x4::get_instance() {
+	auto inst = new std::complex<float4x4>(float4x4().identity());
+	return &inst->_Val[0];
 }
 
 //std::array<xray::math::float4_pod, 4> float4x4::get_matrix()

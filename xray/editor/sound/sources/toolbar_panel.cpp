@@ -157,6 +157,11 @@ void toolbar_panel::show_rms(Object^ obj)
 		if(!snd || !snd->is_loaded)
 			continue;
 
+		if(m_parent->w->name != snd->name)
+			m_parent->w = snd;
+
+		enable_buttons(true);
+
 		sound::sound_rms_ptr rms = snd->get_sound_rms();
 		sound::sound_rms_pinned pinned_rms(rms);
 		u32 size = pinned_rms->size();

@@ -8,6 +8,7 @@
 
 #include "sound_editor_form.h"
 #include <xray/sound/sound.h>
+#include "sound_object_instance.h"
 
 using namespace System;
 using namespace System::Windows::Forms;
@@ -178,6 +179,12 @@ namespace sound_editor {
 		composite_sounds_list^		m_composite_sounds;
 		sound_collections_list^		m_sound_collections;
 		modified_list^				m_modified_sounds;
+		sound_object_instance^		m_instance;
+		bool						m_snd_play;
+		bool						m_load = 0;
+public:
+		single_sound_wrapper^		w;
+
 	}; // class sound_editor
 
 	public enum class sound_editor_drag_drop_operation: int

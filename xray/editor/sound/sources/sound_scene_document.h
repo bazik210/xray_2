@@ -114,6 +114,8 @@ render::render_output_window_ptr const&	render_output_window	() {return *m_outpu
 		SaveFileDialog^								m_save_file_dialog;
 		WeifenLuo::WinFormsUI::Docking::DockPanel^	m_main_dock_panel;
 		objects_list^								m_objects;
+
+	public:
 		objects_list^								m_selected_objects;
 	}; // ref class sound_scene_document
 } // namespace sound_editor

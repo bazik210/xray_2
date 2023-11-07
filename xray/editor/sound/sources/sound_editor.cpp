@@ -282,6 +282,12 @@ void sound_editor::tick()
 
 	m_input_engine->execute();
 	m_gui_binder->update_items();
+
+	if (m_instance && m_snd_play &&!m_instance->is_playing()) 
+	{
+		m_snd_play = false;
+		m_instance->~sound_object_instance();
+	}
 }
 
 void sound_editor::show_properties(Object^ obj, bool is_instance)
@@ -454,8 +460,15 @@ single_sound_wrapper^ sound_editor::get_single_sound(String^ sound_name)
 
 	Action<sound_object_wrapper^>^ opt_cb = gcnew Action<sound_object_wrapper^>(this, &sound_editor::options_loaded_callback);
 	Action<sound_object_wrapper^>^ snd_cb = gcnew Action<sound_object_wrapper^>(this, &sound_editor::sound_loaded_callback);
-	single_sound_wrapper^ w = gcnew single_sound_wrapper(sound_name);
+	w = gcnew single_sound_wrapper(sound_name);
 	w->load(opt_cb, snd_cb);
+
+	if (!m_load) {
+		m_load = true;
+		form->multidocument_base->new_single_document();
+		m_toolbar_panel->enable_buttons(true);
+	}
+
 	w->spl_curve->edit_completed += gcnew System::EventHandler(this, &sound_editor::on_single_sound_spl_curve_changed);
 	m_single_sounds->Add(sound_name, w);
 	return w;
@@ -540,8 +553,20 @@ void sound_editor::play_selected()
 	if(multidocument_base->active_document!=nullptr)
 	{
 		sound_scene_document^ ssdoc = dynamic_cast<sound_scene_document^>(multidocument_base->active_document);
-		if(ssdoc)
-			ssdoc->play_selected();
+		if (ssdoc) {
+			if (m_snd_play && m_instance) {
+				m_snd_play = false;
+				m_instance->~sound_object_instance();
+			}
+			m_instance = w->create_instance();
+			m_instance->m_parent = ssdoc;
+			if (ssdoc->m_selected_objects->Count == 0) {
+				m_instance->play();
+				m_snd_play = true;
+			} else if (ssdoc->m_selected_objects->Count) {
+				ssdoc->play_selected();
+			}
+		}
 	}
 }
 
@@ -550,8 +575,14 @@ void sound_editor::pause_selected()
 	if(multidocument_base->active_document!=nullptr)
 	{
 		sound_scene_document^ ssdoc = dynamic_cast<sound_scene_document^>(multidocument_base->active_document);
-		if(ssdoc)
-			ssdoc->pause_selected();
+		if (ssdoc) {
+			if (ssdoc->m_selected_objects->Count == 0 && m_snd_play) {
+				m_instance->pause();
+			}
+			else if (ssdoc->m_selected_objects->Count) {
+				ssdoc->pause_selected();
+			}
+		}
 	}
 }
 
@@ -560,8 +591,14 @@ void sound_editor::stop_selected()
 	if(multidocument_base->active_document!=nullptr)
 	{
 		sound_scene_document^ ssdoc = dynamic_cast<sound_scene_document^>(multidocument_base->active_document);
-		if(ssdoc)
-			ssdoc->stop_selected();
+		if (ssdoc) {
+			if (ssdoc->m_selected_objects->Count == 0 && m_snd_play) {
+				m_instance->stop();
+			}
+			else if (ssdoc->m_selected_objects->Count) {
+				ssdoc->stop_selected();
+			}
+		}
 	}
 }
 
@@ -634,9 +671,9 @@ void sound_editor::on_form_activated(Object^, EventArgs^)
 			get_sound_world()->get_editor_world_user().set_active_sound_scene(ssdoc->get_sound_scene(), 1000, 0);
 			get_sound_world()->get_editor_world_user().set_listener_properties_interlocked(
 				ssdoc->get_sound_scene(),
-				ssdoc->viewport->get_inverted_view_matrix().c.xyz(),
-				ssdoc->viewport->get_inverted_view_matrix().k.xyz(),
-				ssdoc->viewport->get_inverted_view_matrix().j.xyz());
+				ssdoc->viewport->get_inverted_view_matrix()._c()->xyz(),
+				ssdoc->viewport->get_inverted_view_matrix()._k()->xyz(),
+				ssdoc->viewport->get_inverted_view_matrix()._j()->xyz());
 		}			
 	}
 }

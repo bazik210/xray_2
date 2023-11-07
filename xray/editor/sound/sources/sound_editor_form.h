@@ -24,6 +24,7 @@ namespace sound_editor {
 	public:
 		sound_editor_form				(sound_editor^ ed);
 		~sound_editor_form				();
+		void create_document();
 
 		property sound_document_editor_base^ multidocument_base
 		{
