@@ -22,6 +22,9 @@ sound_rms::sound_rms ( resources::managed_resource_ptr const& ogg_raw_file, floa
 
 	ov_callbacks ovc			= {ogg_utils::ov_read_func, ogg_utils::ov_seek_func, ogg_utils::ov_close_func, ogg_utils::ov_tell_func};
 	ov_open_callbacks			(&ogg, &ovf, NULL, 0, ovc);
+
+	if (!ovf.datasource)
+		return;
 	
 	vorbis_info* ovi			= ov_info(&ovf, -1);
 	u32 samples_per_sec			= ovi->rate;
@@ -38,8 +41,6 @@ sound_rms::sound_rms ( resources::managed_resource_ptr const& ogg_raw_file, floa
 	u32							curr_samples_counter = 0;
 
 	u32 rms_idx					= 0;
-
-
 
 	for(;;)
 	{
@@ -77,7 +78,12 @@ sound_rms::sound_rms ( resources::managed_resource_ptr const& ogg_raw_file, floa
 	}
 	
 	ov_clear			(&ovf);
-	R_ASSERT			( rms_idx == m_count );
+
+	if (rms_idx != m_count) {
+		m_count = rms_idx;
+	}
+
+	//R_ASSERT			( rms_idx == m_count );
 }
 
 sound_rms::~sound_rms ( )

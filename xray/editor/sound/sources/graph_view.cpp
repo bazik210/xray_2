@@ -57,6 +57,11 @@ void graph_view::clear()
 
 void graph_view::add_graph_points(array<Single>^ points)
 {
+	if (points->Length < 2)
+	{
+		return;
+	}
+
 	int index = 0;
 	array<PointF>^ pnts = gcnew array<PointF>(points->Length);
 	float x = (points->Length-1.0f)/m_points_frequency;

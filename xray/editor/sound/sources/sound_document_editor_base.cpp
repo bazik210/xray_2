@@ -163,5 +163,6 @@ void sound_document_editor_base::load_document(System::String^ full_path)
 	doc->Name = doc->Text;
 	doc->load();	
 	doc->Show(m_main_dock_panel);
+	doc->Focus();
 	m_loaded = false;
 }

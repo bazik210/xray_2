@@ -151,8 +151,14 @@ configs::lua_config_ptr create_default_config ( fs_new::native_path_string const
 
 	fs_new::native_path_string	options_path	= wav_file_path;
 	options_path.replace						( _wav_ext, _options_ext );
+	fs_new::virtual_path_string out_path;
 
-	configs::lua_config_ptr	config				= configs::create_lua_config( options_path.c_str() );
+	bool const convertion_result	=	xray::resources::convert_physical_to_virtual_path(&out_path, options_path, resources::sources_mount);
+
+	if (!convertion_result)
+		return NULL;
+
+	configs::lua_config_ptr	config				= configs::create_lua_config( out_path.c_str() );
 	configs::lua_config_value config_options	= config->get_root()["options"];
 	config_options["name"]						= "sound";
 	config_options["channels_number"]			= format.channels;

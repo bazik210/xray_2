@@ -292,8 +292,9 @@ void sound_editor::tick()
 
 void sound_editor::show_properties(Object^ obj, bool is_instance)
 {
-	if(is_instance)
+	if (is_instance) {
 		m_instance_properties_panel->show_properties(obj);
+	}
 	else
 	{
 		m_object_properties_panel->show_properties(obj);
