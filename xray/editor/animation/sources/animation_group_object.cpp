@@ -145,6 +145,9 @@ void animation_group_object::on_animation_loaded(xray::animation_editor::animati
 	R_ASSERT(m_request->ContainsKey(clip_name));
 	for each(intervals_request p in m_request[clip_name])
 	{
+		if (!p.length) 
+		    continue;
+
 		animation_node_interval^ interval = new_clip->intervals[p.cfg_interval_id];
 		animation_node_interval_instance^ inst = gcnew animation_node_interval_instance(interval, p.max_weight, p.min_weight);
 		inst->property_changed += gcnew Action<animation_node_interval_instance^, String^, Object^, Object^>(this, &animation_group_object::interval_property_changed);
