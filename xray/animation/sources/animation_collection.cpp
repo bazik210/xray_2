@@ -98,6 +98,15 @@ expression animation_collection::emit_impl	( mutable_buffer& buffer, animation_l
 	}
 }
 
+bool animation_collection::valid ( ) const
+{
+	if (m_animations.begin()->m_object != NULL) 
+	{
+		return	true;
+	}
+	return false;
+}
+
 expression animation_collection::emit			( mutable_buffer& buffer, bool& is_last_animation ) const
 {
 	return										emit_impl( buffer, 0, is_last_animation );

@@ -22,6 +22,7 @@ class XRAY_ANIMATION_API animation_expression_emitter : public resources::unmana
 public:
 	virtual mixing::expression		emit		( mutable_buffer& buffer, bool& is_last_animation ) const = 0;
 	virtual mixing::expression		emit		( mutable_buffer& buffer, mixing::animation_lexeme& driving_animation, bool& is_last_animation ) const = 0;
+	virtual	bool					valid		( ) const = 0;
 	virtual void					serialize	( memory::writer& w ) const = 0;
 	virtual void					deserialize	( memory::reader& r ) = 0;
 	virtual animation_types_enum	type		( ) const = 0;

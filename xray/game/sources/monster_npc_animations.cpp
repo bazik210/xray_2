@@ -10,6 +10,7 @@
 #include "object_scene.h"
 #include <xray/animation/mixing_math.h>
 #include <xray/animation/animation_player.h>
+//#include <xray/animation/sources/animation_collection.h>
 #include <xray/console_command.h>
 #include <xray/ai/animation_item.h>
 #include <xray/ai/world.h>
@@ -54,15 +55,18 @@ void monster_npc::play_animation		( animation::animation_expression_emitter_ptr 
 	m_model_instance->m_animation_player->set_object_transform	( m_transform );
 
 	mutable_buffer buffer			( ALLOCA( xray::animation::animation_player::stack_buffer_size ), xray::animation::animation_player::stack_buffer_size );
-	expression const new_expression	= emitter->emit( buffer, m_last_animation_emitted );
-	
-	m_model_instance->m_animation_player->subscribe	(
-		xray::animation::channel_id_on_animation_end,
-		boost::bind( &monster_npc::on_animation_end, this, _1, _2, _3, _4 ),
-		0
-	);
-	
-	m_model_instance->m_animation_player->set_target_and_tick( new_expression, current_time_in_ms );
+
+	if (emitter->valid()) {
+		expression const new_expression = emitter->emit(buffer, m_last_animation_emitted);
+
+		m_model_instance->m_animation_player->subscribe(
+			xray::animation::channel_id_on_animation_end,
+			boost::bind(&monster_npc::on_animation_end, this, _1, _2, _3, _4),
+			0
+		);
+
+		m_model_instance->m_animation_player->set_target_and_tick(new_expression, current_time_in_ms);
+	}
 	m_transform						= m_model_instance->m_animation_player->get_object_transform();
 
 	render_model					( );
@@ -76,7 +80,11 @@ void monster_npc::play_animation	( ai::animation_item const* const target )
 	m_current_animation			= target;
 	m_is_current_animation_finished = false;
 	animation::animation_expression_emitter_ptr animation_emitter = static_cast_resource_ptr< animation::animation_expression_emitter_ptr >( m_current_animation->animation );
+//	animation::animation_collection_ptr collection = static_cast_resource_ptr< animation::animation_collection_ptr >(m_current_animation->animation);
+
+//  if(emit.m_animations.begin()->m_object != NULL)
 	play_animation				( animation_emitter );
+
 	LOG_INFO					( "%s: playing animation %s", get_name(), m_current_animation->name );
 }
 

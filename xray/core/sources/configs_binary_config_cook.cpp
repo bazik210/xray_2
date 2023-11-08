@@ -105,6 +105,10 @@ binary_config_cook::binary_config_cook	( ) :
 void binary_config_cook::translate_query	( query_result_for_cook & parent )
 {
 	fs_new::virtual_path_string const		source_path	=	parent.get_requested_path();
+//	  if (!source_path) {
+//		  parent.finish_query			(result_error, parent.assert_on_fail());
+//		  return;
+//	  }
 	R_ASSERT								(source_path.length());
 	fs_new::virtual_path_string				converted_path;
 	make_converted_path						(& converted_path, source_path);

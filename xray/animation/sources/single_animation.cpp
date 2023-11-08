@@ -44,6 +44,15 @@ expression single_animation::emit	( mutable_buffer& buffer, bool& is_last_animat
 	return							expression( lexeme );
 }
 
+bool single_animation::valid ( ) const
+{
+	if (m_animation.m_object != NULL) 
+	{
+		return	true;
+	}
+	return false;
+}
+
 expression single_animation::emit	( mutable_buffer& buffer, animation_lexeme& driving_animation, bool& is_last_animation ) const
 {
 	is_last_animation				= true;

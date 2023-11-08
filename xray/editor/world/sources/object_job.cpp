@@ -130,7 +130,7 @@ void object_job::save( configs::lua_config_value t )
 	t["logic_view_height"]	= (int)(logic_view_height);
 	if ( has_static_resource() )
 		t["job_resource"] = unmanaged_string(m_static_resource_name).c_str();		
-	else if ( m_job_resource == nullptr ) 
+	else if ( m_job_resource == nullptr || m_job_resource->get_object() == nullptr ) 
 		t["job_resource"] = "";
 	else
 	{
@@ -171,7 +171,8 @@ void object_job::render( )
 		if (m_job_resource != nullptr && m_job_resource->get_object() == nullptr) 
 		{
 			m_job_resource = nullptr;
-			m_logic_view->selected_resource->Text = "Selected Resource: none";
+			if(!m_logic_view->selected_resource->Text->Contains("none"))
+				m_logic_view->selected_resource->Text = "Selected Resource: none";
 		}
 	}
 }
@@ -222,8 +223,9 @@ void object_job::initialize_logic_view		( )
 		m_logic_view->selected_resource->Text = "Selected Resource: " + m_static_resource_name;
 		m_logic_view->logic_entity_resource_button_border->BorderBrush = System::Windows::Media::Brushes::DarkGray;
 	}
-	else
-		m_logic_view->selected_resource->Text = ( m_job_resource != nullptr ) ? "Selected Resource: " + m_job_resource->get_full_name() : "Selected Resource: none" ;
+	else {
+		m_logic_view->selected_resource->Text = (m_job_resource != nullptr && m_job_resource->get_object() != nullptr) ? "Selected Resource: " + m_job_resource->get_full_name() : "Selected Resource: none";
+	}
 
 	m_logic_view->get_events_list = gcnew System::Func<Generic::List<System::String^>^>( this, &object_job::get_parent_scene_events_list );
 	m_logic_view->set_start_event = gcnew System::Action<System::String^>( this, &object_job::start_event_name::set );

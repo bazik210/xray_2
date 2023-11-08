@@ -39,6 +39,7 @@ public:
 public:
 	virtual mixing::expression		emit					( mutable_buffer& buffer, bool& is_last_animation ) const;
 	virtual mixing::expression		emit					( mutable_buffer& buffer, mixing::animation_lexeme& driving_animation, bool& is_last_animation ) const;
+	bool							valid					( ) const;
 	virtual animation_types_enum	type					( ) const;
 	virtual void					serialize				( memory::writer& w ) const;
 	virtual void					deserialize				( memory::reader& r );
@@ -60,6 +61,8 @@ private:
 	bool							m_can_repeat_successively;
 	mutable bool					m_is_child_last_animation;
 }; // class animation_collection
+
+typedef resources::resource_ptr < animation_collection, animation_expression_emitter > animation_collection_ptr;
 
 } // namespace animation
 } // namespace xray

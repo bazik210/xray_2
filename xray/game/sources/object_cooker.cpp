@@ -272,6 +272,10 @@ void object_scene_cooker::translate_query( resources::query_result_for_cook& par
 	for(; it!=it_e; ++it)
 	{
 		pcstr resource_name		= (*it)["job_resource"];
+
+		if (!strcmp(resource_name,""))
+			continue;
+
 		if(strings::equal(resource_name, "camera_director") || strings::equal(resource_name, "timing") )
 			continue;
 

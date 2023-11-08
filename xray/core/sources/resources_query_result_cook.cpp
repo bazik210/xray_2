@@ -473,6 +473,7 @@ void   query_result::finish_translated_query (cook_base::result_enum result)
 	R_ASSERT								(result == cook_base::result_success || 
 											 result == cook_base::result_error ||
 											 result == cook_base::result_out_of_memory ||
+											 result == cook_base::result_undefined ||
 											 is_requery_result);
 
 	if ( result == cook_base::result_success )

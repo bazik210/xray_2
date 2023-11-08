@@ -152,6 +152,15 @@ bool   query_result::translate_query_if_needed ()
 			return							true;
 	}
 
+	fs_new::virtual_path_string const source_path = get_requested_path();
+
+	if(m_class_id == binary_config_class && !source_path.length()) 
+	{
+		bool const is_out_of_memory			=	(get_error_type() == error_type_out_of_memory);
+		set_flag								(flag_translated_query);
+		return										!is_out_of_memory;
+	}
+
 	threading::interlocked_increment		(m_on_created_resource_guard);
 	
 	thread_local_data * const tls		=	g_resources_manager->get_thread_local_data(threading::current_thread_id(), true);

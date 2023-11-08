@@ -72,6 +72,9 @@ void monster_npc_cook::on_queried_data_received			( resources::queries_result& d
 
 	configs::binary_config_ptr config					= static_cast_resource_ptr< configs::binary_config_ptr >( data[0].get_unmanaged_resource() );
 
+	if (!config.c_ptr())
+		return;
+
 	on_npc_options_received								( config->get_root(), *parent );
 }
 
