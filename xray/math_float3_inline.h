@@ -7,6 +7,8 @@
 #ifndef XRAY_MATH_FLOAT3_INLINE_H_INCLUDED
 #define XRAY_MATH_FLOAT3_INLINE_H_INCLUDED
 
+#include "math_float3.h"
+
 namespace xray {
 namespace math {
 

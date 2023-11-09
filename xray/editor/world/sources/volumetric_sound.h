@@ -40,6 +40,8 @@ typedef object_base	super;
 	virtual	property_container^	get_property_container	( )	override;
 	virtual	void				on_selected				( bool selected ) override;
 			void				play_looped_clicked		( button^ );
+			void				stop_clicked			( button^ );
+	virtual void				render					( )			override;
 			void				on_sound_loaded	( resources::queries_result& data );
 			void				on_config_loaded( resources::queries_result& data );
 			void				load_sound		( );
@@ -81,17 +83,23 @@ public:
 		void							set		( float t )		
 		{
 			m_radius = t;
-			update_radius				( );
+			//update_radius				( );
 			on_property_changed			( "radius" );
 		}
+	}
+
+	[DisplayNameAttribute("draw radius"), DescriptionAttribute("draw volumetric radius"), CategoryAttribute("options")] 
+	property bool			is_radius_shown {
+		bool				get		( )				{ return m_is_radius_shown; }
+		void				set		( bool v );
 	}
 private:
 			void				select_collision_geometry	( wpf_controls::property_editors::property^ , Object^ );
 			void				collision_geometry_loaded	( project_item_base^ geom );
-			void				update_radius				( );
+//			void				update_radius				( );
 			void				collision_deleting			( );
 private:
-
+			void				initialize_collision( );
 	sound::sound_emitter_ptr*						m_sound_emitter_ptr;
 	sound::sound_instance_proxy_ptr*				m_proxy;
 	render::scene_ptr*								m_scene;
@@ -101,6 +109,7 @@ private:
 	System::String^									m_sound_file_name;
 	float											m_radius;
 	bool											m_config_radius;
+	bool											m_is_radius_shown;
 }; // class volumetric_sound
 
 } // namespace editor

@@ -149,7 +149,7 @@ bool mouse_action_select_object::capture( )
 	collision::object const* object		= NULL;
 	if( m_level_editor->view_window()->ray_query( editor_base::collision_object_type_dynamic, &object, NULL ) )
 	{
-		ASSERT( object->get_type() & editor_base::collision_object_type_dynamic );
+		ASSERT( const_cast<xray::collision::object*>(object)->get_type() & editor_base::collision_object_type_dynamic );
 
 		collision_object_dynamic const* c = static_cast_checked<collision_object_dynamic const*>(object);
 
@@ -157,11 +157,13 @@ bool mouse_action_select_object::capture( )
 		{
 			m_selected = c->get_owner_object();
 
+			collision::object const* co = static_cast_checked<collision::object const*>(c);
+
 			math::float4x4 const& m = m_level_editor->view_window()->get_inverted_view_matrix();
 			if(!check_picked_object(m_level_editor->view_window()->m_collision_tree,
-									c,
-									m.c.xyz(),
-									m.k.xyz()))
+									co,
+									const_cast<xray::math::float4x4&>(m)._c()->xyz(),
+									const_cast<xray::math::float4x4&>(m)._k()->xyz()))
 			m_selected = nullptr;
 		}
 	}
@@ -237,11 +239,11 @@ void mouse_action_select_object::release( )
 			collision::object const* co = coll_objects->get(i);
 			if(!check_picked_object(m_level_editor->view_window()->m_collision_tree,
 									co,
-									m.c.xyz(),
-									m.k.xyz()))
+									const_cast<xray::math::float4x4&>(m)._c()->xyz(),
+									const_cast<xray::math::float4x4&>(m)._k()->xyz()))
 				continue;
 
-			ASSERT( co->get_type() & editor_base::collision_object_type_dynamic );
+			ASSERT( const_cast<xray::collision::object*>(co)->get_type() & editor_base::collision_object_type_dynamic );
 
 			collision_object_dynamic const* collision_dynamic = static_cast_checked< collision_object_dynamic const* >(co);
 			u32 object_id = collision_dynamic->get_owner_object()->id();

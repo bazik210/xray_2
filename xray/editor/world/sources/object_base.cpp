@@ -32,7 +32,7 @@ m_needed_quality_		( false )
 {
 	m_project_item		= nullptr;
 	image_index			= 0;
-	m_transform			= NEW(float4x4)(float4x4().identity());
+	m_transform			= m_transform->get_instance();
 	m_previous_angles	= NEW(float3)(m_transform->get_angles_xyz());
 	m_pivot				= NEW(float3)(0, 0, 0);
 	m_aabbox			= NEW(math::aabb)(math::create_identity_aabb());
@@ -48,7 +48,7 @@ u32 object_base::id( )
 object_base::~object_base()
 {
 	destroy_collision			( );
-	DELETE						( m_transform );
+	delete						( m_transform );
 	DELETE						( m_previous_angles );
 	DELETE						( m_aabbox );
 	DELETE						( m_pivot );

@@ -14,6 +14,8 @@
 #include <xray/geometry_primitives.h>
 #pragma managed( pop )
 
+using namespace xray::math;
+
 namespace xray {
 namespace editor {
 
@@ -115,7 +117,7 @@ void object_light::draw_octahedron( )
 		draw_indices[i] = indices[i];
 	}
 
-	get_debug_renderer().draw_triangles	( *m_scene, draw_vertices, draw_indices );
+	get_debug_renderer().draw_triangles	( *m_scene, draw_vertices, draw_indices, true );
 
 	math::color clr_line(200,200,0,255);
 	for(u32 i=0; i<vcount; ++i)
@@ -133,7 +135,7 @@ void object_light::draw_octahedron( )
 		draw_indices[i] = geometry_utils::octahedron_solid::pairs[i];
 	}
 
-	get_debug_renderer().draw_lines		( *m_scene, draw_vertices, draw_indices );
+	get_debug_renderer().draw_lines		( *m_scene, draw_vertices, draw_indices, true );
 }
 
 void object_light::render( )
@@ -151,24 +153,24 @@ void object_light::render( )
  		case render::light_type_parallel:
  			{
 				// Draw arrow.
-				math::float3 const direction	 = math::normalize((*m_transform).k.xyz());
-				math::float3 const right_offset  = math::normalize((*m_transform).i.xyz())*0.125f;
-				math::float3 const up_offset	 = math::normalize((*m_transform).j.xyz())*0.125f;
+				math::float3 const direction	 = math::normalize((*m_transform)._k()->xyz());
+				math::float3 const right_offset  = math::normalize((*m_transform)._i()->xyz()) * 0.125f;
+				math::float3 const up_offset	 = math::normalize((*m_transform)._j()->xyz()) * 0.125f;
 				
-				math::float3 const light_begin = (*m_transform).c.xyz();
-				math::float3 const light_end   = (*m_transform).c.xyz() + direction * 2.0f;
+				math::float3 const light_begin = (*m_transform)._c()->xyz();
+				math::float3 const light_end   = (*m_transform)._c()->xyz() + direction * 2.0f;
 				
- 				get_debug_renderer().draw_line( *m_scene, light_begin, light_end, clr_range);
+ 				get_debug_renderer().draw_line( *m_scene, light_begin, light_end, clr_range, true);
 				
 				math::float3 const arrows_start = light_end - direction * 0.25f;
-				get_debug_renderer().draw_line( *m_scene, arrows_start + right_offset, light_end, clr_range);
-				get_debug_renderer().draw_line( *m_scene, arrows_start - right_offset, light_end, clr_range);
-				get_debug_renderer().draw_line( *m_scene, arrows_start + up_offset, light_end, clr_range);
-				get_debug_renderer().draw_line( *m_scene, arrows_start - up_offset, light_end, clr_range);
+				get_debug_renderer().draw_line( *m_scene, arrows_start + right_offset, light_end, clr_range, true);
+				get_debug_renderer().draw_line( *m_scene, arrows_start - right_offset, light_end, clr_range, true);
+				get_debug_renderer().draw_line( *m_scene, arrows_start + up_offset, light_end, clr_range, true);
+				get_debug_renderer().draw_line( *m_scene, arrows_start - up_offset, light_end, clr_range, true);
 				
 				// Draw sphere.
-				math::float4x4 m	= math::create_translation((*m_transform).c.xyz());
-				get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_body );
+				math::float4x4 m	= math::create_translation((*m_transform)._c()->xyz());
+				get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_body, true );
 				
  				break;
  			}
@@ -176,9 +178,9 @@ void object_light::render( )
 			{ 
 				if(bsel)// draw light range only in selected state
 				{
-					math::float4x4 m	= math::create_translation((*m_transform).c.xyz());
+					math::float4x4 m	= math::create_translation((*m_transform)._c()->xyz());
 					set_scale_impl		( float3(m_range, m_range, m_range), m );
-					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range );
+					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range, true );
 				}
 			}break;
 
@@ -192,11 +194,11 @@ void object_light::render( )
 
 					float const penumbra_radius		= m_range * math::tan(m_spot_penumbra_angle/2.0f);
 					float3 const penumbra_cone_size	( penumbra_radius, m_range, penumbra_radius);
-					get_debug_renderer().draw_cone	( *m_scene, m, penumbra_cone_size, clr_range );
+					get_debug_renderer().draw_cone	( *m_scene, m, penumbra_cone_size, clr_range, true );
 
 					float const umbra_radius		= m_range * math::tan(m_spot_umbra_angle/2.0f);
 					float3 const umbra_cone_size	( umbra_radius, m_range, umbra_radius);
-					get_debug_renderer().draw_cone	( *m_scene, m, umbra_cone_size, math::color(255,0,255) );
+					get_debug_renderer().draw_cone	( *m_scene, m, umbra_cone_size, math::color(255,0,255), true );
 				}
 			}break;
 
@@ -356,7 +358,7 @@ void object_light::render( )
 				local_tr					= range_scale * math::create_rotation_x( -math::pi_d2) * math::create_rotation_y( -math::pi_d2);
 				add_border_arc				( vertices, indices, offset, local_tr, m, clr_range );
 
-				get_debug_renderer().draw_lines( *m_scene, vertices, indices );
+				get_debug_renderer().draw_lines( *m_scene, vertices, indices, true );
 			}//if(bsel)
 
 			}break;
@@ -370,21 +372,21 @@ void object_light::render( )
 				//get_debug_renderer().draw_line_capsule(m, cylinder_size, clr_body );
 				
 				if(bsel)
-					get_debug_renderer().draw_line_capsule( *m_scene, m, float3(cylinder_size.x+m_range, cylinder_size.y, cylinder_size.z+m_range), clr_range );
+					get_debug_renderer().draw_line_capsule( *m_scene, m, float3(cylinder_size.x+m_range, cylinder_size.y, cylinder_size.z+m_range), clr_range, true );
 
 			}break;
 		case render::light_type_sphere : {
 			if(bsel)// draw light range only in selected state
 			{
 				{
-					math::float4x4 m	= math::create_translation((*m_transform).c.xyz());
+					math::float4x4 m	= math::create_translation((*m_transform)._c()->xyz());
 					set_scale_impl		( float3(m_range, m_range, m_range) + m_transform->get_scale(), m );
-					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range );
+					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range, true );
 				}
 				{
-					math::float4x4 m	= math::create_translation((*m_transform).c.xyz());
+					math::float4x4 m	= math::create_translation((*m_transform)._c()->xyz());
 					set_scale_impl		( m_transform->get_scale(), m );
-					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range );
+					get_debug_renderer().draw_line_ellipsoid( *m_scene, m, clr_range, true );
 				}
 			}
 			break;
@@ -395,14 +397,14 @@ void object_light::render( )
 
 			float3 scale					= m_transform->get_scale( );
 
-			get_debug_renderer().draw_rectangle( *m_scene, *m_transform, float3(1.f, 1.f, 1.f), clr_range );
+			get_debug_renderer().draw_rectangle( *m_scene, *m_transform, float3(1.f, 1.f, 1.f), clr_range, true );
 
 			float4x4 temp					= *m_transform;
-			temp.c.xyz()					= m_transform->c.xyz() - normalize(m_transform->j.xyz())*range;
+			temp._c()->xyz() = m_transform->_c()->xyz() - normalize(m_transform->_j()->xyz()) * range;
 
 			float const range_X_tan_penumbra_angle_div_2 = range*math::tan(m_spot_penumbra_angle/2.f);
 			temp.set_scale					( float3( range_X_tan_penumbra_angle_div_2 + scale.x, 1.f, range_X_tan_penumbra_angle_div_2 + scale.z ) );
-			get_debug_renderer().draw_rectangle( *m_scene, temp, float3(1.f, 1.f, 1.f), clr_range );
+			get_debug_renderer().draw_rectangle( *m_scene, temp, float3(1.f, 1.f, 1.f), clr_range, true );
 
 			float3 const first_corners[]	= {
 				m_transform->transform_position( float3(-1.f, 0.f, -1.f) ),
@@ -418,11 +420,11 @@ void object_light::render( )
 			};
 
 			for ( u32 i=0; i<4; ++i )
-				get_debug_renderer().draw_line	( *m_scene, first_corners[i], second_corners[i], clr_range );
+				get_debug_renderer().draw_line	( *m_scene, first_corners[i], second_corners[i], clr_range, true );
 
 			float const range_X_tan_umbra_angle_div_2 = range*math::tan(m_spot_umbra_angle/2.f);
 			temp.set_scale					( float3( range_X_tan_umbra_angle_div_2 + scale.x, 1.f, range_X_tan_umbra_angle_div_2 + scale.z ) );
-			get_debug_renderer().draw_rectangle( *m_scene, temp, float3(1.f, 1.f, 1.f), clr_body );
+			get_debug_renderer().draw_rectangle( *m_scene, temp, float3(1.f, 1.f, 1.f), clr_body, true );
 
 			float3 third_corners[]	= {
 				temp.transform_position( float3(-1.f, 0.f, -1.f) ),
@@ -432,7 +434,7 @@ void object_light::render( )
 			};
 
 			for ( u32 i=0; i<4; ++i )
-				get_debug_renderer().draw_line	( *m_scene, first_corners[i], third_corners[i], clr_body );
+				get_debug_renderer().draw_line	( *m_scene, first_corners[i], third_corners[i], clr_body, true );
 
 			break;
 		}

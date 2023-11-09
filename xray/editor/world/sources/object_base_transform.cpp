@@ -16,6 +16,8 @@
 #	include <xray/collision/space_partitioning_tree.h>
 #pragma managed( pop )
 
+using namespace xray::math;
+
 namespace xray {
 namespace editor {
 
@@ -34,7 +36,7 @@ static void set_rotation_impl	(float3 angles, float4x4& transform)
 	transform				=
 		create_scale( transform.get_scale() ) *
 		create_rotation( angles ) *
-		create_translation( transform.c.xyz() );
+		create_translation( transform._c()->xyz());
 }
 
 float const min_scale = 0.05f;
@@ -56,7 +58,7 @@ void object_base::set_transform( float4x4 const& t )
 	float3 rotation_prev		= object_rotation;
 	float3 scale_prev			= object_scale;
 
-	float3 s = t.get_scale();
+	float3 s = const_cast<xray::math::float4x4&>(t).get_scale();
 	if(s.x<0.05f || s.y<0.05f || s.z<0.05f)
 	{
 		math::float4x4 m = t;
@@ -91,7 +93,7 @@ void object_base::set_transform( float4x4 const& t )
 void object_base::set_position(float3 p)
 {
 	float4x4 transform		= *m_transform;
-	transform.c.xyz()		= p;
+	transform._c()->xyz() = p;
 	set_transform			(transform);
 }
 
@@ -123,7 +125,7 @@ void object_base::set_scale( float3 s )
 void object_base::set_position_revertible(float3 p)
 {
 	float4x4 transform		= *m_transform;
-	transform.c.xyz()		= p;
+	transform._c()->xyz() = p;
 	
 	if(!is_slave_attribute("position"))
 		owner_tool()->get_level_editor()->get_command_engine()->run( gcnew command_set_object_transform( owner_tool()->get_level_editor(), this->id(), transform ) );
@@ -158,7 +160,7 @@ float4x4 place_object( object_base^ o, float3 const& position )
 {
 	XRAY_UNREFERENCED_PARAMETER	( o );
 	float4x4 result_matrix		= float4x4().identity();
-	result_matrix.c.xyz().set	(position.x, position.y, position.z);
+	result_matrix._c()->xyz().set(position.x, position.y, position.z);
 	return						result_matrix;
 }
 

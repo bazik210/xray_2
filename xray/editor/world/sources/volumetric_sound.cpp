@@ -10,14 +10,19 @@
 #include "project.h"
 #include "project_items.h"
 #include "level_editor.h"
-#include <xray/render/facade/debug_renderer.h>
-#include <xray/collision/collision_object.h>
 #include <xray/editor/base/collision_object_types.h>
-#include <xray/sound/sound_instance_proxy.h>
 #include "editor_world.h"
 #include <xray/sound/world.h>
+#include "object_collision.h"
+#include <xray/editor/base/collision_object_types.h>
 #include "object_collision_geometry_mesh.h"
 #include "object_collision_geometry.h"
+
+#pragma managed( push, off )
+#include <xray/collision/collision_object.h>
+#include <xray/sound/sound_instance_proxy.h>
+#include <xray/render/facade/debug_renderer.h>
+#pragma managed( pop )
 
 namespace xray{
 namespace editor{
@@ -36,8 +41,26 @@ volumetric_sound::volumetric_sound( tool_sound^ tool, render::scene_ptr const& s
 	m_volumetric_config_file_name	( gcnew System::String("") ),
 	m_sound_file_name				( gcnew System::String("") ),
 	m_radius						( 50.0f ),
-	m_config_radius					( false )
+	m_config_radius					( false ),
+	m_is_radius_shown				( true )
 {
+	if(!m_collision->initialized())
+	  initialize_collision();
+}
+
+void volumetric_sound::render( )
+{
+	super::render			( );
+
+	if (m_is_radius_shown)
+	{
+		get_debug_renderer().draw_origin(*m_scene, get_transform(), m_radius / 2, false);
+
+		if (m_project_item->get_selected())
+			get_debug_renderer().draw_line_sphere(*m_scene, get_transform(), m_radius, color(255, 0, 0), true);
+		else
+			get_debug_renderer().draw_line_sphere(*m_scene, get_transform(), m_radius, color(0, 255, 0), true);
+	}
 }
 
 volumetric_sound::~volumetric_sound()
@@ -46,6 +69,19 @@ volumetric_sound::~volumetric_sound()
 		*m_proxy					= 0;
 	if ( m_sound_emitter_ptr->c_ptr() )
 		*m_sound_emitter_ptr		= 0;
+
+	if ( m_collision->initialized() )
+		m_collision->destroy();
+}
+
+void volumetric_sound::initialize_collision( )
+{
+	ASSERT( !m_collision->initialized() );
+	float3 extents				(0.3f,0.3f,0.3f);
+
+	collision::geometry_instance* geom	= &*collision::new_box_geometry_instance( g_allocator, math::create_scale(extents) );
+	m_collision->create_from_geometry( true, this, geom, editor_base::collision_object_type_dynamic | editor_base::collision_object_type_touch );
+	m_collision->insert			( m_transform );
 }
 
 
@@ -92,6 +128,7 @@ wpf_controls::property_container^ volumetric_sound::get_property_container( )
 	
 
 	desc->add_button			( "Play looped", "SomeDescription", gcnew button_delegate(this, &volumetric_sound::play_looped_clicked) );
+	desc->add_button			( "Stop", "SomeDescription", gcnew button_delegate(this, &volumetric_sound::stop_clicked) );
 
 	prop_container->properties->add	( desc );
 
@@ -127,6 +164,9 @@ void volumetric_sound::select_collision_geometry	( wpf_controls::property_editor
 
 void volumetric_sound::play_looped_clicked	( button^ )
 {
+	if (wav_filename == "")
+		return;
+
 	if (m_collision_geometry) {
 		object_collision_geometry^ geom = (object_collision_geometry^)(m_collision_geometry->get_object());
 		object_collision_geometry_mesh^ mesh = geom->get_mesh(false, 0);
@@ -149,7 +189,7 @@ void volumetric_sound::play_looped_clicked	( button^ )
 				(
 					get_editor_world().sound_scene(),
 					get_editor_world().engine().get_sound_world().get_editor_world_user(),
-					*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
+					*collision::new_sphere_geometry_instance(g_allocator, float4x4().identity(), 1.0f),
 					m_radius
 				));
 			}
@@ -159,8 +199,26 @@ void volumetric_sound::play_looped_clicked	( button^ )
 		//	get_editor_world().engine().get_sound_world().get_editor_world_user()
 		//));
 	}
+	if (!m_proxy->c_ptr())
+		return;
+
 			(*m_proxy)->play(sound::looped);
 
+}
+
+void volumetric_sound::stop_clicked			( button^ )
+{
+	if ( (*m_proxy).c_ptr( ) )
+	{
+		(*m_proxy)->stop	( );
+		*m_proxy			= 0;
+	}
+}
+
+void volumetric_sound::is_radius_shown::set( bool v )
+{
+	m_is_radius_shown = v;
+	on_property_changed	( "is_radius_shown" );
 }
 
 void volumetric_sound::on_sound_loaded( resources::queries_result& data )
@@ -193,10 +251,9 @@ if(!m_config_radius) {
 	);
 }
 
-void volumetric_sound::update_radius		( )
-{
-
-}
+//void volumetric_sound::update_radius		( )
+//{
+//}
 
 void volumetric_sound::load_props ( configs::lua_config_value const& config_value )
 {
@@ -214,6 +271,11 @@ void volumetric_sound::load_props ( configs::lua_config_value const& config_valu
 		radius = cfg_radius;
 	}
 
+	String^ drad = gcnew String(config_value["draw_radius"]);
+	if (drad) {
+		is_radius_shown = config_value["draw_radius"];
+	}
+
 	if ( config_file_name != "" )
 		wav_filename			= config_file_name;
 }
@@ -226,6 +288,7 @@ void volumetric_sound::save			( configs::lua_config_value config_value )
 	config_value["collision_geometry"]			= unmanaged_string( collision_geometry ).c_str( );
 	config_value["sound"]						= unmanaged_string( m_volumetric_config_file_name ).c_str( );
 	config_value["radius"]						= radius;
+	config_value["draw_radius"]					= is_radius_shown;
 }
 
 void volumetric_sound::collision_geometry_loaded	( project_item_base^ geom )

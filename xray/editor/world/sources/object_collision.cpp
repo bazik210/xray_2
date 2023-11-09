@@ -26,7 +26,7 @@ m_b_active			( false )
 
 collision::object* object_collision::get_collision_object( )
 { 
-	return m_collision_obj; 
+	return (collision::object*)m_collision_obj; 
 }
 
 void object_collision::destroy( /*memory::base_allocator* allocator */)
@@ -43,7 +43,7 @@ void object_collision::remove( )
 {
 	if ( m_b_active )
 	{
-		m_collision_tree->erase( m_collision_obj );
+		m_collision_tree->erase( get_collision_object( ) );
 	}
 
 	m_b_active = false;
@@ -51,7 +51,7 @@ void object_collision::remove( )
 
 void object_collision::insert( float4x4 const* m )
 {
-	m_collision_tree->insert	( m_collision_obj, *m );
+	m_collision_tree->insert	( get_collision_object( ), *m );
 	m_b_active					= true;
 }
 
@@ -61,7 +61,7 @@ void object_collision::set_matrix( float4x4 const* m )
 	if(!m_b_active)	
 		return;
 
-	m_collision_tree->move( m_collision_obj, *m );
+	m_collision_tree->move( get_collision_object( ), *m );
 }
 
 aabb object_collision::get_aabb( )

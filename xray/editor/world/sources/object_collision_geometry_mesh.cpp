@@ -24,6 +24,7 @@
 using System::Windows::Media::Media3D::Point4D;
 using xray::editor::wpf_controls::property_descriptor;
 using xray::editor::wpf_controls::object_property_value;
+using namespace xray::math;
 
 namespace xray{
 namespace editor{
@@ -31,7 +32,7 @@ namespace editor{
 ////////////////			I N I T I A L I Z E				////////////////
 
 object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collision_geometry^ parent ):
-	m_matrix		( NEW(float4x4) ),
+	m_matrix		( m_matrix->get_instance() ),
 	m_primitive		( NEW(collision::primitive) ),
 	m_parent		( parent ),
 	m_is_anti_mesh	( false )
@@ -39,7 +40,7 @@ object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collisio
 }
 
 object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collision_geometry^ parent, Boolean is_anti_mesh ):
-	m_matrix		( NEW(float4x4) ),
+	m_matrix		(m_matrix->get_instance()),
 	m_primitive		( NEW(collision::primitive) ),
 	m_parent		( parent ),
 	m_is_anti_mesh	( is_anti_mesh )
@@ -49,7 +50,7 @@ object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collisio
 object_collision_geometry_mesh::~object_collision_geometry_mesh ( )
 {
 	activate	( false );
-	DELETE		( m_matrix );
+	delete		( m_matrix );
 	DELETE		( m_primitive );
 }
 
@@ -57,11 +58,11 @@ object_collision_geometry_mesh::~object_collision_geometry_mesh ( )
 
 Float3 object_collision_geometry_mesh::position::get( )
 {
-	return Float3( m_matrix->c.xyz( ) );
+	return Float3( m_matrix->_c()->xyz( ) );
 }
 void object_collision_geometry_mesh::position::set( Float3 p )
 {
-	m_matrix->c.xyz( )		= float3( p );
+	m_matrix->_c()->xyz( )		= float3( p );
 	m_parent->set_modified	( );
 }
 
@@ -74,7 +75,7 @@ void object_collision_geometry_mesh::rotation::set( Float3 p )
 {
 	float3 angles_rad		= float3( p ) * ( math::pi / 180.0f );
 
-	*m_matrix				= create_rotation( angles_rad ) * create_translation( m_matrix->c.xyz( ) );
+	*m_matrix				= create_rotation( angles_rad ) * create_translation( m_matrix->_c()->xyz());
 	m_parent->set_modified	( );
 }
 
@@ -96,8 +97,8 @@ void object_collision_geometry_mesh::type::set( int t )
 {
 	m_primitive->type		= (collision::primitive_type)t;
 
-	if( m_primitive->type == collision::primitive_cylinder )
-		m_primitive->type = collision::primitive_capsule;
+	//if( m_primitive->type == collision::primitive_cylinder )
+	//	m_primitive->type = collision::primitive_capsule;
 
 	if( m_primitive->type == collision::primitive_truncated_sphere )
 	{
@@ -135,27 +136,27 @@ void object_collision_geometry_mesh::render( render::scene_ptr const& scene, ren
 	case collision::primitive_sphere:
 		{
 			collision::sphere sphere = m_primitive->sphere( );
-			renderer.draw_sphere_solid		( scene, local_matrix.c.xyz( ), sphere.radius, color );
-			renderer.draw_sphere			( scene, local_matrix.c.xyz( ), sphere.radius, edge_color, false );
+			renderer.draw_sphere_solid		( scene, local_matrix._c()->xyz(), sphere.radius, color, false);
+			renderer.draw_sphere			( scene, local_matrix._c()->xyz(), sphere.radius, edge_color, false);
 		}break;
 
 	case collision::primitive_box:
 		{
 			collision::box box = m_primitive->box( );
-			renderer.draw_cube_solid		( scene, local_matrix, box.half_side, color );
+			renderer.draw_cube_solid		( scene, local_matrix, box.half_side, color, false );
 			renderer.draw_cube				( scene, local_matrix, box.half_side, edge_color, false );
 		}break;
 
 	case collision::primitive_cylinder:
 		{
 			collision::cylinder cylinder = m_primitive->cylinder( );
-			renderer.draw_cylinder			( scene, local_matrix, float3( cylinder.radius, cylinder.half_length, cylinder.radius), color );
-			renderer.draw_cylinder_solid	( scene, local_matrix, float3( cylinder.radius, cylinder.half_length, cylinder.radius), edge_color, true );	
+			renderer.draw_cylinder			( scene, local_matrix, float3( cylinder.radius, cylinder.half_length, cylinder.radius), color, false );
+			renderer.draw_cylinder_solid	( scene, local_matrix, float3( cylinder.radius, cylinder.half_length, cylinder.radius), edge_color, false );	
 		}break;
 	case collision::primitive_capsule:
 		{
 			collision::capsule capsule = m_primitive->capsule( );
-			renderer.draw_solid_capsule		( scene, local_matrix, float3( capsule.radius, capsule.half_length, capsule.radius), color );
+			renderer.draw_solid_capsule		( scene, local_matrix, float3( capsule.radius, capsule.half_length, capsule.radius), color, false );
 			renderer.draw_line_capsule		( scene, local_matrix, float3( capsule.radius, capsule.half_length, capsule.radius), edge_color, false );
 		}break;
 	case collision::primitive_truncated_sphere:
@@ -396,13 +397,13 @@ void object_collision_geometry_mesh::activate( bool value )
 	if( value )
 	{
 		m_collision_object	= NEW (object_collision_geometry_mesh_collision)( this );
-		m_parent->get_collision_tree( )->insert	(	m_collision_object, 
+		m_parent->get_collision_tree( )->insert	(	(collision::object*)m_collision_object, 
 													*m_matrix * m_parent->get_transform( )
 												);
 	}
 	else
 	{
-		m_parent->get_collision_tree( )->erase( m_collision_object );
+		m_parent->get_collision_tree( )->erase( (collision::object*)m_collision_object );
 		DELETE						( m_collision_object );
 		m_collision_object	= NULL;
 	}
@@ -483,7 +484,7 @@ void object_collision_geometry_mesh::set_plane ( float4 const& plane )
 
 float3 object_collision_geometry_mesh::get_absolute_position ( )
 {
-	return m_parent->get_transform( ).c.xyz( ) + m_matrix->c.xyz( );
+	return const_cast<float4x4&>(m_parent->get_transform( ))._c()->xyz() + m_matrix->_c()->xyz();
 }
 
 void object_collision_geometry_mesh::update_collision ( )
@@ -494,8 +495,8 @@ void object_collision_geometry_mesh::update_collision ( )
 
 void  object_collision_geometry_mesh::update_position ( float4x4 const& matrix )
 {
-	*m_matrix = create_rotation				( matrix.get_angles_xyz( ) ) * create_translation( matrix.c.xyz( ) );
-	m_parent->get_collision_tree( )->move	( m_collision_object, *m_matrix * m_parent->get_transform( ) );
+	*m_matrix = create_rotation				( const_cast<float4x4&>(matrix).get_angles_xyz( ) ) * create_translation( const_cast<float4x4&>(matrix)._c()->xyz());
+	m_parent->get_collision_tree( )->move	( (collision::object*)m_collision_object, *m_matrix * m_parent->get_transform( ) );
 }
 
 ////////////////		C O L L I S I O N			////////////////

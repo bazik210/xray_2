@@ -103,6 +103,7 @@ public:
 	void 	draw_ellipsoid_solid( scene_ptr const& scene, float4x4 const& matrix, float3 const& size, math::color const& color, bool use_depth = true );
 	void	draw_line_ellipsoid	( scene_ptr const& scene, float4x4 const& matrix, math::color const& color, bool use_depth = true );
 	void	draw_line_hemisphere( scene_ptr const& scene, float4x4 const& matrix, float3 const& size, bool bdraw_base, math::color const& color, bool use_depth = true );
+	void	draw_line_sphere	( scene_ptr const& scene, float4x4 const& matrix, const float radius, math::color const& color, bool use_depth = true );
 	void	draw_line_capsule	( scene_ptr const& scene, float4x4 const& matrix, float3 const& size, math::color const& color, bool use_depth = true );
 	void	draw_solid_capsule	( scene_ptr const& scene, float4x4 const& matrix, float3 const& size, math::color const& color, bool use_depth = true );
 

@@ -32,7 +32,7 @@ namespace collision {
 		typedef	xray::editor::wpf_controls::property_container property_container;
 		typedef	xray::collision::space_partitioning_tree space_partitioning_tree;
 
-		enum class object_collision_geometry_mode
+		public enum class object_collision_geometry_mode
 		{
 			containment,
 			intersection

@@ -444,9 +444,9 @@ void window_ide::on_form_activated(System::Object^, System::EventArgs^)
 		m_editor_world.engine().get_sound_world().get_editor_world_user().set_active_sound_scene(m_editor_world.sound_scene(), 1000, 0);
 		m_editor_world.engine().get_sound_world().get_editor_world_user().set_listener_properties_interlocked
 			( m_editor_world.sound_scene(),
-			m_view_window->get_inverted_view_matrix().c.xyz(),
-			m_view_window->get_inverted_view_matrix().k.xyz(),
-			m_view_window->get_inverted_view_matrix().j.xyz());
+			m_view_window->get_inverted_view_matrix()._c()->xyz(),
+			m_view_window->get_inverted_view_matrix()._k()->xyz(),
+			m_view_window->get_inverted_view_matrix()._j()->xyz());
 	}
 }
 

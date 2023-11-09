@@ -713,6 +713,18 @@ void renderer::draw_line_hemisphere( scene_ptr const& scene, float4x4 const& mat
 	}
 }
 
+void renderer::draw_line_sphere( scene_ptr const& scene, float4x4 const& matrix, const float radius, xray::math::color const& color, bool const use_depth )
+{
+	draw_ellipsoid				(
+		scene,
+		matrix,
+		float3( radius, radius, radius ),
+		color,
+		use_depth
+	);
+
+}
+
 void renderer::draw_line_capsule( scene_ptr const& scene, float4x4 const& matrix, float3 const& size, xray::math::color const& color, bool const use_depth )
 {
 	draw_cylinder		( scene, matrix, size, color, use_depth );

@@ -18,10 +18,8 @@
 #include <xray/render/facade/debug_renderer.h>
 #pragma managed( pop )
 
-
 namespace xray{
 namespace editor{
-
 
 object_sound::object_sound( tool_sound^ tool, render::scene_ptr const& scene )	:
 	super			( tool ),
@@ -62,8 +60,8 @@ object_sound::~object_sound()
 void object_sound::set_transform(float4x4 const& transform)
 {
 	super::set_transform			(transform);
-	*m_position						= transform.c.xyz();
-	*m_direction					= transform.i.xyz();
+	*m_position						= const_cast<float4x4&>(transform)._c()->xyz();
+	*m_direction					= const_cast<float4x4&>(transform)._i()->xyz();
 	if ((*m_proxy).c_ptr())
 	{
 		if ( m_sound_type == 0 )
@@ -77,15 +75,15 @@ void object_sound::render( )
 {
 	super::render			( );
 
-	get_debug_renderer().draw_origin	( *m_scene, get_transform(), 2.0f );
+	get_debug_renderer().draw_origin	( *m_scene, get_transform(), 2.0f, false );
 	if (m_project_item->get_selected( ))
-		get_debug_renderer().draw_line_ellipsoid( *m_scene, get_transform(), color(255, 0, 0));
+		get_debug_renderer().draw_line_ellipsoid( *m_scene, get_transform(), color(255, 0, 0), true);
 	else
-		get_debug_renderer().draw_line_ellipsoid( *m_scene, get_transform(), color(0, 255, 0));
+		get_debug_renderer().draw_line_ellipsoid( *m_scene, get_transform(), color(0, 255, 0), true);
 
 	if ( m_sound_type == 1 )
 	{
-		get_debug_renderer().draw_arrow			( *m_scene, *m_position, *m_position + (*m_direction * 5.0f), color(0, 0, 255));
+		get_debug_renderer().draw_arrow			( *m_scene, *m_position, *m_position + (*m_direction * 5.0f), color(0, 0, 255), false);
 	}
 
 //	if ((*m_proxy).c_ptr())
@@ -130,6 +128,10 @@ void object_sound::load_props(configs::lua_config_value const& config_value)
 	super::load_props(config_value);
 
 	String^ config_file_name = gcnew String(config_value["sound"]);
+	String^	emitter_file_type = gcnew String(config_value["emitter_type"]);
+
+	if (emitter_file_type != "")
+	emitter_type = config_value["emitter_type"];
 
 	if (config_file_name != "")
 		wav_filename = config_file_name;
@@ -140,7 +142,7 @@ void object_sound::initialize_collision( )
 	ASSERT( !m_collision->initialized() );
 	float3 extents				(0.3f,0.3f,0.3f);
 
-	collision::geometry_instance* geom	= &*collision::new_box_geometry_instance( &debug::g_mt_allocator, math::create_scale(extents) );
+	collision::geometry_instance* geom	= &*collision::new_box_geometry_instance( g_allocator, math::create_scale(extents) );
 	m_collision->create_from_geometry( true, this, geom, editor_base::collision_object_type_dynamic | editor_base::collision_object_type_touch );
 	m_collision->insert			( m_transform );
 }
@@ -207,6 +209,7 @@ void object_sound::save(configs::lua_config_value config_value)
 
 	config_value["sound"] = unmanaged_string(m_wav_file_name).c_str();
 	config_value["game_object_type"] = "object_sound";
+	config_value["emitter_type"] = emitter_type;
 }
 
 void object_sound::play_clicked		( button^ )

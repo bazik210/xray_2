@@ -20,7 +20,7 @@ void object_light::fill_props( render::light_props& props )
 {
 	props.does_cast_shadows		= false;
 	props.range					= m_range;
-	props.color					= m_color.math_color().m_value;
+	props.color					= m_color.math_color().get_value();
 	props.transform				= *m_transform;
 	props.type					= m_type;
 	props.attenuation_power		= m_attenuation_power;

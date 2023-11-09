@@ -158,6 +158,9 @@ namespace math {
 			};
 			u32				m_value;
 		};
+	public:
+		u32 get_value() { return m_value; }
+
 	#if defined(_MSC_VER)
 	#	pragma warning(pop)
 	#endif // #if defined(_MSC_VER)

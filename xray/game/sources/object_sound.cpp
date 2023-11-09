@@ -61,6 +61,7 @@ void object_sound::load(configs::binary_config_value const& config_value)
 	pcstr collision_geometry_name = config_value["collision_geometry"];
 	m_position					  = (float3)(config_value["position"]);
 	m_wav_file_name				  = config_value["sound"];
+	m_emitter_type				  = config_value["emitter_type"];
 
 //	m_game_scene.get_game().get_game_world().query_object_by_name(
 //		collision_geometry_name,

@@ -157,7 +157,7 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 			break;
 
 		case collision::primitive_capsule:
-			instance	= &*collision::new_capsule_geometry_instance	( g_allocator, matrix, primitive.cylinder( ).radius, primitive.cylinder( ).half_length );
+			instance	= &*collision::new_capsule_geometry_instance	( g_allocator, matrix, primitive.capsule( ).radius, primitive.capsule( ).half_length );
 			break;
 		case collision::primitive_truncated_sphere: 
 			{

@@ -153,7 +153,7 @@ void object_collision_geometry::render ( )
 			draw_indices[i] = indices[i];
 		}
 
-		get_debug_renderer().draw_triangles	( scene, draw_vertices, draw_indices );
+		get_debug_renderer().draw_triangles	( scene, draw_vertices, draw_indices, true );
 
 		math::color clr_line ( 80, 80, 160, 200 );
 		for(u32 i=0; i<vcount; ++i)
@@ -171,7 +171,7 @@ void object_collision_geometry::render ( )
 			draw_indices[i] = geometry_utils::octahedron_solid::pairs[i];
 		}
 
-		get_debug_renderer().draw_lines		( scene, draw_vertices, draw_indices );
+		get_debug_renderer().draw_lines		( scene, draw_vertices, draw_indices, true );
 	}
 
 	u32 count = m_collision_anti_meshes->Count;
@@ -197,7 +197,7 @@ property_container^	object_collision_geometry::get_property_container	( )
 
 	container->add_button		( "sphere", gcnew Action<button^>( this, &object_collision_geometry::add_sphere_mesh_clicked ) );
 	container->add_button		( "box", gcnew Action<button^>( this, &object_collision_geometry::add_box_mesh_clicked ) );
-	//container->add_button		( "cyliner", gcnew Action<button^>( this, &object_collision_geometry::add_cylinder_mesh_clicked ) );
+	container->add_button		( "cyliner", gcnew Action<button^>( this, &object_collision_geometry::add_cylinder_mesh_clicked ) );
 	container->add_button		( "capsule", gcnew Action<button^>( this, &object_collision_geometry::add_capsule_mesh_clicked ) );
 	container->add_button		( "truncated sphere", gcnew Action<button^>( this, &object_collision_geometry::add_truncated_sphere_mesh_clicked ) );
 
@@ -210,7 +210,7 @@ property_container^	object_collision_geometry::get_property_container	( )
 		property_descriptor^ desc			= ret_container->properties->add_container	( name, "collision meshes", "no description", sub );
 		mesh->last_property_descriptor		= desc;
 		sub->inner_value					=	( gcnew property_descriptor( name, mesh, "type" ) )->set_compo_box_style(
-													gcnew cli::array<String^>( 5 ){ "sphere", "box", "", /*"cylinder",*/ "capsule", "truncated sphere" }
+													gcnew cli::array<String^>( 5 ){ "sphere", "box", "cylinder", "capsule", "truncated sphere" }
 												);
 
 		desc->add_button( " x ", "", gcnew Action<button^>( this, &object_collision_geometry::remove_mesh_clicked ) )->tag = mesh;
@@ -224,7 +224,7 @@ property_container^	object_collision_geometry::get_property_container	( )
 
 	container->add_button		( "sphere", gcnew Action<button^>( this, &object_collision_geometry::add_sphere_antimesh_clicked ) );
 	container->add_button		( "box", gcnew Action<button^>( this, &object_collision_geometry::add_box_antimesh_clicked ) );
-	//container->add_button		( "cyliner", gcnew Action<button^>( this, &object_collision_geometry::add_cylinder_antimesh_clicked ) );
+	container->add_button		( "cyliner", gcnew Action<button^>( this, &object_collision_geometry::add_cylinder_antimesh_clicked ) );
 	container->add_button		( "capsule", gcnew Action<button^>( this, &object_collision_geometry::add_capsule_antimesh_clicked ) );
 	container->add_button		( "truncated sphere", gcnew Action<button^>( this, &object_collision_geometry::add_truncated_sphere_antimesh_clicked) );
 
@@ -238,7 +238,7 @@ property_container^	object_collision_geometry::get_property_container	( )
 		property_descriptor^ desc			= ret_container->properties->add_container	( name, "collision anti meshes", "no description", sub );
 		mesh->last_property_descriptor		= desc;
 		sub->inner_value					=	( gcnew property_descriptor( name, mesh, "type" ) )->set_compo_box_style(
-													gcnew cli::array<String^>( 5 ){ "sphere", "box", "", /*"cylinder",*/"capsule", "truncated sphere" }
+													gcnew cli::array<String^>( 5 ){ "sphere", "box", "cylinder", "capsule", "truncated sphere" }
 												);
 
 		desc->add_button			( " x ", "", gcnew Action<button^>( this, &object_collision_geometry::remove_antimesh_clicked ) )->tag = mesh;
@@ -394,7 +394,7 @@ void object_collision_geometry::init_collision ( )
 {
 	ASSERT( !m_collision->initialized( ) );
 
-	collision::geometry_instance* geom			= &*collision::new_sphere_geometry_instance( &debug::g_mt_allocator, float4x4().identity(), 0.5f );
+	collision::geometry_instance* geom			= &*collision::new_sphere_geometry_instance( g_allocator, float4x4().identity(), 0.5f );
 	m_collision->create_from_geometry	( true, this, geom, xray::editor_base::collision_object_type_dynamic | xray::editor_base::collision_object_type_touch );
 	m_collision->insert					( &get_transform( ) );
 //	update_collision_transform			( );
