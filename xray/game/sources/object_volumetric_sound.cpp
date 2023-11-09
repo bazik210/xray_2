@@ -106,6 +106,9 @@ void object_volumetric_sound::on_collision_object_loaded( game_object_ptr_ const
 
 void object_volumetric_sound::on_config_loaded			( resources::queries_result& data )
 {
+	if(!data.is_successful())
+		return;
+
 	configs::binary_config_ptr const config				= static_cast_resource_ptr<configs::binary_config_ptr>( data[0].get_unmanaged_resource( ) );
 	R_ASSERT											( config.c_ptr( ) );
 	configs::binary_config_value const& root			= config->get_root( );
@@ -160,6 +163,9 @@ void object_volumetric_sound::play			(  )
 				m_radius
 			);
 	}
+
+	if (!m_proxy.c_ptr())
+		return;
 
 	//m_proxy			   = m_emitter->emit( m_sound_scene, m_world_user );
 	//m_proxy->set_collision_geometry		( *m_collision_geometry, m_radius );
