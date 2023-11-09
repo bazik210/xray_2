@@ -145,16 +145,27 @@ void animation_group_object::on_animation_loaded(xray::animation_editor::animati
 	R_ASSERT(m_request->ContainsKey(clip_name));
 	for each(intervals_request p in m_request[clip_name])
 	{
-		if (!p.length) 
-		    continue;
+		animation_node_interval^ interval = nullptr;
+		if (p.cfg_interval_id == u32(-1))
+		{
+			interval = new_clip->get_interval_by_offset_and_length(p.offset, p.length);
+		}
+		else {
+			if (!((u32)new_clip->intervals->Count > p.cfg_interval_id))
+				break;
 
-		animation_node_interval^ interval = new_clip->intervals[p.cfg_interval_id];
-		animation_node_interval_instance^ inst = gcnew animation_node_interval_instance(interval, p.max_weight, p.min_weight);
-		inst->property_changed += gcnew Action<animation_node_interval_instance^, String^, Object^, Object^>(this, &animation_group_object::interval_property_changed);
-		if(p.interval_id>(u32)m_intervals->Count)
-			m_intervals->Add(inst);
-		else
-			m_intervals->Insert(p.interval_id, inst);
+			interval = new_clip->intervals[p.cfg_interval_id];
+		}
+
+		if(interval!=nullptr)
+		{	
+			animation_node_interval_instance^ inst = gcnew animation_node_interval_instance(interval, p.max_weight, p.min_weight);
+			inst->property_changed += gcnew Action<animation_node_interval_instance^, String^, Object^, Object^>(this, &animation_group_object::interval_property_changed);
+			if (p.interval_id > (u32)m_intervals->Count)
+				m_intervals->Add(inst);
+			else
+				m_intervals->Insert(p.interval_id, inst);
+		}
 	}
 	
 	m_request->Remove(clip_name);
