@@ -38,6 +38,7 @@ struct XRAY_NOVTABLE engine {
 	virtual	void 			load_level				( pcstr project_resource_name, pcstr project_resource_path=NULL ) = 0;
 	virtual	pcstr			get_resources_path		( ) const = 0;
 	virtual	void 			unload_level			( ) = 0;
+	virtual	void 			switch_to_menu			( ) = 0;
 
 	virtual	render::world&	get_renderer_world		( ) = 0;
 	virtual	sound::world&	get_sound_world			( ) = 0;

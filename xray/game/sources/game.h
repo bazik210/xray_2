@@ -163,6 +163,7 @@ public:
 
 			void			scene_close_query		( );
 			void			switch_to_lobby			( );
+			void			switch_to_menu			( );
 			void			exit					( pcstr str );
 
 			void			check_selected_npc		( );

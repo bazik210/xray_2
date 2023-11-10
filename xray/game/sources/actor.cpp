@@ -733,7 +733,7 @@ void actor::tick()
 #endif
 
 	// pressed fire action
-	if(m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload  && !m_wpn_hidden_1 && !m_wpn_hidden_2)
+	if(m_game_world.get_game().get_active_scene_view() && m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
 		render::debug::renderer& d	= r.debug();
 		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();

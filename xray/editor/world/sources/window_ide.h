@@ -437,6 +437,9 @@ public:
 
 	private: System::Void error_message_button_ButtonClick(System::Object^  sender, System::EventArgs^  e);
 	private: System::Void clearToolStripMenuItem_Click(System::Object^  sender, System::EventArgs^  e);
+
+protected: 
+	virtual void OnFormClosing(FormClosingEventArgs ^e) override;
 };
 
 } // namespace editor

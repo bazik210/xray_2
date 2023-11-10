@@ -841,6 +841,11 @@ void game::switch_to_lobby( )
 		switch_to_scene					( m_lobby_menu );
 }
 
+void game::switch_to_menu( )
+{
+		switch_to_scene					( m_main_menu );
+}
+
 void game::scene_close_query( )
 {
 	if ( m_active_scene == m_main_menu )

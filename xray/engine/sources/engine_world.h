@@ -83,6 +83,7 @@ private:
 	virtual	void			enable_game				( bool value );
 	virtual	void 			load_level				( pcstr project_resource_name, pcstr project_resource_path=NULL );
 	virtual	void 			unload_level			( );
+	virtual	void 			switch_to_menu			( );
 	virtual bool			is_application_active	( );
 	virtual	void			run_renderer_commands	( );
 	virtual	void			on_resize				( );

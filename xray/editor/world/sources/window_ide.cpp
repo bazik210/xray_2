@@ -379,6 +379,8 @@ void window_ide::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 			// deactivate
 			m_view_window->window_view_Deactivate		();
 //			m_editor_world.engine().on_application_deactivate();
+			if (!m_editor_world.editor_mode())
+				m_editor_world.engine().switch_to_menu();
 		}
 	}
 }
@@ -408,6 +410,16 @@ void window_ide::close						( )
 {
 	m_is_closing = true;
 	Close	();
+}
+
+void window_ide::OnFormClosing(FormClosingEventArgs^ e)
+{
+	super::OnFormClosing(e);
+
+	if (!m_editor_world.editor_mode()) {
+		m_editor_world.engine().unload_level();
+		m_editor_world.engine().enable_game(false);
+	}
 }
 
 void window_ide::error_message_out( System::String^ msg)
