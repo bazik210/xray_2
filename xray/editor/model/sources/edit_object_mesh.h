@@ -206,6 +206,7 @@ protected:
 	void						add_sphere_collision_primitive_clicked		( button^ );
 	void						add_box_collision_primitive_clicked			( button^ );
 	void						add_cylinder_collision_primitive_clicked	( button^ );
+	void						add_capsule_collision_primitive_clicked		( button^ );
 	void						switch_to_collision_clicked					( button^ );
 	void						add_portal_clicked							( button^ );
 	void						delete_selected_portals_clicked				( button^ );
@@ -307,6 +308,8 @@ private:
 	void						duplicate_collision_primitive_clicked( button^ );
 	void						add_sphere_collision_primitive_clicked		( button^ );
 	void						add_box_collision_primitive_clicked			( button^ );
+	void						add_cylinder_collision_primitive_clicked	( button^ );
+	void						add_capsule_collision_primitive_clicked		( button^ );
 
 	void						on_preview_model_ready		( resources::queries_result& data );
 	void						remove_preview_model		( );

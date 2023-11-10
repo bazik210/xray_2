@@ -255,11 +255,11 @@ bool edit_object_solid_mesh::load_portals( configs::lua_config_value const& cfg_
 	m_portals.Clear();	
 	m_unique_portal_name_helper->clear();
 	
-	if ( cfg_root.value_exists("portals") )
+	if ( const_cast<xray::configs::lua_config_value&>(cfg_root).value_exists("portals") )
 	{
 		configs::lua_config_value const& cfg = cfg_root["portals"];
-		configs::lua_config::const_iterator portal_it		=	cfg.begin( );
-		configs::lua_config::const_iterator portal_end_it	=	cfg.end( );
+		configs::lua_config::const_iterator portal_it		=	const_cast<xray::configs::lua_config_value&>(cfg).begin( );
+		configs::lua_config::const_iterator portal_end_it	=	const_cast<xray::configs::lua_config_value&>(cfg).end( );
 		for( ; portal_it != portal_end_it; ++portal_it ) 
 		{
 			edit_portal^ portal = gcnew edit_portal( this, m_unique_portal_name_helper, %m_portals, *portal_it );
@@ -369,14 +369,14 @@ void edit_object_solid_mesh::initialize_object_collision( )
 		return;
 
 	m_hq_collision_object = NEW ( collision::collision_object ) ( g_allocator, editor_base::collision_object_type_dynamic, &*collision::new_triangle_mesh_geometry_instance( g_allocator, float4x4().identity(), g.c_ptr()) );
-	m_model_editor->collision_tree->insert( m_hq_collision_object , m_hq_collision_object->get_matrix( ) );
+	m_model_editor->collision_tree->insert( (collision::object*)m_hq_collision_object , m_hq_collision_object->get_matrix( ) );
 }
 
 void edit_object_solid_mesh::destroy_object_collision( )
 {
 	if ( m_hq_collision_object  )
 	{
-		m_model_editor->collision_tree->erase( m_hq_collision_object  );
+		m_model_editor->collision_tree->erase( (collision::object*)m_hq_collision_object  );
 		DELETE ( m_hq_collision_object  );
 		m_hq_collision_object  = NULL;
 	}

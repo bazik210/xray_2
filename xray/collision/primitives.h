@@ -60,14 +60,8 @@ struct primitive
 
 	inline	collision::sphere		sphere	() const { ASSERT( type == primitive_sphere );		return collision::sphere( data_[0] ); }
 	inline	collision::box			box		() const { ASSERT( type == primitive_box );			return collision::box( data_ ); }
-	inline	collision::cylinder		cylinder() const { 
-		ASSERT( type == primitive_cylinder );	
-		return collision::cylinder( data_[1], data_[0] ); 
-	}
-	inline	collision::capsule		capsule	() const { 
-		ASSERT( type == primitive_capsule );	
-		return collision::capsule( data_[1], data_[0]); 
-	}
+	inline	collision::cylinder		cylinder() const { ASSERT( type == primitive_cylinder );	return collision::cylinder( data_[1], data_[0] ); }
+	inline	collision::capsule		capsule	() const { ASSERT( type == primitive_capsule );		return collision::capsule( data_[1], data_[0]); }
 	inline	collision::truncated_sphere		truncated_sphere() const { ASSERT( type == primitive_truncated_sphere );	return collision::truncated_sphere( data_[0] ); }
 
 private:

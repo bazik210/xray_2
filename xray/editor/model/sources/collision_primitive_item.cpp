@@ -19,6 +19,8 @@
 #include <xray/physics/rigid_body.h>
 #pragma managed(pop)
 
+using namespace xray::math;
+
 namespace xray{
 namespace model_editor{
 
@@ -31,7 +33,7 @@ m_parent_solid_mesh	( parent )
 
 void collision_primitive_item_solid_mesh::set_position_impl( Float3 p )
 {
-	m_matrix->c.xyz()		= float3(p);
+	m_matrix->_c()->xyz() = float3(p);
 	m_parent_solid_mesh->m_mass_center_item->collision_item_moved( );
 	m_parent->set_modified	( );
 }
@@ -46,7 +48,7 @@ m_parent_skeletal_mesh	( parent )
 
 void collision_primitive_item_skeletal_mesh::set_position_impl( Float3 p )
 {
-	m_matrix->c.xyz()		= float3(p);
+	m_matrix->_c()->xyz()		= float3(p);
 	//m_parent_solid_mesh->m_mass_center_item->collision_item_moved( );
 	m_parent->set_modified	( );
 }
@@ -58,7 +60,7 @@ void collision_primitive_item_skeletal_mesh::render(render::scene_ptr const& sce
 	math::float4x4 attach_bone_matrix	= m_parent_skeletal_mesh->get_bone_matrix(bone_name);
 
 	math::float4x4 angles_m			= create_rotation( m_matrix->get_angles_xyz() );
-	math::float4x4 translation_m	= create_translation( m_matrix->c.xyz() );
+	math::float4x4 translation_m	= create_translation( m_matrix->_c()->xyz() );
 
 	float4x4 m							= angles_m * (attach_bone_matrix * translation_m);
 	render_impl							(scene, r, clr, m );
@@ -91,7 +93,7 @@ void collision_primitive_item_skeletal_mesh::execute_preview( editor_base::trans
 	}else
 	{
 		math::float4x4 m	= control->calculate( start_modify_matrix );
-		m					= create_rotation( m.get_angles_xyz() ) * create_translation( m.c.xyz() ); // revove scale
+		m					= create_rotation( m.get_angles_xyz() ) * create_translation( m._c()->xyz() ); // revove scale
 
 		float4x4 const P	= start_modify_matrix;
 		float4x4 P_i		= math::invert4x3( P );
@@ -113,7 +115,7 @@ void collision_primitive_item_skeletal_mesh::execute_preview( editor_base::trans
 //
 //		*m_matrix		= create_rotation( m.get_angles_xyz() ) * create_translation( m.c.xyz() );
 
-		m_model_editor->collision_tree->move( m_active_collision_object, *m_matrix );
+		m_model_editor->collision_tree->move( (collision::object*)m_active_collision_object, *m_matrix );
 	}
 	m_parent_skeletal_mesh->get_collision_panel()->refresh_properties();
 }
@@ -148,6 +150,10 @@ void collision_primitive_item_skeletal_mesh::load( configs::lua_config_value con
 		{
 			m_primitive->data_ = scale;
 		}break;
+	case collision::primitive_capsule:
+		{
+			m_primitive->data_ = scale;
+		}break;
 	}
 
 }
@@ -155,7 +161,7 @@ void collision_primitive_item_skeletal_mesh::load( configs::lua_config_value con
 void collision_primitive_item_skeletal_mesh::save( configs::lua_config_value& t )
 {
 	t["type"]			= (int)m_primitive->type;
-	t["position"]		= m_matrix->c.xyz();
+	t["position"]		= m_matrix->_c()->xyz();
 	t["rotation"]		= m_matrix->get_angles_xyz();
 	t["scale"]			= m_primitive->data_;
 	t["animation_bone"]	= unmanaged_string(bone_name).c_str();
@@ -179,7 +185,7 @@ void collision_primitive_item_skeletal_mesh::bone_name::set( System::String^ nam
 
 
 collision_primitive_item_mesh::collision_primitive_item_mesh(model_editor^ me, edit_object_mesh^ parent )
-:m_matrix		( NEW(float4x4) ),
+:m_matrix		( m_matrix->get_instance() ),
 m_primitive		( NEW(collision::primitive) ),
 m_model_editor	( me ),
 m_parent		( parent )
@@ -189,7 +195,7 @@ m_parent		( parent )
 collision_primitive_item_mesh::~collision_primitive_item_mesh( )
 {
 	activate	( false );
-	DELETE		( m_matrix );
+	delete		( m_matrix );
 	DELETE		( m_primitive );
 }
 
@@ -203,19 +209,25 @@ void collision_primitive_item_mesh::render_impl(	render::scene_ptr const& scene,
 	case collision::primitive_sphere:
 		{
 			collision::sphere sp = m_primitive->sphere();
-			r.draw_sphere_solid( scene, m.c.xyz(), sp.radius, clr );
+			r.draw_sphere_solid( scene, const_cast<float4x4&>(m)._c()->xyz(), sp.radius, clr, false );
 		}break;
 
 	case collision::primitive_box:
 		{
 			collision::box box = m_primitive->box();
-			r.draw_cube_solid( scene, m, box.half_side, clr );
+			r.draw_cube_solid( scene, m, box.half_side, clr, false );
 		}break;
 
 	case collision::primitive_cylinder:
 		{
 			collision::cylinder cylinder = m_primitive->cylinder();
-			r.draw_cylinder_solid( scene, m, float3(cylinder.radius, cylinder.half_length, cylinder.radius), clr );
+			r.draw_cylinder_solid( scene, m, float3(cylinder.radius, cylinder.half_length, cylinder.radius), clr, false );
+		}break;
+
+	case collision::primitive_capsule:
+		{
+			collision::capsule capsule = m_primitive->capsule();
+			r.draw_solid_capsule( scene, m, float3(capsule.radius, capsule.half_length, capsule.radius), clr, false );
 		}break;
 	}
 }
@@ -253,6 +265,10 @@ void collision_primitive_item_solid_mesh::load( configs::lua_config_value const&
 		{
 			m_primitive->data_ = scale;
 		}break;
+	case collision::primitive_capsule:
+		{
+			m_primitive->data_ = scale;
+		}break;
 	}
 
 }
@@ -260,14 +276,14 @@ void collision_primitive_item_solid_mesh::load( configs::lua_config_value const&
 void collision_primitive_item_solid_mesh::save( configs::lua_config_value& t, float3 const& mass_center )
 {
 	t["type"]			= (int)m_primitive->type;
-	t["position"]		= m_matrix->c.xyz() - mass_center;
+	t["position"]		= m_matrix->_c()->xyz() - mass_center;
 	t["rotation"]		= m_matrix->get_angles_xyz();
 	t["scale"]			= m_primitive->data_;
 }
 
 Float3 collision_primitive_item_mesh::position::get( )
 {
-	return Float3(m_matrix->c.xyz());
+	return Float3(m_matrix->_c()->xyz());
 }
 
 Float3 collision_primitive_item_mesh::rotation::get( )
@@ -280,7 +296,7 @@ void collision_primitive_item_mesh::rotation::set( Float3 p )
 {
 	float3 angles_rad		= float3(p) * (math::pi/180.0f);
 
-	*m_matrix				= create_rotation( angles_rad ) * create_translation( m_matrix->c.xyz() );
+	*m_matrix				= create_rotation( angles_rad ) * create_translation( m_matrix->_c()->xyz() );
 	m_parent->set_modified	( );
 }
 
@@ -329,6 +345,11 @@ collision::geometry_instance* collision_primitive_item_mesh::create_geometry_ins
 			collision::cylinder cylinder = m_primitive->cylinder();
 			result = &*collision::new_cylinder_geometry_instance( g_allocator, float4x4().identity(), cylinder.radius, cylinder.half_length );
 		}break;
+	case collision::primitive_capsule:
+		{
+			collision::capsule capsule = m_primitive->capsule();
+			result = &*collision::new_capsule_geometry_instance( g_allocator, float4x4().identity(), capsule.radius, capsule.half_length );
+		}break;
 	}
 	return result;
 }
@@ -342,13 +363,13 @@ void collision_primitive_item_mesh::activate( bool value )
 	{
 		m_active_collision_object	= NEW (collision_primitive_item_collision)( this );
 		m_model_editor->collision_tree->insert(
-			m_active_collision_object, 
+			(collision::object*)m_active_collision_object, 
 			*m_matrix
 		);
 	}else
 	{
 		set_selected				( false );
-		m_model_editor->collision_tree->erase( m_active_collision_object );
+		m_model_editor->collision_tree->erase( (collision::object*)m_active_collision_object );
 		DELETE						( m_active_collision_object );
 		m_active_collision_object	= NULL;
 	}
@@ -372,12 +393,12 @@ void collision_primitive_item_solid_mesh::execute_preview( editor_base::transfor
 		update_collision	( );
 	}else
 	{
-		*m_matrix		= create_rotation( m.get_angles_xyz() ) * create_translation( m.c.xyz() );
+		*m_matrix		= create_rotation( m.get_angles_xyz() ) * create_translation( m._c()->xyz() );
 		
 		m_parent_solid_mesh->m_mass_center_item->collision_item_moved( );
 
 		m_model_editor->collision_tree->move(
-			m_active_collision_object,
+			(collision::object*)m_active_collision_object,
 			*m_matrix
 		);
 	}
@@ -386,6 +407,7 @@ void collision_primitive_item_solid_mesh::execute_preview( editor_base::transfor
 
 bool collision_primitive_item_mesh::is_selected( )
 {
+	if (!m_model_editor->m_transform_control_helper) return false;
 	transform_control_object^ current_object = m_model_editor->m_transform_control_helper->m_object;
 	return (current_object == this);
 }
@@ -432,7 +454,7 @@ float4x4 collision_primitive_item_mesh::get_ancor_transform( )
 u32 collision_primitive_item_mesh::get_collision( System::Collections::Generic::List<editor_base::collision_object_wrapper>^% result_list )
 {
 	editor_base::collision_object_wrapper	wrapper;
-	wrapper.m_collision_object				= m_active_collision_object;
+	wrapper.m_collision_object				= (collision::object*)m_active_collision_object;
 	result_list->Add						( wrapper );
 
 	return result_list->Count;
@@ -523,7 +545,7 @@ void mass_center_item::execute_preview( editor_base::transform_control_base^ con
 {
 	math::float4x4 m	= control->calculate( start_mass_center_modify_matrix );
 
-	m_parent->m_physics_settings->mass_center = Float3(m.c.xyz());
+	m_parent->m_physics_settings->mass_center = Float3(m._c()->xyz());
 
 	m_parent->get_collision_panel()->refresh_properties();
 }

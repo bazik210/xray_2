@@ -192,8 +192,8 @@ bool edit_object_skeletal_mesh::load_collision( )
 	configs::lua_config_value const& root = (*m_collision_cfg)->get_root();
 
 	configs::lua_config_value const& composite	= root["hit_targets"];
-	configs::lua_config_iterator it				= composite.begin();
-	configs::lua_config_iterator it_e			= composite.end();
+	configs::lua_config_iterator it				= const_cast<xray::configs::lua_config_value&>(composite).begin();
+	configs::lua_config_iterator it_e			= const_cast<xray::configs::lua_config_value&>(composite).end();
 	
 	for( ;it!=it_e; ++it)
 	{
@@ -403,6 +403,34 @@ void edit_object_skeletal_mesh::add_box_collision_primitive_clicked ( button^ )
 	prim->activate					( true );
 }
 
+void edit_object_skeletal_mesh::add_cylinder_collision_primitive_clicked ( button^ )
+{
+	collision_primitive_item_skeletal_mesh^ prim		= gcnew collision_primitive_item_skeletal_mesh(m_model_editor, this);
+	prim->type						= (int)collision::primitive_cylinder;
+	prim->position					= Float3(float3(0,0,0));
+	prim->rotation					= Float3(float3(0,0,0));
+	prim->scale						= Float3(float3(1,1,1));
+	prim->bone_name					= m_model->m_bone_names_array[0];
+	m_collision_primitives.Add		( prim );
+	set_modified					( );
+	m_collision_panel->set_property_container( get_collision_property_container() );
+	prim->activate					( true );
+}
+
+void edit_object_skeletal_mesh::add_capsule_collision_primitive_clicked ( button^ )
+{
+	collision_primitive_item_skeletal_mesh^ prim		= gcnew collision_primitive_item_skeletal_mesh(m_model_editor, this);
+	prim->type						= (int)collision::primitive_capsule;
+	prim->position					= Float3(float3(0,0,0));
+	prim->rotation					= Float3(float3(0,0,0));
+	prim->scale						= Float3(float3(1,1,1));
+	prim->bone_name					= m_model->m_bone_names_array[0];
+	m_collision_primitives.Add		( prim );
+	set_modified					( );
+	m_collision_panel->set_property_container( get_collision_property_container() );
+	prim->activate					( true );
+}
+
 void edit_object_skeletal_mesh::select_bone( System::String^ bone_name )
 {
 	m_model->select_bone( bone_name );
@@ -485,8 +513,10 @@ editor::wpf_controls::property_container^ edit_object_skeletal_mesh::get_collisi
 	but->width	= 50;
 	but		= container->add_button	( "box", gcnew Action<button^>( this, &edit_object_skeletal_mesh::add_box_collision_primitive_clicked ) );
 	but->width	= 40;
-	//but		= container->add_button	( "cyliner", gcnew Action<button^>( this, &edit_object_skeletal_mesh::add_cylinder_collision_primitive_clicked ) );
-	//but->width	= 50;
+	but		= container->add_button	( "cyliner", gcnew Action<button^>( this, &edit_object_skeletal_mesh::add_cylinder_collision_primitive_clicked ) );
+	but->width	= 50;
+	but		= container->add_button	( "capsule", gcnew Action<button^>( this, &edit_object_skeletal_mesh::add_capsule_collision_primitive_clicked ) );
+	but->width	= 50;
 
 	int i=0;
 	for each ( collision_primitive_item_skeletal_mesh^ prim in m_collision_primitives )
@@ -500,10 +530,11 @@ editor::wpf_controls::property_container^ edit_object_skeletal_mesh::get_collisi
 		sub->inner_value					= gcnew property_descriptor( name, prim, "type" );
 
 		sub->inner_value->set_compo_box_style(
-			gcnew cli::array<System::String^, 1>(3){
+			gcnew cli::array<System::String^, 1>(4){
 				"sphere", 
 				"box", 
 				"cylinder", 
+				"capsule"
 			}
 		);
 
