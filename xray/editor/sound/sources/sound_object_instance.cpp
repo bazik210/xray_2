@@ -24,7 +24,7 @@ using xray::editor::wpf_controls::property_editors::attributes::combo_box_items_
 using namespace xray::math;
 
 sound_object_instance::sound_object_instance(sound_object_wrapper^ w)
-:m_sound_object(w)
+:m_sound_object(w), m_deleter(false)
 {
 	play_looped = false;
 	m_collision = nullptr;
@@ -45,6 +45,7 @@ sound_object_instance::~sound_object_instance()
 	//(*m_proxy) = NULL;
 	delete(m_transform);
 	delete m_collision;
+	m_deleter = !m_deleter;
 }
 
 void sound_object_instance::save(xray::configs::lua_config_value cfg)

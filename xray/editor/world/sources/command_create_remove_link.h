@@ -18,7 +18,7 @@ ref class link_storage;
 
 class editor_world;
 
-enum class enum_action{ enum_link_action_create, enum_link_action_remove };
+public enum class enum_action{ enum_link_action_create, enum_link_action_remove };
 
 public ref class command_create_remove_link : public xray::editor_base::command
 {

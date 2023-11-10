@@ -339,7 +339,7 @@ void terrain_modifier_height::create_cursor( render::scene_ptr const& scene )
 	m_terrain_cursor		= gcnew terrain_painter_cursor(this, scene);
 }
 
-enum class get_height_result{ok, missing};
+public enum class get_height_result{ok, missing};
 
 get_height_result get_height(	terrain_node^ terrain,
 								u16 origin_vert_idx, 

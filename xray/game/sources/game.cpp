@@ -556,8 +556,10 @@ void game::tick( u32 const current_frame_id )
 				}
 			}
 		}
-		else if (m_dead_snd_it && m_snds_timer.get_elapsed_msec() > m_delay)
+		else if (m_dead_snd_it && m_snds_timer.get_elapsed_msec() > m_delay && m_dead_sound->m_custom)
 		{
+			m_dead_sound->m_custom = false;
+			m_dead_sound->~object_volumetric_sound();
 			DELETE(m_dead_sound);
 			m_dead_snd_it = &m_active_sounds.begin();
 			m_snds_cleaner = false;
@@ -800,8 +802,10 @@ void game::unload( pcstr , bool destroying )
 	for (; it != it_end; ++it)
 	{
 		object_volumetric_sound *snd = *it;
-		if (snd && snd->m_proxy) {
+		if (snd && snd->m_proxy && snd->m_custom) {
 			snd->m_force_stop = true;
+			snd->m_custom = false;
+			snd->~object_volumetric_sound();
 			DELETE(snd);
 		}
 	}

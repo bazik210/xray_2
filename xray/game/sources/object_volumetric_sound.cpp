@@ -81,13 +81,17 @@ void object_volumetric_sound::load_custom(fs::path_string sound_name, float4x4 m
 
 void object_volumetric_sound::unload_contents			( )
 {
-	m_emitter											= 0;
+	if(m_emitter.c_ptr())
+		m_emitter											= 0;
 
-	if (m_proxy && m_proxy->is_playing()) {
-		m_proxy->stop();
+	if (m_proxy.c_ptr())
+	{
+		if(m_proxy->is_playing())
+			m_proxy->stop();
+
+		m_proxy												= 0;
 	}
 
-	m_proxy												= 0;
 	if ( m_collision_geometry )
 	{
 		m_collision_geometry->destroy						( g_allocator );

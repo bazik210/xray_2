@@ -50,6 +50,9 @@ sound_object_wrapper^	get_sound_object		() {return m_sound_object;};
 		void			pause					();
 		void			stop_now				();
 
+		bool			m_deleter;
+		bool			get_deleter				() { return m_deleter; }
+
 	[BrowsableAttribute(false)]
 	property Guid id;
 

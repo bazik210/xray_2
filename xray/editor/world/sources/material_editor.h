@@ -30,7 +30,7 @@ namespace editor {
 	ref class	resource_editor_resource;
 	ref class	material;
 	
-	enum class material_editor_mode{ edit_material, edit_instances, unknown };
+	public enum class material_editor_mode{ edit_material, edit_instances, unknown };
 	ref class	material_editor: public resource_editor
 	{
 		typedef resource_editor super;

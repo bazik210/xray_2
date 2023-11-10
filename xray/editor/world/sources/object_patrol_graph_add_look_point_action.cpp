@@ -45,7 +45,7 @@ bool object_patrol_graph_add_look_point_action::do_it ( )
 
 	if( m_window_view->ray_query( editor_base::collision_object_type_dynamic | editor_base::collision_object_type_terrain, &object, &pos ) )
 	{
-		ASSERT( object->get_type( ) & ( editor_base::collision_object_type_dynamic | editor_base::collision_object_type_terrain ) );
+		ASSERT( const_cast<collision::object*>(object)->get_type( ) & ( editor_base::collision_object_type_dynamic | editor_base::collision_object_type_terrain ) );
 
 		pos.y += 0.9f;
 		patrol_graph->owner_tool( )->get_level_editor( )->get_command_engine( )->run( gcnew object_patrol_graph_add_look_point_command( patrol_graph, safe_cast<object_patrol_graph_node^>( patrol_graph->selected_graph_part ), Float3( pos ) ) );

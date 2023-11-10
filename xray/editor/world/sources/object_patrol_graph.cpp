@@ -231,7 +231,7 @@ void object_patrol_graph::render ( )
 {
 	super::render			( );
 
-	get_debug_renderer( ).draw_origin	(  get_editor_world( ).scene( ), get_transform( ), 2.0f );
+	get_debug_renderer( ).draw_origin	(  get_editor_world( ).scene( ), get_transform( ), 2.0f, false );
 
 	math::float3	cylinder_size		= math::float3( 0.5f, 0.88f, 0.5f );
 	math::float3	cone_size			= math::float3( 0.3f, 0.3f, 0.3f );
@@ -259,7 +259,7 @@ void object_patrol_graph::render ( )
 		float3		node_pos			= node->position;
 		float4x4	node_transform		= math::create_translation( node_pos );
 		
-		get_debug_renderer( ).draw_cylinder_solid	( get_editor_world( ).scene( ), node_transform, cylinder_size, is_selected_node ? alpha_color_selected : alpha_color );
+		get_debug_renderer( ).draw_cylinder_solid	( get_editor_world( ).scene( ), node_transform, cylinder_size, is_selected_node ? alpha_color_selected : alpha_color, false );
 
 		get_debug_renderer( ).draw_lines( 
 			get_editor_world( ).scene( ),
@@ -268,7 +268,8 @@ void object_patrol_graph::render ( )
 			geometry_utils::circle::vertex_count,
 			geometry_utils::circle::pairs,
 			geometry_utils::circle::pair_count,
-			white_color
+			white_color,
+			true
 		);
 
 		get_debug_renderer( ).draw_lines( 
@@ -278,7 +279,8 @@ void object_patrol_graph::render ( )
 			geometry_utils::circle::vertex_count,
 			geometry_utils::circle::pairs,
 			geometry_utils::circle::pair_count,
-			white_color
+			white_color,
+			true
 		);
 	}
 
@@ -316,27 +318,27 @@ void object_patrol_graph::render ( )
 
 				if( edge == m_selected_graph_part )
 				{
-					get_debug_renderer( ).draw_line			( get_editor_world( ).scene( ), source_pos, dest_pos, color_selected );
-					get_debug_renderer( ).draw_cone_solid	( get_editor_world( ).scene( ), cone_transform, cone_size, alpha_color_selected );
+					get_debug_renderer( ).draw_line			( get_editor_world( ).scene( ), source_pos, dest_pos, color_selected, false );
+					get_debug_renderer( ).draw_cone_solid	( get_editor_world( ).scene( ), cone_transform, cone_size, alpha_color_selected, false );
 				}
 				else
 				{
 					indices.push_back			( (u16)edge->source_node->index );
 					indices.push_back			( (u16)edge->destination_node->index );
 
-					get_debug_renderer( ).draw_cone_solid	( get_editor_world( ).scene( ), cone_transform, cone_size, alpha_color );
+					get_debug_renderer( ).draw_cone_solid	( get_editor_world( ).scene( ), cone_transform, cone_size, alpha_color, false );
 				}
 
 				float4x4 transform = cone_transform;
-				transform.c.xyz( ) -= transform.j.xyz( ) * cone_size.y;
-				get_debug_renderer( ).draw_circle	( get_editor_world( ).scene( ), transform, cone_size, white_color );
+				transform._c()->xyz() -= transform._j()->xyz() * cone_size.y;
+				get_debug_renderer( ).draw_circle	( get_editor_world( ).scene( ), transform, cone_size, white_color, false );
 			}
 		}
 
 		for( s32 count = ( ( vertices.size( ) - indices.size( ) ) / 2 + 1 ) * 2; count > 0; --count )
 			indices.push_back			( 0 );
 
-		get_debug_renderer( ).draw_lines( get_editor_world( ).scene( ), vertices, indices );
+		get_debug_renderer( ).draw_lines( get_editor_world( ).scene( ), vertices, indices, false );
 	}
 
 	//render look points
@@ -347,7 +349,7 @@ void object_patrol_graph::render ( )
 		render::vertex_colored			vertex;
 		vertex.color					= color;
 
-		float3 camera_position	= owner_tool( )->get_level_editor( )->view_window( )->get_inverted_view_matrix( ).c.xyz( );
+		float3 camera_position	= owner_tool( )->get_level_editor( )->view_window( )->get_inverted_view_matrix( )._c()->xyz();
 
 		for( s32 vi = 0 ; vi < count; ++vi )
 		{
@@ -376,17 +378,17 @@ void object_patrol_graph::render ( )
 				float3 right		= direction ^ up;
 				float4x4 transform;
 				transform.identity( );
-				transform.i.xyz( ) = right;
-				transform.j.xyz( ) = direction;
-				transform.k.xyz( ) = up;
-				transform.c.xyz( ) = vertex.position;
+				transform._i()->xyz() = right;
+				transform._j()->xyz( ) = direction;
+				transform._k()->xyz( ) = up;
+				transform._c()->xyz( ) = vertex.position;
 
-				get_debug_renderer( ).draw_sphere_solid	( get_editor_world( ).scene( ), vertex.position, 0.5f, ( look_point == m_selected_graph_part ) ? alpha_color_selected : alpha_color );
-				get_debug_renderer( ).draw_circle( get_editor_world( ).scene( ), transform, float3( 0.5f, 0.5f, 0.5f ), white_color );
+				get_debug_renderer( ).draw_sphere_solid	( get_editor_world( ).scene( ), vertex.position, 0.5f, ( look_point == m_selected_graph_part ) ? alpha_color_selected : alpha_color, false );
+				get_debug_renderer( ).draw_circle( get_editor_world( ).scene( ), transform, float3( 0.5f, 0.5f, 0.5f ), white_color, false );
 			}
 		}
 
-		get_debug_renderer( ).draw_lines( get_editor_world( ).scene( ), vertices, indices );
+		get_debug_renderer( ).draw_lines( get_editor_world( ).scene( ), vertices, indices, false );
 	}
 }
 
@@ -472,13 +474,13 @@ void object_patrol_graph::insert_graph_in_collision ( )
 {
 	for each( node^ node in m_nodes )
 	{
-		m_collision->m_collision_tree->insert( node->get_collision( ), node->get_matrix( ) );
+		m_collision->m_collision_tree->insert( (collision::object*)node->get_collision( ), node->get_matrix( ) );
 
 		for each( edge^ edge in node->outgoing_edges )
-			m_collision->m_collision_tree->insert( edge->get_collision( ), edge->get_matrix( ) );
+			m_collision->m_collision_tree->insert( (collision::object*)edge->get_collision( ), edge->get_matrix( ) );
 
 		for each( look_point^ look_point in node->look_points )
-			m_collision->m_collision_tree->insert( look_point->get_collision( ), look_point->get_matrix( ) );
+			m_collision->m_collision_tree->insert( (collision::object*)look_point->get_collision( ), look_point->get_matrix( ) );
 	}
 }
 
@@ -486,13 +488,13 @@ void object_patrol_graph::remove_graph_from_collision ( )
 {
 	for each( node^ node in m_nodes )
 	{
-		m_collision->m_collision_tree->erase( node->get_collision( ) );
+		m_collision->m_collision_tree->erase( (collision::object*)node->get_collision( ) );
 
 		for each( edge^ edge in node->outgoing_edges )
-			m_collision->m_collision_tree->erase( edge->get_collision( ) );
+			m_collision->m_collision_tree->erase( (collision::object*)edge->get_collision( ) );
 
 		for each( look_point^ look_point in node->look_points )
-			m_collision->m_collision_tree->erase( look_point->get_collision( ) );
+			m_collision->m_collision_tree->erase( (collision::object*)look_point->get_collision( ) );
 	}
 }
 

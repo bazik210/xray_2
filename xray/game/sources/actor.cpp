@@ -460,7 +460,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		if (m_reload) {
 			if (!m_start_reload_timer) {
 				m_start_reload_timer = true;
-				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("reload",  m_character_transform, false);
 				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -478,7 +478,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_shoot) {
 			if (!m_start_shoot_timer) {
 				m_start_shoot_timer = true;
-				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("shoot",  m_character_transform, false);
 				m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -491,7 +491,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_draw) {
 			if (!m_start_draw_timer) {
 				m_start_draw_timer = true;
-				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("draw", m_character_transform, false);
 				m_draw_anim_time = current_time + (current_draw_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -504,7 +504,7 @@ void actor::update_animations( bool m_reload = false, bool m_shoot = false, bool
 		else if (m_holster) {
 			if (!m_start_holster_timer) {
 				m_start_holster_timer = true;
-				auto m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("holster",  m_character_transform, false);
 				m_holster_anim_time = current_time + (current_holster_lexeme.animation_intervals_begin()->length() * 1000);
 			}

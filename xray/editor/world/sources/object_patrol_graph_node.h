@@ -28,7 +28,7 @@ namespace xray
 		typedef		System::Collections::ObjectModel::ReadOnlyCollection<edge^>	read_only_edges;
 		typedef		System::Collections::ObjectModel::ReadOnlyCollection<look_point^>	read_only_look_points;
 
-		enum class	object_patrol_look_point_selection_type
+		public enum class	object_patrol_look_point_selection_type
 		{
 			random,
 			sequential

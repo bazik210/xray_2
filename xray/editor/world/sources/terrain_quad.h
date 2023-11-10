@@ -116,7 +116,7 @@ inline float distance_xz_sqr(float3 const& v0, float3 const& v1)
 {	return math::sqr((v0).x-v1.x) + math::sqr(v0.z-v1.z); }
 
 
-enum class get_neighbour_result{ok, missing};
+public enum class get_neighbour_result{ok, missing};
 
 get_neighbour_result get_neighbour(	terrain_node^ terrain,
 									u16 const origin_vert_idx, 

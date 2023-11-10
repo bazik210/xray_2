@@ -249,6 +249,9 @@ void sound_editor::on_editor_closing(Object^, FormClosingEventArgs^ e)
 void sound_editor::close_internal()
 {
 	m_state	= editor_state::closed;
+	if (m_instance && !m_instance->get_deleter()) {
+		m_instance->~sound_object_instance();
+	}
 	clear_resources();
 	m_holder->unregister_tool_window(this);
 	delete this;

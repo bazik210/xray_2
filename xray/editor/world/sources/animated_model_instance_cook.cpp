@@ -12,6 +12,8 @@
 #include <xray/physics/model.h>
 #include <xray/collision/api.h>
 
+typedef xray::resources::unmanaged_resource_ptr unmanaged_resource_ptr;
+
 namespace xray {
 namespace editor {
 
@@ -111,10 +113,9 @@ void animated_model_instance_cook::on_subresources_loaded	( resources::queries_r
 
 	xray::animation::animation_player* player		= XRAY_NEW_IMPL( g_allocator, xray::animation::animation_player );
 	new_model_instance->m_animation_player			= player;
-
 	parent->set_unmanaged_resource					(
-				new_model_instance, 
-				resources::memory_usage_type		( resources::nocache_memory, sizeof( animated_model_instance ) )
+				(unmanaged_resource_ptr&)new_model_instance, 
+				resources::memory_usage_type(resources::nocache_memory, sizeof(animated_model_instance) )
 			);
 	parent->finish_query							( result_success );
 }
