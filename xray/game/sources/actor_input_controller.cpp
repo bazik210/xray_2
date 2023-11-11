@@ -21,7 +21,8 @@ actor_input_controller::actor_input_controller( game_scene& w )
 m_sprint_toggle ( false ),
 m_reload		( false ),
 m_wpn_1			( false ),
-m_wpn_2			( false )
+m_wpn_2			( false ),
+m_crouch		( false )
 {
 };
 
@@ -47,6 +48,8 @@ bool actor_input_controller::on_keyboard_action(input::world* input_world,
 		m_wpn_2 = !m_wpn_2;
 	else if (action == xray::input::kb_key_down && game_action == kWPN_RELOAD)
 		m_reload = !m_reload;
+	else if (action == xray::input::kb_key_down && game_action == kCROUCH)
+		m_crouch = !m_crouch;
 
 	return false;
 }
@@ -96,16 +99,10 @@ bool actor_input_controller::on_frame_reload	( )
 	return m_frame_events.action_present(kWPN_RELOAD); 
 }
 
-bool actor_input_controller::on_frame_switch_1	( ) 
+bool actor_input_controller::on_frame_crouch	( ) 
 { 
-	return m_frame_events.action_present(kWPN_1); 
+	return m_frame_events.action_present(kCROUCH); 
 }
-
-bool actor_input_controller::on_frame_switch_2	( ) 
-{ 
-	return m_frame_events.action_present(kWPN_2); 
-}
-
 
 bool frame_events::action_present( game_action_id game_action_name ) const
 {
@@ -129,6 +126,7 @@ void frame_events::reset( )
 	m_onframe_turn_y		= 0.0f;
 	m_onframe_turn_x		= 0.0f;
 	m_onframe_jump			= false;
+	m_onframe_crouch		= false;
 }
 
 void actor_input_controller::on_before_processing( input::world* input_world )
@@ -154,12 +152,13 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	m_frame_events.m_onframe_turn_x			= 0.f;
 	m_frame_events.m_onframe_turn_y			= 0.f;
 	m_frame_events.m_onframe_jump			= false;
+	m_frame_events.m_onframe_crouch			= false;
 
 	if( m_frame_events.empty() )
 		return;
 
 	float move_forward_speed = 1.f;
-	if ( m_frame_events.action_present(kACCEL) || m_sprint_toggle )
+	if (( m_frame_events.action_present(kACCEL) || m_sprint_toggle ) && !m_crouch)
 		move_forward_speed = 1.5f;
 
 	if ( m_frame_events.action_present(kFWD) )
@@ -176,6 +175,9 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 
 	if ( m_frame_events.action_present(kJUMP) )
 		m_frame_events.m_onframe_jump		= true;
+
+	if ( m_frame_events.action_present(kCROUCH) )
+		m_frame_events.m_onframe_crouch		= true;
 
 	if ( m_frame_events.action_present(kRIGHT) )
 		m_frame_events.m_mouse_move.x			+= 1.0f;

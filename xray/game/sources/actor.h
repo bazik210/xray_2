@@ -56,13 +56,14 @@ private:
 	void			remove_models_from_scene	( );
 
 	void			process_input_events		( );
-	void			update_animations			( bool m_reload, bool m_shoot, bool m_draw, bool m_holster, bool m_idle );
+	void			update_animations			( bool m_reload = false, bool m_shoot = false, bool m_draw = false, bool m_holster = false, bool m_idle = false, bool m_crouch  = false);
 	void			calculate_head_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_weapon_matrix		( float4x4* const matrices, float4x4& result ) const;
 	void			calculate_camera_matrix		(float4x4* const matrices, float4x4& result) const;
-	void			switch_weapon();
-	void			on_weapon_loaded(resources::queries_result& data);
-	void			query_new_weapon(pstr weapon_type, pstr new_anim);
+	void			switch_weapon				( );
+	void			on_weapon_loaded			(resources::queries_result& data);
+	void			query_new_weapon			(pstr weapon_type, pstr new_anim);
+	void			disable_crouch				( );
 
 //	animation::callback_return_type_enum on_animation_end	(
 //						animation::skeleton_animation_ptr const& ended_animation,
@@ -87,6 +88,7 @@ private:
 	animation::skeleton_animation_ptr	m_draw_animation;
 	animation::skeleton_animation_ptr	m_holster_animation;
 	animation::skeleton_animation_ptr	m_idle_stand_01_animation;
+	animation::skeleton_animation_ptr	m_crouch_animation;
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;
@@ -114,6 +116,7 @@ private:
 	bool								m_wpn_shoot;
 	object_volumetric_sound*			m_snd;
 
+//	xray::math::float4_pod::type		cr_y;
 
 
 	xray::physics::bt_character_controller*	m_actor_physics_controller;

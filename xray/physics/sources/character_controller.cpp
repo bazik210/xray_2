@@ -46,13 +46,13 @@ void bt_character_controller::initialize( )
 	m_ghostObject						= XRAY_NEW_IMPL( allocator(), btPairCachingGhostObject)();
 	m_bt_physics_world->get_bt_internal()->getPairCache()->setInternalGhostPairCallback(XRAY_NEW_IMPL( allocator(), btGhostPairCallback)() );
 	m_center_of_shape_offset			= float3(0, m_capsule_height/2.0f+m_capsule_radius, 0);
-	btConvexShape* capsule				= XRAY_NEW_IMPL( allocator(), btCapsuleShape)(m_capsule_radius, m_capsule_height );
-	m_ghostObject->setCollisionShape	( capsule );
+	m_capsule							= XRAY_NEW_IMPL( allocator(), btCapsuleShape)(m_capsule_radius, m_capsule_height );
+	m_ghostObject->setCollisionShape	( m_capsule );
 	m_ghostObject->setCollisionFlags	( btCollisionObject::CF_CHARACTER_OBJECT );
 	m_ghostObject->setRestitution		(0.001);
 	m_ghostObject->setFriction			(100);
 	btScalar step_height				= 0.35f;
-	m_bt_controller						= XRAY_NEW_IMPL( allocator(), btKinematicCharacterController)( m_ghostObject, capsule, step_height );
+	m_bt_controller						= XRAY_NEW_IMPL( allocator(), btKinematicCharacterController)( m_ghostObject, m_capsule, step_height );
 	//for bullet 289 with default btKinematicCharacterController 
 	//m_bt_controller->setGravity(btVector3(0, -10, 0));
 	//m_bt_controller->setJumpSpeed(3.5);
@@ -60,6 +60,29 @@ void bt_character_controller::initialize( )
 	m_geometry_instance						= &*xray::collision::new_capsule_geometry_instance( &allocator(), float4x4().identity(), m_capsule_radius, m_capsule_height / 2 );
 }
 
+void bt_character_controller::set_capsule_scaling(int x, int y, int z, bool direction)
+{
+//	m_bt_controller->setGravity(0);
+	m_ghostObject->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
+//	btVector3 oldOrigin = m_ghostObject->getWorldTransform().getOrigin();
+//	btVector3 newOrigin;
+//	if (direction) {
+		//down
+//		newOrigin = btVector3(oldOrigin.getX(), oldOrigin.getY() - y, oldOrigin.getZ());
+//	}
+//	else {
+		//up
+//		newOrigin = btVector3(oldOrigin.getX(), oldOrigin.getY() + y, oldOrigin.getZ());
+//	}
+//	m_ghostObject->getWorldTransform().setOrigin(newOrigin);
+
+//	m_bt_physics_world->get_bt_internal()->updateAabbs();
+//	m_bt_physics_world->get_bt_internal()->updateSingleAabb(m_ghostObject);
+//	m_bt_physics_world->get_bt_internal()->clearForces();
+//	m_bt_controller->setUseGhostSweepTest(false);
+//	m_ghostObject->activate();
+//	m_bt_controller->setGravity(10);
+}
 
 void bt_character_controller::activate( float4x4 const& t )
 {
@@ -76,6 +99,13 @@ void bt_character_controller::deactivate( )
 {
 	m_bt_physics_world->get_bt_internal()->removeCollisionObject( m_ghostObject );
 	m_bt_physics_world->get_bt_internal()->removeAction			( m_bt_controller );
+}
+
+void bt_character_controller::clear( )
+{
+	XRAY_DELETE_IMPL(allocator(), m_ghostObject);
+	XRAY_DELETE_IMPL(allocator(), m_capsule);
+	XRAY_DELETE_IMPL(allocator(), m_bt_controller);
 }
 
 float4x4 bt_character_controller::get_transform( )

@@ -90,6 +90,7 @@ inline  frame matrix_to_frame( const float4x4 &m )
 	return f;
 }
 
+//multiply
 inline	void mul( frame &f, float factor )
 {
 		f.translation	*= factor;
@@ -109,6 +110,8 @@ inline	void sub( frame &f, const  frame &sub )
 		f.rotation		-= sub.rotation;
 		f.scale			/= sub.scale;
 }
+
+//multiply, add, divide
 inline void mad( frame &f, float factor, const  frame &add )
 {
 		f.translation	+= float3( float( factor ) * float3 ( add.translation ) );

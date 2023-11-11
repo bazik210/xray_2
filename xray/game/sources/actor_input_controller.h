@@ -34,6 +34,7 @@ struct frame_events
 	float					m_onframe_turn_y;
 	float					m_onframe_turn_x;
 	bool					m_onframe_jump;
+	bool					m_onframe_crouch;
 };
 
 class actor_input_controller:	public xray::input::handler, 
@@ -58,10 +59,10 @@ public:
 	float				onframe_turn_y		( )	{ return m_frame_events.m_onframe_turn_y; };
 	float				onframe_turn_x		( )	{ return m_frame_events.m_onframe_turn_x; };
 	bool				onframe_jump		( )	{ return m_frame_events.m_onframe_jump; };
+	bool				onframe_crouch		( )	{ return m_frame_events.m_onframe_crouch; };
 	bool				on_frame_fire		( );
 	bool				on_frame_reload		( );
-	bool				on_frame_switch_1	( );
-	bool				on_frame_switch_2	( );
+	bool				on_frame_crouch		( );
 	bool				on_frame_sprint		( )	{ return m_sprint_toggle; }
 	bool				is_doing_movement	( ) { return onframe_move_fwd() || onframe_move_right(); }
 	
@@ -78,6 +79,7 @@ public:
 	timing::timer				m_timer;
 	bool						m_sprint_toggle;
 	bool						m_reload;
+	bool						m_crouch;
 	bool						m_wpn_1;
 	bool						m_wpn_2;
 };

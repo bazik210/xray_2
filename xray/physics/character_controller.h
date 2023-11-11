@@ -11,6 +11,7 @@
 
 class btKinematicCharacterController;
 class btPairCachingGhostObject;
+class btConvexShape;
 
 namespace xray {
 namespace collision{ class geometry_instance; class geometry; }
@@ -26,20 +27,23 @@ public:
 	void initialize						( );
 	void activate						( float4x4 const& transform );
 	void deactivate						( );
+	void clear							( );
 	memory::base_allocator&				allocator();
 	float4x4							get_transform	( );
 	void								set_transform	( float4x4 const& transform );
 	void								set_walk_direction	( float3 const& direction );
 	void								jump			( );
 	collision::geometry_instance &		get_capsule		( );
-private:
+	void								set_capsule_scaling(int x, int y, int z, bool direction);
 	btPairCachingGhostObject*			m_ghostObject;
 	btKinematicCharacterController*		m_bt_controller;
+private:
 	float3								m_center_of_shape_offset;
 	bullet_physics_world*				m_bt_physics_world;
 	float								m_capsule_height;
 	float								m_capsule_radius;
 	collision::geometry_instance*		m_geometry_instance;
+	btConvexShape*						m_capsule;
 }; // class bt_character_controller
 
 XRAY_PHYSICS_API bt_character_controller* create_character_controller( memory::base_allocator& allocator, physics::world* w );
