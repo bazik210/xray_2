@@ -56,7 +56,7 @@ m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
-m_new_weapon		("ak_74"),
+m_new_weapon		("assault_rifles/ak74m"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
 {
 	m_animation_player			= NEW(animation::animation_player)( );
@@ -162,8 +162,8 @@ void actor::add_models_to_scene( )
 	render::game::renderer& r	= m_game_world.renderer();
 
 	r.scene().add_model			( scene, m_character_model->m_render_model, m_character_transform );
-	m_weapon->show				( m_character_transform );
-	m_wpn_draw = true;
+	switch_weapon();
+
 }
 
 void actor::remove_models_from_scene( )

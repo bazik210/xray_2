@@ -308,7 +308,7 @@ bool weapon_part_skinned_visual::calculate_locator( render::model_locator_item c
 weapon::weapon( )
 :m_game_world( NULL ),
 m_current_state( -1 ),
-m_hidden(0),
+m_hidden(1),
 m_current_state_start_time (0)
 
 {
