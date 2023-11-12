@@ -62,8 +62,8 @@ public:
 			void			fill_animation_states	( vectora< editor_animation_state >& result );
 #endif // #ifndef MASTER_GOLD
 
-private:
 			bool			set_target				( mixing::expression const& expression, u32 const current_time_in_ms );
+private:
 	inline	pvoid			get_next_buffer			( u32 buffer_size );
 			void			compact_callbacks		( );
 	static	void			destroy_subscriptions	( subscribed_channel const* channels_head );

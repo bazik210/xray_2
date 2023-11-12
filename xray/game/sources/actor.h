@@ -65,6 +65,8 @@ private:
 	void			query_new_weapon			(pstr weapon_type, pstr new_anim);
 	void			disable_crouch				( );
 
+	static animation::mixing::animation_lexeme get_reload_lexeme(mutable_buffer& buffer, animation::skeleton_animation_ptr animation, float additive);
+
 //	animation::callback_return_type_enum on_animation_end	(
 //						animation::skeleton_animation_ptr const& ended_animation,
 //						pcstr const subscribed_channel,
@@ -80,6 +82,7 @@ private:
 	render::skeleton_model_ptr			m_character_model;
 
 	animation::animation_player*		m_animation_player;
+	animation::animation_player*		m_animation_player2; //hack :(
 	animation::instant_interpolator		m_interpolator;
 	animation::skeleton_animation_ptr	m_idle_stand_animation;
 	animation::skeleton_animation_ptr	m_look_animation_add; //additive
@@ -115,6 +118,11 @@ private:
 	u32									m_switch_snd_time;
 	bool								m_wpn_shoot;
 	object_volumetric_sound*			m_snd;
+	animation::mixing::animation_lexeme* weapon_target;
+	animation::mixing::animation_lexeme* reload_lexeme;
+	animation::mixing::animation_lexeme* additive_reload_lexeme;
+	mutable_buffer						reload_buffer;
+	animation::skeleton_animation_ptr*   reload_animation_ptr;
 
 //	xray::math::float4_pod::type		cr_y;
 

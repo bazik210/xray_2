@@ -49,6 +49,11 @@ inline playing_type_enum binary_tree_animation_node::playing_type		( ) const
 	return								m_playing_type;
 }
 
+void binary_tree_animation_node::set_playing_type	( playing_type_enum playing_type )
+{
+	m_playing_type = playing_type;
+}
+
 inline u32 binary_tree_animation_node::synchronization_group_id			( ) const
 {
 	return								m_synchronization_group_id;

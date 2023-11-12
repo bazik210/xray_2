@@ -9,6 +9,7 @@
 #include <xray/animation/instant_interpolator.h>
 #include <xray/animation/mixing_animation_lexeme.h>
 #include <xray/animation/mixing_math.h>
+#include <xray/animation/mixing.h>
 #include <xray/animation/skeleton_animation.h>
 #include <xray/render/facade/scene_renderer.h>
 #include <xray/render/facade/debug_renderer.h>
@@ -24,6 +25,8 @@
 
 #include <xray/console_command.h>
 
+using xray::animation::mixing::playing_type_enum;
+
 namespace stalker2{
 
 static bool g_thirdperson_value = false;
@@ -34,6 +37,7 @@ actor::actor( game_world& w )
 m_look_pitch		( 0.0f ),
 m_actor_input_controller( NULL ),
 m_animation_player	( NULL ),
+m_animation_player2 ( NULL ),
 m_tmp_is_active		( false ),
 m_stop_query		(false ),
 m_game_world		( w ),
@@ -52,11 +56,15 @@ m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
+reload_buffer(mutable_buffer(XRAY_MALLOC_IMPL(g_allocator, animation::animation_player::stack_buffer_size*48, "reload"), animation::animation_player::stack_buffer_size*48)),
 m_new_weapon		("ak_74"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
 {
 	m_animation_player			= NEW(animation::animation_player)( );
 	m_animation_player->set_no_delete();// ??
+
+	m_animation_player2			= NEW(animation::animation_player)( );
+	m_animation_player2->set_no_delete();
 
 	m_actor_physics_controller	= xray::physics::create_character_controller(*g_allocator, m_game_world.get_physics_world() );
 	m_actor_physics_controller->initialize( );
@@ -83,6 +91,9 @@ actor::~actor( )
 
 		DELETE(m_animation_player);
 		m_animation_player = NULL;
+
+		DELETE(m_animation_player2);
+		m_animation_player2 = NULL;
 }
 
 void actor::set_input_source( actor_input_controller* s )
@@ -144,6 +155,9 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_stop_query = true;
 
 	m_game_world.tmp_actor_ready( this );
+
+	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
+	reload_animation_ptr = &m_reload_animation;
 }
 
 void actor::add_models_to_scene( )
@@ -175,6 +189,7 @@ void actor::activate( math::float4x4 const& initial_matrix )
 
 	m_actor_physics_controller->activate		( m_character_transform );
 	m_animation_player->set_object_transform	( m_character_transform );
+	m_animation_player2->set_object_transform	( m_character_transform );
 	add_models_to_scene				( );
 	m_tmp_is_active					= true;
 }
@@ -393,6 +408,20 @@ void actor::switch_weapon() {
 //	return							animation::callback_return_type_dont_call_me_anymore;
 //}
 
+animation::mixing::animation_lexeme actor::get_reload_lexeme(mutable_buffer& buffer, animation::skeleton_animation_ptr animation, float additive)
+{
+	static animation::mixing::animation_lexeme	current_reload_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer,
+			"reload",
+			animation
+		).time_scale(1.f)
+//		.start_animation_interval_time(additive)
+		//.playing_type(playing_type_enum::play_cyclically)
+	);
+	return current_reload_lexeme;
+}
+
 void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_holster, bool m_idle, bool m_crouch )
 {
 
@@ -401,7 +430,6 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 	animation::skeleton_animation_ptr current_idle_animation		= m_idle_stand_animation;
 	animation::skeleton_animation_ptr current_idle_01_animation		= m_idle_stand_01_animation;
 	animation::skeleton_animation_ptr current_additive_animation	= m_look_animation_add;
-	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
 	animation::skeleton_animation_ptr current_shoot_animation		= m_shoot_animation;
 	animation::skeleton_animation_ptr current_draw_animation		= m_draw_animation;
 	animation::skeleton_animation_ptr current_holster_animation		= m_holster_animation;
@@ -426,14 +454,6 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 			"no_wpn",
 			current_idle_01_animation
 		).time_scale( 1.f )
-	);
-
-	animation::mixing::animation_lexeme	current_reload_lexeme(
-		animation::mixing::animation_lexeme_parameters(
-			buffer,
-			"reload",
-			current_reload_animation
-		).time_scale(1.f)
 	);
 
 		animation::mixing::animation_lexeme	current_shoot_lexeme(
@@ -479,6 +499,7 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		.override_existing_animation( true )
 		.additivity_priority( 1 )
 	);
+
 	animation::mixing::animation_lexeme	current_additive_crouch_lexeme(
 		animation::mixing::animation_lexeme_parameters(
 			buffer, 
@@ -493,37 +514,61 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 
 	u32 current_time				= m_anim_timer.get_elapsed_msec();	
 
-	animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
-
-	m_weapon->select_animation(buffer);
-
 	if (!m_reload && !m_shoot && !m_draw && !m_holster && !m_idle && !m_crouch) {
+		
+		animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
+
+		m_weapon->select_animation(buffer);
+
 		m_animation_player->set_target_and_tick(
+			current_idle_lexeme
+			+ current_additive_lexeme
+			+ weapon_target
+			, current_time);
+		m_animation_player2->set_target_and_tick(
 			current_idle_lexeme
 			+ current_additive_lexeme
 			+ weapon_target
 			, current_time);
 	}
 	else {
+		animation::mixing::animation_lexeme	additive_reload_lexeme(
+			animation::mixing::animation_lexeme_parameters(
+				reload_buffer,
+				"additive",
+				current_additive_animation
+			)
+			.time_scale(0.f)
+			.start_animation_interval_time(additive_current_anim_time)
+			.override_existing_animation(true)
+			.additivity_priority(2)
+		);
+		reload_lexeme = &get_reload_lexeme(reload_buffer, *reload_animation_ptr, additive_current_anim_time);
+		weapon_target = &m_weapon->select_animation(reload_buffer);
 		if (m_reload) {
 			if (!m_start_reload_timer) {
 				m_start_reload_timer = true;
+
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
-				m_snd->load_custom("reload",  m_character_transform, false);
-				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
+				m_snd->load_custom("reload", m_character_transform, false);
+
+				m_reload_anim_time = current_time + ((*reload_lexeme).animation_intervals_begin()->length() * 1000);
+				m_animation_player->set_target(
+					*reload_lexeme
+					+ *weapon_target
+					, current_time);
 			}
-			m_animation_player->set_target_and_tick(
-				current_reload_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
+			m_animation_player->tick(current_time);
+			m_animation_player2->set_target_and_tick(
+				*reload_lexeme
+				+ additive_reload_lexeme
 				, current_time);
-			//	m_animation_player->subscribe(
-			//		xray::animation::channel_id_on_animation_end,
-			//		boost::bind(&actor::on_animation_end, this, _1, _2, _3, _4),
-			//		0
-			//	);
 		}
 		else if (m_shoot) {
+		animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
+
+		m_weapon->select_animation(buffer);
+
 			if (!m_start_shoot_timer) {
 				m_start_shoot_timer = true;
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
@@ -535,8 +580,17 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
+			m_animation_player2->set_target_and_tick(
+				current_shoot_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
 		}
 		else if (m_draw) {
+		animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
+
+		m_weapon->select_animation(buffer);
+
 			if (!m_start_draw_timer) {
 				m_start_draw_timer = true;
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
@@ -548,8 +602,18 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
+			m_animation_player2->set_target_and_tick(
+				current_draw_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
 		}
 		else if (m_holster) {
+		animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
+
+		m_weapon->select_animation(buffer);
+
+
 			if (!m_start_holster_timer) {
 				m_start_holster_timer = true;
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
@@ -561,9 +625,23 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
+			m_animation_player2->set_target_and_tick(
+				current_holster_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
 		}
 		else if (m_crouch) {
+		animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
+
+		m_weapon->select_animation(buffer);
+
 			m_animation_player->set_target_and_tick(
+				current_crouch_lexeme
+				+ current_additive_lexeme
+				+ weapon_target
+				, current_time);
+			m_animation_player2->set_target_and_tick(
 				current_crouch_lexeme
 				+ current_additive_lexeme
 				+ weapon_target
@@ -571,6 +649,10 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		}
 		else if (m_idle) {
 			m_animation_player->set_target_and_tick(
+				current_idle_no_wpn_lexeme
+				+ current_additive_lexeme
+				, current_time);
+			m_animation_player2->set_target_and_tick(
 				current_idle_no_wpn_lexeme
 				+ current_additive_lexeme
 				, current_time);
@@ -604,6 +686,7 @@ void actor::tick()
 		m_start_reload_timer = false;
 		m_weapon->action(0);
 		m_wpn_reload = false;
+		reload_buffer = (mutable_buffer(XRAY_MALLOC_IMPL(g_allocator, animation::animation_player::stack_buffer_size * 48, "reload"), animation::animation_player::stack_buffer_size * 48));
 	}
 
 	if (m_start_draw_timer && m_anim_timer.get_elapsed_msec() >= m_draw_anim_time) {
@@ -746,6 +829,7 @@ void actor::tick()
 	u32 const non_root_bones_count	= m_character_model->m_skeleton->get_non_root_bones_count( );
 	float4x4* const matrices		= static_cast<float4x4*>( ALLOCA(non_root_bones_count*sizeof(float4x4)) );
 	m_animation_player->compute_bones_matrices( *m_character_model->m_skeleton, matrices, matrices + non_root_bones_count );
+	m_animation_player2->compute_bones_matrices( *m_character_model->m_skeleton, matrices, matrices + non_root_bones_count );
 
 	r.scene().update_skeleton		( m_character_model->m_render_model, matrices, non_root_bones_count );
 

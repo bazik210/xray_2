@@ -47,6 +47,7 @@ public:
 	inline						animation_lexeme	( animation_lexeme& other, bool );
 	inline						~animation_lexeme	( );
 	inline	animation_lexeme*	cloned_in_buffer	( );
+	void operator=(animation_lexeme & other);
 
 	using base_lexeme::buffer;
 

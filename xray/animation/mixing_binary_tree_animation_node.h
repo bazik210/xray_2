@@ -44,13 +44,14 @@ typedef intrusive_ptr<
 
 class XRAY_ANIMATION_API binary_tree_animation_node : public binary_tree_base_node {
 
-public:
+public:				
 			explicit				binary_tree_animation_node	( animation_lexeme_parameters const& parameters );
 	inline							binary_tree_animation_node	( binary_tree_animation_node const& other );
 
 	inline	mutable_buffer&			buffer						( ) const { return *m_buffer; }
 	inline	float					time_scale					( ) const;
 	inline	playing_type_enum		playing_type				( ) const;
+	inline	void					set_playing_type			( playing_type_enum playing_type );
 	inline	u32						synchronization_group_id	( ) const;
 	inline	u32						additivity_priority			( ) const;
 	inline	binary_tree_animation_node_ptr driving_animation	( ) const;
@@ -124,7 +125,7 @@ private:
 	float const						m_start_animation_interval_time;
 	u32 const						m_start_cycle_animation_interval_id;
 	float const						m_time_scale;
-	playing_type_enum const			m_playing_type;
+	playing_type_enum				m_playing_type;
 	u32 const						m_synchronization_group_id;
 	u32 const						m_additivity_priority;
 	bool const						m_override_existing_animation;

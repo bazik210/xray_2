@@ -11,6 +11,9 @@
 #include <xray/render/facade/scene_renderer.h>
 #include <xray/animation/mixing_animation_lexeme_parameters.h>
 #include <xray/animation/mixing_math.h>
+#include <xray/animation/mixing.h>
+
+using xray::animation::mixing::playing_type_enum;
 
 namespace stalker2{
 
@@ -273,16 +276,21 @@ xray::animation::mixing::animation_lexeme weapon_part_skinned_visual::select_ani
 	default:
 		NODEFAULT();
 	}
-
 	animation::mixing::animation_lexeme	lexeme(
 		animation::mixing::animation_lexeme_parameters(
 			buffer,
 			"some animation",
 			animation
 			)
-			.synchronization_group_id(999)
+			.time_scale( 1.f )
+//			.start_animation_interval_time( additive_current_anim_time )
+//			.synchronization_group_id(999)
 			.additivity_priority(1)
+			.override_existing_animation( true )
+//			.playing_type(playing_type_enum::play_once_and_remove_at_end)
 	);
+
+	//lexeme.set_playing_type(playing_type_enum::play_once_and_freeze_at_end);
 	return lexeme;
 }
 
@@ -300,7 +308,8 @@ bool weapon_part_skinned_visual::calculate_locator( render::model_locator_item c
 weapon::weapon( )
 :m_game_world( NULL ),
 m_current_state( -1 ),
-m_hidden(0)
+m_hidden(0),
+m_current_state_start_time (0)
 
 {
 	m_base				= NEW(weapon_part_skinned_visual)();

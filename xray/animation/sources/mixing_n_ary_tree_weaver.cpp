@@ -67,7 +67,8 @@ void n_ary_tree_weaver::visit			( binary_tree_animation_node& node )
 {
 	binary_tree_animation_node* unique_node;
 	if ( !is_unique_animation_lexeme(node, m_current_animations_root) ) {
-		LOG_WARNING				( "the same animation lexeme is used twice in the expression" );
+		//LOG_WARNING				( "the same animation lexeme is used twice in the expression" );
+		//i know
 
 		unique_node				= static_cast<binary_tree_animation_node*>( m_buffer.c_ptr() );
 		m_buffer				+= sizeof( binary_tree_animation_node );
