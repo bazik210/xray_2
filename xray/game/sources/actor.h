@@ -116,9 +116,11 @@ private:
 	u32									m_draw_anim_time;
 	u32									m_holster_anim_time;
 	u32									m_switch_snd_time;
+//	u32									m_delay_time;
 	bool								m_wpn_shoot;
+//	bool								m_delay;
 	object_volumetric_sound*			m_snd;
-	animation::mixing::animation_lexeme* weapon_target;
+	animation::mixing::animation_lexeme* weapon_target_ptr;
 	animation::mixing::animation_lexeme* reload_lexeme;
 	animation::mixing::animation_lexeme* additive_reload_lexeme;
 	mutable_buffer						reload_buffer;
