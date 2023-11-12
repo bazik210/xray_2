@@ -47,7 +47,6 @@ public:
 
 	bool			m_stop_query;
 
-
 	float			get_heath()	const { return m_health; }
 
 private:
@@ -66,13 +65,6 @@ private:
 	void			disable_crouch				( );
 
 	static animation::mixing::animation_lexeme get_reload_lexeme(mutable_buffer& buffer, animation::skeleton_animation_ptr animation, float additive);
-
-//	animation::callback_return_type_enum on_animation_end	(
-//						animation::skeleton_animation_ptr const& ended_animation,
-//						pcstr const subscribed_channel,
-//						u32 const callback_time_in_ms,
-//						u32 const domain_data
-//					);
 
 	float4x4							m_character_transform;
 	float4x4							m_character_head_transform;
@@ -116,19 +108,8 @@ private:
 	u32									m_draw_anim_time;
 	u32									m_holster_anim_time;
 	u32									m_switch_snd_time;
-//	u32									m_delay_time;
 	bool								m_wpn_shoot;
-//	bool								m_delay;
 	object_volumetric_sound*			m_snd;
-	animation::mixing::animation_lexeme* weapon_target_ptr;
-	animation::mixing::animation_lexeme* reload_lexeme;
-	animation::mixing::animation_lexeme* additive_reload_lexeme;
-	mutable_buffer						reload_buffer;
-	animation::skeleton_animation_ptr*   reload_animation_ptr;
-
-//	xray::math::float4_pod::type		cr_y;
-
-
 	xray::physics::bt_character_controller*	m_actor_physics_controller;
 
 	weapon_ptr							m_weapon;

@@ -56,8 +56,6 @@ m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
-//m_delay			( false ),
-reload_buffer(mutable_buffer(XRAY_MALLOC_IMPL(g_allocator, animation::animation_player::stack_buffer_size*64, "reload"), animation::animation_player::stack_buffer_size*64)),
 m_new_weapon		("ak_74"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
 {
@@ -156,9 +154,6 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_stop_query = true;
 
 	m_game_world.tmp_actor_ready( this );
-
-	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
-	reload_animation_ptr = &m_reload_animation;
 }
 
 void actor::add_models_to_scene( )
@@ -282,7 +277,7 @@ void actor::process_input_events( )
 //	}
 
 	//pressed reload action
-	if (m_actor_input_controller && m_actor_input_controller->m_reload  /* && !m_delay*/ && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2)
+	if (m_actor_input_controller && m_actor_input_controller->m_reload && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
 		m_actor_input_controller->m_reload = !m_actor_input_controller->m_reload;
 		m_weapon->action				( 2 );
@@ -435,6 +430,7 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 	animation::skeleton_animation_ptr current_draw_animation		= m_draw_animation;
 	animation::skeleton_animation_ptr current_holster_animation		= m_holster_animation;
 	animation::skeleton_animation_ptr current_crouch_animation		= m_crouch_animation;
+	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
 
 	// calculate additive animation coefficient, based on pitch
 	float k								= 1.0f - (m_look_pitch+1.0f)/2.0f; // normalized to 0..1.0f
@@ -513,6 +509,26 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		.additivity_priority( 1 )
 	);
 
+		animation::mixing::animation_lexeme	current_reload_lexeme(
+			animation::mixing::animation_lexeme_parameters(
+				buffer,
+				"reload",
+				m_reload_animation
+			).time_scale(1.f)
+		);
+
+		animation::mixing::animation_lexeme	additive_reload_lexeme(
+			animation::mixing::animation_lexeme_parameters(
+				buffer,
+				"additive",
+				current_additive_animation
+			)
+			.time_scale(0.f)
+			.start_animation_interval_time(additive_current_anim_time)
+			.override_existing_animation(true)
+			.additivity_priority(2)
+		);
+
 	u32 current_time				= m_anim_timer.get_elapsed_msec();	
 
 	animation::mixing::animation_lexeme weapon_target = m_weapon->select_animation( buffer );
@@ -532,33 +548,20 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 			, current_time);
 	}
 	else {
-		animation::mixing::animation_lexeme	additive_reload_lexeme(
-			animation::mixing::animation_lexeme_parameters(
-				reload_buffer,
-				"additive",
-				current_additive_animation
-			)
-			.time_scale(0.f)
-			.start_animation_interval_time(additive_current_anim_time)
-			.override_existing_animation(true)
-			.additivity_priority(2)
-		);
-		reload_lexeme = &get_reload_lexeme(reload_buffer, *reload_animation_ptr, additive_current_anim_time);
-		weapon_target_ptr = &m_weapon->select_animation(reload_buffer);
 		if (m_reload) {
 			if (!m_start_reload_timer) {
 				m_start_reload_timer = true;
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("reload", m_character_transform, false);
-				m_reload_anim_time = current_time + ((*reload_lexeme).animation_intervals_begin()->length() * 1000);
+				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
 				m_animation_player->set_target(
-					*reload_lexeme
-					+ *weapon_target_ptr
+					current_reload_lexeme
+					+ weapon_target
 					, current_time);
 			}
 			m_animation_player->tick(current_time);
 			m_animation_player2->set_target_and_tick(
-				*reload_lexeme
+				current_reload_lexeme
 				+ additive_reload_lexeme
 				, current_time);
 		}
@@ -665,14 +668,8 @@ void actor::tick()
 	if (m_start_reload_timer && m_anim_timer.get_elapsed_msec() >= m_reload_anim_time) {
 		m_start_reload_timer = false;
 		m_weapon->action(0);
-		//m_delay_time = m_anim_timer.get_elapsed_msec() + 200;
-		//m_delay = true;
 		m_wpn_reload = false;
-		reload_buffer = (mutable_buffer(XRAY_MALLOC_IMPL(g_allocator, animation::animation_player::stack_buffer_size * 64, "reload"), animation::animation_player::stack_buffer_size * 64));
 	}
-	//if (m_delay && m_anim_timer.get_elapsed_msec() >= m_delay_time) {
-	//	m_delay = false;
-	//}
 
 	if (m_start_draw_timer && m_anim_timer.get_elapsed_msec() >= m_draw_anim_time) {
 		m_start_draw_timer = false;
@@ -781,27 +778,12 @@ void actor::tick()
 		}
 	}
 
-//	if (m_test) {
-//		float4x4 character_position = m_actor_physics_controller->get_transform();
-//		character_position.c.y = cr_y;
-//		m_actor_physics_controller->set_transform(character_position);
-//	}
-//	else {
-//		float4x4 character_position = m_actor_physics_controller->get_transform();
-//		m_actor_physics_controller->set_transform(character_position);
-//	}
-
 	//if shoot, wait till anim ends
 	if (m_start_shoot_timer && m_anim_timer.get_elapsed_msec() >= m_shoot_anim_time) {
 		m_start_shoot_timer = false;
 		m_wpn_shoot = false;
 		m_weapon->action				( 0 );
 	}
-
-//	if (!m_wpn_switch) {
-//		//update timer consistenly until we are switching weapon
-//		m_wpn_timer = m_anim_timer.get_elapsed_msec() + 100;
-//	}
 
 	render::scene_ptr scene			= m_game_world.get_render_scene();
 	render::game::renderer& r		= m_game_world.renderer();
