@@ -12,6 +12,7 @@
 #include <xray/animation/animation_player.h>
 #include <xray/animation/instant_interpolator.h>
 #include "object_volumetric_sound.h"
+#include <xray/render/facade/scene_renderer.h>
 #include "weapon.h"
 
 namespace xray{
@@ -49,6 +50,9 @@ public:
 
 	float			get_heath()	const { return m_health; }
 
+	void			fire_particle_load			( );
+	void			particle_fire_attach		(resources::queries_result& data);
+
 private:
 	void			on_resources_ready			( resources::queries_result& data );
 	void			add_models_to_scene			( );
@@ -84,6 +88,7 @@ private:
 	animation::skeleton_animation_ptr	m_holster_animation;
 	animation::skeleton_animation_ptr	m_idle_stand_01_animation;
 	animation::skeleton_animation_ptr	m_crouch_animation;
+	xray::particle::particle_system_instance_ptr	m_particle_system_instance_ptr;
 
 	timing::timer						m_anim_timer;
 	animation::bone_index_type			m_head_bone_idx;

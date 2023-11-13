@@ -105,14 +105,14 @@ void actor::query_resources( )
 	resources::request r[] ={
 		{ "character/human/actor/neutral_03/neutral_03_actor_full",	resources::skeleton_model_instance_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle",	resources::animation_class },
-		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle_01",  resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/stand/unarmed_on_site_idle",  resources::animation_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_add",	resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload_empty", resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/fire_1",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",  resources::animation_class },
 		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_idle",  resources::animation_class },
-		{ "assault_rifles/ak74m",								resources::weapon_class },
+		{ "assault_rifles/ak74m",  resources::weapon_class },
 	};
 
 	resources::query_resources(
@@ -120,6 +120,28 @@ void actor::query_resources( )
 		boost::bind( &actor::on_resources_ready, this, _1 ),
 		g_allocator
 	);
+}
+
+void actor::fire_particle_load() {
+
+
+	resources::user_data_variant* ud = NEW(resources::user_data_variant)();
+	particle::world* p = &m_game_world.renderer().scene().particle_world(m_game_world.get_render_scene());
+	ud->set(p);
+
+	fs::path_string		m_visual_name = "campfire_middle"; //"fx_weapon";
+
+	resources::query_resource(
+		m_visual_name.c_str(),
+		resources::particle_system_instance_class,
+		boost::bind(&actor::particle_fire_attach, this, _1),
+		g_allocator,
+		ud
+	);
+}
+
+void actor::particle_fire_attach( resources::queries_result& data ) {
+
 }
 
 void actor::on_resources_ready( resources::queries_result& data )
@@ -143,6 +165,8 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
 	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[8].get_managed_resource());
 
+	//m_particle_system_instance_ptr = static_cast_resource_ptr<xray::particle::particle_system_instance_ptr>( data[9].get_unmanaged_resource());
+	
 	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
 	m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
 	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
@@ -154,6 +178,8 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_stop_query = true;
 
 	m_game_world.tmp_actor_ready( this );
+
+	//fire_particle_load();
 }
 
 void actor::add_models_to_scene( )
@@ -571,12 +597,13 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				m_snd = NEW(object_volumetric_sound)(m_game_world);
 				m_snd->load_custom("shoot",  m_character_transform, false);
 				m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
-			}
-			m_animation_player->set_target_and_tick(
+			m_animation_player->set_target(
 				current_shoot_lexeme
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
+			}
+			m_animation_player->tick(current_time);
 			m_animation_player2->set_target_and_tick(
 				current_shoot_lexeme
 				+ current_additive_lexeme
@@ -887,6 +914,8 @@ void actor::tick()
 		float ray_length	= 100.0f; // weapon config???
 		
 		m_weapon->action				( 1 );//shoot
+
+		//m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_character_transform );
 
 		m_wpn_shoot = true; //play shoot anim
 
