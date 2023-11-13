@@ -103,6 +103,7 @@ public:
 	// particles
 	void			play_particle_system			( scene_ptr const& scene, particle::particle_system_instance_ptr const& in_instance, math::float4x4 const& transform );
 	void			stop_particle_system			( scene_ptr const& scene, particle::particle_system_instance_ptr const& in_instance );
+	void			stop_now_particle_system		( scene_ptr const& scene, particle::particle_system_instance_ptr const& in_instance );
 	void			remove_particle_system_instance ( scene_ptr const& scene, particle::particle_system_instance_ptr const& in_instance );
 	void			update_particle_system_instance	( scene_ptr const& scene, particle::particle_system_instance_ptr const& instance, math::float4x4 const& transform, bool visible = true, bool paused = false);
 	void			set_particles_render_mode		( scene_view_ptr const& scene_view, particle::enum_particle_render_mode render_mode );

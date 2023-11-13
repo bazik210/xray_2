@@ -169,6 +169,7 @@ public:
 
 			void	play_particle_system			( scene_ptr const& in_scene, particle::particle_system_instance_ptr in_instance, bool use_transform, bool always_looping, math::float4x4 const& transform );
 			void	stop_particle_system			( scene_ptr const& in_scene, particle::particle_system_instance_ptr in_instance );
+			void	stop_now_particle_system			( scene_ptr const& scene, particle::particle_system_instance_ptr in_instance );
 			void	remove_particle_system_instance	( particle::particle_system_instance_ptr in_instance, scene_ptr const& in_scene );
 			void	update_particle_system_instance	( particle::particle_system_instance_ptr instance, scene_ptr const& in_scene, xray::math::float4x4 const& transform, bool visible = true, bool paused = false);
 

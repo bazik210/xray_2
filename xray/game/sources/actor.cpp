@@ -20,6 +20,7 @@
 #include <xray/physics/rigid_body.h>
 #include "collision_object_types.h"
 #include <xray/animation/cubic_spline_skeleton_animation.h>
+#include <xray/render/facade/material_effects_instance_cook_data.h>
 #include "actor_input_controller.h"
 #include "weapon.h"
 
@@ -51,6 +52,7 @@ m_snd				( 0 ),
 m_start_reload_timer ( 0 ),
 m_start_shoot_timer  ( 0 ),
 m_start_draw_timer	 ( 0 ),
+m_start_particle_timer ( 0 ),
 m_start_holster_timer ( 0 ),
 m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
@@ -124,23 +126,60 @@ void actor::query_resources( )
 
 void actor::fire_particle_load() {
 
+	xray::render::material_effects_instance_cook_data* cook_data = 
+		NEW(xray::render::material_effects_instance_cook_data)(xray::render::decal_vertex_input_type, NULL, false);
+	
+	resources::user_data_variant		user_data;
+	user_data.set					( cook_data );
 
-	resources::user_data_variant* ud = NEW(resources::user_data_variant)();
+	xray::render::material_effects_instance_cook_data* cook_data2 = 
+		NEW(xray::render::material_effects_instance_cook_data)(xray::render::decal_vertex_input_type, NULL, false);
+
+	resources::user_data_variant		user_data2;
+	user_data2.set					( cook_data2 );
+
+	xray::render::material_effects_instance_cook_data* cook_data3 = 
+		NEW(xray::render::material_effects_instance_cook_data)(xray::render::decal_vertex_input_type, NULL, false);
+
+	resources::user_data_variant		user_data3;
+	user_data3.set					( cook_data3 );
+
+	xray::render::material_effects_instance_cook_data* cook_data4 = 
+		NEW(xray::render::material_effects_instance_cook_data)(xray::render::decal_vertex_input_type, NULL, false);
+
+	resources::user_data_variant		user_data4;
+	user_data4.set					( cook_data4 );
+
+	resources::request r[] = {
+		{ "fx/pfx/pfx_flame_01",	resources::material_effects_instance_class },
+		{ "fx/pfx/glow_fire",	resources::material_effects_instance_class },
+		{ "fx/pfx/smoke_03",	resources::material_effects_instance_class },
+		{ "fx/pfx/distort_14_panner",	resources::material_effects_instance_class },
+//		{ "campfire_middle",	resources::particle_system_instance_class },
+		{ "fx_weapon",	resources::particle_system_instance_class }
+	};
+
+	resources::user_data_variant udv;
 	particle::world* p = &m_game_world.renderer().scene().particle_world(m_game_world.get_render_scene());
-	ud->set(p);
+	udv.set(p);
 
-	fs::path_string		m_visual_name = "campfire_middle"; //"fx_weapon";
+//	resources::user_data_variant const* user_data[] = { &udv };
+	resources::user_data_variant const* ud[] = { &user_data, &user_data2, &user_data3, &user_data4, &udv };
 
-	resources::query_resource(
-		m_visual_name.c_str(),
-		resources::particle_system_instance_class,
-		boost::bind(&actor::particle_fire_attach, this, _1),
+	resources::query_resources(
+		r,
+		boost::bind( &actor::particle_fire_attach, this, _1 ),
 		g_allocator,
 		ud
 	);
 }
 
-void actor::particle_fire_attach( resources::queries_result& data ) {
+void actor::particle_fire_attach( resources::queries_result& data ) 
+{
+	R_ASSERT(data.is_successful());
+	LOG_INFO("SUCCESS!");
+
+	m_particle_system_instance_ptr = static_cast_resource_ptr<xray::particle::particle_system_instance_ptr>( data[4].get_unmanaged_resource());
 
 }
 
@@ -164,8 +203,6 @@ void actor::on_resources_ready( resources::queries_result& data )
 	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
 	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
 	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[8].get_managed_resource());
-
-	//m_particle_system_instance_ptr = static_cast_resource_ptr<xray::particle::particle_system_instance_ptr>( data[9].get_unmanaged_resource());
 	
 	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
 	m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
@@ -179,7 +216,7 @@ void actor::on_resources_ready( resources::queries_result& data )
 
 	m_game_world.tmp_actor_ready( this );
 
-	//fire_particle_load();
+	fire_particle_load();
 }
 
 void actor::add_models_to_scene( )
@@ -602,6 +639,14 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
+		m_particle_matrix = m_weapon_matrix;
+		//m_particle_matrix.c.xyz() =  m_particle_matrix.c.xyz() * 1.1;
+		//m_particle_matrix.c.x = m_particle_matrix.c.x - 0.54;
+		//m_particle_matrix.c.y = m_particle_matrix.c.y - 0.11;
+		//m_particle_matrix.c.z = m_particle_matrix.c.z - 0.2;
+		//m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
+		m_particle_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000) / 1.1;
+		//m_start_particle_timer = true;
 			}
 			m_animation_player->tick(current_time);
 			m_animation_player2->set_target_and_tick(
@@ -811,6 +856,11 @@ void actor::tick()
 		m_wpn_shoot = false;
 		m_weapon->action				( 0 );
 	}
+	if (m_start_particle_timer && m_anim_timer.get_elapsed_msec() >= m_particle_time) {
+		m_start_particle_timer = false;
+		m_game_world.renderer().scene().remove_particle_system_instance(m_game_world.get_render_scene(), m_particle_system_instance_ptr);
+	}
+
 
 	render::scene_ptr scene			= m_game_world.get_render_scene();
 	render::game::renderer& r		= m_game_world.renderer();
@@ -829,9 +879,8 @@ void actor::tick()
 
 	if (m_weapon && !m_weapon->m_hidden) {
 		// update weapon
-		float4x4 weapon_matrix;
-		calculate_weapon_matrix(matrices, weapon_matrix);
-		m_weapon->set_transform(weapon_matrix);
+		calculate_weapon_matrix(matrices, m_weapon_matrix);
+		m_weapon->set_transform(m_weapon_matrix);
 		m_weapon->tick(m_animation_player);
 	}
 
@@ -914,8 +963,6 @@ void actor::tick()
 		float ray_length	= 100.0f; // weapon config???
 		
 		m_weapon->action				( 1 );//shoot
-
-		//m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_character_transform );
 
 		m_wpn_shoot = true; //play shoot anim
 

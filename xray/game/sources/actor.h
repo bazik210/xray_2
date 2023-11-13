@@ -74,6 +74,8 @@ private:
 	float4x4							m_character_head_transform;
 	float4x4							m_character_camera_transform;
 	float								m_look_pitch;
+	float4x4							m_weapon_matrix;
+	float4x4							m_particle_matrix;
 
 	render::skeleton_model_ptr			m_character_model;
 
@@ -99,6 +101,7 @@ private:
 	bool								m_start_shoot_timer;
 	bool								m_start_draw_timer;
 	bool								m_start_holster_timer;
+	bool								m_start_particle_timer;
 	bool								m_switch_snd_time_delay;
 	bool								m_wpn_reload;
 	bool								m_wpn_draw;
@@ -113,6 +116,7 @@ private:
 	u32									m_draw_anim_time;
 	u32									m_holster_anim_time;
 	u32									m_switch_snd_time;
+	u32									m_particle_time;
 	bool								m_wpn_shoot;
 	object_volumetric_sound*			m_snd;
 	xray::physics::bt_character_controller*	m_actor_physics_controller;

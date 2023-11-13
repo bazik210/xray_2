@@ -128,6 +128,12 @@ void particle_world::stop(particle_system_instance_ptr instance, float time)
 	impl->stop_impl(time);
 }
 
+void particle_world::stop_now(particle_system_instance_ptr instance, float time)
+{
+	particle_system_instance_impl* impl = static_cast_checked<particle_system_instance_impl*>(instance.c_ptr());
+	impl->stop_now_impl(time);
+}
+
 void particle_world::set_transform_to_particle_instance(particle_system_instance* instance, xray::math::float4x4 const& transform)
 {
 	particle_system_instance_impl* impl = static_cast_checked<particle_system_instance_impl*>(instance);

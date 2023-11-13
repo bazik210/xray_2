@@ -158,6 +158,12 @@ void scene_renderer::stop_particle_system( scene_ptr const& scene, particle_syst
 	m_channel.owner_push_back  ( XRAY_NEW_IMPL( m_allocator, functor_command ) ( boost::bind( &engine::world::stop_particle_system, &m_render_engine_world, scene, in_instance) ));
 }
 
+void scene_renderer::stop_now_particle_system( scene_ptr const& scene, particle_system_instance_ptr const& in_instance )
+{
+	R_ASSERT	( scene );
+	m_channel.owner_push_back  ( XRAY_NEW_IMPL( m_allocator, functor_command ) ( boost::bind( &engine::world::stop_now_particle_system, &m_render_engine_world, scene, in_instance) ));
+}
+
 void scene_renderer::remove_particle_system_instance( scene_ptr const& scene, particle_system_instance_ptr const& in_instance )
 {
 	R_ASSERT	( scene );

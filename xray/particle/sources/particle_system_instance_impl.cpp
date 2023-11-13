@@ -393,6 +393,7 @@ void particle_system_instance_impl::add_emitter_instance( u32 lod_index, particl
 
 void particle_system_instance_impl::play_impl()
 {
+	set_visible(true);
 	m_is_playing = true;
 	//m_particle_world.add_particle_system_instance(this);
 }
@@ -411,6 +412,14 @@ void particle_system_instance_impl::stop_impl(float time)
 	// если time больше ее времени жизни, то пс просто доиграет до конца и удалится.
 	m_is_playing = false;
 	m_no_more_create = true;
+}
+
+void particle_system_instance_impl::stop_now_impl(float time)
+{
+	(void)&time;
+	set_visible(false);
+	m_is_playing = false;
+	//remove_dead_particles();
 }
 
 void particle_system_instance_impl::process_lods_lerping( float time_delta )

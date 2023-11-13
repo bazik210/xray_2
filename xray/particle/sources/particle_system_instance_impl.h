@@ -30,6 +30,7 @@ public:
 	void play_impl							();
 	void play_impl							(xray::math::float4x4 const& transform);
 	void stop_impl							(float time_to_stop);
+	void stop_now_impl						(float time_to_stop);
 	
 	void set_pause							(bool pause);
 	

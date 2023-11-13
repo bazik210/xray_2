@@ -38,6 +38,7 @@ public:
 	
 	virtual	void	play							( particle_system_instance_ptr particle_system_instance, xray::math::float4x4 const& transform, bool use_transform, bool always_loop );
 	virtual	void	stop							( particle_system_instance_ptr particle_system_instance, float time );
+	virtual	void	stop_now						( particle_system_instance_ptr particle_system_instance, float time );
 	virtual	void	remove							( particle_system_instance_ptr particle_system_instance );
 	virtual	void	set_transform					( particle_system_instance_ptr particle_system_instance, math::float4x4 const& transform );
 	virtual	void	set_visible						( particle_system_instance_ptr particle_system_instance, bool is_visible );

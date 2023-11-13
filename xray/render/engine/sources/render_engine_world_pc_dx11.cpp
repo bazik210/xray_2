@@ -1150,6 +1150,13 @@ void engine::world::stop_particle_system			( xray::render::scene_ptr const& in_s
 	scene->particle_world()->stop(in_instance, 0.0f);
 }
 
+void engine::world::stop_now_particle_system			( xray::render::scene_ptr const& in_scene, particle::particle_system_instance_ptr in_instance )
+{
+	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
+
+	scene->particle_world()->stop_now(in_instance, 0.0f);
+}
+
 void engine::world::remove_particle_system_instance	( particle::particle_system_instance_ptr particle_system_instance, xray::render::scene_ptr const& in_scene )
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());

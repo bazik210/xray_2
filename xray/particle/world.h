@@ -49,6 +49,7 @@ struct XRAY_NOVTABLE world : public resources::unmanaged_resource {
 	
 	virtual	void	play							( particle_system_instance_ptr particle_system_instance, xray::math::float4x4 const& transform, bool use_transform, bool always_loop) = 0;
 	virtual	void	stop							( particle_system_instance_ptr particle_system_instance, float time ) = 0;
+	virtual	void	stop_now						( particle_system_instance_ptr particle_system_instance, float time ) = 0;
 	virtual	void	remove							( particle_system_instance_ptr particle_system_instance ) = 0;
 	virtual	void	set_transform					( particle_system_instance_ptr particle_system_instance, math::float4x4 const& transform ) = 0;
 	virtual	void	set_visible						( particle_system_instance_ptr particle_system_instance, bool is_visible ) = 0;
