@@ -130,7 +130,11 @@ void weapon_part_solid_visual::load( configs::binary_config_value const& config,
 bool weapon_part_solid_visual::get_locator( pcstr locator_name, render::model_locator_item& locator )
 {
 	bool res = m_model->m_render_model->get_locator( locator_name, locator );
-	R_ASSERT(res, "locator not found %s", locator_name );
+
+	if (!res)
+		return false;
+	//R_ASSERT(res, "locator not found %s", locator_name );
+
 	return res;
 }
 

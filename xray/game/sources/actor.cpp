@@ -951,8 +951,10 @@ void actor::tick()
 		 float4 muzzle_point_rotated = m_muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
 		// 4
 		m_particle_matrix = m_weapon_matrix; //m_weapon->m_barrel_end->m_transform;
-		m_locator_offset = m_weapon->m_barrel_end->get_muzzle_flash_locator().m_offset;
-		
+
+		//old ak (wpn_2) hasn't this type of locator, just notification
+		//m_locator_offset = m_weapon->m_barrel_end->get_muzzle_flash_locator().m_offset;
+
 		m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x; //- m_locator_offset.c.x; //
 		m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y; //- m_locator_offset.c.y; //
 		m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z; //- m_locator_offset.c.z; //
