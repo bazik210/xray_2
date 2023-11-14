@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created		: 28.07.2011
 //	Author		: Andrew Kolomiets
+//	Editors		: loxotron, ugo_zapad, Dieg
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
@@ -23,6 +24,7 @@
 #include <xray/render/facade/material_effects_instance_cook_data.h>
 #include "actor_input_controller.h"
 #include "weapon.h"
+#include "key_binder.h"
 
 #include <xray/console_command.h>
 
@@ -58,6 +60,7 @@ m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
+m_muzzle_point		(float4(0.0f, 0.03f, -0.8f, 1.0f)),
 m_new_weapon		("assault_rifles/ak74m"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
 {
@@ -287,7 +290,6 @@ void actor::process_input_events( )
 	{
 		float const frame_time_sec		= m_actor_input_controller->last_frame_time_delta()/1000.0f;
 		
-
 		// kirill:	do smth with player speed
 		//			- fps affect on it
 		//			- hardcode bad, mkay
@@ -308,6 +310,23 @@ void actor::process_input_events( )
 			move_delta_right	= frame_time_sec * 0.83f * 2.f;
 		}
 
+		//loxotron: we should update particle position in time somehow, cause it's not attached to anything, bad way :(
+		if (m_actor_input_controller->onframe_move_fwd() && m_actor_input_controller->m_frame_events.action_present(kFWD)) {
+				m_muzzle_point = float4(0.0f, 0.03f, -1.1f, 1.0f);
+		}
+		else if (m_actor_input_controller->onframe_move_right())
+		{
+			if (m_actor_input_controller->m_frame_events.action_present(kR_STRAFE)) {
+				m_muzzle_point = float4(-0.09f, 0.03f, -0.8f, 1.0f);
+			}
+			else if (m_actor_input_controller->m_frame_events.action_present(kL_STRAFE))
+			{
+				m_muzzle_point = float4(0.09f, 0.03f, -0.8f, 1.0f);
+			}
+		}
+		else {
+			m_muzzle_point = float4(0.0f, 0.03f, -0.8f, 1.0f);
+		}
 
 		float3 walk_direction			= m_character_transform.k.xyz() * m_actor_input_controller->onframe_move_fwd() * move_delta_fw;
 		walk_direction					+= m_character_transform.i.xyz() * m_actor_input_controller->onframe_move_right() * move_delta_right;
@@ -640,31 +659,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ weapon_target
 				, current_time);
 
-			/*
-			* Dieg:
-			* Particle position magic starts here.
-			* 1. Start by using local coordinates (so the point is using coordinates in relation to coordinates of our weapon)
-			* 2. Play with numbers until particle appears where it has to in default position right after spawning inside the scene*
-			* 3. Rotate our point around origin so that it always appears at the muzzle
-			* 4. Convert coordinates to weapon space (just add local pos to weapon pos)
-			*
-			* *We should consider predefined muzzle_pos in weapon config file just like it was done in X-Ray 1.x so that we don't use magic numbers in code.
-			* When dealing with weapon attachments such as changing barrel length or adding a silencer we could just create onAttach() and onDetach() functions
-			* that would simply do m_muzzle_pos = m_muzzle_pos + val_from_config .
-			*/
-			// 1 + 2
-			// X and Z values are minus because it seems that some unspeakable evil is happening during rotation (jk, I just didn't want to read the code).
-			float4 muzzle_point = float4(0.0f, 0.0f, -0.7f, 1.0f);
-			// 3
-			// It seems that we are using row order so vec4 * mat4x4 = vec4. Multiplying the point by rotation matrix returns coordinates after rotation.
-			float4 muzzle_point_rotated = muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
-			// 4
-			m_particle_matrix = m_weapon_matrix;
-			m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x;
-			m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y;
-			m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z;
-			
 			m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
+
 			m_particle_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000) / 1.1;
 			m_start_particle_timer = true;
 			}
@@ -756,6 +752,10 @@ void actor::tick()
 	if (!m_actor_physics_controller)
 		return;
 
+	//updating particle position
+	if(m_start_particle_timer)
+		m_game_world.renderer().scene().update_particle_system_instance( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
+
 	//if reload, wait till anim ends
 	if (m_start_reload_timer && m_anim_timer.get_elapsed_msec() >= m_reload_anim_time) {
 		m_start_reload_timer = false;
@@ -817,8 +817,6 @@ void actor::tick()
 	}
 
 	m_character_transform = m_actor_physics_controller->get_transform();
-
-	process_input_events();
 
 	//if (!m_actor_input_controller->on_frame_crouch()) {
 		if (m_weapon) {
@@ -902,6 +900,31 @@ void actor::tick()
 		calculate_weapon_matrix(matrices, m_weapon_matrix);
 		m_weapon->set_transform(m_weapon_matrix);
 		m_weapon->tick(m_animation_player);
+
+		/*
+		* Dieg:
+		* Particle position magic starts here.
+		* 1. Start by using local coordinates (so the point is using coordinates in relation to coordinates of our weapon)
+		* 2. Play with numbers until particle appears where it has to in default position right after spawning inside the scene*
+		* 3. Rotate our point around origin so that it always appears at the muzzle
+		* 4. Convert coordinates to weapon space (just add local pos to weapon pos)
+		*
+		* *We should consider predefined muzzle_pos in weapon config file just like it was done in X-Ray 1.x so that we don't use magic numbers in code.
+		* When dealing with weapon attachments such as changing barrel length or adding a silencer we could just create onAttach() and onDetach() functions
+		* that would simply do m_muzzle_pos = m_muzzle_pos + val_from_config .
+		*/
+		// 1 + 2
+		// X and Z values are minus because it seems that some unspeakable evil is happening during rotation (jk, I just didn't want to read the code).
+		// float4 muzzle_point = float4(-0.02f, 0.0f, -1.1f /*-0.7f*/, 1.0f);
+		// 3
+		// It seems that we are using row order so vec4 * mat4x4 = vec4. Multiplying the point by rotation matrix returns coordinates after rotation.
+
+		float4 muzzle_point_rotated = m_muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
+		// 4
+		m_particle_matrix = m_weapon_matrix;
+		m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x;
+		m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y;
+		m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z;
 	}
 
 	//calculate_head_matrix		( matrices, m_character_head_transform );
@@ -1001,6 +1024,8 @@ void actor::tick()
 			}
 		}
 	}
+
+	process_input_events();
 }
 
 void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) const

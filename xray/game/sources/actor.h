@@ -129,6 +129,7 @@ private:
 	game_world&							m_game_world;
 
 	float								m_health;
+	float4								m_muzzle_point;
 }; // class actor
 
 } // namespace stalker2

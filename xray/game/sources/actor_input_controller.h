@@ -74,8 +74,8 @@ public:
 private:
 	static void			update_camera_matrix( frame_events const& frame_events, math::float4x4& camera_matrix );
 
-	 frame_events				m_frame_events;
 public:
+	 frame_events				m_frame_events;
 	timing::timer				m_timer;
 	bool						m_sprint_toggle;
 	bool						m_reload;
