@@ -49,6 +49,20 @@ void weapon_part_visual::load( configs::binary_config_value const& config )
 	}
 }
 
+render::model_locator_item weapon_part_visual::get_muzzle_flash_locator()
+{
+	pcstr muzzle_point_name	= "A_Muzzle";
+	string32 barrel_end_name = "barrel_end";
+
+	weapon_part_visual* parent_part = m_parent->get_part(barrel_end_name);
+	visual_attach_desc				desc;
+	desc.m_item						= this;
+	strings::copy					( desc.m_muzzle_point.m_name, muzzle_point_name );
+	desc.m_muzzle_point.m_bone		= u16(-1);
+	this->get_locator		( muzzle_point_name, desc.m_muzzle_point );
+	return desc.m_muzzle_point;
+}
+
 void weapon_part_visual::update_childs_transform( )
 {
 	childs::iterator it		= m_childs.begin();

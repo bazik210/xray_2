@@ -33,6 +33,7 @@ struct visual_attach_desc
 
 	weapon_part_visual*			m_item;
 	render::model_locator_item	m_attach_point;
+	render::model_locator_item	m_muzzle_point;
 };
 
 class weapon_part_visual : public weapon_part
@@ -42,6 +43,7 @@ class weapon_part_visual : public weapon_part
 public:
 						weapon_part_visual	( );
 			void		load				( configs::binary_config_value const& config );
+	render::model_locator_item	get_muzzle_flash_locator ( );
 
 	virtual void		set_transform		( float4x4 const& transform );
 	virtual void		show				( float4x4 const& initial_transform );
@@ -51,6 +53,7 @@ public:
 			
 protected:
 			void		update_childs_transform( );
+public:
 	float4x4					m_transform;
 
 	typedef vector<visual_attach_desc> childs;

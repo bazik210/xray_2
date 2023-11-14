@@ -30,6 +30,7 @@ public:
 	void clear							( );
 	memory::base_allocator&				allocator();
 	float4x4							get_transform	( );
+	void								set_noclip		( bool value = 1 );
 	void								set_transform	( float4x4 const& transform );
 	void								set_walk_direction	( float3 const& direction );
 	void								jump			( );

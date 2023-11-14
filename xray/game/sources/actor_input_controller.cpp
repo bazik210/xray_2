@@ -22,7 +22,8 @@ m_sprint_toggle ( false ),
 m_reload		( false ),
 m_wpn_1			( false ),
 m_wpn_2			( false ),
-m_crouch		( false )
+m_crouch		( false ),
+m_actor			( NULL )
 {
 };
 
@@ -48,7 +49,7 @@ bool actor_input_controller::on_keyboard_action(input::world* input_world,
 		m_wpn_2 = !m_wpn_2;
 	else if (action == xray::input::kb_key_down && game_action == kWPN_RELOAD)
 		m_reload = !m_reload;
-	else if (action == xray::input::kb_key_down && game_action == kCROUCH)
+	else if (action == xray::input::kb_key_down && (game_action == kCROUCH || game_action == kSECONDARY))
 		m_crouch = !m_crouch;
 
 	return false;
@@ -76,6 +77,9 @@ bool actor_input_controller::on_mouse_key_action( input::world* input_world,
 	if(action==xray::input::ms_key_down)
 		m_frame_events.m_game_actions.push_back	( game_action );
 
+	if(action==xray::input::ms_key_hold)
+		m_frame_events.m_mouse_events.push_back	( button );
+
 	return false;
 }
 
@@ -101,7 +105,12 @@ bool actor_input_controller::on_frame_reload	( )
 
 bool actor_input_controller::on_frame_crouch	( ) 
 { 
-	return m_frame_events.action_present(kCROUCH); 
+	if (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 bool frame_events::action_present( game_action_id game_action_name ) const
@@ -109,12 +118,19 @@ bool frame_events::action_present( game_action_id game_action_name ) const
 	return std::find(m_game_actions.begin(), m_game_actions.end(), game_action_name) != m_game_actions.end();
 }
 
+bool frame_events::mouse_event_present( int e )
+{
+	return std::find(m_mouse_events.begin(), m_mouse_events.end(), e) != m_mouse_events.end();
+}
+
+
 bool frame_events::empty( ) const
 {
 	return( m_game_actions.empty() && 
 		math::is_zero(m_mouse_move.x) && 
 		math::is_zero(m_mouse_move.y) && 
-		math::is_zero(m_mouse_move.z) );
+		math::is_zero(m_mouse_move.z) ) &&
+		m_mouse_events.empty( );
 }
 
 void frame_events::reset( )
@@ -122,11 +138,14 @@ void frame_events::reset( )
 	m_game_actions.clear	( );
 	m_mouse_move.set		( 0.0f, 0.0f, 0.0f );
 	m_onframe_move_fwd		= 0.0f;
+	m_onframe_mouse_move	= 0.0f;
 	m_onframe_move_right	= 0.0f;
+	m_onframe_move_up		= 0.0f;
 	m_onframe_turn_y		= 0.0f;
 	m_onframe_turn_x		= 0.0f;
 	m_onframe_jump			= false;
 	m_onframe_crouch		= false;
+	m_mouse_events.clear	( );
 }
 
 void actor_input_controller::on_before_processing( input::world* input_world )
@@ -148,7 +167,9 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	m_frame_events.m_last_frame_time_ms		= time_ms;
 
 	m_frame_events.m_onframe_move_fwd		= 0.f;
+	m_frame_events.m_onframe_mouse_move		= 0.f;
 	m_frame_events.m_onframe_move_right		= 0.f;
+	m_frame_events.m_onframe_move_up		= 0.f;
 	m_frame_events.m_onframe_turn_x			= 0.f;
 	m_frame_events.m_onframe_turn_y			= 0.f;
 	m_frame_events.m_onframe_jump			= false;
@@ -164,8 +185,17 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	if ( m_frame_events.action_present(kFWD) )
 		m_frame_events.m_onframe_move_fwd		+= move_forward_speed;
 
+	if ( m_actor && m_actor->m_noclip && m_frame_events.mouse_event_present(input::mouse_button_left) )
+		m_frame_events.m_onframe_mouse_move		+= 1.0f;
+
+	if ( m_actor && m_actor->m_noclip && m_frame_events.mouse_event_present(input::mouse_button_right) )
+		m_frame_events.m_onframe_mouse_move		-= 1.0f;
+
 	if ( m_frame_events.action_present(kBACK) )
 		m_frame_events.m_onframe_move_fwd		-= 1.0f;
+
+	if ( m_actor && m_actor->m_noclip && m_frame_events.action_present(kJUMP))
+		m_frame_events.m_onframe_move_up		+= move_forward_speed;
 
 	if ( m_frame_events.action_present(kR_STRAFE) )
 		m_frame_events.m_onframe_move_right		+= 1.0f;
@@ -173,11 +203,14 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	if ( m_frame_events.action_present(kL_STRAFE) )
 		m_frame_events.m_onframe_move_right		-= 1.0f;
 
-	if ( m_frame_events.action_present(kJUMP) )
+	if ( m_actor && !m_actor->m_noclip && m_frame_events.action_present(kJUMP))
 		m_frame_events.m_onframe_jump		= true;
 
-	if ( m_frame_events.action_present(kCROUCH) )
+	if (m_actor && m_actor->m_noclip && (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)))
 		m_frame_events.m_onframe_crouch		= true;
+
+	if (m_actor && m_actor->m_noclip && (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)))
+		m_frame_events.m_onframe_move_up		-= move_forward_speed;
 
 	if ( m_frame_events.action_present(kRIGHT) )
 		m_frame_events.m_mouse_move.x			+= 1.0f;
@@ -194,7 +227,6 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 
 	m_frame_events.m_onframe_turn_x		= math::deg2rad( m_frame_events.m_mouse_move.y );
 	m_frame_events.m_onframe_turn_y		= math::deg2rad( m_frame_events.m_mouse_move.x ) * 0.75f;
-	
 }
 
 void actor_input_controller::update_camera_matrix( frame_events const& frame_events, math::float4x4& camera_matrix )
@@ -202,6 +234,7 @@ void actor_input_controller::update_camera_matrix( frame_events const& frame_eve
 	math::float2 const raw_angles	= float2( frame_events.m_onframe_turn_x, frame_events.m_onframe_turn_y );
 	float const move_fwd			= frame_events.m_onframe_move_fwd;
 	float const move_right			= frame_events.m_onframe_move_right;
+//	float const move_up				= frame_events.m_onframe_move_up;
 
 	float const linear_factor		= 0.006f * frame_events.m_last_frame_time_delta;
 	float const angle_factor		= 0.5f;
@@ -220,14 +253,14 @@ void actor_input_controller::update_camera_matrix( frame_events const& frame_eve
 	float4x4 rotation				= math::create_rotation( new_angles_zxy, math::rotation_zxy );
 
 	float3 const position			=	camera_matrix.c.xyz( ) +
-										camera_matrix.i.xyz( ) * (linear_factor*move_right) +
-										camera_matrix.k.xyz( ) * (linear_factor*move_fwd);
+										camera_matrix.i.xyz( ) * (linear_factor*move_right); // +
+//										camera_matrix.k.xyz( ) * (linear_factor*move_fwd) +
+//										camera_matrix.j.xyz( ) * (linear_factor*move_up);
 
 	float4x4 const translation		= math::create_translation( position );
 
 	camera_matrix					= rotation * translation;
 }
-
 
 void actor_input_controller::on_focus( bool b_focus_enter )
 {

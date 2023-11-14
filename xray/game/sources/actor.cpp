@@ -25,12 +25,13 @@
 #include "actor_input_controller.h"
 #include "weapon.h"
 #include "key_binder.h"
-
 #include <xray/console_command.h>
 
 using xray::animation::mixing::playing_type_enum;
 
 namespace stalker2{
+
+console_commands::cc_bool g_noclip("noclip", g_noclip_enabled, false, console_commands::command_type_user_specific);
 
 static bool g_thirdperson_value = false;
 console_commands::cc_bool g_thirdperson("thirdperson", g_thirdperson_value, false, console_commands::command_type_user_specific);
@@ -60,6 +61,7 @@ m_switch_snd_time_delay ( 0 ),
 m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
+m_noclip			( false ),
 m_muzzle_point		(float4(0.0f, 0.03f, -0.8f, 1.0f)),
 m_new_weapon		("assault_rifles/ak74m"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
@@ -180,7 +182,7 @@ void actor::fire_particle_load() {
 void actor::particle_fire_attach( resources::queries_result& data ) 
 {
 	R_ASSERT(data.is_successful());
-	LOG_INFO("SUCCESS!");
+//	LOG_INFO("SUCCESS!");
 
 	m_particle_system_instance_ptr = static_cast_resource_ptr<xray::particle::particle_system_instance_ptr>( data[4].get_unmanaged_resource());
 
@@ -294,20 +296,30 @@ void actor::process_input_events( )
 		//			- fps affect on it
 		//			- hardcode bad, mkay
 
-		float move_delta_fw		= frame_time_sec * 1.66f * 4.f;
-		float move_delta_right	= frame_time_sec * 0.83f * 4.f;
-		if (m_actor_input_controller->on_frame_sprint() && !m_actor_input_controller->m_crouch)
-		{
-			move_delta_fw		= frame_time_sec * 1.66f * 10.f;
-			move_delta_right	= frame_time_sec * 0.83f * 10.f;
+		float move_delta_fw = 0;
+		float move_delta_right = 0;
 
-			// reset if unpressed key
-			if (!m_actor_input_controller->is_doing_movement())
-				m_actor_input_controller->m_sprint_toggle = false;
+		if (!g_noclip_enabled) {
+
+			move_delta_fw = frame_time_sec * 1.66f * 4.f;
+			move_delta_right = frame_time_sec * 0.83f * 4.f;
+			if (m_actor_input_controller->on_frame_sprint() && !m_actor_input_controller->m_crouch)
+			{
+				move_delta_fw = frame_time_sec * 1.66f * 10.f;
+				move_delta_right = frame_time_sec * 0.83f * 10.f;
+
+				// reset if unpressed key
+				if (!m_actor_input_controller->is_doing_movement())
+					m_actor_input_controller->m_sprint_toggle = false;
+			}
+			if (m_actor_input_controller->on_frame_crouch()) {
+				move_delta_fw = frame_time_sec * 1.66f * 2.f;
+				move_delta_right = frame_time_sec * 0.83f * 2.f;
+			}
 		}
-		if (m_actor_input_controller->on_frame_crouch()) {
-			move_delta_fw		= frame_time_sec * 1.66f * 2.f;
-			move_delta_right	= frame_time_sec * 0.83f * 2.f;
+		else {
+			move_delta_fw = frame_time_sec * 1.66f * 15.f;
+			move_delta_right = frame_time_sec * 0.83f * 15.f;
 		}
 
 		//loxotron: we should update particle position in time somehow, cause it's not attached to anything, bad way :(
@@ -331,11 +343,28 @@ void actor::process_input_events( )
 		float3 walk_direction			= m_character_transform.k.xyz() * m_actor_input_controller->onframe_move_fwd() * move_delta_fw;
 		walk_direction					+= m_character_transform.i.xyz() * m_actor_input_controller->onframe_move_right() * move_delta_right;
 
+		
+		walk_direction += m_character_transform.j.xyz() * m_actor_input_controller->onframe_move_up() * move_delta_fw;
+
+		if (m_actor_input_controller->m_frame_events.m_onframe_mouse_move && g_noclip_enabled) {
+			walk_direction = m_character_camera_transform.k.xyz() * m_actor_input_controller->m_frame_events.m_onframe_mouse_move * move_delta_fw;
+		}
+
 		m_actor_physics_controller->set_walk_direction( walk_direction  );
 	}
 
-	if(m_actor_input_controller->onframe_jump())
+	if (g_noclip_enabled && !m_noclip) {
+		m_noclip = true;
+		m_actor_physics_controller->set_noclip();
+	}
+	else if (!g_noclip_enabled && m_noclip) {
+		m_noclip = false;
+		m_actor_physics_controller->set_noclip(false);
+	}
+
+	if (m_actor_input_controller->onframe_jump() && !g_noclip_enabled) {
 		m_actor_physics_controller->jump();
+	}
 
 //	pressed crouch
 //	if (m_actor_input_controller && m_actor_input_controller->m_crouch && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2) 
@@ -779,13 +808,13 @@ void actor::tick()
 
 	}
 
-	if (!m_actor_input_controller->on_frame_crouch() && m_actor_input_controller->m_crouch)
+	if (!m_actor_input_controller->on_frame_crouch() && m_actor_input_controller->m_crouch && !g_noclip_enabled)
 	{
 		m_actor_input_controller->m_crouch = false;
 
 		disable_crouch();
 	}
-	else if (m_actor_input_controller->on_frame_crouch() && !m_actor_input_controller->m_crouch)
+	else if (m_actor_input_controller->on_frame_crouch() && !m_actor_input_controller->m_crouch && !g_noclip_enabled)
 	{
 		m_actor_input_controller->m_crouch = true;
 
@@ -919,12 +948,14 @@ void actor::tick()
 		// 3
 		// It seems that we are using row order so vec4 * mat4x4 = vec4. Multiplying the point by rotation matrix returns coordinates after rotation.
 
-		float4 muzzle_point_rotated = m_muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
+		 float4 muzzle_point_rotated = m_muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
 		// 4
-		m_particle_matrix = m_weapon_matrix;
-		m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x;
-		m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y;
-		m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z;
+		m_particle_matrix = m_weapon_matrix; //m_weapon->m_barrel_end->m_transform;
+		m_locator_offset = m_weapon->m_barrel_end->get_muzzle_flash_locator().m_offset;
+		
+		m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x; //- m_locator_offset.c.x; //
+		m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y; //- m_locator_offset.c.y; //
+		m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z; //- m_locator_offset.c.z; //
 	}
 
 	//calculate_head_matrix		( matrices, m_character_head_transform );
@@ -998,7 +1029,7 @@ void actor::tick()
 #endif
 
 	// pressed fire action
-	if(m_game_world.get_game().get_active_scene_view() && m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
+	if(!g_noclip_enabled && m_game_world.get_game().get_active_scene_view() && m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
 		render::debug::renderer& d	= r.debug();
 		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();

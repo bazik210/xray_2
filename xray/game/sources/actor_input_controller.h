@@ -9,6 +9,7 @@
 
 #include <xray/input/handler.h>
 #include "game_camera.h"
+#include "actor.h"
 
 namespace stalker2{
 
@@ -20,8 +21,10 @@ struct frame_events
 	frame_events():m_last_frame_time_ms(0),m_last_frame_time_delta(0.0f) {reset();}
 	
 	bool		action_present		( game_action_id game_action_name ) const;
+	bool		mouse_event_present (int e);
 	bool		empty				( ) const;
 	void		reset				( );
+	vector<int>				m_mouse_events;
 
 	u32						m_last_frame_time_ms;
 	float					m_last_frame_time_delta;
@@ -31,10 +34,12 @@ struct frame_events
 
 	float					m_onframe_move_fwd;
 	float					m_onframe_move_right;
+	float					m_onframe_move_up;
 	float					m_onframe_turn_y;
 	float					m_onframe_turn_x;
 	bool					m_onframe_jump;
 	bool					m_onframe_crouch;
+	float					m_onframe_mouse_move;
 };
 
 class actor_input_controller:	public xray::input::handler, 
@@ -56,6 +61,7 @@ public:
 
 	float				onframe_move_fwd	( )	{ return m_frame_events.m_onframe_move_fwd; };
 	float				onframe_move_right	( )	{ return m_frame_events.m_onframe_move_right; };
+	float				onframe_move_up		( )	{ return m_frame_events.m_onframe_move_up; };
 	float				onframe_turn_y		( )	{ return m_frame_events.m_onframe_turn_y; };
 	float				onframe_turn_x		( )	{ return m_frame_events.m_onframe_turn_x; };
 	bool				onframe_jump		( )	{ return m_frame_events.m_onframe_jump; };
@@ -71,11 +77,12 @@ public:
 	// game_camera stuff
 	virtual void	on_focus			( bool b_focus_enter);
 
-private:
+//private:
 	static void			update_camera_matrix( frame_events const& frame_events, math::float4x4& camera_matrix );
 
 public:
-	 frame_events				m_frame_events;
+	actor*						m_actor;
+	frame_events				m_frame_events;
 	timing::timer				m_timer;
 	bool						m_sprint_toggle;
 	bool						m_reload;

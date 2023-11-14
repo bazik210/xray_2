@@ -98,6 +98,24 @@ float4x4 bt_character_controller::get_transform( )
 	return			result;
 }
 
+void bt_character_controller::set_noclip( bool value )
+{
+	if (value) {
+		m_bt_controller->setGravity(0);
+		m_ghostObject->setCollisionFlags	( btCollisionObject::CF_NO_CONTACT_RESPONSE );
+		m_bt_controller->setUseGhostSweepTest(false);
+		m_bt_controller->setFallSpeed(0);
+		//m_bt_physics_world->get_bt_internal()->removeCollisionObject(m_ghostObject);
+	}
+	else {
+		m_bt_controller->setGravity(9.8 * 3.0);
+		m_ghostObject->setCollisionFlags	( btCollisionObject::CF_CHARACTER_OBJECT );
+		m_bt_controller->setUseGhostSweepTest(true);
+		m_bt_controller->setFallSpeed(55.0);
+		//m_bt_physics_world->get_bt_internal()->addCollisionObject(m_ghostObject);
+	}
+}
+
 void bt_character_controller::set_transform	( float4x4 const& transform )
 {
 	float4x4 m		= transform;

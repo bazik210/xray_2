@@ -14,6 +14,7 @@ enum	game_action_id
 	kDOWN,
 	kJUMP,
 	kCROUCH,
+	kSECONDARY,
 	kACCEL,
 	kSPRINT_TOGGLE,
 						

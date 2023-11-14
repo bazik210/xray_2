@@ -26,6 +26,8 @@ namespace collision{ class geometry_instance; }
 
 namespace stalker2{
 
+static bool g_noclip_enabled = false;
+
 class game_world;
 class actor_input_controller;
 
@@ -52,6 +54,8 @@ public:
 
 	void			fire_particle_load			( );
 	void			particle_fire_attach		(resources::queries_result& data);
+	
+	bool			m_noclip;
 
 private:
 	void			on_resources_ready			( resources::queries_result& data );
@@ -96,6 +100,7 @@ private:
 	animation::bone_index_type			m_head_bone_idx;
 	animation::bone_index_type			m_camera_bone_idx;
 	animation::bone_index_type			m_weapon_bone_idx;
+	animation::bone_index_type			m_muzzle_bone_idx;
 	bool								m_tmp_is_active;
 	bool								m_start_reload_timer;
 	bool								m_start_shoot_timer;
@@ -130,6 +135,7 @@ private:
 
 	float								m_health;
 	float4								m_muzzle_point;
+	math::float4x4						m_locator_offset;
 }; // class actor
 
 } // namespace stalker2

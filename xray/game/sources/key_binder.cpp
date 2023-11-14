@@ -54,6 +54,7 @@ game_action_descr  actions[]		= {
 	{ "down",				kDOWN					,_both, "kDOWN"},	
 	{ "jump",				kJUMP					,_both, "kSPACE"},	
 	{ "crouch",				kCROUCH					,_both, "kC"},	
+	{ "secondary",			kSECONDARY				,_both, "kLCONTROL"},
 	{ "accel",				kACCEL					,_both, "kLSHIFT"},	
 	{ "sprint_toggle",  	kSPRINT_TOGGLE  		,_both, "kX"},	
 																
