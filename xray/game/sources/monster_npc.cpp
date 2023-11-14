@@ -347,6 +347,18 @@ void monster_npc::tick			( u32 const current_time_in_ms )
 
 	if ( debug_draw_allowed() )
 		draw					( m_renderer, get_game_world().get_game().get_active_scene() );
+
+	////////////test////////////
+	u32 const non_root_bones_count	= m_model_instance->m_physics_model->m_skeleton->get_non_root_bones_count( );
+	float4x4* const matrices		= static_cast<float4x4*>( ALLOCA(non_root_bones_count*sizeof(float4x4)) );
+	m_model_instance->m_animation_player->compute_bones_matrices( *m_model_instance->m_physics_model->m_skeleton, matrices, matrices + non_root_bones_count );
+
+	if (m_weapon && !m_weapon->m_hidden) {
+		// update weapon
+		calculate_wpn_matrix(matrices, m_wpn_matrix);
+		m_weapon->set_transform(m_wpn_matrix);
+		m_weapon->tick(m_model_instance->m_animation_player);
+	}
 }
 
 void monster_npc::render_model	( )
@@ -368,6 +380,9 @@ void monster_npc::render_model	( )
 	m_model_instance->m_render_model->m_bounding_collision->update	( bone_matrices, bone_matrices + bone_matrices_count );
 	m_model_instance->m_physics_model->m_collision->update			( bone_matrices, bone_matrices + bone_matrices_count );
 	m_model_instance->m_damage_collision->update					( bone_matrices, bone_matrices + bone_matrices_count );
+
+	if(m_weapon && m_weapon->m_hidden)
+		m_weapon->show				(m_model_instance->m_animation_player->get_object_transform());
 }
 
 void monster_npc::add_weapon				( object_weapon* weapon )
@@ -533,6 +548,13 @@ void monster_npc::move_to_position		( ai::movement_target const* const target )
 #endif // #ifndef MASTER_GOLD
 	m_model_instance->m_animation_player->set_object_transform( transform );
 	setup_animations					( m_ai_world.get_current_time_in_ms() );
+}
+
+void monster_npc::calculate_wpn_matrix( float4x4* const matrices, float4x4& result  ) const
+{
+	float4x4 const& npc_transform			= m_model_instance->m_animation_player->get_object_transform();
+	float4x4 character_render_transform	= create_rotation(float3(0.0f, math::pi, 0.0f)) * npc_transform * create_translation(float3(0.f, 0.04f, 0.f));
+	result								= matrices[m_weapon_bone_idx] * npc_transform;
 }
 
 } // namespace stalker2

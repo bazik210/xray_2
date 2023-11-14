@@ -100,7 +100,6 @@ private:
 	animation::bone_index_type			m_head_bone_idx;
 	animation::bone_index_type			m_camera_bone_idx;
 	animation::bone_index_type			m_weapon_bone_idx;
-	animation::bone_index_type			m_muzzle_bone_idx;
 	bool								m_tmp_is_active;
 	bool								m_start_reload_timer;
 	bool								m_start_shoot_timer;

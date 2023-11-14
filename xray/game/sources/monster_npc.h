@@ -25,6 +25,7 @@
 #include <xray/ai_navigation/sources/navigation_mesh_types.h>
 #include <xray/animation/animation_expression_emitter.h>
 #include <xray/render/engine/base_classes.h>
+#include "weapon.h"
 
 namespace xray {
 
@@ -247,6 +248,10 @@ private:
 //			void	tick_animation_controller		( );
 //			void	on_animation_controller_animations_arrived( xray::resources::queries_result const& result );
 			void	setup_animations				( u32 current_time_in_ms );
+			
+			float4x4	m_wpn_matrix;
+			void	calculate_wpn_matrix(float4x4* const matrices, float4x4& result) const;
+
 
 private:
 	ai::world&										m_ai_world;
@@ -255,6 +260,9 @@ private:
 
 	xray::render::game::renderer&					m_renderer;
 	animated_model_instance_ptr						m_model_instance;
+
+	weapon_ptr										m_weapon;
+	animation::bone_index_type						m_weapon_bone_idx;
 
 	collision::space_partitioning_tree&				m_spatial_tree;
 	ai_collision_object*							m_collision_object;
