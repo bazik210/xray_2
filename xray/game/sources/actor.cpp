@@ -639,14 +639,34 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ current_additive_lexeme
 				+ weapon_target
 				, current_time);
-		m_particle_matrix = m_weapon_matrix;
-		//m_particle_matrix.c.xyz() =  m_particle_matrix.c.xyz() * 1.1;
-		//m_particle_matrix.c.x = m_particle_matrix.c.x - 0.54;
-		//m_particle_matrix.c.y = m_particle_matrix.c.y - 0.11;
-		//m_particle_matrix.c.z = m_particle_matrix.c.z - 0.2;
-		//m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
-		m_particle_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000) / 1.1;
-		//m_start_particle_timer = true;
+
+			/*
+			* Dieg:
+			* Particle position magic starts here.
+			* 1. Start by using local coordinates (so the point is using coordinates in relation to coordinates of our weapon)
+			* 2. Play with numbers until particle appears where it has to in default position right after spawning inside the scene*
+			* 3. Rotate our point around origin so that it always appears at the muzzle
+			* 4. Convert coordinates to weapon space (just add local pos to weapon pos)
+			*
+			* *We should consider predefined muzzle_pos in weapon config file just like it was done in X-Ray 1.x so that we don't use magic numbers in code.
+			* When dealing with weapon attachments such as changing barrel length or adding a silencer we could just create onAttach() and onDetach() functions
+			* that would simply do m_muzzle_pos = m_muzzle_pos + val_from_config .
+			*/
+			// 1 + 2
+			// X and Z values are minus because it seems that some unspeakable evil is happening during rotation (jk, I just didn't want to read the code).
+			float4 muzzle_point = float4(0.0f, 0.0f, -0.7f, 1.0f);
+			// 3
+			// It seems that we are using row order so vec4 * mat4x4 = vec4. Multiplying the point by rotation matrix returns coordinates after rotation.
+			float4 muzzle_point_rotated = muzzle_point * create_rotation(m_weapon_matrix.get_angles_xyz());
+			// 4
+			m_particle_matrix = m_weapon_matrix;
+			m_particle_matrix.c.x = m_particle_matrix.c.x + muzzle_point_rotated.x;
+			m_particle_matrix.c.y = m_particle_matrix.c.y + muzzle_point_rotated.y;
+			m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z;
+			
+			m_game_world.renderer().scene().play_particle_system( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
+			m_particle_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000) / 1.1;
+			m_start_particle_timer = true;
 			}
 			m_animation_player->tick(current_time);
 			m_animation_player2->set_target_and_tick(
