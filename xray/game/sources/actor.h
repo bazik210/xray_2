@@ -52,6 +52,8 @@ public:
 	bool			m_stop_query;
 
 	float			get_heath()	const { return m_health; }
+	bool			get_particle_timer() const { return m_start_particle_timer; }
+	void			clear_weapon_fx();
 
 	void			fire_particle_load			( );
 	void			particle_fire_attach		(resources::queries_result& data);

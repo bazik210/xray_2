@@ -207,6 +207,11 @@ void game_world::unload( )
 		(*it)->stop			( true );
 	}
 
+	if (m_local_actor->get_particle_timer())
+	{
+		m_local_actor->clear_weapon_fx();
+	}
+
 	switch_to_free_fly_camera	( );
 	DELETE						( m_local_actor );
 

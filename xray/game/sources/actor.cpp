@@ -241,6 +241,11 @@ void actor::on_load_animations(  resources::queries_result& data  )
 	fire_particle_load();
 }
 
+void actor::clear_weapon_fx()
+{
+	m_game_world.renderer().scene().remove_particle_system_instance(m_game_world.get_render_scene(), m_particle_system_instance_ptr);
+}
+
 void actor::fire_particle_load() {
 
 	xray::render::material_effects_instance_cook_data* cook_data = 
@@ -870,7 +875,7 @@ void actor::tick()
 		return;
 
 	//updating particle position
-	if(m_start_particle_timer)
+	if (m_start_particle_timer)
 		m_game_world.renderer().scene().update_particle_system_instance( m_game_world.get_render_scene(), m_particle_system_instance_ptr, m_particle_matrix );
 
 	//if reload, wait till anim ends
@@ -1000,7 +1005,7 @@ void actor::tick()
 	}
 	if (m_start_particle_timer && m_anim_timer.get_elapsed_msec() >= m_particle_time) {
 		m_start_particle_timer = false;
-		m_game_world.renderer().scene().remove_particle_system_instance(m_game_world.get_render_scene(), m_particle_system_instance_ptr);
+		clear_weapon_fx();
 	}
 
 
