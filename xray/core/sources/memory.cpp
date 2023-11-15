@@ -187,7 +187,7 @@ void xray::memory::preinitialize			( )
 	);
 
 	g_resources_links_allocator.do_register		(
-		math::align_down<u64>( 256*Kb, sizeof(xray::resources::resource_link) ),
+		math::align_down<u64>( 1*Mb, sizeof(xray::resources::resource_link) ),
 		"resources links allocator"
 	);
 }
