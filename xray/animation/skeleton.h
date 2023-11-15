@@ -30,6 +30,7 @@ public:
 	inline	skeleton_bone const&	get_root		( ) const;
 	inline	skeleton_bone const&	get_root_bone	( ) const;
 	inline	bool					is_root_bone	( bone_index_type index ) const;
+			bool					bone_exist		( pcstr const name ) const;
 
 private:
 	inline	skeleton_bone&			get_root		( );

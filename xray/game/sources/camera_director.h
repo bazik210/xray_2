@@ -35,6 +35,8 @@ private:
 	float4x4			m_projection;
 
 	game_camera*		m_active_camera;
+	game_world*			m_game_world;
+	float				m_aspect;
 }; // class camera_director
 
 typedef	intrusive_ptr<

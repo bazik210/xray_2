@@ -9,6 +9,7 @@
 #include "game.h"
 #include "game_scene.h"
 #include "game_camera.h"
+#include "game_world.h"
 #include <xray/console_command.h>
 
 namespace stalker2{
@@ -21,10 +22,12 @@ m_active_camera		( NULL )
 
 	set_position_direction	( float3( 16.f, 10.f, 0.f ), float3( -1.f,  -1.f, 0.f ).normalize() );
 
-	float aspect( 4.f/3.f );
+	float2 size			= w.get_game().engine().get_render_window_size();
+	m_aspect = size.x / size.y;
+
 	float fov( 57.5f*math::pi/180.0f );
 
-	m_projection		= math::create_perspective_projection( fov/aspect, aspect, 0.1f, 5000.0f );
+	m_projection		= math::create_perspective_projection( fov/m_aspect, m_aspect, 0.1f, 5000.0f );
 }
 
 void camera_director::set_position_direction( math::float3 const& p, math::float3 const& d )

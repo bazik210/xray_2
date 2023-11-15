@@ -50,6 +50,7 @@ void render_options_editor_source::process_fs( vfs::vfs_iterator const & in_it, 
 			if(extension == ".cfg" )
 			{
 				System::String^ file_name	= Path::GetFileNameWithoutExtension(gcnew System::String(it.get_name()));
+				if (file_name != "base")
 				m_parent->add_item		( file_path+file_name, xray::editor_base::node_texture );
 			}
 		}

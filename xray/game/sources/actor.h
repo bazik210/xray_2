@@ -43,6 +43,7 @@ public:
 	void			set_input_source	( actor_input_controller* s );
 
 	collision::geometry_instance&	get_caracter_capsule		( );
+	float4x4 const&					character_select_transform	( ) const;
 	float4x4 const&					character_head_transform	( ) const		{ return m_character_head_transform; }
 	float4x4 const&					character_camera_transform	( ) const { return m_character_camera_transform; }
 
@@ -59,6 +60,7 @@ public:
 
 private:
 	void			on_resources_ready			( resources::queries_result& data );
+	void			on_load_animations			( resources::queries_result& data );
 	void			add_models_to_scene			( );
 	void			remove_models_from_scene	( );
 
@@ -128,6 +130,7 @@ private:
 	weapon_ptr							m_weapon;
 	pstr								m_new_weapon;
 	pstr								m_new_anim;
+	u32									m_bone_count;
 
 	actor_input_controller*				m_actor_input_controller;
 	game_world&							m_game_world;
@@ -135,6 +138,13 @@ private:
 	float								m_health;
 	float4								m_muzzle_point;
 	math::float4x4						m_locator_offset;
+
+	xray::fixed_string512				m_temp;
+	xray::fixed_string512				m_plr_dir;
+	xray::fixed_string512				m_weapon_dir;
+	xray::fixed_string512				m_hud_global_test = "";
+	xray::fixed_string512				m_weapon_c_sav = "";
+	xray::fixed_string512				m_wpn_cmd = "";
 }; // class actor
 
 } // namespace stalker2

@@ -99,6 +99,7 @@ namespace editor {
 	private: System::Windows::Forms::Label^  bkg_file_label;
 	private: System::Windows::Forms::Button^  export_button;
 	private: System::Windows::Forms::Button^  reset_colors_button;
+	private: System::Windows::Forms::TableLayoutPanel^  MoveButtonsPanel;
 
 
 
@@ -142,6 +143,7 @@ namespace editor {
 		void InitializeComponent(void)
 		{
 			this->components = (gcnew System::ComponentModel::Container());
+			System::ComponentModel::ComponentResourceManager^  resources = (gcnew System::ComponentModel::ComponentResourceManager(terrain_core_form::typeid));
 			this->panel1 = (gcnew System::Windows::Forms::Panel());
 			this->map_bkg_info_panel = (gcnew System::Windows::Forms::Panel());
 			this->select_bkg_file_button = (gcnew System::Windows::Forms::Button());
@@ -168,6 +170,7 @@ namespace editor {
 			this->button_move_up = (gcnew System::Windows::Forms::Button());
 			this->button_move_left = (gcnew System::Windows::Forms::Button());
 			this->panel2 = (gcnew System::Windows::Forms::Panel());
+			this->reset_colors_button = (gcnew System::Windows::Forms::Button());
 			this->export_button = (gcnew System::Windows::Forms::Button());
 			this->copy_nodes_button = (gcnew System::Windows::Forms::Button());
 			this->edit_bkg_button = (gcnew System::Windows::Forms::Button());
@@ -175,7 +178,7 @@ namespace editor {
 			this->splitter1 = (gcnew System::Windows::Forms::Splitter());
 			this->global_map_panel = (gcnew System::Windows::Forms::Panel());
 			this->global_map_menu = (gcnew System::Windows::Forms::ContextMenuStrip(this->components));
-			this->reset_colors_button = (gcnew System::Windows::Forms::Button());
+			this->MoveButtonsPanel = (gcnew System::Windows::Forms::TableLayoutPanel());
 			this->panel1->SuspendLayout();
 			this->map_bkg_info_panel->SuspendLayout();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->bkg_scale_up_down))->BeginInit();
@@ -186,10 +189,12 @@ namespace editor {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->m_num_pos_x))->BeginInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->m_scale_up_down))->BeginInit();
 			this->panel2->SuspendLayout();
+			this->MoveButtonsPanel->SuspendLayout();
 			this->SuspendLayout();
 			// 
 			// panel1
 			// 
+			this->panel1->Controls->Add(this->MoveButtonsPanel);
 			this->panel1->Controls->Add(this->map_bkg_info_panel);
 			this->panel1->Controls->Add(this->focus_button);
 			this->panel1->Controls->Add(this->groupBox1);
@@ -198,10 +203,6 @@ namespace editor {
 			this->panel1->Controls->Add(this->current_x_label);
 			this->panel1->Controls->Add(this->label2);
 			this->panel1->Controls->Add(this->m_scale_up_down);
-			this->panel1->Controls->Add(this->button_move_down);
-			this->panel1->Controls->Add(this->button_move_right);
-			this->panel1->Controls->Add(this->button_move_up);
-			this->panel1->Controls->Add(this->button_move_left);
 			this->panel1->Controls->Add(this->panel2);
 			this->panel1->Dock = System::Windows::Forms::DockStyle::Right;
 			this->panel1->Location = System::Drawing::Point(476, 0);
@@ -211,6 +212,7 @@ namespace editor {
 			// 
 			// map_bkg_info_panel
 			// 
+			this->map_bkg_info_panel->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
 			this->map_bkg_info_panel->Controls->Add(this->select_bkg_file_button);
 			this->map_bkg_info_panel->Controls->Add(this->bkg_file_label);
 			this->map_bkg_info_panel->Controls->Add(this->remove_bkg_button);
@@ -409,7 +411,8 @@ namespace editor {
 			// 
 			this->label2->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
 			this->label2->AutoSize = true;
-			this->label2->Location = System::Drawing::Point(9, 343);
+			this->label2->Location = System::Drawing::Point(4, 357);
+			this->label2->Margin = System::Windows::Forms::Padding(0);
 			this->label2->Name = L"label2";
 			this->label2->Size = System::Drawing::Size(57, 13);
 			this->label2->TabIndex = 10;
@@ -418,7 +421,7 @@ namespace editor {
 			// m_scale_up_down
 			// 
 			this->m_scale_up_down->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->m_scale_up_down->Location = System::Drawing::Point(7, 362);
+			this->m_scale_up_down->Location = System::Drawing::Point(64, 355);
 			this->m_scale_up_down->Maximum = System::Decimal(gcnew cli::array< System::Int32 >(4) {50, 0, 0, 0});
 			this->m_scale_up_down->Minimum = System::Decimal(gcnew cli::array< System::Int32 >(4) {1, 0, 0, 0});
 			this->m_scale_up_down->Name = L"m_scale_up_down";
@@ -429,45 +432,53 @@ namespace editor {
 			// 
 			// button_move_down
 			// 
-			this->button_move_down->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->button_move_down->Location = System::Drawing::Point(95, 362);
+			this->button_move_down->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"button_move_down.BackgroundImage")));
+			this->button_move_down->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
+			this->button_move_down->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->button_move_down->Location = System::Drawing::Point(29, 58);
+			this->button_move_down->Margin = System::Windows::Forms::Padding(0);
 			this->button_move_down->Name = L"button_move_down";
-			this->button_move_down->Size = System::Drawing::Size(25, 25);
+			this->button_move_down->Size = System::Drawing::Size(29, 32);
 			this->button_move_down->TabIndex = 7;
-			this->button_move_down->Text = L"|";
 			this->button_move_down->UseVisualStyleBackColor = true;
 			this->button_move_down->Click += gcnew System::EventHandler(this, &terrain_core_form::button_move_down_Click);
 			// 
 			// button_move_right
 			// 
-			this->button_move_right->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->button_move_right->Location = System::Drawing::Point(117, 337);
+			this->button_move_right->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"button_move_right.BackgroundImage")));
+			this->button_move_right->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
+			this->button_move_right->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->button_move_right->Location = System::Drawing::Point(58, 29);
+			this->button_move_right->Margin = System::Windows::Forms::Padding(0);
 			this->button_move_right->Name = L"button_move_right";
-			this->button_move_right->Size = System::Drawing::Size(25, 25);
+			this->button_move_right->Size = System::Drawing::Size(32, 29);
 			this->button_move_right->TabIndex = 6;
-			this->button_move_right->Text = L">";
 			this->button_move_right->UseVisualStyleBackColor = true;
 			this->button_move_right->Click += gcnew System::EventHandler(this, &terrain_core_form::button_move_right_Click);
 			// 
 			// button_move_up
 			// 
-			this->button_move_up->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->button_move_up->Location = System::Drawing::Point(95, 314);
+			this->button_move_up->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"button_move_up.BackgroundImage")));
+			this->button_move_up->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
+			this->button_move_up->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->button_move_up->Location = System::Drawing::Point(29, 0);
+			this->button_move_up->Margin = System::Windows::Forms::Padding(0);
 			this->button_move_up->Name = L"button_move_up";
-			this->button_move_up->Size = System::Drawing::Size(25, 25);
+			this->button_move_up->Size = System::Drawing::Size(29, 29);
 			this->button_move_up->TabIndex = 5;
-			this->button_move_up->Text = L"^";
 			this->button_move_up->UseVisualStyleBackColor = true;
 			this->button_move_up->Click += gcnew System::EventHandler(this, &terrain_core_form::button_move_up_Click);
 			// 
 			// button_move_left
 			// 
-			this->button_move_left->Anchor = static_cast<System::Windows::Forms::AnchorStyles>((System::Windows::Forms::AnchorStyles::Bottom | System::Windows::Forms::AnchorStyles::Left));
-			this->button_move_left->Location = System::Drawing::Point(74, 337);
+			this->button_move_left->BackgroundImage = (cli::safe_cast<System::Drawing::Image^  >(resources->GetObject(L"button_move_left.BackgroundImage")));
+			this->button_move_left->BackgroundImageLayout = System::Windows::Forms::ImageLayout::Center;
+			this->button_move_left->Dock = System::Windows::Forms::DockStyle::Fill;
+			this->button_move_left->Location = System::Drawing::Point(0, 29);
+			this->button_move_left->Margin = System::Windows::Forms::Padding(0);
 			this->button_move_left->Name = L"button_move_left";
-			this->button_move_left->Size = System::Drawing::Size(25, 25);
+			this->button_move_left->Size = System::Drawing::Size(29, 29);
 			this->button_move_left->TabIndex = 4;
-			this->button_move_left->Text = L"<";
 			this->button_move_left->UseVisualStyleBackColor = true;
 			this->button_move_left->Click += gcnew System::EventHandler(this, &terrain_core_form::button_move_left_Click);
 			// 
@@ -483,6 +494,16 @@ namespace editor {
 			this->panel2->Name = L"panel2";
 			this->panel2->Size = System::Drawing::Size(157, 99);
 			this->panel2->TabIndex = 1;
+			// 
+			// reset_colors_button
+			// 
+			this->reset_colors_button->Location = System::Drawing::Point(79, 68);
+			this->reset_colors_button->Name = L"reset_colors_button";
+			this->reset_colors_button->Size = System::Drawing::Size(75, 25);
+			this->reset_colors_button->TabIndex = 12;
+			this->reset_colors_button->Text = L"Reset clr";
+			this->reset_colors_button->UseVisualStyleBackColor = true;
+			this->reset_colors_button->Click += gcnew System::EventHandler(this, &terrain_core_form::reset_colors_button_Click);
 			// 
 			// export_button
 			// 
@@ -555,15 +576,28 @@ namespace editor {
 			this->global_map_menu->Size = System::Drawing::Size(61, 4);
 			this->global_map_menu->Opening += gcnew System::ComponentModel::CancelEventHandler(this, &terrain_core_form::global_map_menu_Opening);
 			// 
-			// reset_colors_button
+			// MoveButtonsPanel
 			// 
-			this->reset_colors_button->Location = System::Drawing::Point(79, 68);
-			this->reset_colors_button->Name = L"reset_colors_button";
-			this->reset_colors_button->Size = System::Drawing::Size(75, 25);
-			this->reset_colors_button->TabIndex = 12;
-			this->reset_colors_button->Text = L"Reset clr";
-			this->reset_colors_button->UseVisualStyleBackColor = true;
-			this->reset_colors_button->Click += gcnew System::EventHandler(this, &terrain_core_form::reset_colors_button_Click);
+			this->MoveButtonsPanel->ColumnCount = 3;
+			this->MoveButtonsPanel->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
+				33.33333F)));
+			this->MoveButtonsPanel->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
+				33.33333F)));
+			this->MoveButtonsPanel->ColumnStyles->Add((gcnew System::Windows::Forms::ColumnStyle(System::Windows::Forms::SizeType::Percent, 
+				33.33333F)));
+			this->MoveButtonsPanel->Controls->Add(this->button_move_right, 2, 1);
+			this->MoveButtonsPanel->Controls->Add(this->button_move_up, 1, 0);
+			this->MoveButtonsPanel->Controls->Add(this->button_move_down, 1, 2);
+			this->MoveButtonsPanel->Controls->Add(this->button_move_left, 0, 1);
+			this->MoveButtonsPanel->Location = System::Drawing::Point(35, 253);
+			this->MoveButtonsPanel->Margin = System::Windows::Forms::Padding(0);
+			this->MoveButtonsPanel->Name = L"MoveButtonsPanel";
+			this->MoveButtonsPanel->RowCount = 3;
+			this->MoveButtonsPanel->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 33.33333F)));
+			this->MoveButtonsPanel->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 33.33333F)));
+			this->MoveButtonsPanel->RowStyles->Add((gcnew System::Windows::Forms::RowStyle(System::Windows::Forms::SizeType::Percent, 33.33333F)));
+			this->MoveButtonsPanel->Size = System::Drawing::Size(90, 90);
+			this->MoveButtonsPanel->TabIndex = 23;
 			// 
 			// terrain_core_form
 			// 
@@ -594,6 +628,7 @@ namespace editor {
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->m_num_pos_x))->EndInit();
 			(cli::safe_cast<System::ComponentModel::ISupportInitialize^  >(this->m_scale_up_down))->EndInit();
 			this->panel2->ResumeLayout(false);
+			this->MoveButtonsPanel->ResumeLayout(false);
 			this->ResumeLayout(false);
 
 		}

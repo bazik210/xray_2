@@ -58,3 +58,17 @@ bone_index_type	skeleton::get_bone_index	( pcstr const name ) const
 {
 	return					skeleton_bone_index( *this, name );
 }
+
+bool	skeleton::bone_exist	( pcstr const name ) const
+{
+	auto skeleton = this;
+	u32 const bones_count	= (*skeleton).get_bones_count();
+	skeleton_bone const* const begin	= &(*skeleton).get_bone(0);
+	skeleton_bone const* const end		= &(*skeleton).get_bone( bones_count - 1 ) + 1;
+	skeleton_bone const* const result	= std::find_if( begin, end, bone_id_predicate( name ) );
+
+	if (result != end)
+		return result;
+
+	return false;
+}

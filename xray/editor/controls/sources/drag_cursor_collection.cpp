@@ -37,7 +37,7 @@ void			drag_cursor_collection::make_cursors		(Drawing::Image^ image)
 	make_cursors(image, true);
 }
 
-void drag_cursor_collection::make_cursors(Control^ control, Boolean show_std_cursor)
+void 			drag_cursor_collection::make_cursors(Control^ control, Boolean show_std_cursor)
 {
 	Bitmap^ bmp				= gcnew Bitmap(control->Width, control->Height);
 	control->DrawToBitmap	(bmp, control->ClientRectangle);

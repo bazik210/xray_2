@@ -375,6 +375,9 @@ void engine::world::set_renderer_configuration( fs_new::virtual_path_string cons
 {
 	fs_new::virtual_path_string						path;
 	path.assignf						("resources/render/%s.cfg", config_name.c_str());
+
+	if (config_name == "base")
+		return;
 	
 	query_resource( 
 		path.c_str(), 

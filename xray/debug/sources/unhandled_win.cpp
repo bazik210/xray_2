@@ -63,13 +63,14 @@ static void save_minidump						( pcstr const output_file_name, _EXCEPTION_POINTE
 		GetCurrentProcessId(),
 		minidump_handle,
 		MINIDUMP_TYPE (
-			MiniDumpWithDataSegs |
+			MiniDumpNormal |
+////		MiniDumpWithDataSegs |
 //			MiniDumpWithFullMemory |
 //			MiniDumpWithHandleData |
 //			MiniDumpFilterMemory |
 //			MiniDumpScanMemory |
 //			MiniDumpWithUnloadedModules |
-			MiniDumpWithIndirectlyReferencedMemory |
+////		MiniDumpWithIndirectlyReferencedMemory |
 //			MiniDumpFilterModulePaths |
 //			MiniDumpWithProcessThreadData |
 //			MiniDumpWithPrivateReadWriteMemory |

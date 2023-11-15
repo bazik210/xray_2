@@ -142,8 +142,8 @@ void game_world::tick()
 	if (m_local_actor)
 	{
 		m_local_actor->tick();
-		if (m_local_actor->character_camera_transform().valid()) {
-			m_actor_input_controller->inverted_view_matrix() = m_local_actor->character_camera_transform(); //character_head_transform();
+		if (m_local_actor->character_camera_transform().valid() || m_local_actor->character_head_transform().valid()) {
+			m_actor_input_controller->inverted_view_matrix() = m_local_actor->character_select_transform();
 			//m_actor_input_controller->update_camera_matrix(m_actor_input_controller->m_frame_events, m_actor_input_controller->inverted_view_matrix());
 		}
 	}

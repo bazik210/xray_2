@@ -255,6 +255,8 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_initialized				= true;
 	
 	m_game_world				= NEW( game_world )( *this );
+	m_game_world->set_game_world(m_game_world);
+
 	static object_cooker s_object_cook( *m_game_world );
 	static object_scene_cooker s_object_scene_cook( *m_game_world );
 	register_cook				( &s_object_cook );

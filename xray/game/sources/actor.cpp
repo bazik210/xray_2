@@ -33,6 +33,14 @@ namespace stalker2{
 
 console_commands::cc_bool g_noclip("noclip", g_noclip_enabled, false, console_commands::command_type_user_specific);
 
+static xray::command_line::key	s_hud		 ("hud", "", "", "player model");
+
+static string512 weapon_c = "assault_rifles/ak74m";
+
+static console_commands::cc_string weapon_cc ("give_me_weapon", weapon_c, 256, false, xray::console_commands::command_type_user_specific );
+
+static xray::command_line::key	weapon_cl		 ("weapon", "", "", "on load");
+
 static bool g_thirdperson_value = false;
 console_commands::cc_bool g_thirdperson("thirdperson", g_thirdperson_value, false, console_commands::command_type_user_specific);
 
@@ -62,6 +70,7 @@ m_switch_snd_time		( 0 ),
 m_wpn_switch		( false ),
 m_wpn_call			( false ),
 m_noclip			( false ),
+m_camera_bone_idx	( NULL ),
 m_muzzle_point		(float4(0.0f, 0.03f, -0.8f, 1.0f)),
 m_new_weapon		("assault_rifles/ak74m"),
 m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
@@ -109,8 +118,74 @@ void actor::set_input_source( actor_input_controller* s )
 
 void actor::query_resources( )
 {
+	//-hud="actor/neutral_01/neutral_01" -weapon="ak_74" //example keys 
+	//-hud="neutral\neutral_01_novice\neutral_01_novice" -weapon="assault_rifles/ak74m" //example keys
+	//-hud="dolg/dolg_exo" -weapon="ak_74" //example keys 
+
+	s_hud.is_set_as_string( &m_temp );
+
+	m_weapon_c_sav = weapon_c;
+	m_weapon_dir = weapon_c;
+	if (m_temp != "")
+	{
+		m_plr_dir	= "character/human/";	//first part of
+		m_plr_dir.append(m_temp);			//it's like plr_dir+=temp
+		m_plr_dir.replace("\\","/");		//fixing incorrect separators (esli est \_(._.)_/)
+	
+	}
+	else m_plr_dir = "character/human/actor/neutral_03/neutral_03_actor_full"; //the default hud model
+	m_hud_global_test = m_plr_dir;
+	if (m_weapon_dir == "") m_weapon_dir = "assault_rifles/ak74m";//the default weapon model
+
+	m_wpn_cmd = weapon_c;
+
+	weapon_cl.is_set_as_string(&m_wpn_cmd);
+
 	resources::request r[] ={
-		{ "character/human/actor/neutral_03/neutral_03_actor_full",	resources::skeleton_model_instance_class },
+		{ m_plr_dir.c_str(),	resources::skeleton_model_instance_class },
+		{ m_weapon_dir.c_str(),	resources::weapon_class },
+	};
+
+	m_new_weapon = m_weapon_dir.c_str(); 
+
+	if (m_wpn_cmd != "") {
+		m_new_weapon = m_wpn_cmd.c_str();
+	}
+
+	resources::query_resources(
+		r,
+		boost::bind( &actor::on_resources_ready, this, _1 ),
+		g_allocator
+	);
+}
+
+void actor::on_resources_ready( resources::queries_result& data )
+{
+	if(!data.is_successful())
+		return;
+
+	if (m_stop_query) {
+		data.empty();
+		return;
+	}
+
+	m_character_model		= static_cast_resource_ptr<render::skeleton_model_ptr>(data[0].get_unmanaged_resource());
+
+	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
+
+	if(m_character_model->m_skeleton->bone_exist("Camera_Root"))
+		m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
+
+	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
+
+	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[1].get_unmanaged_resource());
+	m_weapon->m_game_world	= &m_game_world;
+
+
+	m_bone_count = m_character_model->m_skeleton->get_bones_count();
+
+	if (m_bone_count > 65) {
+		resources::request r[] = {
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_idle",	resources::animation_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/unarmed_on_site_idle",  resources::animation_class },
 		{ "resources/animations/single/human/actor/locomotion/stand/on_site_add",	resources::animation_class },
@@ -118,15 +193,52 @@ void actor::query_resources( )
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/fire_1",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",  resources::animation_class },
-		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_idle",  resources::animation_class },
-		{ "assault_rifles/ak74m",  resources::weapon_class },
-	};
+		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_idle",  resources::animation_class }
+		};
 
-	resources::query_resources(
-		r,
-		boost::bind( &actor::on_resources_ready, this, _1 ),
-		g_allocator
-	);
+		resources::query_resources(
+			r,
+			boost::bind(&actor::on_load_animations, this, _1),
+			g_allocator
+		);
+	}
+	else {
+		resources::request r[] = {
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_add",   resources::animation_class },
+		{ "resources/animations/single/human/hud/reload",	   resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class }
+		};
+
+		resources::query_resources(
+			r,
+			boost::bind(&actor::on_load_animations, this, _1),
+			g_allocator
+		);
+	}
+}
+
+void actor::on_load_animations(  resources::queries_result& data  ) 
+{
+	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[0].get_managed_resource());
+	m_idle_stand_01_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
+	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());
+	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
+	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
+	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[5].get_managed_resource());
+	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
+	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
+
+	//some query system bug;
+	m_stop_query = true;
+
+	m_game_world.tmp_actor_ready( this );
+
+	fire_particle_load();
 }
 
 void actor::fire_particle_load() {
@@ -188,42 +300,6 @@ void actor::particle_fire_attach( resources::queries_result& data )
 
 }
 
-void actor::on_resources_ready( resources::queries_result& data )
-{
-	if(!data.is_successful())
-		return;
-
-	if (m_stop_query) {
-		data.empty();
-		return;
-	}
-
-	m_character_model		= static_cast_resource_ptr<render::skeleton_model_ptr>(data[0].get_unmanaged_resource());
-
-	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
-	m_idle_stand_01_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());
-	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[3].get_managed_resource());
-	m_reload_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
-	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[5].get_managed_resource());
-	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
-	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
-	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[8].get_managed_resource());
-	
-	m_head_bone_idx			= m_character_model->m_skeleton->get_bone_index("Head")-1;
-	m_camera_bone_idx		= m_character_model->m_skeleton->get_bone_index("Camera_Root")-1;
-	m_weapon_bone_idx		= m_character_model->m_skeleton->get_bone_index("Weapon")-1;
-
-	m_weapon				= static_cast_resource_ptr<weapon_ptr>(data[9].get_unmanaged_resource());
-	m_weapon->m_game_world	= &m_game_world;
-
-	//some query system bug;
-	m_stop_query = true;
-
-	m_game_world.tmp_actor_ready( this );
-
-	fire_particle_load();
-}
-
 void actor::add_models_to_scene( )
 {
 	render::scene_ptr scene		= m_game_world.get_render_scene();
@@ -261,6 +337,16 @@ void actor::activate( math::float4x4 const& initial_matrix )
 collision::geometry_instance& actor::get_caracter_capsule( )
 {
 	return m_actor_physics_controller->get_capsule( );
+}
+
+float4x4 const& actor::character_select_transform() const
+{
+	if (m_camera_bone_idx) {
+		return m_character_camera_transform;
+	}
+	else {
+		return m_character_head_transform;
+	}
 }
 
 void actor::process_input_events( )
@@ -671,10 +757,12 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 					, current_time);
 			}
 			m_animation_player->tick(current_time);
-			m_animation_player2->set_target_and_tick(
-				current_reload_lexeme
-				+ additive_reload_lexeme
-				, current_time);
+			if (m_bone_count > 65) {
+				m_animation_player2->set_target_and_tick(
+					current_reload_lexeme
+					+ additive_reload_lexeme
+					, current_time);
+			}
 		}
 		else if (m_shoot) {
 			if (!m_start_shoot_timer) {
@@ -897,6 +985,13 @@ void actor::tick()
 		}
 	}
 
+	if (m_weapon_c_sav != weapon_c)
+	{
+		m_weapon_c_sav = weapon_c;
+		m_new_weapon = m_weapon_c_sav.c_str();
+		switch_weapon();
+	}
+
 	//if shoot, wait till anim ends
 	if (m_start_shoot_timer && m_anim_timer.get_elapsed_msec() >= m_shoot_anim_time) {
 		m_start_shoot_timer = false;
@@ -960,9 +1055,13 @@ void actor::tick()
 		m_particle_matrix.c.z = m_particle_matrix.c.z + muzzle_point_rotated.z; //- m_locator_offset.c.z; //
 	}
 
-	//calculate_head_matrix		( matrices, m_character_head_transform );
 
-	calculate_camera_matrix		( matrices, m_character_camera_transform );
+	if (m_camera_bone_idx) {
+		calculate_camera_matrix(matrices, m_character_camera_transform);
+	}
+	else {
+		calculate_head_matrix( matrices, m_character_head_transform );
+	}
 
 	// im bad with math :(
 #if 0
@@ -1078,7 +1177,8 @@ void actor::calculate_head_matrix( float4x4* const matrices, float4x4& result ) 
 											matrices[m_head_bone_idx] * 
 											character_render_transform );
 
-	result.c.xyz()			+= result.j.xyz()*0.1f;
+	result.k.xyz() += result.k.xyz() / 1.6; //forward vector
+	result.c.xyz() += result.j.xyz() * 0.1f;
 }
 
 void actor::calculate_weapon_matrix( float4x4* const matrices, float4x4& result  ) const

@@ -16,7 +16,7 @@ void terrain_node::render()
 {
 
 	// debug drawing, will be replaced with object-visual drawing later
-	//super::render	();
+	super::render	();
 
 	//if(!m_vertices || !draw_wireframe)
 	//	return;
