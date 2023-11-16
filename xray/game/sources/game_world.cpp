@@ -207,7 +207,7 @@ void game_world::unload( )
 		(*it)->stop			( true );
 	}
 
-	if (m_local_actor->get_particle_timer())
+	if (m_local_actor && m_local_actor->get_particle_timer())
 	{
 		m_local_actor->clear_weapon_fx();
 	}
