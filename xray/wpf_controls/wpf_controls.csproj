@@ -26,7 +26,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\binaries\Win32\Debug\</OutputPath>
+    <OutputPath>..\..\binaries\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -35,7 +35,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
-    <OutputPath>..\..\binaries\Win32\Release\</OutputPath>
+    <OutputPath>..\..\binaries\Release\</OutputPath>
     <DefineConstants>TRACE;RELEASE</DefineConstants>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
@@ -46,7 +46,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\binaries\Win64\Debug\</OutputPath>
+    <OutputPath>..\..\binaries\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -56,7 +56,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DefineConstants>TRACE;BOOST_NO_EXCEPTIONS;RELEASE</DefineConstants>
-    <OutputPath>..\..\binaries\Win64\Release\</OutputPath>
+    <OutputPath>..\..\binaries\Release\</OutputPath>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
@@ -64,7 +64,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
-    <OutputPath>..\..\binaries\Win64\MinSizeRel\</OutputPath>
+    <OutputPath>..\..\binaries\MinSizeRel\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>wpf_controls</AssemblyName>
     <DebugType>none</DebugType>
@@ -74,7 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
     <DebugSymbols>true</DebugSymbols>
     <DefineDebug>true</DefineDebug>
-    <OutputPath>..\..\binaries\Win64\RelWithDebInfo\</OutputPath>
+    <OutputPath>..\..\binaries\RelWithDebInfo\</OutputPath>
     <PlatformTarget>x64</PlatformTarget>
     <AssemblyName>wpf_controls</AssemblyName>
     <DebugType>full</DebugType>

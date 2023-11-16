@@ -17,12 +17,12 @@ START /B /WAIT cmake --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt"
 	exit
 ) || (
 	echo CMake finished generation successfully! Running post-generation scripts...
-	CALL GenerateDependencyGraph.bat
+	::CALL GenerateDependencyGraph.bat
 	CALL RemoveExceptions.bat
 	CALL RemoveDebugNDebug.bat
 	CALL SetupNothrownew.bat
 	CALL SetupTools.bat
-	::CALL SetupWPF_Controls.bat
+	CALL SetupWPF_Controls.bat
 	echo Cleaning up...
 	CALL RemoveTempFiles.bat
 	echo Done!
