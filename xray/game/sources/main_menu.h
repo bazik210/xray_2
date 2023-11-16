@@ -71,6 +71,7 @@ private:
 #endif //#ifdef XRAY_RENDERER_FLASH
 
 	game_world&		m_game_world;
+	bool			m_fly_mode;
 
 }; // class main_menu
 

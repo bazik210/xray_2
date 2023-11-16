@@ -185,7 +185,8 @@ main_menu_ui(xray::ui::world& ui_world)
 
 main_menu::main_menu( game& g, game_world& w ) 
 :super			( g ),
-m_game_world	( w )
+m_game_world	( w ),
+m_fly_mode		( false )
 {
 #ifndef MASTER_GOLD
 	m_dbg_name							= "Main Menu";

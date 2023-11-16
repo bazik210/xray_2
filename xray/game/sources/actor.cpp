@@ -449,8 +449,7 @@ void actor::process_input_events( )
 		m_actor_physics_controller->set_noclip();
 	}
 	else if (!g_noclip_enabled && m_noclip) {
-		m_noclip = false;
-		m_actor_physics_controller->set_noclip(false);
+		disable_noclip();
 	}
 
 	if (m_actor_input_controller->onframe_jump() && !g_noclip_enabled) {
@@ -1190,6 +1189,13 @@ void actor::calculate_weapon_matrix( float4x4* const matrices, float4x4& result 
 {
 	float4x4 character_render_transform	= create_rotation(float3(0.0f, math::pi, 0.0f)) * m_character_transform * create_translation(float3(0.f, 0.04f, 0.f));
 	result								= matrices[m_weapon_bone_idx] * character_render_transform;
+}
+
+void actor::disable_noclip()
+{
+	g_noclip_enabled = false;
+	m_noclip = false;
+	m_actor_physics_controller->set_noclip(false);
 }
 
 }

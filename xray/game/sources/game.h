@@ -266,6 +266,7 @@ public:
 	snd_list::const_iterator*				m_dead_snd_it;
 	object_volumetric_sound*				m_dead_sound;
 	u32										m_delay;
+	xray::engine::console*					m_console;
 
 private:
 	timing::timer							m_timer;
@@ -277,7 +278,6 @@ private:
 	xray::sound::sound_scene_ptr			m_sound_scene;
 
 	stats_graph*							m_fps_graph;
-	xray::engine::console*					m_console;
 	stats*									m_stats;
 	npc_stats*								m_active_npc_stats;
 	key_binder*								m_key_binder;

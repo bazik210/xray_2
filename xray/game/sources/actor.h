@@ -60,6 +60,8 @@ public:
 	
 	bool			m_noclip;
 
+	void			disable_noclip				( );
+
 private:
 	void			on_resources_ready			( resources::queries_result& data );
 	void			on_load_animations			( resources::queries_result& data );

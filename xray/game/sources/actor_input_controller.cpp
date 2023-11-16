@@ -12,10 +12,11 @@
 #include <xray/input/keyboard.h>
 #include <xray/input/mouse.h>
 #include <xray/input/world.h>
+#include <xray/engine/console.h>
+
 
 namespace stalker2
 {
-
 actor_input_controller::actor_input_controller( game_scene& w )
 :super			( w ),
 m_sprint_toggle ( false ),
@@ -49,7 +50,7 @@ bool actor_input_controller::on_keyboard_action(input::world* input_world,
 		m_wpn_2 = !m_wpn_2;
 	else if (action == xray::input::kb_key_down && game_action == kWPN_RELOAD)
 		m_reload = !m_reload;
-	else if (action == xray::input::kb_key_down && (game_action == kCROUCH || game_action == kSECONDARY))
+	else if (action == xray::input::kb_key_down && !action == xray::input::kb_key_hold && (game_action == kCROUCH || game_action == kSECONDARY))
 		m_crouch = !m_crouch;
 
 	return false;
@@ -175,6 +176,10 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	m_frame_events.m_onframe_jump			= false;
 	m_frame_events.m_onframe_crouch			= false;
 
+	if (m_actor && m_actor->m_noclip == true && m_game_scene.get_game().m_console && !m_game_scene.get_game().m_console->get_active() && input_world->get_keyboard()->is_key_down(xray::input::key_return)) {
+		m_actor->disable_noclip();
+	}
+
 	if( m_frame_events.empty() )
 		return;
 
@@ -206,7 +211,7 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 	if ( m_actor && !m_actor->m_noclip && m_frame_events.action_present(kJUMP))
 		m_frame_events.m_onframe_jump		= true;
 
-	if (m_actor && m_actor->m_noclip && (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)))
+	if (m_actor && !m_actor->m_noclip && (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)))
 		m_frame_events.m_onframe_crouch		= true;
 
 	if (m_actor && m_actor->m_noclip && (m_frame_events.action_present(kCROUCH) || m_frame_events.action_present(kSECONDARY)))

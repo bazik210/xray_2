@@ -179,17 +179,17 @@ void free_fly_camera::tick( )
 	if ( mouse_event_present(input::mouse_button_right) )
 		forward					-= factor*.1f;
 
-	if ( keyb_event_present(input::key_d) )
-		right				+= factor*.1f;
-	
-	if ( keyb_event_present(input::key_a) )
-		right				-= factor*.1f;
-	
 	if ( keyb_event_present(input::key_w) )
 		up					+= factor*.1f;
 	
 	if ( keyb_event_present(input::key_s) )
 		up					-= factor*.1f;
+
+	if ( keyb_event_present(input::key_d) )
+		right				+= factor*.1f;
+	
+	if ( keyb_event_present(input::key_a) )
+		right				-= factor*.1f;
 
 	float const	angle_x			= angle_factor * math::deg2rad( m_mouse_move.y );
 	float const	angle_y			= angle_factor * math::deg2rad( m_mouse_move.x ) * 0.75f;
