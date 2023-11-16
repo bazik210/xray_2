@@ -43,6 +43,12 @@ physical_path_mounter::physical_path_mounter	(query_mount_arguments & args, virt
 		m_mount_ptr						=	mount_ptr_raw;
 	}
 
+	if (args.mount_ptr && !m_mount_ptr.c_ptr())
+	{
+		m_mount_ptr = args.mount_ptr;
+		LOG_INFO("what the f.. duck, call chechin");
+	}
+
 	if ( m_args.asynchronous_device )
 	{
 		synchronous_device_interface	device(m_args.asynchronous_device, m_args.allocator);

@@ -72,7 +72,7 @@ animation_node_interval^	get_interval			(u32 index);
 		property String^ path
 		{
 			String^		get() {return m_path;};
-			void		set(String^ new_val) {m_path = source_path+new_val+extension;};
+			void		set(String^ new_val) {m_path = /*source_path+*/new_val+extension;};
 		};
 		[CategoryAttribute("Group properties"), DisplayNameAttribute("position"), node_property_attribute(false, false), node_sub_properties_attribute(false, false), ReadOnlyAttribute(true), BrowsableAttribute(false)]
 		property System::Windows::Point position
