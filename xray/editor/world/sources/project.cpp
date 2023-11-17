@@ -631,13 +631,13 @@ bool project::save_needed( )
 
 void project::set_modified_caption( bool const is_modified )
 {
-	m_level_editor->ide()->Text	= m_project_name + (is_modified ? " (Modified)" : "") + " - X-Ray Editor (Build #" + xray::build::build_station_build_id() + ", " + gcnew System::String( xray::build::build_date() ) + ")";
+	m_level_editor->ide()->Text	= m_project_name + (is_modified ? " (Modified)" : "") + " - Crash-Hole Editor (Build #" + xray::build::build_station_build_id() + ", " + gcnew System::String( xray::build::build_date() ) + ")";
 }
 
 void project::set_changed( )
 {
 	if ( !m_changed )
-		m_level_editor->ide()->Text		= m_project_name + " (Modified) - X-Ray Editor";
+		m_level_editor->ide()->Text		= m_project_name + " (Modified) - Crash-Hole Editor";
 
 	m_changed = true;
 }

@@ -118,6 +118,8 @@ public:
 			void				set_sky_material		(material_effects_instance_ptr const& in_material) { m_sky_material = in_material; }
 			material_effects_instance_ptr const& get_sky_material() const { return m_sky_material; }
 			inline bool			sky_enabled				( ) const { return m_sky_enabled;}
+
+			u32					get_render_instances_count	( ) { return m_render_model_instances.capacity(); }
 private:
 	friend	class				scene_cook;
 	

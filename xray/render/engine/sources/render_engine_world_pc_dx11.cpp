@@ -732,6 +732,9 @@ void engine::world::update_model( xray::render::scene_ptr const& in_scene, rende
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
 
+	if (!scene->get_render_instances_count())
+		return;
+
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
 	model->set_transform				( transform );
 	scene->modify_model					( model );
@@ -740,6 +743,9 @@ void engine::world::update_model( xray::render::scene_ptr const& in_scene, rende
 void engine::world::remove_model( xray::render::scene_ptr const& in_scene, render_model_instance_ptr const& v)
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
+
+	if (!scene->get_render_instances_count())
+		return;
 
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
 	scene->remove_model( model);
