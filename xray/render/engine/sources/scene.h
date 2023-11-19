@@ -80,6 +80,7 @@ public:
 			void		add_model						( render_model_instance_impl_ptr v);
 			void		modify_model					( render_model_instance_impl_ptr v);
 			void		remove_model					( render_model_instance_impl_ptr v);
+			bool		verify_model					( render_model_instance_impl_ptr v);
 	
 			void		add_light						( u32 id, render::light_props const& props);
 			void		update_light					( u32 id, render::light_props const& props);

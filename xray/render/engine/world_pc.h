@@ -247,6 +247,7 @@ private:
 	u32					m_frame_id;
 	bool				m_initialized;
 	bool				m_enable_terrain_debug_mode;
+	xray::render::scene* m_scene;
 }; // class render_engine_world
 
 } // namespace engine

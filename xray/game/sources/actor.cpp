@@ -452,7 +452,7 @@ void actor::process_input_events( )
 		disable_noclip();
 	}
 
-	if (m_actor_input_controller->onframe_jump() && !g_noclip_enabled) {
+	if (m_actor_input_controller->onframe_jump() && !g_noclip_enabled && !m_actor_input_controller->on_frame_crouch()) {
 		m_actor_physics_controller->jump();
 	}
 
@@ -900,13 +900,13 @@ void actor::tick()
 
 	}
 
-	if (!m_actor_input_controller->on_frame_crouch() && m_actor_input_controller->m_crouch && !g_noclip_enabled)
+	if (!m_actor_input_controller->on_frame_crouch() && m_actor_input_controller->m_crouch && !g_noclip_enabled && !m_actor_input_controller->onframe_jump())
 	{
 		m_actor_input_controller->m_crouch = false;
 
 		disable_crouch();
 	}
-	else if (m_actor_input_controller->on_frame_crouch() && !m_actor_input_controller->m_crouch && !g_noclip_enabled)
+	else if (m_actor_input_controller->on_frame_crouch() && !m_actor_input_controller->m_crouch && !g_noclip_enabled && !m_actor_input_controller->onframe_jump())
 	{
 		m_actor_input_controller->m_crouch = true;
 

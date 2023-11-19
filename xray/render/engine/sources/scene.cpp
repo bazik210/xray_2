@@ -159,6 +159,14 @@ void scene::modify_model( render_model_instance_impl_ptr v)
 	m_models_tree->move			( &v->m_collision_object, v->transform() );
 }
 
+bool scene::verify_model( render_model_instance_impl_ptr v)
+{
+	if (std::find(m_render_model_instances.begin(), m_render_model_instances.end(), v) != m_render_model_instances.end())
+		return true;
+
+	return false;
+}
+
 void scene::remove_model( render_model_instance_impl_ptr v)
 {
 	render_model_instances::iterator it	= std::find(m_render_model_instances.begin(), m_render_model_instances.end(), v);

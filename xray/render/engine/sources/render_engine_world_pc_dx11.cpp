@@ -720,6 +720,8 @@ void engine::world::add_model( xray::render::scene_ptr const& in_scene, render::
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
 
+	m_scene = scene;
+
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
 	
 	if (apply_transform)
@@ -736,6 +738,11 @@ void engine::world::update_model( xray::render::scene_ptr const& in_scene, rende
 		return;
 
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
+	if (scene != m_scene) {
+		if (!scene->verify_model(model))
+			return;
+	}
+
 	model->set_transform				( transform );
 	scene->modify_model					( model );
 }
@@ -748,6 +755,11 @@ void engine::world::remove_model( xray::render::scene_ptr const& in_scene, rende
 		return;
 
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
+	if (scene != m_scene) {
+		if (!scene->verify_model(model))
+			return;
+	}
+
 	scene->remove_model( model);
 }
 
