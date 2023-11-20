@@ -260,7 +260,7 @@ function(xr_setup_static_libs)
     xr_set_target_defaults_static_lib_CPP(engine)
     xr_set_target_defaults_static_lib_CPP(engine_pc)
     xr_set_target_defaults_static_lib_CPP(input)
-    xr_set_target_defaults_static_lib_CPP(particle)
+    xr_set_target_defaults_particle_lib_CPP(particle)
     xr_set_target_defaults_static_lib_CPP(physics)
     xr_set_target_defaults_static_lib_CPP(sound)
     xr_set_target_defaults_static_lib_CPP(ui)
@@ -839,6 +839,63 @@ function(xr_set_target_defaults_static_lib_CPP TARGET)
     target_compile_options(${TARGET} PRIVATE
         $<$<CONFIG:Release>:/GF /Oi /Ox /Ob2 /Ot /Oy /GT /GS- /fp:fast>
         $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Ox /Ot /Oy /Ob2 /GT /GS- /fp:fast>
+        $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
+        /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
+        /W4
+        /Zi
+        /MD
+        /Y-
+        /MP
+    )
+
+    set_target_properties(${TARGET} PROPERTIES LINK_FLAGS "/LARGEADDRESSAWARE")
+
+    xr_disable_target_exception_handling(${TARGET})
+
+    # set Additional Include Directories
+    target_include_directories(${TARGET} PRIVATE
+        ${SOLUTION_DIR_INCLUDE_PATH}
+        ${THIRDPARTY_DIR_INCLUDE_PATH}
+    )
+	
+    # set Additional Library Directories
+    target_link_directories(${TARGET} PRIVATE
+        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+    )
+
+    # List all target properties
+    xr_print_target_compile_definitions(${TARGET})
+    xr_print_target_compile_flags(${TARGET})
+
+endfunction()
+
+function(xr_set_target_defaults_particle_lib_CPP TARGET)
+    # set output file name
+    xr_set_lib_name(${TARGET})
+
+    if("${CMAKE_GENERATOR_PLATFORM}" STREQUAL "x64")
+        # set platform as x64
+        target_compile_definitions(${TARGET} PRIVATE
+            PLATFORM_WIN64
+            WIN64
+            WINDOWS
+            _HAS_EXCEPTIONS=0
+    #         XRAY_STATIC_LIBRARIES
+        )
+    else()
+        # set platform as x86
+        target_compile_definitions(${TARGET} PRIVATE
+            PLATFORM_WIN32
+            WIN32
+            WINDOWS
+            _HAS_EXCEPTIONS=0
+    #         XRAY_STATIC_LIBRARIES
+        )
+    endif()
+    # set compiler flags																				
+    target_compile_options(${TARGET} PRIVATE
+        $<$<CONFIG:Release>:/GF /Oi /Od /Ob1 /GT /GS- /fp:fast>
+        $<$<CONFIG:RelWithDebInfo>:/GF /Oi /Od /Ob1 /GT /GS- /fp:fast>
         $<$<CONFIG:Debug>:/GF- /Gy /RTC1 /fp:precise /fp:except->
         /wd4005 /wd4131 /wd4275 /wd4458 /wd4459 /wd4945
         /W4
