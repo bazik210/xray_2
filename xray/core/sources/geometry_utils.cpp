@@ -227,8 +227,11 @@ bool geometry_collector::write_obj_file( pcstr fn, float const scale, bool save_
 	synchronous_device_interface const & device	= resources::get_synchronous_device();
 	
 	file_type*	f;
+
+	fs_new::native_path_string fn_path;
+	fn_path = fn_path.convert(fn);
 	
-	if(!device->open(&f, fn, file_mode::create_always, file_access::write, assert_on_fail_false))
+	if(!device->open(&f, fn_path, file_mode::create_always, file_access::write, assert_on_fail_false))
 	{
 		LOG_INFO					("unable to open file [%s]", fn);
 		return false;
