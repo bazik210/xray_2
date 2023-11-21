@@ -69,6 +69,9 @@ private:
 			void	update_statistic			( );
 			void	on_statistic_updated		( );
 			void	update_window				( strings::text_tree_item* item, render::scene_view_ptr const& scene_view );
+
+public:
+			void	update_sound_scene			( sound_scene_ptr const& scene );
 private:
 	debug_statistic*				m_statistic[2];
 	ui::progress_bar**				m_progress_bars;

@@ -1338,7 +1338,6 @@ void sound_scene::dump_debug_stream_writing	( ) const
 
 debug_statistic* sound_scene::create_statistic	( ) const
 {
-	return 0;
 	debug_statistic* statistic					= XRAY_NEW_IMPL( g_allocator, debug_statistic )( );
 	statistic->m_listener_position				= m_listener.m_position;
 	statistic->m_listener_orient_front			= m_listener.m_orient_front;

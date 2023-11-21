@@ -583,51 +583,54 @@ void renderer::draw_text( pcstr text, xray::math::float2 const& position, xray::
 {
 	XRAY_UNREFERENCED_PARAMETERS(text, &position, in_font, &in_color);
 	// TODO:
-// 	vectora<xray::render::ui::vertex>	ui_vertices(g_allocator);
-// 
-// 	u32 symb_count			= strlen(text);
-// 	u32 max_verts			= symb_count*4; // use TriangleList+ IndexBuffer(0-1-2, 3-2-1)
-// 	
-// 	pcstr ch				= text;
-// 	float const height		= in_font->get_height();
-// 	float height_ts			= in_font->get_height_ts();
-// 
-// 	float curr_word_len		= 0.0f;
-// 	pcstr next_word			= NULL;
-// 
-// 	//if(m_mode==tm_multiline)
-// 	in_font->parse_word			(ch, curr_word_len, next_word);
-// 
-// 	
-// 	//xray::render::ui::command* cmd = render.create_command(max_verts, prim_type, point_type);
-// 	for(u32 i=0; i<symb_count; ++i, ++ch)
-// 	{
-// 		u32 clr = in_color;//(i>=(u32)idx1 && i<(u32)idx2)?sel_clr:in_color;
-// 
-// 		float3 uv			= in_font->get_char_tc_ts(*ch);
-// 		float3 const& tc	= in_font->get_char_tc(*ch);
-// 
-// 		//if((m_mode==tm_multiline) && (ch==next_word))
-// 		//{
-// 		//	parse_word		(ch, m_font, curr_word_len, next_word);
-// 		//	if(pos_rt.x+curr_word_len >get_size().x)
-// 		//	{
-// 		//		pos_rt.x		= 0.0f;
-// 		//		pos_rt.y		+= height;
-// 		//	}
-// 		//}
-// 
-// 		cmd->push_point		(pos.x+pos_rt.x,		pos.y+pos_rt.y+height,	0.0f, clr, uv.x,		uv.y+height_ts);
-// 		cmd->push_point		(pos.x+pos_rt.x,		pos.y+pos_rt.y,			0.0f, clr, uv.x,		uv.y);
-// 		cmd->push_point		(pos.x+pos_rt.x+tc.z,	pos.y+pos_rt.y+height,	0.0f, clr, uv.x+uv.z,	uv.y+height_ts);
-// 		cmd->push_point		(pos.x+pos_rt.x+tc.z,	pos.y+pos_rt.y,			0.0f, clr, uv.x+uv.z,	uv.y);
-// 
-// 		pos_rt.x			+= tc.z;
-// 	}
-// //	cmd->set_shader();
-// //	cmd->set_geom();
-// //	w.ui().destroy_command(cmd);
-// 	render.push_command		(cmd);
+ //	vectora<xray::render::ui::vertex>	ui_vertices(g_allocator);
+ //
+ //	u32 symb_count			= strlen(text);
+ //	u32 max_verts			= symb_count*4; // use TriangleList+ IndexBuffer(0-1-2, 3-2-1)
+ //	
+ //	pcstr ch				= text;
+ //	float const height		= in_font->get_height();
+ //	float height_ts			= in_font->get_height_ts();
+ //
+ //	float curr_word_len		= 0.0f;
+ //	pcstr next_word			= NULL;
+ //
+ //	//if(m_mode==tm_multiline)
+ //	in_font->parse_word			(ch, curr_word_len, next_word);
+ //
+ //	
+ //	xray::render::ui::command* cmd = render.create_command(max_verts, prim_type, point_type);
+ //	for(u32 i=0; i<symb_count; ++i, ++ch)
+ //	{
+ //		u32 clr = in_color.m_value;//(i>=(u32)idx1 && i<(u32)idx2)?sel_clr:in_color;
+ //
+ //		float3 uv			= in_font->get_char_tc_ts(*ch);
+ //		float3 const& tc	= in_font->get_char_tc(*ch);
+
+	//	float2 pos_rt			(0, 0);
+	//	float2 pos				= position;
+ //
+ //		//if((m_mode==tm_multiline) && (ch==next_word))
+ //		//{
+ //		//	parse_word		(ch, m_font, curr_word_len, next_word);
+ //		//	if(pos_rt.x+curr_word_len >get_size().x)
+ //		//	{
+ //		//		pos_rt.x		= 0.0f;
+ //		//		pos_rt.y		+= height;
+ //		//	}
+ //		//}
+ //
+ //		cmd->push_point		(pos.x+pos_rt.x,		pos.y+pos_rt.y+height,	0.0f, clr, uv.x,		uv.y+height_ts);
+ //		cmd->push_point		(pos.x+pos_rt.x,		pos.y+pos_rt.y,			0.0f, clr, uv.x,		uv.y);
+ //		cmd->push_point		(pos.x+pos_rt.x+tc.z,	pos.y+pos_rt.y+height,	0.0f, clr, uv.x+uv.z,	uv.y+height_ts);
+ //		cmd->push_point		(pos.x+pos_rt.x+tc.z,	pos.y+pos_rt.y,			0.0f, clr, uv.x+uv.z,	uv.y);
+ //
+ //		pos_rt.x			+= tc.z;
+ //	}
+ ////	cmd->set_shader();
+ ////	cmd->set_geom();
+ ////	w.ui().destroy_command(cmd);
+ //	render.push_command		(cmd);
 }
 
 //flash_renderer& renderer::get_flash_renderer( )

@@ -9,7 +9,7 @@
 
 namespace xray {
 
-class debug_policy
+class XRAY_CORE_API debug_policy
 {
 public:
 	enum { debug_enabled = true };

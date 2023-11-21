@@ -81,7 +81,7 @@ public:
 	receiver_collision*		m_next;
 }; // struct receiver_collision
 
-class sound_scene :	public resources::unmanaged_resource,
+class XRAY_SOUND_API sound_scene :	public resources::unmanaged_resource,
 					private boost::noncopyable
 {
 public:

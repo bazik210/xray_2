@@ -33,7 +33,8 @@ sound_instance_proxy_internal::sound_instance_proxy_internal(	sound_scene& scene
 	m_destruction_pending	( false ),
 	m_volumetric_radius		( 0.0f ),
 	m_type					( point ),
-	m_collision				( 0 )
+	m_collision				( 0 ),
+	m_cone_type				( human )
 {
 }
 

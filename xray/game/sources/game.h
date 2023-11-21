@@ -267,6 +267,7 @@ public:
 	object_volumetric_sound*				m_dead_sound;
 	u32										m_delay;
 	xray::engine::console*					m_console;
+//	bool									m_sound_created;
 
 private:
 	timing::timer							m_timer;

@@ -35,7 +35,7 @@ enum sound_type
 	volumetric
 };
 
-class sound_instance_proxy_internal : public sound_instance_proxy
+class XRAY_SOUND_API sound_instance_proxy_internal : public sound_instance_proxy
 {
 public:
 	typedef intrusive_list	<	sound_order,

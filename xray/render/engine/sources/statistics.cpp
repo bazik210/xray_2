@@ -178,16 +178,16 @@ u32 statistics_group::render(xray::ui::world& ui_world, u32 x, u32 y)
  	
  	for (statistics_base* it = first_statistics; it != 0; it = it->m_next)
  	{
-		if (it->m_name != "render frame time" && 
-			it->m_name != "num draw calls" && 
-			it->m_name != "num total rendered triangles" && 
-			it->m_name != "num visible triangles" && 
-			it->m_name != "FPS" &&
-			it->m_name != "culling time" && 
-			it->m_name != "num total patches" && 
-			it->m_name != "num rendered patches" && 
-			it->m_name != "num visible patches")
-			continue;
+		//if (it->m_name != "render frame time" && 
+		//	it->m_name != "num draw calls" && 
+		//	it->m_name != "num total rendered triangles" && 
+		//	it->m_name != "num visible triangles" && 
+		//	it->m_name != "FPS" &&
+		//	it->m_name != "culling time" && 
+		//	it->m_name != "num total patches" && 
+		//	it->m_name != "num rendered patches" && 
+		//	it->m_name != "num visible patches")
+		//	continue;
 		
  		fs_new::virtual_path_string value;
  		it->print(value);
@@ -244,10 +244,10 @@ void statistics::render(xray::ui::world& ui_world, u32 x, u32 y)
 	
  	for (statistics_group* it = first_group; it != 0; it = it->m_next)
  	{
-		if (it != &general_stat_group && 
-			it != &visibility_stat_group &&
-			it != &grass_stat_group)
-			continue;
+		//if (it != &general_stat_group && 
+		//	it != &visibility_stat_group &&
+		//	it != &grass_stat_group)
+		//	continue;
 		
 		if (y_offset > 800)
 		{

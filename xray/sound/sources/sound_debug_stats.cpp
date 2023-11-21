@@ -131,6 +131,11 @@ void sound_debug_stats::update_statistic( )
 
 }
 
+void sound_debug_stats::update_sound_scene(sound_scene_ptr const& scene)
+{
+	m_scene = static_cast_checked<sound_scene*>(scene.c_ptr());
+}
+
 void sound_debug_stats::on_statistic_updated( )
 {
 	if ( m_actual_statistic == -1 )

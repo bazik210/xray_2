@@ -178,6 +178,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_dead_snd_it			( NULL ),
 	m_dead_sound			( NULL ),
 	m_delay					( 0 )
+//	m_sound_created			( false )
 {
 	query_render_scene		( );
 	query_sound_scene		( );
@@ -533,6 +534,11 @@ void game::tick( u32 const current_frame_id )
 	//	game_test_suite::run_tests	( );
 	//	game_test_run				= true;
 	//}
+
+//	if (m_ui_world && m_sound_created) {
+//		m_sound_created = false;
+//		m_sound_stats->update_sound_scene(m_sound_scene);
+//	}
 
 	if( !get_active_scene() )
 	{
