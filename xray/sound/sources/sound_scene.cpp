@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created		: 02.08.2011
 //	Author		: Dmitry Kulikov
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
@@ -1336,9 +1337,9 @@ void sound_scene::dump_debug_stream_writing	( ) const
 
 }
 
-debug_statistic* sound_scene::create_statistic	( ) const
+debug_statistic* sound_scene::create_statistic	( )
 {
-	debug_statistic* statistic					= XRAY_NEW_IMPL( g_allocator, debug_statistic )( );
+	statistic									= XRAY_NEW_IMPL( g_allocator, debug_statistic )( );
 	statistic->m_listener_position				= m_listener.m_position;
 	statistic->m_listener_orient_front			= m_listener.m_orient_front;
 	statistic->m_listener_orient_top			= m_listener.m_orient_top;
@@ -1350,13 +1351,13 @@ debug_statistic* sound_scene::create_statistic	( ) const
 	sound_instance_proxy_internal* proxy		= m_active_proxies.front( );
 	while ( proxy )
 	{
-		proxy_statistic* prx_stats					= XRAY_NEW_IMPL( g_allocator, proxy_statistic )( );
+		prx_stats									= XRAY_NEW_IMPL( g_allocator, proxy_statistic )( );
 		R_ASSERT									( prx_stats );
 		proxy->fill_statistic						( *prx_stats );
 		sound_propagator* prop						= proxy->get_propagators( ).front( );
 		while ( prop )
 		{
-			propagator_statistic* prop_stats			= XRAY_NEW_IMPL( g_allocator, propagator_statistic )( );
+			prop_stats									= XRAY_NEW_IMPL( g_allocator, propagator_statistic )( );
 			R_ASSERT									( prop_stats );
 			prop->fill_statistic						( *prop_stats );
 			prx_stats->m_propagator_statistics.push_back( prop_stats );

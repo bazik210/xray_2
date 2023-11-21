@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created		: 04.03.2009
 //	Author		: Andrew Kolomiets
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
@@ -304,8 +305,8 @@ void game_world::on_activate( )
 	super::on_activate			( );
 	m_camera_director->on_focus	( true );
 	
-	if(get_sound_scene())
-		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
+//	if(get_sound_scene())
+//		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
 
 if (m_key_camera)
 	switch_to_free_fly_camera();
@@ -418,16 +419,21 @@ void game_world::on_resources_ready( resources::queries_result& data )
 
 	m_scene				= static_cast_resource_ptr< xray::render::scene_ptr >( data[0].get_unmanaged_resource() );
 	m_scene_view		= static_cast_resource_ptr< xray::render::scene_view_ptr >( data[1].get_unmanaged_resource() );
-
 	m_sound_scene		= static_cast_resource_ptr< xray::sound::sound_scene_ptr >( data[2].get_unmanaged_resource() );
-	
+
+	//we are forced to use game_world sound scene, for some reason game sound_scene produce a crash :[
+
 	if(is_active())
-		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 1000, 0 );
+		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( m_sound_scene, 1000, 0 );
+
+	#ifndef MASTER_GOLD
+		get_game().load_sound_stats();
+	#endif //#ifndef MASTER_GOLD
 }
 
 void game_world::clear_resources( )
 {
-	get_game().get_sound_world().get_logic_world_user().remove_sound_scene	( get_sound_scene() );
+	get_game().get_sound_world().get_logic_world_user().remove_sound_scene	( m_sound_scene );
 }
 
 void game_world::tmp_actor_ready( actor* a )

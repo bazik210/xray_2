@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created 	: 22.12.2009
 //	Author		: Dmitriy Iassenev
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
@@ -694,7 +695,7 @@ void sound_world::remove_scene_from_active	( sound_scene& scene )
 	m_active_scenes.erase			( &scene );
 }
 
-void sound_world::set_active_sound_scene_impl(	sound_scene& scene,
+void sound_world::set_active_sound_scene_impl(	sound_scene* scene,
 												u32 fade_in_time,
 												u32 fade_out_time  )
 {
@@ -708,7 +709,7 @@ void sound_world::set_active_sound_scene_impl(	sound_scene& scene,
 		#endif //#ifndef MASTER_GOLD
 	}
 
-	m_current_scene					= &scene;
+	m_current_scene					= scene;
 	m_current_scene->fade_in		( *this, fade_in_time );
 }
 

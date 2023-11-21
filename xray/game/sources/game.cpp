@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created 	: 11.11.2008
 //	Author		: Dmitriy Iassenev
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
@@ -278,11 +279,6 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_lobby_menu				= NEW( lobby_menu )( *this );
 
 	create_debug_window			( );
-
-#ifndef MASTER_GOLD
-	m_sound_stats				= NEW( xray::sound::sound_debug_stats )( g_allocator, m_sound_world.get_logic_world_user(), m_sound_scene, *m_ui_world );
-#endif //#ifndef MASTER_GOLD
-
 	register_console_commands	( );
 
 	m_viewport.left				= 0.f;
@@ -310,6 +306,11 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 		m_is_active				= false;
 		on_application_activate	( );
 	}
+}
+
+void game::load_sound_stats()
+{
+	m_sound_stats				= NEW( xray::sound::sound_debug_stats )( g_allocator, m_sound_world.get_logic_world_user(), get_game_world().get_sound_scene(), *m_ui_world);
 }
 
 void game::speedtree_loaded(resources::queries_result& data, xray::render::game::renderer* r)
@@ -361,8 +362,6 @@ void game::query_render_scene( )
 	xray::const_buffer			temp_buffer( "", 1 );
 	xray::resources::creation_request requests[] = 
 	{
-//		xray::resources::creation_request( "game_scene", temp_buffer, resources::scene_class ),
-//		xray::resources::creation_request( "game_scene_view", temp_buffer, resources::scene_view_class ),
 		xray::resources::creation_request( "game_render_output_window", temp_buffer, resources::render_output_window_class )
 	};
  	xray::resources::query_create_resources(

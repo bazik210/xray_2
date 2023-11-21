@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created 	: 22.12.2009
 //	Author		: Dmitriy Iassenev
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
@@ -141,7 +142,7 @@ public:
 			void	remove_scene_from_active		( sound_scene& scene );
 
 
-			void	set_active_sound_scene_impl		(	sound_scene& scene,
+			void	set_active_sound_scene_impl		(	sound_scene* scene,
 														u32 fade_in_time,
 														u32 fade_out_old_scene_time  );
 

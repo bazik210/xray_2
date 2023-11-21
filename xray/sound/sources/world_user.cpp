@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created		: 05.09.2011
 //	Author		: Dmitry Kulikov
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
@@ -139,11 +140,12 @@ void world_user::set_active_sound_scene	(	sound_scene_ptr& scene,
 											u32 fade_out_old_scene_time  )
 {
 	R_ASSERT					( scene );
-	sound_scene& scn			= static_cast_checked<sound_scene&>( *scene.c_ptr() );
+	sound_scene* scn			= static_cast_checked<sound_scene*>( scene.c_ptr() );
 
 	functor_order* order		= XRAY_NEW_IMPL( m_allocator, functor_order )
-	(	
-		boost::bind( &sound_world::set_active_sound_scene_impl, m_owner_world,  boost::ref( scn ), fade_in_time, fade_out_old_scene_time )
+	(
+
+		boost::bind( &sound_world::set_active_sound_scene_impl, m_owner_world, scn, fade_in_time, fade_out_old_scene_time)
 	);
 
 	add_order							( order );

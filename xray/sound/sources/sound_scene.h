@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created		: 02.08.2011
 //	Author		: Dmitry Kulikov
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2011
 ////////////////////////////////////////////////////////////////////////////
 
@@ -203,7 +204,7 @@ public:
 				bool			is_debug_stream_writing_enabled		( ) const { return m_is_debug_stream_writing_enabled != 0; }
 				void			dump_debug_stream_writing			( ) const;
 
-			debug_statistic*	create_statistic					( ) const;
+			debug_statistic*	create_statistic					( );
 				void			delete_statistic					( debug_statistic* statistic ) const;
 #endif //#ifndef MASTER_GOLD
 
@@ -217,6 +218,11 @@ private:
 								(
 									create_sound_propagator_params const& params
 								);
+public:
+	// stats
+		    debug_statistic* statistic;
+			proxy_statistic* prx_stats;
+			propagator_statistic* prop_stats;
 
 private:
 			void		init_allocators						( );

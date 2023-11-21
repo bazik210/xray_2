@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Created 	: 11.11.2008
 //	Author		: Dmitriy Iassenev
+//  Editor		: loxotron
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 
@@ -137,11 +138,13 @@ public:
 	xray::collision::space_partitioning_tree&		get_spatial_tree		( ) const	{ return *m_spatial_tree; }
 	xray::network::world&	get_network_world		( ) const	{ return m_network_world; }
 
-	sound::sound_scene_ptr const& get_sound_scene	( ) 
+	sound::sound_scene_ptr& get_sound_scene	( ) 
 	
 	{ 
 		return m_sound_scene; 
 	}
+
+	void					set_sound_scene			( sound::sound_scene_ptr& s ) { m_sound_scene = s; }
 
 	inline	engine_user::engine&	engine			( ) const	{ return m_engine; }
 	xray::render::world&			render_world	( )			{ return m_render_world; }
@@ -239,6 +242,9 @@ private:
 		m_ai_world->on_destruction_event			( *object_to_be_destroyed );
 		DELETE										( object_to_be_destroyed );
 	}
+
+public:
+	void					load_sound_stats		();
 
 private:
 	typedef intrusive_list< human_npc,
