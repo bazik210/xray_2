@@ -109,7 +109,7 @@ foreach(var CMAKE_CXX_FLAGS CMAKE_CXX_FLAGS_RELEASE CMAKE_CXX_FLAGS_DEBUG CMAKE_
     string(REPLACE "/RTCs" "" ${var} "${${var}}")
     string(REPLACE "/RTCu" "" ${var} "${${var}}")
     string(REPLACE "/RTC1" "" ${var} "${${var}}")
-    string(REPLACE "/DNDEBUG" "/DDEBUG" ${var} "${${var}}")
+    string(REPLACE "/DNDEBUG" "" ${var} "${${var}}")
 endforeach() 
 
 

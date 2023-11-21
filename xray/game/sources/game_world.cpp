@@ -305,8 +305,8 @@ void game_world::on_activate( )
 	super::on_activate			( );
 	m_camera_director->on_focus	( true );
 	
-//	if(get_sound_scene())
-//		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
+	if(get_sound_scene())
+		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
 
 if (m_key_camera)
 	switch_to_free_fly_camera();
@@ -424,7 +424,7 @@ void game_world::on_resources_ready( resources::queries_result& data )
 	//we are forced to use game_world sound scene, for some reason game sound_scene produce a crash :[
 
 	if(is_active())
-		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( m_sound_scene, 1000, 0 );
+		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 1000, 0 );
 
 	#ifndef MASTER_GOLD
 		get_game().load_sound_stats();
@@ -433,7 +433,7 @@ void game_world::on_resources_ready( resources::queries_result& data )
 
 void game_world::clear_resources( )
 {
-	get_game().get_sound_world().get_logic_world_user().remove_sound_scene	( m_sound_scene );
+	get_game().get_sound_world().get_logic_world_user().remove_sound_scene	( get_sound_scene() );
 }
 
 void game_world::tmp_actor_ready( actor* a )
