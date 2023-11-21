@@ -1141,7 +1141,6 @@ void game::draw_frustum					(
 	);
 }
 
-
 u32 game::get_node_by_name(pcstr node_name) const
 {
 	// 	game_objects_type::const_iterator it		= m_game_objects.begin();
@@ -1188,18 +1187,20 @@ void game::check_selected_npc()
 
 void game::setup_movement_target()
 {
+	float3 cam = m_game_world->get_camera_director()->get_active_camera()->get_inverted_view_matrix().c.xyz();
+	float3 fwd = m_game_world->get_camera_director()->get_active_camera()->get_inverted_view_matrix().k.xyz();
 	collision::ray_objects_type			objects(g_allocator);
 	m_game_world->get_collision_tree()->ray_query(
 		collision_object_type_terrain,
-		get_camera_position(),
-		m_inverted_view_matrix.k.xyz(),
+		cam,
+		fwd,
 		1000.f,
 		objects,
 		collision::objects_predicate_type()
 	);
 
 	if (!objects.empty())
-		m_movement_target = get_camera_position() + m_inverted_view_matrix.k.xyz() * objects.front().distance;
+		m_movement_target = cam + fwd * objects.front().distance;
 }
 
 void game::toggle_npc_creation_mode()
@@ -1229,11 +1230,13 @@ struct get_first_npc_in_camera_direction_predicate : private boost::noncopyable
 monster_npc* game::find_npc_in_camera_direction() const
 {
 	collision::ray_triangles_type game_objects(g_allocator);
+	float3 cam = m_game_world->get_camera_director()->get_active_camera()->get_inverted_view_matrix().c.xyz();
+	float3 fwd = m_game_world->get_camera_director()->get_active_camera()->get_inverted_view_matrix().k.xyz();
 	get_first_npc_in_camera_direction_predicate query_predicate;
 	m_spatial_tree->ray_query(
 		collision_object_type_ai,
-		get_camera_position(),
-		m_inverted_view_matrix.k.xyz(),
+		cam,
+		fwd,
 		50000.f,
 		game_objects,
 		collision::triangles_predicate_type(&query_predicate, &get_first_npc_in_camera_direction_predicate::predicate)
@@ -1251,7 +1254,7 @@ void game::update_npc_stats()
 
 void game::set_navmesh_info(pcstr text) const
 {
-	//m_stats->set_navmesh_info(text);
+	m_stats->set_navmesh_info(text);
 }
 
 void game::query_npc_dictionary()

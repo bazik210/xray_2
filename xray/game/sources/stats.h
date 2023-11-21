@@ -37,6 +37,7 @@ public:
 	void			set_active_scene			( pcstr scene_name );
 	void			set_camera_stats			( float3 const& pos, float3 const& dir );
 	void			set_resources_stats			( pcstr str );
+	void			set_navmesh_info			( pcstr str );
 
 protected:
 	void			create						( );
@@ -49,6 +50,7 @@ protected:
 	ui::text*		m_camera_direction;
 	ui::text*		m_resources_activity;
 	ui::text*		m_active_scene_info;
+	ui::text*		m_navmesh_info;
 
 }; //class stats
 

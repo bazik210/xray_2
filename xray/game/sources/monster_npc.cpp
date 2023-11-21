@@ -31,7 +31,7 @@
 #include <xray/console_command.h>
 
 static bool s_mob_debug_draw		= false;
-static xray::console_commands::cc_bool s_mob_debug_draw_command( "mob_debug_draw", s_mob_debug_draw, true, xray::console_commands::command_type_engine_internal );
+static xray::console_commands::cc_bool s_mob_debug_draw_command( "npc_debug_draw", s_mob_debug_draw, true, xray::console_commands::command_type_engine_internal );
 
 namespace stalker2 {
 
@@ -275,18 +275,18 @@ void monster_npc::draw		( render::game::renderer& render, render::scene_ptr cons
 {
 	//m_model_instance->m_damage_collision->draw_collision( scene, render.debug(), m_transform );
 
-	//m_renderer.debug().draw_aabb(
-	//	m_scene,
-	//	m_collision_object->get_geom_instance().get_aabb().center(),
-	//	m_collision_object->get_geom_instance().get_aabb().extents(),
-	//	math::color( 0, 255, 0 )
-	//);
+	m_renderer.debug().draw_aabb(
+		scene,
+		m_collision_object->get_geom_instance().get_aabb().center(),
+		m_collision_object->get_geom_instance().get_aabb().extents(),
+		math::color( 0, 255, 0 )
+	);
 
-	//m_renderer.debug().draw_origin( m_scene, m_transform, 3.0f );
+	m_renderer.debug().draw_origin( scene, m_transform, 3.0f );
 
 	float3 const& start_pos	= get_eyes_position();
 	float3 const& end_pos	= start_pos + get_eyes_direction() * 2.f;
-	//m_renderer.debug().draw_arrow( m_scene, start_pos, end_pos, math::color( 255, 0, 0 ) );
+	m_renderer.debug().draw_arrow( scene, start_pos, end_pos, math::color( 255, 0, 0 ) );
 
 	if ( m_sound_perceived )
 	{
@@ -302,13 +302,13 @@ void monster_npc::draw		( render::game::renderer& render, render::scene_ptr cons
 #ifndef MASTER_GOLD
 	if ( m_target_vertex )
 	{
-		//m_renderer.debug().draw_origin	( m_scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
+		m_renderer.debug().draw_origin	( scene, math::create_rotation( m_target_vertex->rotation ) * math::create_translation( m_game_world.get_game().movement_target() + float3( 0.f, .5f, 0.f ) ), .5f );
 
 		typedef xray::ai::navigation::path_type	path_type;
 		for ( path_type::const_iterator b = m_navigation_path.begin(), e = m_navigation_path.end(), i = b; i != e; ++i ) {
-			//m_renderer.debug().draw_aabb( m_scene, *i, float3( .1f, .1f, .1f ), xray::math::color( 255, 0, 0 ) );
-			//if ( i != b )
-			//	m_renderer.debug().draw_arrow( m_scene, *(i-1), *i, xray::math::color( 0, 255, 0 ) );
+			m_renderer.debug().draw_aabb( scene, *i, float3( .1f, .1f, .1f ), xray::math::color( 255, 0, 0 ) );
+			if ( i != b )
+				m_renderer.debug().draw_arrow( scene, *(i-1), *i, xray::math::color( 0, 255, 0 ) );
 		}
 	}
 #endif // #ifndef MASTER_GOLD

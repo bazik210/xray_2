@@ -55,6 +55,11 @@ void stats::set_resources_stats( pcstr str )
 	m_resources_activity->set_text	( str );
 }
 
+void stats::set_navmesh_info			( pcstr str )
+{
+	m_navmesh_info->set_text( str );
+}
+
 void stats::create()
 {
 	m_main_window						= m_ui_world.create_window();
@@ -108,4 +113,12 @@ void stats::create()
 	m_active_scene_info->set_color			(0xffffffff);
 	m_main_window->add_child				(m_active_scene_info->w(), true);
 
+	m_navmesh_info							= m_ui_world.create_text();
+	m_navmesh_info->w()->set_visible		(true);
+	m_navmesh_info->w()->set_position		(float2(0.0f, 100.0f));
+	m_navmesh_info->w()->set_size			(float2(300.0f, 40.0f));
+	m_navmesh_info->set_font				(xray::ui::fnt_arial);
+	m_navmesh_info->set_text_mode			(xray::ui::tm_multiline);
+	m_navmesh_info->set_color				(0xffffffff);
+	m_main_window->add_child			(m_navmesh_info->w(), true);
 }
