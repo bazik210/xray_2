@@ -75,7 +75,10 @@ static bool s_draw_stats_value = true;
 static console_commands::cc_bool s_draw_stats("draw_stats", s_draw_stats_value, true, xray::console_commands::command_type_user_specific);
 
 static bool s_ph_draw_aabb_value = false;
-static console_commands::cc_bool s_ph_draw_aabb("ph_draw_aabb", s_ph_draw_aabb_value, false, xray::console_commands::command_type_user_specific);
+static console_commands::cc_bool s_ph_draw_aabb("ph_draw_aabb", s_ph_draw_aabb_value, true, xray::console_commands::command_type_user_specific);
+
+static bool s_ph_draw_sp_tree_value = false;
+static console_commands::cc_bool s_ph_draw_spatial("ph_draw_spatial_tree", s_ph_draw_sp_tree_value, true, xray::console_commands::command_type_user_specific);
 
 static float cam_fov = 58.5f; //70.5f
  
@@ -656,6 +659,11 @@ void game::tick( u32 const current_frame_id )
 
 	if ( (m_debug_window_type != debug_window_none) && !m_console->get_active() )
 		draw_debug_window			( );
+
+	if (get_active_scene() && m_enabled && m_spatial_tree && s_ph_draw_sp_tree_value)
+    {
+        m_spatial_tree->render(get_active_scene(), m_renderer.debug());
+    }
 
 	if (get_active_scene() && m_enabled && s_ph_draw_aabb_value)
 	{
