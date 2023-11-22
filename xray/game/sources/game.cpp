@@ -65,12 +65,17 @@
 	#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 
+#include <xray/physics/sources/bullet_physics_world.h>
+
 using xray::console_commands::cc_delegate;
 using xray::console_commands::cc_float3;
 using xray::console_commands::cc_float;
 
 static bool s_draw_stats_value = true;
 static console_commands::cc_bool s_draw_stats("draw_stats", s_draw_stats_value, true, xray::console_commands::command_type_user_specific);
+
+static bool s_ph_draw_aabb_value = false;
+static console_commands::cc_bool s_ph_draw_aabb("ph_draw_aabb", s_ph_draw_aabb_value, false, xray::console_commands::command_type_user_specific);
 
 static float cam_fov = 58.5f; //70.5f
  
@@ -651,6 +656,11 @@ void game::tick( u32 const current_frame_id )
 
 	if ( (m_debug_window_type != debug_window_none) && !m_console->get_active() )
 		draw_debug_window			( );
+
+	if (get_active_scene() && m_enabled && s_ph_draw_aabb_value)
+	{
+		static_cast<xray::physics::bullet_physics_world*>(m_game_world->get_physics_world())->debug_render_aabb(get_active_scene(), m_renderer.debug());
+	}
 
 	renderer().draw_scene( 
 							get_active_scene(), 

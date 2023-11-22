@@ -24,6 +24,81 @@ void bullet_free( void* memblock )
 namespace xray {
 namespace physics {
 
+class PhysicsDebugDrawer : public btIDebugDraw
+{
+public:
+	//void init();
+	//void shutdown();
+
+	// btIDebugDraw inherit
+	void drawLine(const btVector3& from, const btVector3& to, const btVector3& color) override;
+	void drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color) override;
+	void reportErrorWarning(const char* warningString) override;
+	void draw3dText(const btVector3& location, const char* textString) override;
+	void setDebugMode(int debugMode) override;
+	int getDebugMode() const override;
+
+	void XR_SetScene(xray::render::scene_ptr const* scene);
+	void XR_SetDebugRenderer(xray::render::debug::renderer* debug_renderer);
+
+private:
+	xray::render::scene_ptr const* m_scene;
+	xray::render::debug::renderer* m_debug_renderer;
+	int m_debugMode;
+};
+
+PhysicsDebugDrawer g_physicsDebugDrawer;
+
+void PhysicsDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+{
+	m_debug_renderer->draw_line(*m_scene, from_bullet(from),
+		from_bullet(to), xray::math::color(color.x(), color.y(), color.z(), 1.f), true);
+
+	//g_debugRender->DrawLine(
+	//	glm::vec3(from.x(), from.y(), from.z()),
+	//	glm::vec3(to.x(), to.y(), to.z()),
+	//	glm::vec3(color.x(), color.y(), color.z())
+	//);
+}
+
+void PhysicsDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+{
+	drawLine(
+		PointOnB,
+		PointOnB + normalOnB,
+		color
+	);
+}
+
+void PhysicsDebugDrawer::reportErrorWarning(const char* warningString)
+{
+}
+
+void PhysicsDebugDrawer::draw3dText(const btVector3& location, const char* textString)
+{
+}
+
+void PhysicsDebugDrawer::setDebugMode(int debugMode)
+{
+	m_debugMode = debugMode;
+}
+
+int PhysicsDebugDrawer::getDebugMode() const
+{
+	return m_debugMode;
+}
+
+
+void PhysicsDebugDrawer::XR_SetScene(xray::render::scene_ptr const* scene)
+{
+	m_scene = scene;
+}
+
+void PhysicsDebugDrawer::XR_SetDebugRenderer(xray::render::debug::renderer* debug_renderer)
+{
+	m_debug_renderer = debug_renderer;
+}
+
 btTransform from_xray( float4x4 const& m )
 {
 	math::quaternion q_xray(m);
@@ -170,6 +245,61 @@ void bullet_physics_world::debug_render( xray::render::scene_ptr const& scene, x
 						m_dynamic_test_body->is_active()? cl_active : cl_inactive );
 
 }
+
+void bullet_physics_world::debug_render_aabb(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
+{
+	g_physicsDebugDrawer.XR_SetScene(&scene);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+
+	int debugDrawMode = 0;
+	debugDrawMode |= btIDebugDraw::DBG_DrawAabb;
+	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+
+	m_dynamicsWorld->debugDrawWorld();
+
+	g_physicsDebugDrawer.setDebugMode(0);
+
+	g_physicsDebugDrawer.XR_SetScene(nullptr);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+}
+
+void bullet_physics_world::debug_render_contacts(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
+{
+	g_physicsDebugDrawer.XR_SetScene(&scene);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+
+	int debugDrawMode = 0;
+	debugDrawMode |= btIDebugDraw::DBG_DrawContactPoints;
+	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+
+	m_dynamicsWorld->debugDrawWorld();
+
+	g_physicsDebugDrawer.setDebugMode(0);
+
+	g_physicsDebugDrawer.XR_SetScene(nullptr);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+}
+
+void bullet_physics_world::debug_render_wireframe(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
+{
+	g_physicsDebugDrawer.XR_SetScene(&scene);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+
+	int debugDrawMode = 0;
+	debugDrawMode |= btIDebugDraw::DBG_DrawWireframe;
+	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+
+	m_dynamicsWorld->debugDrawWorld();
+
+	g_physicsDebugDrawer.setDebugMode(0);
+
+	g_physicsDebugDrawer.XR_SetScene(nullptr);
+	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+}
+
 
 void bullet_physics_world::create_test_scene( )
 {

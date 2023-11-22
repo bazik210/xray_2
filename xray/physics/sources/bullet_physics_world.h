@@ -34,6 +34,14 @@ public:
 	virtual	void			tick					( );
 	virtual	void			clear_resources			( ){};
 	virtual	void			debug_render			( xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer ) const;
+
+	/////////////////////////////////////////////////////////////////
+	// in-game stuff
+	virtual void			debug_render_aabb		( xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer ) const;
+	virtual void			debug_render_contacts	( xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer ) const;
+	virtual void			debug_render_wireframe	( xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer ) const;
+	/////////////////////////////////////////////////////////////////
+
 	virtual	void			set_ready				( bool ){};
 	virtual	void			create_test_scene		( );
 
