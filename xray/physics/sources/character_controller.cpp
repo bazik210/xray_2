@@ -116,6 +116,26 @@ void bt_character_controller::set_noclip( bool value )
 	}
 }
 
+void bt_character_controller::set_sweep(bool value)
+{
+	if (!value) {
+		m_bt_controller->setUseGhostSweepTest(false);
+	}
+	else {
+		m_bt_controller->setUseGhostSweepTest(true);
+	}
+}
+
+void bt_character_controller::set_fall_speed(bool value)
+{
+	if (!value) {
+		m_bt_controller->setFallSpeed(0);
+	}
+	else {
+		m_bt_controller->setFallSpeed(55.0);
+	}
+}
+
 void bt_character_controller::set_transform	( float4x4 const& transform )
 {
 	float4x4 m		= transform;

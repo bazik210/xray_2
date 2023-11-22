@@ -1141,8 +1141,9 @@ void actor::tick()
 	if(!g_noclip_enabled && m_game_world.get_game().get_active_scene_view() && m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
 		render::debug::renderer& d	= r.debug();
-		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();
-		float3 ray_dir		= m_character_camera_transform.k.xyz(); //m_character_head_transform.k.xyz();
+
+		float3 ray_from		= (m_camera_bone_idx) ? m_character_camera_transform.c.xyz() : m_character_head_transform.c.xyz();
+		float3 ray_dir		= (m_camera_bone_idx) ? m_character_camera_transform.k.xyz() : m_character_head_transform.k.xyz();
 		float ray_length	= 1000.0f; // weapon config???
 		
 		m_weapon->action				( 1 );//shoot
@@ -1152,7 +1153,7 @@ void actor::tick()
 		physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test( ray_from, ray_dir, ray_length );
 		if (result.m_object) // we are pick something
 		{
-			d.draw_aabb( scene, result.m_hit_point_world, float3(0.01f,0.01f,0.01f), math::color(0,255,0,255));
+			//d.draw_aabb( scene, result.m_hit_point_world, float3(0.01f,0.01f,0.01f), math::color(0,255,0,255));
 			
 			// shooting
 			// weapon snd(2d or 3d???)
@@ -1184,7 +1185,26 @@ void actor::tick()
 		}
 	}
 
+	draw_debug_aabb(r, scene);
+
 	process_input_events();
+}
+
+void actor::draw_debug_aabb(render::game::renderer& r, render::scene_ptr& scene)
+{
+	float3 ray_from = (m_camera_bone_idx) ? m_character_camera_transform.c.xyz() : m_character_head_transform.c.xyz();
+	float3 ray_dir = (m_camera_bone_idx) ? m_character_camera_transform.k.xyz() : m_character_head_transform.k.xyz();
+	float ray_length = 100.0f;
+
+	render::debug::renderer& d = r.debug();
+
+	physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test(ray_from, ray_dir, ray_length);
+
+
+	if (result.m_object)
+	{
+		d.draw_aabb(scene, result.m_hit_point_world, float3(0.01f, 0.01f, 0.01f), math::color(0, 255, 0, 255));
+	}
 }
 
 void actor::calculate_camera_matrix(float4x4* const matrices, float4x4& result) const

@@ -77,6 +77,7 @@ private:
 	void			on_weapon_loaded			(resources::queries_result& data);
 	void			query_new_weapon			(pstr weapon_type, pstr new_anim);
 	void			disable_crouch				( );
+	void			draw_debug_aabb				(render::game::renderer& r, render::scene_ptr& scene);
 
 	static animation::mixing::animation_lexeme get_reload_lexeme(mutable_buffer& buffer, animation::skeleton_animation_ptr animation, float additive);
 
