@@ -26,6 +26,10 @@
 #include "weapon.h"
 #include "key_binder.h"
 #include <xray/console_command.h>
+#include <xray/collision/common_types.h>
+#include <xray/collision/collision_object.h>
+
+#include <xray/collision/space_partitioning_tree.h>
 
 using xray::animation::mixing::playing_type_enum;
 
@@ -1139,7 +1143,7 @@ void actor::tick()
 		render::debug::renderer& d	= r.debug();
 		float3 ray_from		= m_character_camera_transform.c.xyz(); //m_character_head_transform.c.xyz();
 		float3 ray_dir		= m_character_camera_transform.k.xyz(); //m_character_head_transform.k.xyz();
-		float ray_length	= 100.0f; // weapon config???
+		float ray_length	= 1000.0f; // weapon config???
 		
 		m_weapon->action				( 1 );//shoot
 
@@ -1157,6 +1161,25 @@ void actor::tick()
 				// play shootmark snd 3d!!!
 				float const impulse_strength	= 100.f;
 				result.m_object->apply_impulse	( ray_dir*impulse_strength, result.m_hit_point_world );
+			}
+		}
+
+		ai_collision_object const* npc = nullptr;
+
+		//float visibility = 0.f;
+		//if (m_game_world.get_game().ray_query(npc, nullptr, ray_from, ray_dir, ray_length, 0.f, visibility))
+		//{
+		//	if (npc && npc->get_game_object().cast_npc())
+		//		npc->get_game_object().cast_npc()->stop_animation_playing();
+		//}
+
+		xray::collision::ray_objects_type collision_results(*stalker2::g_allocator);
+		if (m_game_world.get_game().get_spatial_tree().ray_query(collision_object_type_ai, ray_from, ray_dir, ray_length, collision_results, collision::objects_predicate_type()))
+		{
+			ai_collision_object const* ai_obj = dynamic_cast<ai_collision_object const*>(collision_results[0].object);
+			if (ai_obj)
+			{
+				if (ai_obj->get_game_object().cast_npc())ai_obj->get_game_object().cast_npc()->stop_animation_playing();
 			}
 		}
 	}
