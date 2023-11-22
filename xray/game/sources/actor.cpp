@@ -48,6 +48,9 @@ static xray::command_line::key	weapon_cl		 ("weapon", "", "", "on load");
 static bool g_thirdperson_value = false;
 console_commands::cc_bool g_thirdperson("thirdperson", g_thirdperson_value, false, console_commands::command_type_user_specific);
 
+static bool s_ph_draw_actor_aabb_value = true;
+static console_commands::cc_bool s_ph_draw_actor_aabb("ph_draw_actor_aabb", s_ph_draw_actor_aabb_value, true, xray::console_commands::command_type_user_specific);
+
 actor::actor( game_world& w )
 :m_character_transform( float4x4().identity() ),
 m_look_pitch		( 0.0f ),
@@ -1185,7 +1188,8 @@ void actor::tick()
 		}
 	}
 
-	draw_debug_aabb(r, scene);
+	if(s_ph_draw_actor_aabb_value)
+		 draw_debug_aabb(r, scene);
 
 	process_input_events();
 }
