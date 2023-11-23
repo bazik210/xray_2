@@ -73,17 +73,6 @@ MStatus save_visuals( solid_visual_collector& collector,
 	return result;
 }
 
-
-struct mesh_descr{
-	pcstr visual;
-	pcstr collision;
-};
-
-mesh_descr input_meshes [] = {
-	{"vis", "col" },
-	{NULL, NULL},
-};
-
 MSyntax solid_visual_exporter::newSyntax()
 {
     MSyntax			syntax;
@@ -177,10 +166,8 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 	CHK_STAT_R					(result);
 	MString last_name			= root_dag_path.partialPathName( &result );
 	CHK_STAT_R					(result);
-
-	mesh_descr& desc = input_meshes[0];
-
-	MString	visual_name			= root_name + "|" + desc.visual;		
+	
+	MString	visual_name			= root_name + "|vis";
 	result						= get_path_by_name( visual_name, dag_path, false );
 
 	if( result.error() )
@@ -221,7 +208,7 @@ MStatus solid_visual_exporter::doIt( const MArgList& args)
 			return			MStatus::kFailure;
 		}
 
-		MString	collision_name		= root_name + "|" + desc.collision;
+		MString	collision_name		= root_name + "|col";
 		result						= get_path_by_name( collision_name, dag_path, false );
 
 		if( !result.error() )

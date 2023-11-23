@@ -15,7 +15,7 @@
 // TODO: place in separate files!
 //------------------------------------------------
 
-#define USE_GPU_TIMERS			1
+#define USE_GPU_TIMERS			0
 #define USE_RENDER_STATISTICS	1
 
 namespace xray {
