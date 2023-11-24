@@ -35,8 +35,10 @@ bool actor_input_controller::on_keyboard_action(input::world* input_world,
 {
 	XRAY_UNREFERENCED_PARAMETERS	( input_world );
 
-	if (key == xray::input::key_escape) //? escape returns kWPN_FIRE for some reason
+	if (key == xray::input::key_escape) { //? escape returns kWPN_FIRE for some reason
+		m_frame_events.m_game_actions.clear();
 		return false;
+	}
 
 	game_action_id game_action = stalker2::key_binder::get_binded_action( key );
 

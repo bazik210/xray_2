@@ -1140,52 +1140,58 @@ void actor::tick()
 	}
 #endif
 
-	// pressed fire action
-	if(!g_noclip_enabled && m_game_world.get_game().get_active_scene_view() && m_actor_input_controller && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
+	if (!m_game_world.get_game().m_reserve_switch) //if we are going to editor lobby, don't shoot, common :[
 	{
-		render::debug::renderer& d	= r.debug();
-
-		float3 ray_from		= (m_camera_bone_idx) ? m_character_camera_transform.c.xyz() : m_character_head_transform.c.xyz();
-		float3 ray_dir		= (m_camera_bone_idx) ? m_character_camera_transform.k.xyz() : m_character_head_transform.k.xyz();
-		float ray_length	= 1000.0f; // weapon config???
-		
-		m_weapon->action				( 1 );//shoot
-
-		m_wpn_shoot = true; //play shoot anim
-
-		physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test( ray_from, ray_dir, ray_length );
-		if (result.m_object) // we are pick something
+		// pressed fire action
+		if (!g_noclip_enabled && m_game_world.get_game().get_active_scene_view() && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 		{
-			//d.draw_aabb( scene, result.m_hit_point_world, float3(0.01f,0.01f,0.01f), math::color(0,255,0,255));
-			
-			// shooting
-			// weapon snd(2d or 3d???)
-			if(!result.m_object->is_static_or_kinematic_object())
+			render::debug::renderer& d = r.debug();
+
+			float3 ray_from = (m_camera_bone_idx) ? m_character_camera_transform.c.xyz() : m_character_head_transform.c.xyz();
+			float3 ray_dir = (m_camera_bone_idx) ? m_character_camera_transform.k.xyz() : m_character_head_transform.k.xyz();
+			float ray_length = 1000.0f; // weapon config???
+
+			m_weapon->action(1);//shoot
+
+			m_wpn_shoot = true; //play shoot anim
+
+			physics::closest_ray_result result = m_game_world.get_physics_world()->ray_test(ray_from, ray_dir, ray_length);
+			if (result.m_object) // we are pick something
 			{
-				// play shootmark snd 3d!!!
-				float const impulse_strength	= 100.f;
-				result.m_object->apply_impulse	( ray_dir*impulse_strength, result.m_hit_point_world );
+				//d.draw_aabb( scene, result.m_hit_point_world, float3(0.01f,0.01f,0.01f), math::color(0,255,0,255));
+
+				// shooting
+				// weapon snd(2d or 3d???)
+				if (!result.m_object->is_static_or_kinematic_object())
+				{
+					// play shootmark snd 3d!!!
+					float const impulse_strength = 100.f;
+					result.m_object->apply_impulse(ray_dir * impulse_strength, result.m_hit_point_world);
+				}
+			}
+
+			ai_collision_object const* npc = nullptr;
+
+			//float visibility = 0.f;
+			//if (m_game_world.get_game().ray_query(npc, nullptr, ray_from, ray_dir, ray_length, 0.f, visibility))
+			//{
+			//	if (npc && npc->get_game_object().cast_npc())
+			//		npc->get_game_object().cast_npc()->stop_animation_playing();
+			//}
+
+			xray::collision::ray_objects_type collision_results(*stalker2::g_allocator);
+			if (m_game_world.get_game().get_spatial_tree().ray_query(collision_object_type_ai, ray_from, ray_dir, ray_length, collision_results, collision::objects_predicate_type()))
+			{
+				ai_collision_object const* ai_obj = dynamic_cast<ai_collision_object const*>(collision_results[0].object);
+				if (ai_obj)
+				{
+					if (ai_obj->get_game_object().cast_npc())ai_obj->get_game_object().cast_npc()->stop_animation_playing();
+				}
 			}
 		}
-
-		ai_collision_object const* npc = nullptr;
-
-		//float visibility = 0.f;
-		//if (m_game_world.get_game().ray_query(npc, nullptr, ray_from, ray_dir, ray_length, 0.f, visibility))
-		//{
-		//	if (npc && npc->get_game_object().cast_npc())
-		//		npc->get_game_object().cast_npc()->stop_animation_playing();
-		//}
-
-		xray::collision::ray_objects_type collision_results(*stalker2::g_allocator);
-		if (m_game_world.get_game().get_spatial_tree().ray_query(collision_object_type_ai, ray_from, ray_dir, ray_length, collision_results, collision::objects_predicate_type()))
-		{
-			ai_collision_object const* ai_obj = dynamic_cast<ai_collision_object const*>(collision_results[0].object);
-			if (ai_obj)
-			{
-				if (ai_obj->get_game_object().cast_npc())ai_obj->get_game_object().cast_npc()->stop_animation_playing();
-			}
-		}
+	}
+	else {
+		m_actor_input_controller->m_frame_events.m_game_actions.clear();
 	}
 
 	if(s_ph_draw_actor_aabb_value)
