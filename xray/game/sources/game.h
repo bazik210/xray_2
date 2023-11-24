@@ -165,7 +165,8 @@ public:
 			void			toggle_console			( );
 
 			void			scene_close_query		( );
-			void			switch_to_lobby			( );
+			void			activate_lobby			( );
+			void			switch_to_lobby			( bool editor = false );
 			void			switch_to_menu			( );
 			void			exit					( pcstr str );
 
@@ -263,6 +264,7 @@ public:
 	xray::render::scene_ptr const			get_active_scene		( )	const;
 	bool									get_editor				( ) { return false; };
 	bool									gload;
+	bool									m_reserve_switch;
 
 	typedef vector<object_volumetric_sound*>	snd_list;
 

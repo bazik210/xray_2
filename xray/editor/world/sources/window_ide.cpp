@@ -367,6 +367,11 @@ void window_ide::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 	BOOL fMinimized					= (BOOL) HIWORD(wParam);
 	bool const active				= ((fActive!=WA_INACTIVE) && (!fMinimized)) ? true : false;
 
+	if (active) {
+		if (!m_editor_world.editor_mode())
+			m_editor_world.engine().switch_to_menu();
+	}
+
 	if (active != m_editor_world.engine().is_application_active())
 	{
 		if (active)	
@@ -380,7 +385,7 @@ void window_ide::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 			m_view_window->window_view_Deactivate		();
 //			m_editor_world.engine().on_application_deactivate();
 			if (!m_editor_world.editor_mode())
-				m_editor_world.engine().switch_to_menu();
+				m_editor_world.engine().activate_menu();
 		}
 	}
 }

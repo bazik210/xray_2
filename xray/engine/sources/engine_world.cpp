@@ -194,16 +194,31 @@ void engine_world::load_level( pcstr project_resource_name, pcstr project_resour
 	);
 }
 
-void engine_world::switch_to_menu		( )
+void engine_world::activate_menu		( )
 {
 	if ( command_line_editor_singlethread() ) {
-		engine_user_world().switch_to_lobby();
+		engine_user_world().activate_lobby();
 		return;
 	}
 
 	apc::run							(
 		apc::logic,
-		boost::bind( &xray::engine_user::world::switch_to_lobby, &engine_user_world() ),
+		boost::bind( &xray::engine_user::world::activate_lobby, &engine_user_world()),
+		apc::continue_process_loop,
+		apc::wait_for_completion
+	);
+}
+
+void engine_world::switch_to_menu		( )
+{
+	if ( command_line_editor_singlethread() ) {
+		engine_user_world().switch_to_lobby(true);
+		return;
+	}
+
+	apc::run							(
+		apc::logic,
+		boost::bind( &xray::engine_user::world::switch_to_lobby, &engine_user_world(), true ),
 		apc::continue_process_loop,
 		apc::wait_for_completion
 	);

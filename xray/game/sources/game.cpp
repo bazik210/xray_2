@@ -186,7 +186,8 @@ game::game(		xray::engine_user::engine& engine,
 	m_snds_cleaner			( false ),
 	m_dead_snd_it			( NULL ),
 	m_dead_sound			( NULL ),
-	m_delay					( 0 )
+	m_delay					( 0 ),
+	m_reserve_switch		( false )
 //	m_sound_created			( false )
 {
 	query_render_scene		( );
@@ -489,8 +490,9 @@ void game::switch_to_scene( game_scene* scene )
 	R_ASSERT						( scene );
 //	ASSERT			( m_active_scene != scene );
 
-	if( m_active_scene )
-		m_active_scene->on_deactivate( );
+	if ( m_active_scene ) {
+		m_active_scene->on_deactivate();
+	}
 	
 	m_active_scene	= scene;
 	m_active_scene->on_activate		( );
@@ -861,13 +863,32 @@ void game::unload( pcstr , bool destroying )
 		switch_to_scene					( m_main_menu );
 }
 
-void game::switch_to_lobby( )
+void game::activate_lobby( )
 {
-		switch_to_scene					( m_lobby_menu );
+	m_reserve_switch = true;
+}
+
+void game::switch_to_lobby( bool editor )
+{
+	if (m_active_scene == m_lobby_menu)
+		return;
+
+	if (editor) {
+		if (m_reserve_switch) {
+			m_reserve_switch = false;
+			switch_to_scene(m_lobby_menu);
+		}
+	}
+	else {
+		switch_to_scene(m_lobby_menu);
+	}
 }
 
 void game::switch_to_menu( )
 {
+	if (m_active_scene == m_main_menu)
+		return;
+
 		switch_to_scene					( m_main_menu );
 }
 
