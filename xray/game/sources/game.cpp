@@ -867,6 +867,8 @@ void game::unload( pcstr , bool destroying )
 	m_npcs.clear();
 	m_mobs.clear();
 
+	m_renderer.scene().clear_scene_render_model_instances(get_active_scene());
+
 	if(!destroying)
 		switch_to_scene					( m_main_menu );
 }
@@ -1670,6 +1672,11 @@ xray::render::scene_view_ptr const game::get_active_scene_view( )	const
 xray::render::scene_ptr const game::get_active_scene( )	const
 {
 	return m_active_scene ? m_active_scene->get_render_scene() : NULL;//get_game_world().get_render_scene();
+}
+
+xray::render::scene_ptr const game::get_game_world_scene( )	const
+{
+	return m_game_world ? m_game_world->get_render_scene() : NULL;//get_game_world().get_render_scene();
 }
 
 #ifdef XRAY_STATIC_LIBRARIES

@@ -125,7 +125,7 @@ void human_npc::clear_resources	( )
 {
 	m_sound_world.get_logic_world_user().unregister_receiver( m_sound_scene, *this );
 
-	m_renderer.scene().remove_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model );
+	m_renderer.scene().remove_model( get_game_world().get_game().get_game_world_scene(), m_model_instance->m_render_model->m_model );
 	m_spatial_tree.erase		( m_collision_object );
 	
 	R_ASSERT					( m_collision_object );
