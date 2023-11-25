@@ -553,6 +553,13 @@ void game::tick( u32 const current_frame_id )
 	{
 		m_renderer.end_frame		( );
 		return;
+	} else if ( m_reserve_switch ) 
+	{
+		if( get_active_scene() )
+			m_renderer.scene().update_scene_render_model_instances(get_active_scene());
+
+		m_renderer.end_frame		( );
+		return;
 	}
 
 	if (!m_active_sounds.empty())
@@ -865,6 +872,9 @@ void game::unload( pcstr , bool destroying )
 
 void game::activate_lobby( )
 {
+	if (m_active_scene == m_lobby_menu)
+		return;
+
 	m_reserve_switch = true;
 }
 
@@ -875,8 +885,8 @@ void game::switch_to_lobby( bool editor )
 
 	if (editor) {
 		if (m_reserve_switch) {
-			m_reserve_switch = false;
 			switch_to_scene(m_lobby_menu);
+			m_reserve_switch = false;
 		}
 	}
 	else {

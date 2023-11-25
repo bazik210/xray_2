@@ -155,6 +155,9 @@ public:
 			void			add_model					( scene_ptr const& scene, render::render_model_instance_ptr const& v, float4x4 const& transform, bool apply_transform = true);
 			void			update_model				( scene_ptr const& scene, render::render_model_instance_ptr const& v, math::float4x4 const& transform);
 			void			remove_model				( scene_ptr const& scene, render::render_model_instance_ptr const& v);
+
+			void			update_model_render_instances ( scene_ptr const& scene );	
+			void			clear_model_render_instances  ( scene_ptr const& scene );
 			
 			void			add_speedtree_instance		( scene_ptr const& in_scene, render::speedtree_instance_ptr const& v, float4x4 const& transform, bool populate_forest );
 			void			remove_speedtree_instance	( scene_ptr const& in_scene, render::speedtree_instance_ptr const& v, bool populate_forest );

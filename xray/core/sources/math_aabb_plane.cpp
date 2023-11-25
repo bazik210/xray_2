@@ -73,7 +73,12 @@ intersection aabb_plane::test	( aabb const& aabb ) const
 	if ( plane.classify( float3( values[ positive_ids[0] ], values[ positive_ids[1] ], values[ positive_ids[2] ] ) ) < 0.f )
 		return			intersection_outside;
 
-	lut_ids_type const&	negative_ids = aabb_lut[ m_lut_id >> 3 ];
+	//out of range
+	if((m_lut_id >> 3) > 7) 
+		return intersection_inside;
+
+	lut_ids_type const& negative_ids = aabb_lut[m_lut_id >> 3];
+
 	// Test for completely within the positive halfspace of this plane
 	//
 	// If the halfplane test returns negative, the posTestPoint is _not_

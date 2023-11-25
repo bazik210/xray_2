@@ -133,6 +133,16 @@ void scene_renderer::update_skeleton( render_model_instance_ptr const& v, float4
 	m_channel.owner_push_back	( XRAY_NEW_IMPL( m_allocator, update_skeleton_command ) ( m_render_engine_world, v, matrices, count ) );
 }
 
+void scene_renderer::update_scene_render_model_instances(scene_ptr const& scene)
+{
+	m_channel.owner_push_back		( XRAY_NEW_IMPL( m_allocator, functor_command ) ( boost::bind( &xray::render::engine::world::update_model_render_instances, &m_render_engine_world, scene)));
+}
+
+void scene_renderer::clear_scene_render_model_instances(scene_ptr const& scene)
+{
+	m_channel.owner_push_back		( XRAY_NEW_IMPL( m_allocator, functor_command ) ( boost::bind( &xray::render::engine::world::clear_model_render_instances, &m_render_engine_world, scene)));
+}
+
 void scene_renderer::play_particle_system			( scene_ptr const& scene, particle_system_instance_ptr const& in_instance, xray::float4x4 const& transform )
 {
 	R_ASSERT	( scene );

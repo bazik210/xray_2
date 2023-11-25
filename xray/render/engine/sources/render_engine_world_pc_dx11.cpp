@@ -730,11 +730,35 @@ void engine::world::add_model( xray::render::scene_ptr const& in_scene, render::
 	scene->add_model( model);
 }
 
+void engine::world::update_model_render_instances(xray::render::scene_ptr const& in_scene)
+{
+	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
+	
+	render_model_instances* instances = scene->get_model_render_instances();
+
+	render_model_instances::const_iterator it		= instances->begin();
+	render_model_instances::const_iterator it_end	= instances->end();
+
+	for (; it != it_end; ++it)
+	{
+		if (!scene->verify_model(*it)) {
+			instances->erase(it);
+		}
+	}
+}
+
+void engine::world::clear_model_render_instances(xray::render::scene_ptr const& in_scene)
+{
+	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
+
+	scene->get_model_render_instances()->clear();
+}
+
 void engine::world::update_model( xray::render::scene_ptr const& in_scene, render_model_instance_ptr const& v, xray::math::float4x4 const& transform)
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
 
-	if (!scene->get_render_instances_count())
+	if (!scene->get_model_render_instances_count())
 		return;
 
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);
@@ -751,7 +775,7 @@ void engine::world::remove_model( xray::render::scene_ptr const& in_scene, rende
 {
 	xray::render::scene* scene = static_cast_checked<xray::render::scene*>(in_scene.c_ptr());
 
-	if (!scene->get_render_instances_count())
+	if (!scene->get_model_render_instances_count())
 		return;
 
 	render_model_instance_impl_ptr model = static_cast_resource_ptr<render_model_instance_impl_ptr>(v);

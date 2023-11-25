@@ -87,12 +87,16 @@ public:
 	void			update_model					( scene_ptr const& scene, render_model_instance_ptr const& render_model, math::float4x4 const& model_to_world );
 	void			remove_model					( scene_ptr const& scene, render_model_instance_ptr const& render_model );
 	void			update_model_vertex_buffer		( render::render_model_instance_ptr const& object, vectora<buffer_fragment> const& fragments );
+	
 	// WTF: model instance doesn't need to know scene it is used in? 
 	void			update_skeleton					( render::render_model_instance_ptr const& v, math::float4x4 const* matrices, u32 count );
 	void			set_model_ghost_mode			( render::render_model_instance_ptr const& v, bool b );
 	void			set_speedtree_instance_material ( render::speedtree_instance_ptr const& v, fs_new::virtual_path_string const& subsurface_name, resources::unmanaged_resource_ptr const& mtl_ptr);
 	void			set_model_material				( render::render_model_instance_ptr const& v, fs_new::virtual_path_string const& subsurface_name, resources::unmanaged_resource_ptr const& mtl_ptr);
 	void			set_model_visible				( render::render_model_instance_ptr const& v, fs_new::virtual_path_string const& subsurface_name, bool value );
+	
+	void			update_scene_render_model_instances	( scene_ptr const& scene );	
+	void			clear_scene_render_model_instances ( scene_ptr const& scene );
 	
 	// speedtree
 	void			add_speedtree_instance			( scene_ptr const& scene, render::speedtree_instance_ptr const& v, xray::math::float4x4 const& transform, bool populate_forest );

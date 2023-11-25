@@ -177,11 +177,13 @@ void object_volumetric_sound::play			(  )
 	if(m_custom)
 		m_proxy->set_matrix	( m_matrix );
 
-	if(m_looped) {
-		m_proxy->play							( xray::sound::looped );
-	}
-	else {
-		m_proxy->play							( xray::sound::once );
+	if (!m_game_scene.get_game().m_reserve_switch) {
+		if(m_looped) {
+			m_proxy->play							( xray::sound::looped );
+		}
+		else {
+			m_proxy->play							( xray::sound::once );
+		}
 	}
 
 	if(m_custom)

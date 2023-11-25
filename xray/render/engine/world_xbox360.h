@@ -142,6 +142,10 @@ public:
 			void	add_model						( scene_ptr const& in_scene, render_model_instance_ptr const& v, float4x4 const& transform, bool apply_transform = true );
 			void	update_model					( scene_ptr const& in_scene, render_model_instance_ptr const& v, math::float4x4 const& transform );
 			void	remove_model					( scene_ptr const& in_scene, render_model_instance_ptr const& v );
+
+			void	update_model_render_instances 	( scene_ptr const& scene );	
+			void	clear_model_render_instances  	( scene_ptr const& scene );
+
 			void	set_model_material				( render::render_model_instance_ptr v, fs_new::virtual_path_string const& subsurface_name, resources::unmanaged_resource_ptr mtl_ptr);
 			void	set_speedtree_instance_material ( render::speedtree_instance_ptr const& v, fs_new::virtual_path_string const& subsurface_name, resources::unmanaged_resource_ptr mtl_ptr);
 			void	set_model_visible				( render::render_model_instance_ptr v, fs_new::virtual_path_string const& subsurface_name, bool value );
