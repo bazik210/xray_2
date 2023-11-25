@@ -401,6 +401,14 @@ public:
 	bool			skip_frame;
 }; // class end_frame_guard
 
+bool IsCursorVisible()
+{
+    CURSORINFO ci = { sizeof(CURSORINFO) };
+    if (GetCursorInfo(&ci))
+        return ci.flags & CURSOR_SHOWING;
+    return false;
+}
+
 void editor_world::tick( )
 {
 	m_physics_world->tick			( );
@@ -440,6 +448,19 @@ void editor_world::tick( )
 	m_level_editor->get_project()->set_modified_caption( m_level_editor->get_project() && (m_level_editor->save_needed() || m_level_editor->has_uncommited_changes(reason)) );
 
 	m_view_window->tick				( );
+
+	if (m_view_window->get_click()) {
+		m_view_window->set_click(0);
+
+		if (!editor_mode() && m_view_window->is_mouse_in_view())
+		{
+			if (IsCursorVisible()) {
+				m_view_window->clip_cursor();
+				while (ShowCursor(FALSE) >= 0);
+				engine().allow_fire();
+			}
+		}
+	}
 
 	bool const is_minimized			= (m_window_ide->WindowState == System::Windows::Forms::FormWindowState::Minimized);
 
@@ -567,7 +588,7 @@ struct render_predicate : private boost::noncopyable {
 	inline	void	operator ( )	( collision::object const* const object ) const
 	{
 		ASSERT						( object );
-		object->render				( m_scene, m_renderer );
+		const_cast<xray::collision::object*>(object)->render				( m_scene, m_renderer );
 	}
 
 	xray::render::scene_ptr const&	m_scene;
@@ -876,6 +897,8 @@ void editor_world::editor_mode(bool beditor_mode)
 		m_view_window->clip_cursor		( );
 
 		while ( ShowCursor(FALSE) >= 0 );
+
+		engine().allow_fire();
 	}
 
 	m_editor_mode						= beditor_mode;

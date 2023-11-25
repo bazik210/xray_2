@@ -168,6 +168,7 @@ public:
 			void			activate_lobby			( );
 			void			switch_to_lobby			( bool editor = false );
 			void			switch_to_menu			( );
+			void			allow_fire				( );
 			void			exit					( pcstr str );
 
 			void			check_selected_npc		( );
@@ -265,6 +266,7 @@ public:
 	bool									get_editor				( ) { return false; };
 	bool									gload;
 	bool									m_reserve_switch;
+	bool									m_allow_ed_fire;
 
 	typedef vector<object_volumetric_sound*>	snd_list;
 

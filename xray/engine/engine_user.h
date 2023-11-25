@@ -63,6 +63,7 @@ struct XRAY_NOVTABLE world {
 	virtual	void 	unload						( pcstr, bool ) = 0;
 	virtual	void 	activate_lobby				( ) = 0;
 	virtual	void 	switch_to_lobby				( bool editor ) = 0;
+	virtual	void 	allow_fire					( ) = 0;
 	virtual	void 	on_application_activate		( ) = 0;
 	virtual	void 	on_application_deactivate	( ) = 0;
 	virtual ui::world&		ui_world			( ) = 0;

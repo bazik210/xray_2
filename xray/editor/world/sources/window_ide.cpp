@@ -368,8 +368,9 @@ void window_ide::OnWM_Activate(WPARAM wParam, LPARAM lParam)
 	bool const active				= ((fActive!=WA_INACTIVE) && (!fMinimized)) ? true : false;
 
 	if (active) {
-		if (!m_editor_world.editor_mode())
+		if (!m_editor_world.editor_mode()) {
 			m_editor_world.engine().switch_to_menu();
+		}
 	}
 
 	if (active != m_editor_world.engine().is_application_active())

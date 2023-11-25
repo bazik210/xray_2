@@ -79,15 +79,14 @@ signalling_bool   base_of_intrusive_base::try_unregister_from_fat_or_from_name_r
 	{
 		if ( is_associated_with_fat(object) )
 		{
-			if ( try_clean_associated(fat_it, count_that_allows_unregister) )
-			{
-				object->on_deassociated_from_fat	();
-			}
-			else
+
+			if ( !try_clean_associated(fat_it, count_that_allows_unregister) )
 			{
 				LOG_TRACE					(rare_message);
-				return						false;
 			}
+
+			//we still need to clean it for editor, common :[
+			object->on_deassociated_from_fat	();
 		}
 	}
 	
@@ -103,7 +102,7 @@ signalling_bool   base_of_intrusive_base::try_unregister_from_fat_or_from_name_r
 		if ( get_reference_count() > (long)count_that_allows_unregister )
 		{
 			LOG_TRACE						(rare_message);
-			return							false;
+			//return							false;
 		}
 			
 		g_resources_manager->push_name_registry_to_delete	(name_registry_entry);

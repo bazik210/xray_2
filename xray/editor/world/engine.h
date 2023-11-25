@@ -40,6 +40,7 @@ struct XRAY_NOVTABLE engine {
 	virtual	void 			unload_level			( ) = 0;
 	virtual	void 			switch_to_menu			( ) = 0;
 	virtual	void 			activate_menu			( ) = 0;
+	virtual	void 			allow_fire				( ) = 0;
 
 	virtual	render::world&	get_renderer_world		( ) = 0;
 	virtual	sound::world&	get_sound_world			( ) = 0;

@@ -913,7 +913,7 @@ void scene_view_panel::subscribe_on_drag_enter	( System::Windows::Forms::DragEve
 	view_panel->DragEnter	+= e;
 }
 
-void scene_view_panel::view_panel_MouseMove	( System::Object^, System::Windows::Forms::MouseEventArgs^ )
+void scene_view_panel::view_panel_MouseMove	( System::Object^, System::Windows::Forms::MouseEventArgs^ e )
 {
 	if( m_infinite_mode )
 	{
@@ -928,6 +928,11 @@ void scene_view_panel::view_panel_MouseMove	( System::Object^, System::Windows::
 		if( delta_x != 0 || delta_y != 0)
 			Cursor->Position	= m_mouse_campure_point;
 	}
+}
+
+void scene_view_panel::view_panel_MouseClick(System::Object^, System::Windows::Forms::MouseEventArgs^ e)
+{
+	m_click = 1;
 }
 
 void scene_view_panel::on_axis_model_ready( resources::queries_result& data )

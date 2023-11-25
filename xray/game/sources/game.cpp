@@ -187,7 +187,8 @@ game::game(		xray::engine_user::engine& engine,
 	m_dead_snd_it			( NULL ),
 	m_dead_sound			( NULL ),
 	m_delay					( 0 ),
-	m_reserve_switch		( false )
+	m_reserve_switch		( false ),
+	m_allow_ed_fire			( true )
 //	m_sound_created			( false )
 {
 	query_render_scene		( );
@@ -876,6 +877,7 @@ void game::activate_lobby( )
 		return;
 
 	m_reserve_switch = true;
+	m_allow_ed_fire = false;
 }
 
 void game::switch_to_lobby( bool editor )
@@ -900,6 +902,11 @@ void game::switch_to_menu( )
 		return;
 
 		switch_to_scene					( m_main_menu );
+}
+
+void game::allow_fire( )
+{
+	m_allow_ed_fire = true;
 }
 
 void game::scene_close_query( )

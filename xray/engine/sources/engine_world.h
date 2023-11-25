@@ -85,6 +85,7 @@ private:
 	virtual	void 			unload_level			( );
 	virtual	void 			switch_to_menu			( );
 	virtual	void 			activate_menu			( );
+	virtual	void 			allow_fire				( );
 	virtual bool			is_application_active	( );
 	virtual	void			run_renderer_commands	( );
 	virtual	void			on_resize				( );

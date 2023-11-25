@@ -104,6 +104,7 @@ namespace editor_base {
 			this->view_panel->Size = System::Drawing::Size(332, 304);
 			this->view_panel->TabIndex = 1;
 			this->view_panel->MouseMove += gcnew System::Windows::Forms::MouseEventHandler(this, &scene_view_panel::view_panel_MouseMove);
+			this->view_panel->MouseClick += gcnew System::Windows::Forms::MouseEventHandler(this, &scene_view_panel::view_panel_MouseClick);
 			this->view_panel->Resize += gcnew System::EventHandler(this, &scene_view_panel::view_panel_Resize);
 			// 
 			// scene_view_panel
@@ -241,9 +242,13 @@ public:
 
 	int						render_view_mode		( ){ return m_render_view_mode; }
 	void					set_render_view_mode	( int m ){ m_render_view_mode = m; }
+public:
+	u32						get_click( ) { return m_click; }
+	void					set_click(u32 v) { m_click = v; }
 
 	static float			m_grid_step				= 1.0f;
 	static u32				m_grid_dim				= 100;
+	u32						m_click					= 0;
 
 private:
 	void					render_grid				( );
@@ -296,6 +301,8 @@ private:
 	void							on_axis_model_ready		( resources::queries_result& data );
 	void							on_camera_move			( );
 	void							view_panel_MouseMove	( System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e );
+	void							view_panel_MouseClick	( System::Object^  sender, System::Windows::Forms::MouseEventArgs^  e );
+
 	void							view_panel_Resize		( System::Object^  sender, System::EventArgs^ e );
 	void							render_mode_btn_click	( System::Object^  sender, System::EventArgs^ e );
 	void							render_mode_menu_click	( System::Object^, System::EventArgs^ );

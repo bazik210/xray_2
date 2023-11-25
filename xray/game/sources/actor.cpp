@@ -116,6 +116,15 @@ actor::~actor( )
 
 		DELETE(m_animation_player2);
 		m_animation_player2 = NULL;
+
+		//if (m_snd != nullptr) { //workaround for editor
+		//	if (std::find(m_game_world.get_game().m_active_sounds.begin(), m_game_world.get_game().m_active_sounds.end(), m_snd) == m_game_world.get_game().m_active_sounds.end())
+		//	{
+		//		m_snd->m_force_stop = true;
+		//		m_snd->m_custom = false;
+		//		DELETE(m_snd);
+		//	}
+		//}
 }
 
 void actor::set_input_source( actor_input_controller* s )
@@ -759,7 +768,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		if (m_reload) {
 			if (!m_start_reload_timer) {
 				m_start_reload_timer = true;
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(NEW(object_volumetric_sound)(m_game_world));
+				m_snd = m_game_world.get_game().m_active_sounds.back();
 				m_snd->load_custom("reload", m_character_transform, false);
 				m_reload_anim_time = current_time + (current_reload_lexeme.animation_intervals_begin()->length() * 1000);
 				m_animation_player->set_target(
@@ -778,7 +788,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		else if (m_shoot) {
 			if (!m_start_shoot_timer) {
 				m_start_shoot_timer = true;
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(NEW(object_volumetric_sound)(m_game_world));
+				m_snd = m_game_world.get_game().m_active_sounds.back();
 				m_snd->load_custom("shoot",  m_character_transform, false);
 				m_shoot_anim_time = current_time + (current_shoot_lexeme.animation_intervals_begin()->length() * 1000);
 			m_animation_player->set_target(
@@ -802,7 +813,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		else if (m_draw) {
 			if (!m_start_draw_timer) {
 				m_start_draw_timer = true;
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(NEW(object_volumetric_sound)(m_game_world));
+				m_snd = m_game_world.get_game().m_active_sounds.back();
 				m_snd->load_custom("draw", m_character_transform, false);
 				m_draw_anim_time = current_time + (current_draw_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -820,7 +832,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		else if (m_holster) {
 			if (!m_start_holster_timer) {
 				m_start_holster_timer = true;
-				m_snd = NEW(object_volumetric_sound)(m_game_world);
+				m_game_world.get_game().m_active_sounds.push_back(NEW(object_volumetric_sound)(m_game_world));
+				m_snd = m_game_world.get_game().m_active_sounds.back();
 				m_snd->load_custom("holster",  m_character_transform, false);
 				m_holster_anim_time = current_time + (current_holster_lexeme.animation_intervals_begin()->length() * 1000);
 			}
@@ -1140,7 +1153,7 @@ void actor::tick()
 	}
 #endif
 
-	if (!m_game_world.get_game().m_reserve_switch) //if we are going to editor lobby, don't shoot, common :[
+	if (m_game_world.get_game().m_allow_ed_fire) //if we are going to editor lobby, don't shoot, common :[
 	{
 		// pressed fire action
 		if (!g_noclip_enabled && m_game_world.get_game().get_active_scene_view() && m_actor_input_controller->on_frame_fire() && !m_wpn_switch && !m_wpn_reload && !m_wpn_hidden_1 && !m_wpn_hidden_2)
