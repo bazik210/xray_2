@@ -268,9 +268,18 @@ void object_monster_npc::render			( )
 wpf_controls::property_container^ object_monster_npc::get_property_container	( )
 {
 	wpf_controls::property_container^ container		= super::get_property_container();
+	array<System::String^>^ all = m_parent_tool->animated_model_instances_names()->ToArray();
+	List< String^>^ monsters = gcnew List< String^ >();
+
+	for (int i = 0; i <= all->Length - 1; i++) {
+		auto string = all[i]->ToString();
+		if (!string->Contains("human")) {
+			monsters->Add(all[i]);
+		}
+	}
 
 	container->properties["visual/animated model instance"]->dynamic_attributes->add( 
-		gcnew wpf_controls::property_editors::attributes::combo_box_items_attribute( m_parent_tool->animated_model_instances_names()->ToArray() )
+		gcnew wpf_controls::property_editors::attributes::combo_box_items_attribute( monsters->ToArray() )
 	);
 	
 	return											container;
