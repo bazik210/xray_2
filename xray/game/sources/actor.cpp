@@ -209,7 +209,7 @@ void actor::on_resources_ready( resources::queries_result& data )
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/fire_1",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",  resources::animation_class },
-		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_idle",  resources::animation_class }
+		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_add",  resources::animation_class }
 		};
 
 		resources::query_resources(
@@ -247,7 +247,8 @@ void actor::on_load_animations(  resources::queries_result& data  )
 	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
 	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[5].get_managed_resource());
 	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
-	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
+	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());	
+	current_additive_animation	= m_look_animation_add;
 
 	//some query system bug;
 	m_stop_query = true;
@@ -472,27 +473,6 @@ void actor::process_input_events( )
 		m_actor_physics_controller->jump();
 	}
 
-//	pressed crouch
-//	if (m_actor_input_controller && m_actor_input_controller->m_crouch && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2) 
-//	{
-//		m_actor_input_controller->m_crouch = !m_actor_input_controller->m_crouch;
-//		//update_animations(false, false, false, false, false, true);
-//		if (!m_crouch) {
-//			m_crouch = true;
-//			float4x4 character_position = m_actor_physics_controller->get_transform();
-//			cr_y = character_position.c.y -= 0.5;
-////////////////////////////////////////////////////////////////
-//			m_actor_physics_controller->set_capsule_scaling(1, 0.5, 1, true);
-//		}
-//		else {
-//			m_crouch = false;
-//			//character_position.c.y += 0.5;
-//			//m_actor_physics_controller->set_transform(character_position);
-////////////////////////////////////////////////////////////////
-//			disable_crouch();
-//		}
-//	}
-
 	//pressed reload action
 	if (m_actor_input_controller && m_actor_input_controller->m_reload && !m_wpn_reload && !m_wpn_switch && !m_wpn_holster && !m_wpn_draw && !m_wpn_hidden_1 && !m_wpn_hidden_2)
 	{
@@ -642,17 +622,14 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 
 	animation::skeleton_animation_ptr current_idle_animation		= m_idle_stand_animation;
 	animation::skeleton_animation_ptr current_idle_01_animation		= m_idle_stand_01_animation;
-	animation::skeleton_animation_ptr current_additive_animation	= m_look_animation_add;
 	animation::skeleton_animation_ptr current_shoot_animation		= m_shoot_animation;
 	animation::skeleton_animation_ptr current_draw_animation		= m_draw_animation;
 	animation::skeleton_animation_ptr current_holster_animation		= m_holster_animation;
-	animation::skeleton_animation_ptr current_crouch_animation		= m_crouch_animation;
 	animation::skeleton_animation_ptr current_reload_animation		= m_reload_animation;
 
 	// calculate additive animation coefficient, based on pitch
 	float k								= 1.0f - (m_look_pitch+1.0f)/2.0f; // normalized to 0..1.0f
 	float additive_current_anim_time	= animation::cubic_spline_skeleton_animation_pinned( current_additive_animation ).c_ptr()->length_in_frames() / animation::default_fps * k;
-	float additive_crouch_anim_time	= animation::cubic_spline_skeleton_animation_pinned( current_additive_animation ).c_ptr()->length_in_frames() / animation::default_fps;
 
 	animation::mixing::animation_lexeme	current_idle_lexeme(
 		animation::mixing::animation_lexeme_parameters(
@@ -694,14 +671,6 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		).time_scale(1.f)
 	);
 
-	animation::mixing::animation_lexeme	current_crouch_lexeme(
-		animation::mixing::animation_lexeme_parameters(
-			buffer,
-			"crouch",
-			current_crouch_animation
-		).time_scale(1.f)
-	);
-
 	animation::mixing::animation_lexeme	current_additive_lexeme(
 		animation::mixing::animation_lexeme_parameters(
 			buffer, 
@@ -710,18 +679,6 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		)
 		.time_scale( 0.f )
 		.start_animation_interval_time( additive_current_anim_time )
-		.override_existing_animation( true )
-		.additivity_priority( 1 )
-	);
-
-	animation::mixing::animation_lexeme	current_additive_crouch_lexeme(
-		animation::mixing::animation_lexeme_parameters(
-			buffer, 
-			"additive_crouch",
-			current_crouch_animation
-		)
-		.time_scale( 1.f )
-		.start_animation_interval_time( additive_crouch_anim_time )
 		.override_existing_animation( true )
 		.additivity_priority( 1 )
 	);
@@ -848,18 +805,6 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				+ weapon_target
 				, current_time);
 		}
-		else if (m_crouch) {
-			m_animation_player->set_target_and_tick(
-				current_crouch_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
-			m_animation_player2->set_target_and_tick(
-				current_crouch_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
-		}
 		else if (m_idle) {
 			m_animation_player->set_target_and_tick(
 				current_idle_no_wpn_lexeme
@@ -924,13 +869,17 @@ void actor::tick()
 	{
 		m_actor_input_controller->m_crouch = false;
 
-		disable_crouch();
+		current_additive_animation = m_look_animation_add;
+
+		//disable_crouch();
 	}
 	else if (m_actor_input_controller->on_frame_crouch() && !m_actor_input_controller->m_crouch && !g_noclip_enabled && !m_actor_input_controller->onframe_jump())
 	{
 		m_actor_input_controller->m_crouch = true;
 
-		m_actor_physics_controller->set_capsule_scaling(1, 0.5, 1, true);
+		current_additive_animation = m_crouch_animation;
+
+		//m_actor_physics_controller->set_capsule_scaling(1, 0.5, 1, true);
 	}
 
 	if (m_switch_snd_time_delay && m_anim_timer.get_elapsed_msec() >= m_switch_snd_time)
@@ -952,14 +901,11 @@ void actor::tick()
 		else {
 			m_switch_snd_time = m_anim_timer.get_elapsed_msec() + 400;
 			m_switch_snd_time_delay = true;
-
 		}
-
 	}
 
 	m_character_transform = m_actor_physics_controller->get_transform();
 
-	//if (!m_actor_input_controller->on_frame_crouch()) {
 		if (m_weapon) {
 			if (!m_weapon->m_hidden) {
 				if (!m_wpn_switch && !m_wpn_draw && !m_wpn_holster) {
@@ -988,11 +934,6 @@ void actor::tick()
 				update_animations(false, false, false, false, true);
 			}
 		}
-//	 }
-//	 else {
-//		 m_actor_physics_controller->set_capsule_scaling(1, 1, 1);
-//		 update_animations(false, false, false, false, false, true);
-//	 }
 
 	//switching weapon
 	if (m_wpn_switch && m_anim_timer.get_elapsed_msec() >= m_wpn_timer && !m_wpn_call) {

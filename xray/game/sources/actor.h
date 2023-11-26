@@ -101,6 +101,7 @@ private:
 	animation::skeleton_animation_ptr	m_holster_animation;
 	animation::skeleton_animation_ptr	m_idle_stand_01_animation;
 	animation::skeleton_animation_ptr	m_crouch_animation;
+	animation::skeleton_animation_ptr	current_additive_animation;
 	xray::particle::particle_system_instance_ptr	m_particle_system_instance_ptr;
 
 	timing::timer						m_anim_timer;
