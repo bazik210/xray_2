@@ -221,11 +221,11 @@ private:
 	// for AI tests	
 			void		query_npc_dictionary		( );
 			void		on_npc_dictionary_created	( resources::queries_result& data );
-			void		on_queried_npc_attributes_received	( resources::queries_result& data, monster_npc_ptr owner );
+			void		on_queried_npc_attributes_received	( resources::queries_result& data, human_npc_ptr owner );
 			void		on_behaviour_created		( resources::queries_result& data );
 			void		on_npc_created				( resources::queries_result& data, float3 const camera_position );
-			void		fill_npc_attributes_randomly( monster_npc_ptr owner, float3 const& initial_position );
-			void		fill_npc_attributes_manually( monster_npc_ptr owner );
+			void		fill_npc_attributes_randomly( human_npc_ptr owner, float3 const& initial_position );
+			void		fill_npc_attributes_manually( human_npc_ptr owner );
 			void		finish_npc_creation			(human_npc_ptr& new_npc, human_npc::npc_game_attributes& attributes );
 			void		finish_monster_creation		( monster_npc_ptr& new_npc, monster_npc::npc_game_attributes& attributes );
 			bool		is_npc_id_available			( u32 const npc_id ) const;
@@ -236,7 +236,7 @@ private:
 	
 			void			run_ai_tests			( u32 const current_frame_id );
 			void			update_npc_stats		( );
-			monster_npc* find_npc_in_camera_direction	( ) const;
+			human_npc* 		find_npc_in_camera_direction	( ) const;
 	
 	template < typename T >
 	inline	void			destroy					( T*& object_to_be_destroyed )
@@ -328,7 +328,7 @@ private:
 	// tests for AI
 	bool									m_is_dictionary_created;
 	bool									m_is_npc_auto_creation_enabled;
-	monster_npc_ptr							m_selected_npc;
+	human_npc_ptr							m_selected_npc;
 	bool									m_active_npc_set;
 	npcs_type								m_npcs;
 	mobs_type								m_mobs;

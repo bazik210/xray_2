@@ -31,7 +31,7 @@
 #include <xray/console_command.h>
 
 static bool s_debug_draw		= false;
-static xray::console_commands::cc_bool s_debug_draw_command( "debug_draw", s_debug_draw, true, xray::console_commands::command_type_engine_internal );
+static xray::console_commands::cc_bool s_debug_draw_command( "npc_debug_draw", s_debug_draw, true, xray::console_commands::command_type_engine_internal );
 
 namespace stalker2 {
 
@@ -105,7 +105,8 @@ human_npc::human_npc		(
 	m_search_service		( 0 ),
 	m_animation_space_graph	( 0 ),
 	m_collision_object		( 0 ),
-	m_next_key_point		( 0 )
+	m_next_key_point		( 0 ),
+	m_weapon_bone_idx		( 0 )
 #ifdef MASTER_GOLD
 	,m_navigation_path		( g_allocator )
 #endif // #ifdef MASTER_GOLD
@@ -125,7 +126,10 @@ void human_npc::clear_resources	( )
 {
 	m_sound_world.get_logic_world_user().unregister_receiver( m_sound_scene, *this );
 
-	m_renderer.scene().remove_model( get_game_world().get_game().get_game_world_scene(), m_model_instance->m_render_model->m_model );
+	if (m_weapon)
+		m_weapon->hide();
+
+	m_renderer.scene().remove_model( get_game_world().get_render_scene(), m_model_instance->m_render_model->m_model );
 	m_spatial_tree.erase		( m_collision_object );
 	
 	R_ASSERT					( m_collision_object );
@@ -188,7 +192,7 @@ void human_npc::enable			( )
 	R_ASSERT					( m_model_instance );
 
 	m_spatial_tree.insert		( m_collision_object, m_transform );
-	m_renderer.scene().add_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform);
+	m_renderer.scene().add_model( get_game_world().get_render_scene(), m_model_instance->m_render_model->m_model, m_transform);
 	m_model_instance->m_animation_player->set_object_transform( m_transform );
 
 	setup_animations_controller	( );
@@ -208,7 +212,7 @@ void human_npc::on_sound_event	( sound::sound_producer const& sound_source )
 	m_ai_world.on_sound_event	( *this, perceived_sound );
 }
 
-void human_npc::on_hit_event		( hit_mob_object const& hit_source )
+void human_npc::on_hit_event		( hit_object const& hit_source )
 {
 	ai::sensed_hit_object			perceived_hit;
 	perceived_hit.own_position		= get_position( hit_source.m_position );
@@ -329,7 +333,7 @@ void human_npc::set_transform	( float4x4 const& transform )
 	m_transform					= transform;
 	LOG_INFO					( "Position after set_transform: [%f][%f][%f]", m_transform.c.x, m_transform.c.y, m_transform.c.z );
 
-	m_renderer.scene().update_model( get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform );
+	m_renderer.scene().update_model( get_game_world().get_render_scene(), m_model_instance->m_render_model->m_model, m_transform );
 	m_model_instance->m_animation_player->set_object_transform( m_transform );
 }
 
@@ -346,7 +350,21 @@ void human_npc::tick			( u32 const current_time_in_ms )
 		play_animation			( m_current_animation );
 
 	if ( debug_draw_allowed() )
-		draw					( m_renderer, get_game_world().get_game().get_active_scene() );
+	{
+		draw					( m_renderer, get_game_world().get_render_scene() );
+	}
+
+	////////////test////////////
+	u32 const non_root_bones_count	= m_model_instance->m_physics_model->m_skeleton->get_non_root_bones_count( );
+	float4x4* const matrices		= static_cast<float4x4*>( ALLOCA(non_root_bones_count*sizeof(float4x4)) );
+	m_model_instance->m_animation_player->compute_bones_matrices( *m_model_instance->m_physics_model->m_skeleton, matrices, matrices + non_root_bones_count );
+
+	if (m_weapon && !m_weapon->m_hidden) {
+		// update weapon
+		calculate_wpn_matrix(matrices, m_wpn_matrix);
+		m_weapon->set_transform(m_wpn_matrix);
+		m_weapon->tick(m_model_instance->m_animation_player);
+	}
 }
 
 void human_npc::render_model	( )
@@ -358,7 +376,7 @@ void human_npc::render_model	( )
 	float4x4* const bone_matrices		= static_cast< float4x4* >( ALLOCA( bone_matrices_count * sizeof( float4x4 ) ) );
 	animation_player->compute_bones_matrices( *skeleton, bone_matrices, bone_matrices + bone_matrices_count );
 
-	m_renderer.scene().update_model		 (get_game_world().get_game().get_active_scene(), m_model_instance->m_render_model->m_model, m_transform );
+	m_renderer.scene().update_model		 ( get_game_world().get_render_scene(), m_model_instance->m_render_model->m_model, m_transform );
 	m_renderer.scene().update_skeleton	(
 		m_model_instance->m_render_model->m_model,
 		bone_matrices,
@@ -368,6 +386,9 @@ void human_npc::render_model	( )
 	m_model_instance->m_render_model->m_bounding_collision->update	( bone_matrices, bone_matrices + bone_matrices_count );
 	m_model_instance->m_physics_model->m_collision->update			( bone_matrices, bone_matrices + bone_matrices_count );
 	m_model_instance->m_damage_collision->update					( bone_matrices, bone_matrices + bone_matrices_count );
+
+	if(m_weapon && m_weapon->m_hidden)
+		m_weapon->show				(m_model_instance->m_animation_player->get_object_transform());
 }
 
 void human_npc::add_weapon				( object_weapon* weapon )
@@ -533,6 +554,13 @@ void human_npc::move_to_position		( ai::movement_target const* const target )
 #endif // #ifndef MASTER_GOLD
 	m_model_instance->m_animation_player->set_object_transform( transform );
 	setup_animations					( m_ai_world.get_current_time_in_ms() );
+}
+
+void human_npc::calculate_wpn_matrix( float4x4* const matrices, float4x4& result  ) const
+{
+	float4x4 const& npc_transform			= m_model_instance->m_animation_player->get_object_transform();
+	float4x4 character_render_transform	= create_rotation(float3(0.0f, math::pi, 0.0f)) * npc_transform * create_translation(float3(0.f, 0.04f, 0.f));
+	result								= matrices[m_weapon_bone_idx] * npc_transform;
 }
 
 } // namespace stalker2

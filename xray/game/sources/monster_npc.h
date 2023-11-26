@@ -25,7 +25,6 @@
 #include <xray/ai_navigation/sources/navigation_mesh_types.h>
 #include <xray/animation/animation_expression_emitter.h>
 #include <xray/render/engine/base_classes.h>
-#include "weapon.h"
 
 namespace xray {
 
@@ -64,25 +63,17 @@ class search_service;
 struct animation_space_vertex_id;
 class game;
 
+class monster_npc;
+typedef resources::resource_ptr< monster_npc, resources::unmanaged_intrusive_base > monster_npc_ptr;
+
 // dummy, just for testing purposes (till the collision/damage detectors will be implemented)
-struct hit_object
+struct hit_mob_object
 {
 	ai::game_object*			m_source;
 	float3						m_position;
 	u16							m_target_bone;
 	float						m_power;
 }; // struct hit_object
-
-struct npc_cook_params
-{
-	ai::brain_unit_cook_params	brain_unit_params;
-	xray::render::scene_ptr			scene;
-	sound::sound_scene_ptr		sound_scene;
-	physics::world*				physics_world;
-}; // struct npc_cook_params
-
-class monster_npc;
-typedef resources::resource_ptr< monster_npc, resources::unmanaged_intrusive_base > monster_npc_ptr;
 
 class monster_npc :
 	public ai::npc,
@@ -169,12 +160,12 @@ public:
 	virtual	void				reload				( ai::weapon const* const gun );
 	virtual	void				play_animation		( ai::animation_item const* const target );
 	virtual	void				move_to_position	( ai::movement_target const* const target );
-	virtual	void			stop_animation_playing	( );
+	virtual	void				stop_animation_playing	( );
 		
 	virtual void				on_sound_event		( sound::sound_producer const& sound_source );
 	virtual pcstr				get_description		( ) const { return m_game_attributes.description.c_str(); }
 	virtual	float3				get_source_position	( float3 const& requester ) const { return get_position( requester ); }
-	virtual void				on_hit_event		( hit_object const& hit_source );
+	virtual void				on_hit_event		( hit_mob_object const& hit_source );
 	
 	virtual	npc*				cast_npc			( )			{ return this; }
 	virtual	npc const*			cast_npc			( )	const	{ return this; }
@@ -197,7 +188,7 @@ public:
 			void				add_weapon			( object_weapon* weapon );
 			void				remove_weapon		( object_weapon* weapon );
 	object_weapon*				pop_weapon			( );
-			void			get_available_weapons	( ai::weapons_list& list_to_be_filled ) const;
+			void				get_available_weapons	( ai::weapons_list& list_to_be_filled ) const;
 
 			void				enable				( );
 			void				set_attributes		( npc_game_attributes& attributes );
@@ -248,10 +239,6 @@ private:
 //			void	tick_animation_controller		( );
 //			void	on_animation_controller_animations_arrived( xray::resources::queries_result const& result );
 			void	setup_animations				( u32 current_time_in_ms );
-			
-			float4x4	m_wpn_matrix;
-			void	calculate_wpn_matrix(float4x4* const matrices, float4x4& result) const;
-
 
 private:
 	ai::world&										m_ai_world;
@@ -260,9 +247,6 @@ private:
 
 	xray::render::game::renderer&					m_renderer;
 	animated_model_instance_ptr						m_model_instance;
-
-	weapon_ptr										m_weapon;
-	animation::bone_index_type						m_weapon_bone_idx;
 
 	collision::space_partitioning_tree&				m_spatial_tree;
 	ai_collision_object*							m_collision_object;

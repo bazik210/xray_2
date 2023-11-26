@@ -734,13 +734,7 @@ void game::update_stats				( u32 const current_frame_id )
 #endif //#ifndef MASTER_GOLD
 }
 
-static void delete_weapons(monster_npc_ptr& owner)
-{
-	while (object_weapon* weapon = owner->pop_weapon())
-		DELETE(weapon);
-}
-
-static void delete_mweapons(human_npc_ptr& owner)
+static void delete_weapons(human_npc_ptr& owner)
 {
 	while (object_weapon* weapon = owner->pop_weapon())
 		DELETE(weapon);
@@ -748,13 +742,12 @@ static void delete_mweapons(human_npc_ptr& owner)
 
 static void kill_mob(monster_npc_ptr& condemned)
 {
-	delete_weapons(condemned);
 	condemned->clear_resources();
 }
 
 static void kill_npc(human_npc_ptr& condemned)
 {
-	delete_mweapons(condemned);
+	delete_weapons(condemned);
 	condemned->clear_resources();
 }
 
@@ -1215,7 +1208,7 @@ u32 game::get_node_by_name(pcstr node_name) const
 
 void game::get_available_weapons(ai::npc* owner, ai::weapons_list& list_to_be_filled) const
 {
-	monster_npc* const npc_owner = static_cast_checked< monster_npc* >(owner);
+	human_npc* const npc_owner = static_cast_checked< human_npc* >(owner);
 	npc_owner->get_available_weapons(list_to_be_filled);
 }
 
@@ -1285,7 +1278,7 @@ struct get_first_npc_in_camera_direction_predicate : private boost::noncopyable
 	ai::npc* first_npc;
 }; // struct get_first_npc_in_camera_direction_predicate
 
-monster_npc* game::find_npc_in_camera_direction() const
+human_npc* game::find_npc_in_camera_direction() const
 {
 	collision::ray_triangles_type game_objects(g_allocator);
 	float3 cam = m_game_world->get_camera_director()->get_active_camera()->get_inverted_view_matrix().c.xyz();
@@ -1299,7 +1292,7 @@ monster_npc* game::find_npc_in_camera_direction() const
 		game_objects,
 		collision::triangles_predicate_type(&query_predicate, &get_first_npc_in_camera_direction_predicate::predicate)
 	);
-	return query_predicate.first_npc ? static_cast_checked< monster_npc* >(query_predicate.first_npc) : 0;
+	return query_predicate.first_npc ? static_cast_checked< human_npc* >(query_predicate.first_npc) : 0;
 }
 void game::update_npc_stats()
 {
@@ -1390,7 +1383,7 @@ bool game::is_npc_id_available(u32 const npc_id) const
 
 static void generate_weapons(
 	math::random32& randomizer,
-	monster_npc::npc_game_attributes& attributes,
+	human_npc::npc_game_attributes& attributes,
 	ai::world const& world,
 	ai::weapon_types_enum weapon_type
 )
@@ -1399,9 +1392,9 @@ static void generate_weapons(
 	attributes.weapons.push_back(NEW(object_weapon)(weapon_type, world.get_weapon_name_by_id(weapon_type, random_id), random_id));
 }
 
-void game::fill_npc_attributes_randomly(monster_npc_ptr owner, float3 const& initial_position)
+void game::fill_npc_attributes_randomly(human_npc_ptr owner, float3 const& initial_position)
 {
-	monster_npc::npc_game_attributes		attributes;
+	human_npc::npc_game_attributes		attributes;
 	math::random32 randomizer(m_ai_world->get_current_time_in_ms());
 	attributes.group_id = randomizer.random(m_ai_world->get_groups_count());
 	attributes.outfit_id = randomizer.random(m_ai_world->get_outfits_count());
@@ -1427,11 +1420,10 @@ void game::fill_npc_attributes_randomly(monster_npc_ptr owner, float3 const& ini
 	attributes.name = name_id.first;
 	attributes.id = name_id.second;
 
-	finish_monster_creation(owner, attributes);
-//	finish_npc_creation(owner, attributes);
+	finish_npc_creation(owner, attributes);
 }
 
-void game::fill_npc_attributes_manually(monster_npc_ptr owner)
+void game::fill_npc_attributes_manually(human_npc_ptr owner)
 {
 	query_resource(
 		"resources/npc/human/game_attributes/for_manual_creation.attributes",
@@ -1492,27 +1484,10 @@ void game::on_monster_attributes_received(configs::binary_config_value const& at
 	attributes.name = attributes_config["name"];
 	attributes.id = attributes_config["id"];
 
-	if (m_type != "bloodsucker")
-	{
-		configs::binary_config_value const& weapons = attributes_config["weapons"];
-
-		configs::binary_config_value::const_iterator it = weapons.begin();
-		configs::binary_config_value::const_iterator it_end = weapons.end();
-
-		for (; it != it_end; ++it)
-		{
-			configs::binary_config_value const& gun = *it;
-			u32 const type = gun["type"];
-			ai::weapon_types_enum const weapon_type = (ai::weapon_types_enum)type;
-			u32 const weapon_id = gun["id"];
-			attributes.weapons.push_back(NEW(object_weapon)(weapon_type, m_ai_world->get_weapon_name_by_id(weapon_type, weapon_id), weapon_id));
-		}
-	}
-
 	finish_monster_creation(owner, attributes);
 }
 
-void game::on_queried_npc_attributes_received(resources::queries_result& data, monster_npc_ptr owner)
+void game::on_queried_npc_attributes_received(resources::queries_result& data, human_npc_ptr owner)
 {
 	if (!data.is_successful())
 	{
@@ -1523,14 +1498,14 @@ void game::on_queried_npc_attributes_received(resources::queries_result& data, m
 	configs::binary_config_ptr config = static_cast_resource_ptr< configs::binary_config_ptr >(data[0].get_unmanaged_resource());
 	configs::binary_config_value const& config_root = config->get_root();
 
-	on_monster_attributes_received(config_root, owner, "human");
+	on_npc_attributes_received(config_root, owner);
 }
 
 void game::on_npc_created(resources::queries_result& data, float3 const camera_position)
 {
 	R_ASSERT(data.is_successful());
 
-	monster_npc_ptr new_npc = static_cast_resource_ptr< monster_npc_ptr >(data[0].get_unmanaged_resource());
+	human_npc_ptr new_npc = static_cast_resource_ptr< human_npc_ptr >(data[0].get_unmanaged_resource());
 
 	if (m_is_npc_auto_creation_enabled)
 		fill_npc_attributes_randomly(new_npc, camera_position);
@@ -1570,8 +1545,8 @@ void game::delete_selected_npc()
 {
 	if (m_selected_npc)
 	{
-		m_mobs.erase(m_selected_npc);
-		kill_mob(m_selected_npc);
+		m_npcs.erase(m_selected_npc);
+		kill_npc(m_selected_npc);
 		m_selected_npc = 0;
 		m_active_npc_set = false;
 		--m_npc_queries_count;

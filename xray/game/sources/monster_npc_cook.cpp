@@ -103,7 +103,6 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 
 	m_type = model_path;
 
-
 	ai::brain_unit_cook_params				cook_brain_unit_params;
 	cook_brain_unit_params.world_user_type	= resources::sound_player_logic_class;
 
@@ -114,7 +113,8 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 	resources::user_data_variant			physics_world;
 	physics_world.set						( &m_game.physics() );
 
-	if (m_type.find("bloodsucker") != std::string::npos) {
+//	if (m_type.find("bloodsucker") != std::string::npos)
+
 		resources::request requests[] =
 		{
 			{ brain_unit_path, resources::brain_unit_class },
@@ -122,7 +122,7 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 			{ "resources/animations/single/monster/bloodsucker/locomotion/stand_idle_1", resources::animation_class },
 			{ "resources/animations/single/monster/bloodsucker/locomotion/walk_move_fwd_idle_1", resources::animation_class },
 			{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_left_idle_1", resources::animation_class },
-			{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_right_idle_1", resources::animation_class },
+			{ "resources/animations/single/monster/bloodsucker/locomotion/walk_arc_fwd_right_idle_1", resources::animation_class }
 		};
 
 		resources::user_data_variant const* params[] =
@@ -143,39 +143,6 @@ void monster_npc_cook::on_npc_options_received			( configs::binary_config_value 
 			params,
 			&parent
 		);
-	}
-	else {
-		resources::request requests[] =
-		{
-			{ brain_unit_path, resources::brain_unit_class },
-			{ model_path, resources::game_animated_model_instance_class },
-			{ "resources/animations/single/human/common_anim_slot_3/free/on_site_still_aim_1", resources::animation_class },
-			{ "resources/animations/single/human/common_anim_slot_3/free/walk_move_fwd_aim_1", resources::animation_class },
-			{ "resources/animations/single/human/common_anim_slot_3/free/walk_arc_fwd_left_aim_1", resources::animation_class },
-			{ "resources/animations/single/human/common_anim_slot_3/free/walk_arc_fwd_right_aim_1", resources::animation_class },
-			{ "ak_74",  resources::weapon_class }
-		};
-
-		resources::user_data_variant const* params[] =
-		{
-			&brain_unit_params,
-			&physics_world,
-			0,
-			0,
-			0,
-			0,
-			0
-		};
-
-		query_resources(
-			requests,
-			array_size(requests),
-			boost::bind(&monster_npc_cook::on_subresources_loaded, this, _1, monster),
-			g_allocator,
-			params,
-			&parent
-		);
-	}
 }
 
 void monster_npc_cook::on_subresources_loaded	( resources::queries_result& data, monster_npc* const monster )
@@ -209,13 +176,6 @@ void monster_npc_cook::on_subresources_loaded	( resources::queries_result& data,
 
 	animation::skeleton_animation_ptr arc_right_animation	= static_cast_resource_ptr< animation::skeleton_animation_ptr >( data[5].get_managed_resource() );
 	monster->set_arc_right_animation			( arc_right_animation );
-
-	if (m_type.find("bloodsucker") == std::string::npos) {
-		monster->m_weapon						= static_cast_resource_ptr<weapon_ptr>(data[6].get_unmanaged_resource());
-		monster->m_weapon->m_game_world			= &m_game.get_game_world();
-		monster->m_weapon_bone_idx				= monster->m_model_instance->m_physics_model->m_skeleton->get_bone_index("Weapon")-1;
-			//monster->m_model_instance->m_physics_model->m_skeleton->get_bone_index("RightHandMiddle_1")-1;
-	}
 
 	parent->set_unmanaged_resource			(
 				monster, 
