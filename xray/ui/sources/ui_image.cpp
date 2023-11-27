@@ -32,6 +32,11 @@ void ui_image::init_texture( pcstr texture_name )
 	{
 		m_tex_coords.set(0,0,1,1);
 		m_point_type	=	2;
+	}else
+	if(0==strings::compare_insensitive(texture_name,"ui_health"))
+	{
+		m_tex_coords.set(0,0,1,1);
+		m_point_type	=	4;
 	}
 	else
 	{

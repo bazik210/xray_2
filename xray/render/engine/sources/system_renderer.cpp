@@ -632,6 +632,9 @@ void system_renderer::draw_ui_vertices( vertex_formats::TL const * vertices, u32
 		else if (point_type == 3)
 			m_sh_ui->apply(effect_system_ui::ui);
 
+		else if (point_type == 4)
+			m_sh_ui->apply(effect_system_ui::ui_hud);
+
 		backend::ref().render_indexed( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 3*count/2, 0, v_offset);
 
 	}

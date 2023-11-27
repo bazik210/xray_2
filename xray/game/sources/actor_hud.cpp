@@ -42,7 +42,7 @@ void actor_hud::init(stalker2::game& game, stalker2::game_world& world)
     m_wnd->set_visible(true);
 
     ui::image* img					= m_ui_world->create_image();
-	img->init_texture				( "ui_rect" );
+	img->init_texture				( "ui_health" );
 	img->set_color					( 0xfff0f0f0 );
 	img->w()->set_size				( float2(128, 64) );
 	img->w()->set_position			( float2(100, screen_size.y - 100) );

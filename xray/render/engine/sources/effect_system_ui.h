@@ -18,7 +18,7 @@ public:
 	effect_system_ui () : effect_descriptor() {}
 	~effect_system_ui() {}
 
-	enum techniques{ ui_font, ui, ui_fill, ui_line_strip };
+	enum techniques{ ui_font, ui, ui_fill, ui_line_strip, ui_hud };
 
 	virtual	void compile(effect_compiler& compiler, custom_config_value const& config);
 
