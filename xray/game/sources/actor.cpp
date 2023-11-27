@@ -84,7 +84,8 @@ m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_pers
 m_walk				( false ),
 m_walk_bcwd			( false ),
 m_frames			( 0 ),
-m_walk_speed		( 0.45f )
+m_walk_speed		( 0.45f ),
+m_sw_delay			( false )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
 	m_animation_player->set_no_delete();// ??
@@ -414,6 +415,10 @@ void actor::process_walk()
 	}
 	else {
 		current_walk_animation = m_forward_animation;
+		if (m_walk && !m_start_shoot_timer && !m_start_reload_timer) {
+			m_animation_player->reset();
+			m_animation_player2->reset();
+		}
 		m_walk = false;
 		m_walk_bcwd = false;
 	}
@@ -641,6 +646,7 @@ void actor::on_weapon_loaded(resources::queries_result& data)
 		//old anim doesn't work
 	}
 
+	m_sw_delay = false;
 	m_wpn_draw = true;
 	update_animations(false, false, true, false, false);
 
@@ -680,33 +686,33 @@ animation::mixing::animation_lexeme actor::get_reload_lexeme(mutable_buffer& buf
 	return current_reload_lexeme;
 }
 
-void actor::calculate_walk_frames( float& additive_walk_anim_time )
+void actor::calculate_walk_frames(float& additive_walk_anim_time)
 {
-		if (!m_walk_bcwd) {
-			if (additive_walk_anim_time < (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps)
-			{
-				additive_walk_anim_time = m_frames / animation::default_fps * m_walk_speed;
-				m_frames++;
-			}
-
-			if (additive_walk_anim_time >= (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps) {
-				additive_walk_anim_time = 0;
-				m_frames = 0;
-			}
+	if (!m_walk_bcwd) {
+		if (additive_walk_anim_time < (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps)
+		{
+			additive_walk_anim_time = m_frames / animation::default_fps * m_walk_speed;
+			m_frames++;
 		}
-		else {
-			if (additive_walk_anim_time > 0)
-			{
-				additive_walk_anim_time = additive_walk_anim_time - (m_frames / animation::default_fps * m_walk_speed);
-				m_frames++;
-			}
 
-			if (additive_walk_anim_time <= 0) 
-			{
-				additive_walk_anim_time = animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames() / animation::default_fps;
-				m_frames = 0;
-			}
-		}	
+		if (additive_walk_anim_time >= (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps) {
+			additive_walk_anim_time = 0;
+			m_frames = 0;
+		}
+	}
+	else {
+		if (additive_walk_anim_time > 0)
+		{
+			additive_walk_anim_time = additive_walk_anim_time - (m_frames / animation::default_fps * m_walk_speed);
+			m_frames++;
+		}
+
+		if (additive_walk_anim_time <= 0)
+		{
+			additive_walk_anim_time = animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames() / animation::default_fps;
+			m_frames = 0;
+		}
+	}
 }
 
 void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_holster, bool m_idle, bool m_crouch )
@@ -834,7 +840,7 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 			shoot_expression = current_shoot_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
 			draw_expression = current_draw_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
 			holster_expression = current_holster_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
-			idle_no_wpn_expression = current_idle_no_wpn_lexeme + current_forward_lexeme + current_additive_lexeme;
+			idle_no_wpn_expression = current_idle_no_wpn_lexeme + current_additive_lexeme + current_forward_lexeme;
 		}
 
 	if (!m_reload && !m_shoot && !m_draw && !m_holster && !m_idle && !m_crouch) {
@@ -990,6 +996,7 @@ void actor::tick()
 			m_weapon->hide();
 		}
 		else {
+			m_sw_delay = true;
 			m_switch_snd_time = m_anim_timer.get_elapsed_msec() + 400;
 			m_switch_snd_time_delay = true;
 		}
@@ -1016,6 +1023,10 @@ void actor::tick()
 				}
 				else if (m_wpn_holster) {
 					update_animations(false, false, false, true);
+				}
+				if (m_sw_delay)
+				{
+					update_animations(false, false, false, false, true);
 				}
 				//else {
 					//update_animations();

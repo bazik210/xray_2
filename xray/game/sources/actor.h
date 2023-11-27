@@ -141,6 +141,7 @@ private:
 	bool								m_walk_bcwd;
 	float								m_walk_speed;
 	int									m_frames;
+	bool								m_sw_delay;
 	
 	object_volumetric_sound*			m_snd;
 	xray::physics::bt_character_controller*	m_actor_physics_controller;
