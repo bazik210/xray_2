@@ -563,7 +563,7 @@ void game::tick( u32 const current_frame_id )
 		return;
 	}
 
-	if(m_is_active)
+	if(m_is_active && get_game_world().m_local_actor)
 		actor_hud::get_instance()->render(ui_world().get_renderer(), get_active_scene_view());
 
 	if (!m_active_sounds.empty())

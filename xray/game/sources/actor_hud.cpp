@@ -41,16 +41,28 @@ void actor_hud::init(stalker2::game& game, stalker2::game_world& world)
     m_wnd->set_size(screen_size);
     m_wnd->set_visible(true);
 
-    ui::image* img					= m_ui_world->create_image();
+    img								= m_ui_world->create_image();
 	img->init_texture				( "ui_health" );
 	img->set_color					( 0xfff0f0f0 );
 	img->w()->set_size				( float2(128, 64) );
-	img->w()->set_position			( float2(100, screen_size.y - 100) );
+    if (!game.engine().command_line_editor())
+    {
+        img->w()->set_position(float2(100, screen_size.y - 100));
+    }
+    else {
+        img->w()->set_position(float2(100, screen_size.y * 3 - 100));
+    }
 	img->w()->set_visible			( true );
 	m_wnd->add_child		        ( img->w(), true );
 
     m_health_text = m_ui_world->create_text();
-    m_health_text->w()->set_position(float2(130, screen_size.y - 78));
+    if (!game.engine().command_line_editor())
+    {
+        m_health_text->w()->set_position(float2(130, screen_size.y - 78));
+    }
+    else {
+        m_health_text->w()->set_position(float2(130, screen_size.y * 3 - 78));
+    }
     //m_health_text->w()->set_size(float2(100.f, 40.f));
     m_health_text->w()->set_visible(true);
     m_health_text->set_font(ui::fnt_arial);
