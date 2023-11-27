@@ -38,6 +38,7 @@ public:
 	void								jump			( );
 	collision::geometry_instance &		get_capsule		( );
 	void								set_capsule_scaling(int x, int y, int z, bool direction);
+	bool								onGround		( );
 	btPairCachingGhostObject*			m_ghostObject;
 	btKinematicCharacterController*		m_bt_controller;
 private:

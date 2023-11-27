@@ -389,25 +389,26 @@ float4x4 const& actor::character_select_transform() const
 
 void actor::process_walk()
 {
+	//учитывать прыжок или нет?
 	if (m_actor_input_controller->onframe_move_fwd() > 0)
 	{
 		current_walk_animation = m_forward_animation;
 		m_walk = true;
 		m_walk_bcwd = false;
 	}
-	else if (m_actor_input_controller->onframe_move_fwd() < 0)
+	else if (m_actor_input_controller->onframe_move_fwd() < 0  && m_actor_physics_controller->onGround())
 	{
 		current_walk_animation = m_forward_animation;
 		m_walk = true;
 		m_walk_bcwd = true;
 	}
-	else if (m_actor_input_controller->onframe_move_right() > 0)
+	else if (m_actor_input_controller->onframe_move_right() > 0 && m_actor_physics_controller->onGround())
 	{
 		current_walk_animation = m_right_animation;
 		m_walk = true;
 		m_walk_bcwd = false;
 	}
-	else if (m_actor_input_controller->onframe_move_right() < 0)
+	else if (m_actor_input_controller->onframe_move_right() < 0 && m_actor_physics_controller->onGround())
 	{
 		current_walk_animation = m_left_animation;
 		m_walk = true;
@@ -687,7 +688,7 @@ animation::mixing::animation_lexeme actor::get_reload_lexeme(mutable_buffer& buf
 }
 
 void actor::calculate_walk_frames(float& additive_walk_anim_time)
-{
+{	
 	if (!m_walk_bcwd) {
 		if (additive_walk_anim_time < (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps)
 		{

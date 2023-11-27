@@ -65,6 +65,11 @@ void bt_character_controller::set_capsule_scaling(int x, int y, int z, bool dire
 	m_ghostObject->getCollisionShape()->setLocalScaling(btVector3(x,y,z));
 }
 
+bool bt_character_controller::onGround()
+{
+	return m_bt_controller->onGround();
+}
+
 void bt_character_controller::activate( float4x4 const& t )
 {
 	set_transform				( t );
