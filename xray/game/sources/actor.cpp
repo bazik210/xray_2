@@ -415,7 +415,7 @@ void actor::process_walk()
 	}
 	else {
 		current_walk_animation = m_forward_animation;
-		if (m_walk && !m_start_shoot_timer && !m_start_reload_timer) {
+		if (m_walk && !m_start_shoot_timer && !m_start_reload_timer && !m_wpn_switch) {
 			m_animation_player->reset();
 			m_animation_player2->reset();
 		}
