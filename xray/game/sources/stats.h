@@ -32,7 +32,7 @@ public:
 					stats						( xray::ui::world& ui_world );
 					~stats						( );
 
-	void			draw						( xray::render::ui::renderer& w, render::scene_view_ptr const& scene );
+	void			draw						( xray::render::ui::renderer& w, xray::render::scene_view_ptr const& scene );
 	void			set_fps_stats				( float fps );
 	void			set_active_scene			( pcstr scene_name );
 	void			set_camera_stats			( float3 const& pos, float3 const& dir );

@@ -169,6 +169,8 @@ system_renderer::system_renderer( renderer_context * renderer_context):
 	//desc["ui_texture1"]		    = "ui/ui_skull";
 	desc["ui_texture1"] = "ui/ui_actor_main_menu";
 
+	desc["ui_texture2"] = "ui/ui_hud_health_back";
+
 	effect_manager::ref().create_effect<effect_system_ui>(&m_sh_ui, desc);
 	m_WVP_sl					= backend::ref().register_constant_host( "m_WVP_sl", rc_float );
 	

@@ -260,14 +260,14 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	
 	m_ui_world->set_base_screen_size(m_engine.get_render_window_size());
 
-	actor_hud::get_instance()->init(*this);
-
 	register_cooks				( );
 
 	m_initialized				= true;
 	
 	m_game_world				= NEW( game_world )( *this );
 	m_game_world->set_game_world(m_game_world);
+
+	actor_hud::get_instance()->init(*this, *m_game_world);
 
 	static object_cooker s_object_cook( *m_game_world );
 	static object_scene_cooker s_object_scene_cook( *m_game_world );
@@ -562,6 +562,9 @@ void game::tick( u32 const current_frame_id )
 		m_renderer.end_frame		( );
 		return;
 	}
+
+	if(m_is_active)
+		actor_hud::get_instance()->render(ui_world().get_renderer(), get_active_scene_view());
 
 	if (!m_active_sounds.empty())
 	{

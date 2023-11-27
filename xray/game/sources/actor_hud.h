@@ -21,7 +21,7 @@ namespace animation { struct world; }
 namespace sound { class sound_debug_stats; }
 
 namespace render {
-	namespace game { class renderer; }
+	namespace ui { class renderer; }
 
 } // namespace render
 }
@@ -40,13 +40,17 @@ public:
 	actor_hud();
 	~actor_hud();
 
-	void init(stalker2::game& game);
+	void init(stalker2::game& game, stalker2::game_world& world);
 	void destroy(stalker2::game& game);
 
-	void render(stalker2::game& game, stalker2::game_world& world);
+	void render(xray::render::ui::renderer& w, xray::render::scene_view_ptr const& scene);
 private:
 	ui::window* m_wnd;
 	ui::text* m_health_text;
+	ui::world* m_ui_world;
+	stalker2::game* m_game;
+	stalker2::game_world* m_world;
+
 };
 
 }
