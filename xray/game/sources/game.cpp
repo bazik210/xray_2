@@ -751,6 +751,12 @@ static void kill_npc(human_npc_ptr& condemned)
 	condemned->clear_resources();
 }
 
+float game::get_current_fps()
+{
+	if (m_fps_graph)
+		return m_fps_graph->average_value();
+}
+
 void game::clear_resources				( )
 {
 	destroy_debug_window				( );

@@ -28,7 +28,6 @@
 #include <xray/console_command.h>
 #include <xray/collision/common_types.h>
 #include <xray/collision/collision_object.h>
-
 #include <xray/collision/space_partitioning_tree.h>
 
 using xray::animation::mixing::playing_type_enum;
@@ -84,7 +83,7 @@ m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_pers
 m_walk				( false ),
 m_walk_bcwd			( false ),
 m_frames			( 0 ),
-m_walk_speed		( 0.45f ),
+m_walk_speed		( 1.f /*0.45f*/ ),
 m_sw_delay			( false )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
@@ -426,7 +425,7 @@ void actor::process_walk()
 
 	if (m_actor_input_controller->m_frame_events.action_present(kACCEL) && !m_actor_input_controller->m_crouch)
 	{
-		m_walk_speed = 0.58;
+		m_walk_speed = 1.288f; //1.13f; //0.58;
 	}
 }
 
@@ -479,7 +478,7 @@ void actor::process_input_events( )
 				{
 					move_delta_fw = frame_time_sec * 1.66f * 10.f;
 					move_delta_right = frame_time_sec * 0.83f * 10.f;
-					m_walk_speed = 0.65;
+					m_walk_speed = 1.42f; //1.25f; //0.65;
 
 					// reset if unpressed key
 					if (!m_actor_input_controller->is_doing_movement()) {
@@ -488,12 +487,12 @@ void actor::process_input_events( )
 				}
 			}
 			else {
-				m_walk_speed = 0.45;
+				m_walk_speed = 1.0f; //0.45;
 			}
 			if (m_actor_input_controller->on_frame_crouch()) {
 				move_delta_fw = frame_time_sec * 1.66f * 2.f;
 				move_delta_right = frame_time_sec * 0.83f * 2.f;
-				m_walk_speed = 0.35;
+				m_walk_speed = 0.77f; //0.85f; //0.35;
 			}
 		}
 		else {
@@ -692,7 +691,7 @@ void actor::calculate_walk_frames(float& additive_walk_anim_time)
 	if (!m_walk_bcwd) {
 		if (additive_walk_anim_time < (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps)
 		{
-			additive_walk_anim_time = m_frames / animation::default_fps * m_walk_speed;
+			additive_walk_anim_time = m_frames / m_game_world.get_game().get_current_fps() * m_walk_speed;
 			m_frames++;
 		}
 
@@ -704,7 +703,7 @@ void actor::calculate_walk_frames(float& additive_walk_anim_time)
 	else {
 		if (additive_walk_anim_time > 0)
 		{
-			additive_walk_anim_time = additive_walk_anim_time - (m_frames / animation::default_fps * m_walk_speed);
+			additive_walk_anim_time = additive_walk_anim_time - (m_frames / m_game_world.get_game().get_current_fps() * m_walk_speed);
 			m_frames++;
 		}
 

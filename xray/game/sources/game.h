@@ -96,6 +96,7 @@ public:
 	virtual	void			enable					( bool value );
 	virtual	void			tick					( u32 current_frame_id );
 	virtual	void			clear_resources			( );
+			float			get_current_fps			( );
 	virtual ui::world&		ui_world				( )		{return *m_ui_world;}
 	virtual input::world&	input_world				( )		{return *m_input_world;}
 
