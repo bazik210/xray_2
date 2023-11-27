@@ -67,6 +67,8 @@ private:
 	void			on_load_animations			( resources::queries_result& data );
 	void			add_models_to_scene			( );
 	void			remove_models_from_scene	( );
+	void			process_walk				( );
+	void			calculate_walk_frames		( float& additive_walk_anim_time );
 
 	void			process_input_events		( );
 	void			update_animations			( bool m_reload = false, bool m_shoot = false, bool m_draw = false, bool m_holster = false, bool m_idle = false, bool m_crouch  = false);
@@ -102,6 +104,11 @@ private:
 	animation::skeleton_animation_ptr	m_idle_stand_01_animation;
 	animation::skeleton_animation_ptr	m_crouch_animation;
 	animation::skeleton_animation_ptr	current_additive_animation;
+	animation::skeleton_animation_ptr	m_forward_animation;
+	animation::skeleton_animation_ptr	m_right_animation;
+	animation::skeleton_animation_ptr	m_left_animation;
+	animation::skeleton_animation_ptr	current_walk_animation;
+	
 	xray::particle::particle_system_instance_ptr	m_particle_system_instance_ptr;
 
 	timing::timer						m_anim_timer;
@@ -130,6 +137,11 @@ private:
 	u32									m_switch_snd_time;
 	u32									m_particle_time;
 	bool								m_wpn_shoot;
+	bool								m_walk;	
+	bool								m_walk_bcwd;
+	float								m_walk_speed;
+	int									m_frames;
+	
 	object_volumetric_sound*			m_snd;
 	xray::physics::bt_character_controller*	m_actor_physics_controller;
 

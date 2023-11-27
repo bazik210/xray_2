@@ -58,7 +58,7 @@ m_actor_input_controller( NULL ),
 m_animation_player	( NULL ),
 m_animation_player2 ( NULL ),
 m_tmp_is_active		( false ),
-m_stop_query		(false ),
+m_stop_query		( false ),
 m_game_world		( w ),
 m_wpn_reload		( false ),
 m_wpn_shoot			( false ),
@@ -80,7 +80,11 @@ m_noclip			( false ),
 m_camera_bone_idx	( NULL ),
 m_muzzle_point		(float4(0.0f, 0.03f, -0.8f, 1.0f)),
 m_new_weapon		("assault_rifles/ak74m"),
-m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload")
+m_new_anim			("resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/reload"),
+m_walk				( false ),
+m_walk_bcwd			( false ),
+m_frames			( 0 ),
+m_walk_speed		( 0.45f )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
 	m_animation_player->set_no_delete();// ??
@@ -209,7 +213,10 @@ void actor::on_resources_ready( resources::queries_result& data )
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/fire_1",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/draw",  resources::animation_class },
 		{ "resources/animations/single/weapons/assault_rifles/ak74m/1st_person/danger/player/holster",  resources::animation_class },
-		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_add",  resources::animation_class }
+		{ "resources/animations/single/human/actor/locomotion/crouch/on_site_add",  resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/walk/forward_add",  resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/walk/right_add",  resources::animation_class },
+		{ "resources/animations/single/human/actor/locomotion/walk/left_add",  resources::animation_class }
 		};
 
 		resources::query_resources(
@@ -224,6 +231,9 @@ void actor::on_resources_ready( resources::queries_result& data )
 		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_add",   resources::animation_class },
 		{ "resources/animations/single/human/hud/reload",	   resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
+		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
 		{ "resources/animations/single/human/hud/stand_idle",  resources::animation_class },
@@ -247,8 +257,13 @@ void actor::on_load_animations(  resources::queries_result& data  )
 	m_shoot_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[4].get_managed_resource());
 	m_draw_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[5].get_managed_resource());
 	m_holster_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[6].get_managed_resource());
-	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());	
+	m_crouch_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[7].get_managed_resource());
+	m_forward_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[8].get_managed_resource());	
+	m_right_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[9].get_managed_resource());	
+	m_left_animation		= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[10].get_managed_resource());	
+
 	current_additive_animation	= m_look_animation_add;
+	current_walk_animation		= m_forward_animation;
 
 	//some query system bug;
 	m_stop_query = true;
@@ -371,6 +386,44 @@ float4x4 const& actor::character_select_transform() const
 	}
 }
 
+void actor::process_walk()
+{
+	if (m_actor_input_controller->onframe_move_fwd() > 0)
+	{
+		current_walk_animation = m_forward_animation;
+		m_walk = true;
+		m_walk_bcwd = false;
+	}
+	else if (m_actor_input_controller->onframe_move_fwd() < 0)
+	{
+		current_walk_animation = m_forward_animation;
+		m_walk = true;
+		m_walk_bcwd = true;
+	}
+	else if (m_actor_input_controller->onframe_move_right() > 0)
+	{
+		current_walk_animation = m_right_animation;
+		m_walk = true;
+		m_walk_bcwd = false;
+	}
+	else if (m_actor_input_controller->onframe_move_right() < 0)
+	{
+		current_walk_animation = m_left_animation;
+		m_walk = true;
+		m_walk_bcwd = false;
+	}
+	else {
+		current_walk_animation = m_forward_animation;
+		m_walk = false;
+		m_walk_bcwd = false;
+	}
+
+	if (m_actor_input_controller->m_frame_events.action_present(kACCEL) && !m_actor_input_controller->m_crouch)
+	{
+		m_walk_speed = 0.58;
+	}
+}
+
 void actor::process_input_events( )
 {
 	if(!m_actor_input_controller)
@@ -411,18 +464,30 @@ void actor::process_input_events( )
 
 			move_delta_fw = frame_time_sec * 1.66f * 4.f;
 			move_delta_right = frame_time_sec * 0.83f * 4.f;
-			if (m_actor_input_controller->on_frame_sprint() && !m_actor_input_controller->m_crouch)
-			{
-				move_delta_fw = frame_time_sec * 1.66f * 10.f;
-				move_delta_right = frame_time_sec * 0.83f * 10.f;
+			
+			process_walk();
 
-				// reset if unpressed key
-				if (!m_actor_input_controller->is_doing_movement())
-					m_actor_input_controller->m_sprint_toggle = false;
+			if (m_actor_input_controller->on_frame_sprint())
+			{
+				if (!m_actor_input_controller->m_crouch)
+				{
+					move_delta_fw = frame_time_sec * 1.66f * 10.f;
+					move_delta_right = frame_time_sec * 0.83f * 10.f;
+					m_walk_speed = 0.65;
+
+					// reset if unpressed key
+					if (!m_actor_input_controller->is_doing_movement()) {
+						m_actor_input_controller->m_sprint_toggle = false;
+					}
+				}
+			}
+			else {
+				m_walk_speed = 0.45;
 			}
 			if (m_actor_input_controller->on_frame_crouch()) {
 				move_delta_fw = frame_time_sec * 1.66f * 2.f;
 				move_delta_right = frame_time_sec * 0.83f * 2.f;
+				m_walk_speed = 0.35;
 			}
 		}
 		else {
@@ -615,6 +680,35 @@ animation::mixing::animation_lexeme actor::get_reload_lexeme(mutable_buffer& buf
 	return current_reload_lexeme;
 }
 
+void actor::calculate_walk_frames( float& additive_walk_anim_time )
+{
+		if (!m_walk_bcwd) {
+			if (additive_walk_anim_time < (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps)
+			{
+				additive_walk_anim_time = m_frames / animation::default_fps * m_walk_speed;
+				m_frames++;
+			}
+
+			if (additive_walk_anim_time >= (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames()) / animation::default_fps) {
+				additive_walk_anim_time = 0;
+				m_frames = 0;
+			}
+		}
+		else {
+			if (additive_walk_anim_time > 0)
+			{
+				additive_walk_anim_time = additive_walk_anim_time - (m_frames / animation::default_fps * m_walk_speed);
+				m_frames++;
+			}
+
+			if (additive_walk_anim_time <= 0) 
+			{
+				additive_walk_anim_time = animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames() / animation::default_fps;
+				m_frames = 0;
+			}
+		}	
+}
+
 void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_holster, bool m_idle, bool m_crouch )
 {
 
@@ -630,6 +724,10 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 	// calculate additive animation coefficient, based on pitch
 	float k								= 1.0f - (m_look_pitch+1.0f)/2.0f; // normalized to 0..1.0f
 	float additive_current_anim_time	= animation::cubic_spline_skeleton_animation_pinned( current_additive_animation ).c_ptr()->length_in_frames() / animation::default_fps * k;
+	float additive_walk_anim_time = (m_walk_bcwd) ? (animation::cubic_spline_skeleton_animation_pinned(current_walk_animation).c_ptr()->length_in_frames() / animation::default_fps) : 0;
+	if (m_walk) {
+		calculate_walk_frames(additive_walk_anim_time);
+	}
 
 	animation::mixing::animation_lexeme	current_idle_lexeme(
 		animation::mixing::animation_lexeme_parameters(
@@ -683,6 +781,19 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 		.additivity_priority( 1 )
 	);
 
+	animation::mixing::animation_lexeme	current_fake_additive = current_additive_lexeme;
+
+	animation::mixing::animation_lexeme	current_forward_lexeme(
+		animation::mixing::animation_lexeme_parameters(
+			buffer, 
+			"forward",
+			current_walk_animation
+		).time_scale( 1.f )
+		.start_animation_interval_time( additive_walk_anim_time )
+		.override_existing_animation( true )
+		.additivity_priority( 1 )
+	);
+
 		animation::mixing::animation_lexeme	current_reload_lexeme(
 			animation::mixing::animation_lexeme_parameters(
 				buffer,
@@ -709,17 +820,26 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 
 	m_weapon->select_animation(buffer);
 
+		xray::animation::mixing::expression idle_expression = current_idle_lexeme + current_additive_lexeme + weapon_target;
+		xray::animation::mixing::expression reload_expression = current_reload_lexeme + current_additive_lexeme + weapon_target;
+		xray::animation::mixing::expression shoot_expression = current_shoot_lexeme + current_additive_lexeme + weapon_target;
+		xray::animation::mixing::expression draw_expression = current_draw_lexeme + current_additive_lexeme + weapon_target;
+		xray::animation::mixing::expression holster_expression = current_holster_lexeme + current_additive_lexeme + weapon_target;
+		xray::animation::mixing::expression idle_no_wpn_expression = current_idle_no_wpn_lexeme + current_additive_lexeme;
+		
+		
+		if (m_walk) {
+			idle_expression = current_idle_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
+			reload_expression = current_reload_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
+			shoot_expression = current_shoot_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
+			draw_expression = current_draw_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
+			holster_expression = current_holster_lexeme + current_additive_lexeme + current_forward_lexeme + weapon_target;
+			idle_no_wpn_expression = current_idle_no_wpn_lexeme + current_forward_lexeme + current_additive_lexeme;
+		}
+
 	if (!m_reload && !m_shoot && !m_draw && !m_holster && !m_idle && !m_crouch) {
-		m_animation_player->set_target_and_tick(
-			current_idle_lexeme
-			+ current_additive_lexeme
-			+ weapon_target
-			, current_time);
-		m_animation_player2->set_target_and_tick(
-			current_idle_lexeme
-			+ current_additive_lexeme
-			+ weapon_target
-			, current_time);
+		m_animation_player->set_target_and_tick(idle_expression, current_time);
+		m_animation_player2->set_target_and_tick(idle_expression, current_time);
 	}
 	else {
 		if (m_reload) {
@@ -736,10 +856,7 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 			}
 			m_animation_player->tick(current_time);
 			if (m_bone_count > 65) {
-				m_animation_player2->set_target_and_tick(
-					current_reload_lexeme
-					+ additive_reload_lexeme
-					, current_time);
+				m_animation_player2->set_target_and_tick(reload_expression, current_time);
 			}
 		}
 		else if (m_shoot) {
@@ -761,11 +878,7 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 			m_start_particle_timer = true;
 			}
 			m_animation_player->tick(current_time);
-			m_animation_player2->set_target_and_tick(
-				current_shoot_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
+			m_animation_player2->set_target_and_tick(shoot_expression, current_time);
 		}
 		else if (m_draw) {
 			if (!m_start_draw_timer) {
@@ -775,16 +888,8 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				m_snd->load_custom("draw", m_character_transform, false);
 				m_draw_anim_time = current_time + (current_draw_lexeme.animation_intervals_begin()->length() * 1000);
 			}
-			m_animation_player->set_target_and_tick(
-				current_draw_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
-			m_animation_player2->set_target_and_tick(
-				current_draw_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
+			m_animation_player->set_target_and_tick(draw_expression, current_time);
+			m_animation_player2->set_target_and_tick(draw_expression, current_time);
 		}
 		else if (m_holster) {
 			if (!m_start_holster_timer) {
@@ -794,26 +899,12 @@ void actor::update_animations( bool m_reload, bool m_shoot, bool m_draw, bool m_
 				m_snd->load_custom("holster",  m_character_transform, false);
 				m_holster_anim_time = current_time + (current_holster_lexeme.animation_intervals_begin()->length() * 1000);
 			}
-			m_animation_player->set_target_and_tick(
-				current_holster_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
-			m_animation_player2->set_target_and_tick(
-				current_holster_lexeme
-				+ current_additive_lexeme
-				+ weapon_target
-				, current_time);
+			m_animation_player->set_target_and_tick(holster_expression, current_time);
+			m_animation_player2->set_target_and_tick(holster_expression, current_time);
 		}
 		else if (m_idle) {
-			m_animation_player->set_target_and_tick(
-				current_idle_no_wpn_lexeme
-				+ current_additive_lexeme
-				, current_time);
-			m_animation_player2->set_target_and_tick(
-				current_idle_no_wpn_lexeme
-				+ current_additive_lexeme
-				, current_time);
+			m_animation_player->set_target_and_tick(idle_no_wpn_expression, current_time);
+			m_animation_player2->set_target_and_tick(idle_no_wpn_expression, current_time);
 		}
 	}
 }
