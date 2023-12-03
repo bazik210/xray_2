@@ -227,6 +227,7 @@ game::~game( )
 	DELETE						( m_lobby_menu );
 	DELETE						( m_console );
 	DELETE						( m_stats );
+	DELETE						( m_actor_hud );
 	DELETE						( m_active_npc_stats );
 	DELETE						( m_fps_graph );
 #ifndef MASTER_GOLD
@@ -240,8 +241,6 @@ game::~game( )
 	#endif
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 	DELETE						( m_key_binder );
-
-	actor_hud::get_instance()->destroy(*this);
 
 	deinitialize_modules		( );
 }
@@ -267,8 +266,6 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_game_world				= NEW( game_world )( *this );
 	m_game_world->set_game_world(m_game_world);
 
-	actor_hud::get_instance()->init(*this, *m_game_world);
-
 	static object_cooker s_object_cook( *m_game_world );
 	static object_scene_cooker s_object_scene_cook( *m_game_world );
 	register_cook				( &s_object_cook );
@@ -278,6 +275,7 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_stats						= NEW( stats )( *m_ui_world );
 	m_fps_graph					= NEW( stats_graph )( 1.f, math::infinity, 30.f, 60.f );
 	m_active_npc_stats			= NEW( npc_stats )( *m_ui_world );
+	m_actor_hud					= NEW( actor_hud )( m_ui_world, m_game_world, this );
 #ifdef XRAY_STATIC_LIBRARIES
 	#ifdef XRAY_RENDERER_FLASH
 		m_flash_factory				= NEW( flash_factory )( *this );
@@ -563,9 +561,6 @@ void game::tick( u32 const current_frame_id )
 		return;
 	}
 
-	if(m_is_active && get_game_world().m_local_actor)
-		actor_hud::get_instance()->render(ui_world().get_renderer(), get_active_scene_view());
-
 	if (!m_active_sounds.empty())
 	{
 		if (!m_snds_cleaner) {
@@ -669,6 +664,9 @@ void game::tick( u32 const current_frame_id )
 
 	// because of out of memory at the start
 	update_stats					( current_frame_id );
+
+	if(m_is_active && m_active_scene && m_active_scene == m_game_world && get_game_world().m_local_actor)
+		m_actor_hud->render(ui_world().get_renderer(), m_game_world->get_render_scene_view());
 
 	if ( (m_debug_window_type != debug_window_none) && !m_console->get_active() )
 		draw_debug_window			( );

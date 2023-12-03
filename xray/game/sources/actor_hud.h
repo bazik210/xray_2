@@ -34,24 +34,17 @@ class game_world;
 class actor_hud
 {
 public:
-	static actor_hud* get_instance();
-
-public:
-	actor_hud();
+	actor_hud(xray::ui::world* ui_world, stalker2::game_world* m_world, stalker2::game* game);
 	~actor_hud();
 
-	void init(stalker2::game& game, stalker2::game_world& world);
-	void destroy(stalker2::game& game);
-
 	void render(xray::render::ui::renderer& w, xray::render::scene_view_ptr const& scene);
+
 private:
-	ui::window* m_wnd;
-	ui::image* m_img;
-	ui::text* m_health_text;
 	ui::world* m_ui_world;
 	stalker2::game* m_game;
 	stalker2::game_world* m_world;
-
+	ui::window* m_wnd;
+	ui::text* m_health_text;
 };
 
 }

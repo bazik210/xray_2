@@ -62,6 +62,7 @@ class human_npc;
 class monster_npc;
 class building_object;
 class composite_building;
+class actor_hud;
 #ifdef XRAY_RENDERER_FLASH
 class flash_factory;
 #endif
@@ -292,6 +293,7 @@ private:
 
 	stats_graph*							m_fps_graph;
 	stats*									m_stats;
+	actor_hud*								m_actor_hud;
 	npc_stats*								m_active_npc_stats;
 	key_binder*								m_key_binder;
 
