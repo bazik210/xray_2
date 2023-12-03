@@ -46,7 +46,7 @@ public:
 	void render(xray::render::ui::renderer& w, xray::render::scene_view_ptr const& scene);
 private:
 	ui::window* m_wnd;
-	ui::image* img;
+	ui::image* m_img;
 	ui::text* m_health_text;
 	ui::world* m_ui_world;
 	stalker2::game* m_game;

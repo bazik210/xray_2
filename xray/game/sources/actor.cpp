@@ -50,6 +50,18 @@ console_commands::cc_bool g_thirdperson("thirdperson", g_thirdperson_value, fals
 static bool s_ph_draw_actor_aabb_value = true;
 static console_commands::cc_bool s_ph_draw_actor_aabb("ph_draw_actor_aabb", s_ph_draw_actor_aabb_value, true, xray::console_commands::command_type_user_specific);
 
+static float speed_crouch_mul_val = 2.f;
+static console_commands::cc_float cc_speed_crouch_mul("speed_crouch_mul", speed_crouch_mul_val, 0.1f, 100.0f, true, xray::console_commands::command_type_user_specific);
+
+static float speed_walk_mul_val = 4.f;
+static console_commands::cc_float cc_speed_walk_mul("speed_walk_mul", speed_walk_mul_val, 0.1f, 100.0f, true, xray::console_commands::command_type_user_specific);
+
+static float speed_run_mul_val = 10.f;
+static console_commands::cc_float cc_speed_run_mul("speed_run_mul", speed_run_mul_val, 0.1f, 100.0f, true, xray::console_commands::command_type_user_specific);
+
+static float speed_noclip_mul_val = 15.f;
+static console_commands::cc_float cc_speed_noclip_mul("speed_noclip_mul", speed_noclip_mul_val, 0.1f, 100.0f, true, xray::console_commands::command_type_user_specific);
+
 actor::actor( game_world& w )
 :m_character_transform( float4x4().identity() ),
 m_look_pitch		( 0.0f ),
@@ -467,8 +479,8 @@ void actor::process_input_events( )
 
 		if (!g_noclip_enabled) {
 
-			move_delta_fw = frame_time_sec * 1.66f * 4.f;
-			move_delta_right = frame_time_sec * 0.83f * 4.f;
+			move_delta_fw = frame_time_sec * 1.66f * speed_walk_mul_val;
+			move_delta_right = frame_time_sec * 0.83f * speed_walk_mul_val;
 			
 			process_walk();
 
@@ -476,8 +488,8 @@ void actor::process_input_events( )
 			{
 				if (!m_actor_input_controller->m_crouch)
 				{
-					move_delta_fw = frame_time_sec * 1.66f * 10.f;
-					move_delta_right = frame_time_sec * 0.83f * 10.f;
+					move_delta_fw = frame_time_sec * 1.66f * speed_run_mul_val;
+					move_delta_right = frame_time_sec * 0.83f * speed_run_mul_val;
 					m_walk_speed = 1.42f; //1.25f; //0.65;
 
 					// reset if unpressed key
@@ -490,14 +502,14 @@ void actor::process_input_events( )
 				m_walk_speed = 1.0f; //0.45;
 			}
 			if (m_actor_input_controller->on_frame_crouch()) {
-				move_delta_fw = frame_time_sec * 1.66f * 2.f;
-				move_delta_right = frame_time_sec * 0.83f * 2.f;
+				move_delta_fw = frame_time_sec * 1.66f * speed_crouch_mul_val;
+				move_delta_right = frame_time_sec * 0.83f * speed_crouch_mul_val;
 				m_walk_speed = 0.77f; //0.85f; //0.35;
 			}
 		}
 		else {
-			move_delta_fw = frame_time_sec * 1.66f * 15.f;
-			move_delta_right = frame_time_sec * 0.83f * 15.f;
+			move_delta_fw = frame_time_sec * 1.66f * speed_noclip_mul_val;
+			move_delta_right = frame_time_sec * 0.83f * speed_noclip_mul_val;
 		}
 
 		//loxotron: we should update particle position in time somehow, cause it's not attached to anything, bad way :(

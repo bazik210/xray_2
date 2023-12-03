@@ -13,10 +13,14 @@
 #include <xray/input/mouse.h>
 #include <xray/input/world.h>
 #include <xray/engine/console.h>
-
+#include <xray/console_command.h>
 
 namespace stalker2
 {
+
+static float speed_forward_mul_val = 1.5f;
+static console_commands::cc_float cc_speed_forward_mul("speed_forward_mul", speed_forward_mul_val, 0.1f, 100.0f, true, xray::console_commands::command_type_user_specific);
+
 actor_input_controller::actor_input_controller( game_scene& w )
 :super			( w ),
 m_sprint_toggle ( false ),
@@ -190,7 +194,7 @@ void actor_input_controller::on_after_processing( input::world* input_world )
 
 	float move_forward_speed = 1.f;
 	if (( m_frame_events.action_present(kACCEL) || m_sprint_toggle ) && !m_crouch)
-		move_forward_speed = 1.5f;
+		move_forward_speed = speed_forward_mul_val;
 
 	if ( m_frame_events.action_present(kFWD) )
 		m_frame_events.m_onframe_move_fwd		+= move_forward_speed;

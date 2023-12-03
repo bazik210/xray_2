@@ -19,6 +19,7 @@ actor_hud* actor_hud::get_instance()
 
 actor_hud::actor_hud() :
     m_wnd(nullptr),
+    m_img(nullptr),
     m_health_text(nullptr),
     m_ui_world(NULL),
     m_game(NULL),
@@ -41,19 +42,19 @@ void actor_hud::init(stalker2::game& game, stalker2::game_world& world)
     m_wnd->set_size(screen_size);
     m_wnd->set_visible(true);
 
-    img								= m_ui_world->create_image();
-	img->init_texture				( "ui_health" );
-	img->set_color					( 0xfff0f0f0 );
-	img->w()->set_size				( float2(128, 64) );
+    m_img							= m_ui_world->create_image();
+	m_img->init_texture				( "ui_health" );
+	m_img->set_color				( 0xfff0f0f0 );
+	m_img->w()->set_size			( float2(128, 64) );
     if (!game.engine().command_line_editor())
     {
-        img->w()->set_position(float2(100, screen_size.y - 100));
+        m_img->w()->set_position(float2(100, screen_size.y - 100));
     }
     else {
-        img->w()->set_position(float2(100, screen_size.y * 3 - 100));
+        m_img->w()->set_position(float2(100, screen_size.y * 3 - 100));
     }
-	img->w()->set_visible			( true );
-	m_wnd->add_child		        ( img->w(), true );
+	m_img->w()->set_visible			( true );
+	m_wnd->add_child		        ( m_img->w(), true );
 
     m_health_text = m_ui_world->create_text();
     if (!game.engine().command_line_editor())
