@@ -75,7 +75,7 @@ pvoid stack_allocator::realloc_impl	( pvoid pointer, size_t new_size XRAY_CORE_D
 	if ( pointer )
 		memory::copy				( result, new_size, pointer, new_size );
 	free_impl						( pointer XRAY_CORE_DEBUG_PARAMETERS );
-	LOG_WARNING						( "realloc has been called on stack allocator, is it intended behavior?" );
+//	LOG_WARNING						( "realloc has been called on stack allocator, is it intended behavior?" );
 	return							result;
 }
 

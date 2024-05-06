@@ -160,17 +160,30 @@ void proximity_trigger_behaviour::tick ( )
 		}
 	}
 #endif //#ifndef MASTER_GOLD
-	proximity_trigger_testee_status testee_status	= m_proximity_trigger->test_object( m_testee );
 
-	if( testee_status == proximity_trigger_testee_status_enter )
-	{
-		game_event ev("on enter");
-		m_owner->get_event_manager( )->emit_event( ev, m_proximity_trigger );
+	if (m_proximity_trigger->get_game_world().m_local_actor) {
+
+		if (m_is_actor_reset) {
+			m_is_actor_reset = false;
+			m_testee = &m_proximity_trigger->get_game_world().m_local_actor->get_caracter_capsule();
+		}
+
+		proximity_trigger_testee_status testee_status = m_proximity_trigger->test_object(m_testee);
+
+		if (testee_status == proximity_trigger_testee_status_enter)
+		{
+			game_event ev("on enter");
+			m_owner->get_event_manager()->emit_event(ev, m_proximity_trigger);
+		}
+		else if (testee_status == proximity_trigger_testee_status_leave)
+		{
+			game_event ev("on exit");
+			m_owner->get_event_manager()->emit_event(ev, m_proximity_trigger);
+		}
+
 	}
-	else if( testee_status == proximity_trigger_testee_status_leave )
-	{
-		game_event ev("on exit");
-		m_owner->get_event_manager( )->emit_event( ev, m_proximity_trigger );
+	else {
+		m_is_actor_reset = true;
 	}
 
 #ifndef MASTER_GOLD

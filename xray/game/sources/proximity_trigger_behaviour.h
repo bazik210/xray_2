@@ -53,6 +53,7 @@ namespace stalker2
 	private:
 		proximity_trigger_input_handler*	m_input_handler;
 		bool								m_is_input_handler_enabled;
+		bool								m_is_actor_reset;
 
 		static bool							m_is_testee_volume_enabled;
 		static bool							m_is_input_handler_enabled_catched;

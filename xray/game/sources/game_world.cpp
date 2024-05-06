@@ -234,7 +234,7 @@ void game_world::switch_to_hud_camera( )
 		return;
 	}
 
-		m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
+//	m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
 }
 
 void game_world::switch_to_free_fly_camera( )
@@ -273,7 +273,7 @@ void game_world::spawn_actor()
 {
 	m_local_actor = NEW(actor)(*this);
 	m_actor_spawned = true;
-	m_local_actor->query_resources();
+	//m_local_actor->query_resources();
 }
 
 void game_world::on_project_loaded( resources::queries_result& data )
@@ -293,8 +293,7 @@ void game_world::on_project_loaded( resources::queries_result& data )
 	if(!m_key_camera) {
 		switch_to_free_fly_camera();
 
-		m_local_actor = NEW(actor)(*this);
-		m_actor_spawned	= true;
+		spawn_actor();
 		}
 
 		//m_hud = NEW(hud)( *this);
