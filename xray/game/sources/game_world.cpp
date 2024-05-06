@@ -231,8 +231,11 @@ void game_world::unload( )
 	m_game_project						= NULL;
 }
 
-void game_world::switch_to_hud_camera( )
+void game_world::switch_to_hud_camera( bool controller )
 {
+	if(controller)
+		m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
+
 //	m_camera_director->switch_to_camera(m_hud, "hud game camera");
 
 	if (!m_local_actor) {

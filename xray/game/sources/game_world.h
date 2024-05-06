@@ -79,7 +79,7 @@ public:
 	void			on_scene_stop			( object_scene_ptr scene );
 	
 	void			switch_to_free_fly_camera( );
-	void			switch_to_hud_camera	( );
+	void			switch_to_hud_camera	( bool controller = false );
 	bool			is_loading_or_unloading	( ){return false;}
 //	hud*			get_hud					( ) { return m_hud; }
 //	xray::physics::world*					get_physics_world		( ) { return m_physics_world;}

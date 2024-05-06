@@ -42,8 +42,11 @@ bool main_menu::on_keyboard_action( input::world* input_world, input::enum_keybo
  		{
 			if (m_fly_mode) {
 				m_fly_mode = false;
+ 				m_game_world.switch_to_hud_camera(true);
 			}
- 			m_game_world.switch_to_hud_camera();
+			else {
+				m_game_world.switch_to_hud_camera();
+			}
 			get_game().scene_close_query();
  			return				true;
  		}
@@ -65,7 +68,7 @@ bool main_menu::on_keyboard_action( input::world* input_world, input::enum_keybo
 			}
 			else {
 				m_fly_mode = false;
- 				m_game_world.switch_to_hud_camera();
+ 				m_game_world.switch_to_hud_camera(true);
 				get_game().scene_close_query();
 			}
 			return				true;
