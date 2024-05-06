@@ -310,19 +310,14 @@ void game_world::on_activate( )
 	super::on_activate			( );
 	m_camera_director->on_focus	( true );
 
-	//if we're switching level or in editor
-	if (get_game().m_is_stats_cleared || get_game().engine().command_line_editor())
-	{
-		if (get_sound_scene())
-			get_game().get_sound_world().get_logic_world_user().set_active_sound_scene(get_sound_scene(), 1000, 0);
-	}
+	if (get_sound_scene())
+		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene(get_sound_scene(), 1000, 0);
 
 #ifndef MASTER_GOLD
 	if (get_game().m_is_stats_cleared) {
 		get_game().m_is_stats_cleared = false;
 		get_game().load_sound_stats();
 	}
-
 #endif //#ifndef MASTER_GOLD
 
 if (m_key_camera)

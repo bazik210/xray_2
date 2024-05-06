@@ -131,4 +131,4 @@ private:
 
 } // namespace stalker2
 
-#endif // #ifndef GAME_WORLD_H_INCLUDED
+#endif // GAME_WORLD_H_INCLUDED
