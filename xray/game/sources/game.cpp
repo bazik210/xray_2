@@ -188,7 +188,8 @@ game::game(		xray::engine_user::engine& engine,
 	m_dead_sound			( NULL ),
 	m_delay					( 0 ),
 	m_reserve_switch		( false ),
-	m_allow_ed_fire			( true )
+	m_allow_ed_fire			( true ),
+	m_is_stats_cleared		( false )
 //	m_sound_created			( false )
 {
 	query_render_scene		( );
@@ -778,9 +779,9 @@ void game::clear_resources				( )
 	xray::collision::delete_space_partitioning_tree( m_spatial_tree );
 	m_spatial_tree						= 0;
 
-#ifndef MASTER_GOLD
-	m_sound_stats->clear_resources		( m_sound_world.get_logic_world_user() );
-#endif //#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
+//		m_sound_stats->clear_resources		( m_sound_world.get_logic_world_user() );
+//#endif //#ifndef MASTER_GOLD
 
 	m_sound_world.get_logic_world_user().remove_sound_scene	( m_sound_scene );
 	//m_render_world.destroy( *g_allocator, m_renderer);

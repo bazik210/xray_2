@@ -369,6 +369,10 @@ private:
 	void									destroy_debug_window		();
 	void									draw_debug_window			();
 	void									toggle_debug_window			();
+
+public:
+	xray::sound::sound_debug_stats* 		get_sound_stats() { return m_sound_stats; };
+	bool									m_is_stats_cleared;
 }; // class game
 
 } // namespace stalker2

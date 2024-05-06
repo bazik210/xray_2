@@ -22,6 +22,7 @@
 
 #include <xray/sound/world.h>
 #include <xray/sound/world_user.h>
+#include <xray/sound/sound_debug_stats.h>
 #include <xray/console_command.h>
 
 #include <xray/network/packet_reader.h>
@@ -201,6 +202,11 @@ void game_world::unload( )
 {
 //	DELETE(volumetric_test);
 
+#ifndef MASTER_GOLD
+		get_game().get_sound_stats()->clear_resources(get_game().get_sound_world().get_logic_world_user());
+		get_game().m_is_stats_cleared = true;
+#endif //#ifndef MASTER_GOLD
+
 	scenes_list::iterator it = m_active_scenes.begin();
 	scenes_list::iterator it_e = m_active_scenes.end();
 	for( ;it!=it_e; ++it)
@@ -303,9 +309,21 @@ void game_world::on_activate( )
 {
 	super::on_activate			( );
 	m_camera_director->on_focus	( true );
-	
-	if(get_sound_scene())
-		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 0, 0 );
+
+	//if we're switching level or in editor
+	if (get_game().m_is_stats_cleared || get_game().engine().command_line_editor())
+	{
+		if (get_sound_scene())
+			get_game().get_sound_world().get_logic_world_user().set_active_sound_scene(get_sound_scene(), 1000, 0);
+	}
+
+#ifndef MASTER_GOLD
+	if (get_game().m_is_stats_cleared) {
+		get_game().m_is_stats_cleared = false;
+		get_game().load_sound_stats();
+	}
+
+#endif //#ifndef MASTER_GOLD
 
 if (m_key_camera)
 	switch_to_free_fly_camera();
@@ -421,8 +439,8 @@ void game_world::on_resources_ready( resources::queries_result& data )
 	m_sound_scene		= static_cast_resource_ptr< xray::sound::sound_scene_ptr >( data[2].get_unmanaged_resource() );
 
 	//we are forced to use game_world sound scene, for some reason game sound_scene produce a crash :[
-
-	if(is_active())
+	
+	if(is_active()) //if we are in game
 		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 1000, 0 );
 
 	#ifndef MASTER_GOLD
