@@ -13,7 +13,7 @@
 
 #ifndef NDEBUG
 #	define DEBUG
-#endif // #ifdef NDEBUG
+#endif // NDEBUG
 
 #include <xray/macro_compile_assert.h>
 #include <xray/macro_strings.h>

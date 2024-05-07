@@ -30,9 +30,9 @@ private:
 	typedef	base_allocator				super;
 
 protected:
-			pvoid	call_malloc			( size_t size_t, pcstr const description, pcstr const function, pcstr const file, u32 const line) override;
-	     	pvoid	call_realloc		( pvoid pointer, size_t new_size, pcstr const description, pcstr const function, pcstr const file, u32 const line ) override;
-	    	void	call_free			( pvoid pointer, pcstr const function, pcstr const file, u32 const line ) override;
+	virtual	pvoid	call_malloc			( size_t size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION );
+	virtual	pvoid	call_realloc		( pvoid pointer, size_t new_size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION );
+	virtual	void	call_free			( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION );
 	virtual	size_t	usable_size_impl	( pvoid pointer ) const;
 private:
 	virtual	void	initialize_impl		( pvoid arena, u64 arena_size, pcstr arena_id ) override;

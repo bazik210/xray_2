@@ -43,9 +43,9 @@ public:
 			size_t	usable_size			( pvoid pointer ) const;
 
 protected:
-	virtual	pvoid	call_malloc			( size_t size_t, pcstr const description, pcstr const function, pcstr const file, u32 const line ) = 0;
-	virtual	pvoid	call_realloc		( pvoid pointer, size_t new_size, pcstr const description, pcstr const function, pcstr const file, u32 const line ) = 0;
-	virtual	void	call_free			( pvoid pointer, pcstr const function, pcstr const file, u32 const line ) = 0;
+	virtual	pvoid	call_malloc			( size_t size_t XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION ) = 0;
+	virtual	pvoid	call_realloc		( pvoid pointer, size_t new_size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION ) = 0;
+	virtual	void	call_free			( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION ) = 0;
 	virtual	size_t	usable_size_impl	( pvoid pointer ) const = 0;
 
 protected:

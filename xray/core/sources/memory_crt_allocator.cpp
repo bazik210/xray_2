@@ -90,17 +90,17 @@ void crt_allocator::free_impl		( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLAR
 	(*m_free_ptr)					( pointer );
 }
 
-pvoid crt_allocator::call_malloc	( size_t size_t, pcstr const description, pcstr const function, pcstr const file, u32 const line )
+pvoid crt_allocator::call_malloc	( size_t size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION )
 {
-	return							( malloc_impl( size_t XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION XRAY_CORE_DEBUG_PARAMETERS ) );
+	return							( malloc_impl( size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION XRAY_CORE_DEBUG_PARAMETERS ) );
 }
 
-pvoid crt_allocator::call_realloc	( pvoid pointer, size_t new_size, pcstr const description, pcstr const function, pcstr const file, u32 const line )
+pvoid crt_allocator::call_realloc	( pvoid pointer, size_t new_size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION_DECLARATION XRAY_CORE_DEBUG_PARAMETERS_DECLARATION )
 {
 	return							( realloc_impl( pointer, new_size XRAY_CORE_DEBUG_PARAMETERS_DESCRIPTION XRAY_CORE_DEBUG_PARAMETERS ) );
 }
 
-void crt_allocator::call_free		( pvoid pointer, pcstr const function, pcstr const file, u32 const line )
+void crt_allocator::call_free		( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION )
 {
 	free_impl						( pointer XRAY_CORE_DEBUG_PARAMETERS );
 }

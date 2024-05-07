@@ -8,7 +8,9 @@
 #define THREADING_FUNCTIONS_WIN_XBOX_INLINE_H_INCLUDED
 
 #include <intrin.h>
-#include <xray/os_include.h>
+
+//breaks release config
+//#include <xray/os_include.h>
 
 #pragma intrinsic(_InterlockedCompareExchange,		\
 				  _InterlockedCompareExchange64,	\
