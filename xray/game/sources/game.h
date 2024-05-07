@@ -22,6 +22,7 @@
 #include "monster_npc.h"
 #include <xray/render/engine/base_classes.h>
 #include "object_volumetric_sound.h"
+#include "object_collision_geometry.h"
 
 namespace xray {
 
@@ -272,7 +273,9 @@ public:
 	bool									m_allow_ed_fire;
 
 	typedef vector<object_volumetric_sound*>	snd_list;
+	typedef vector<object_collision_geometry*>	cl_list;
 
+	cl_list									m_collisions;
 	snd_list								m_active_sounds;
 	bool									m_snds_cleaner;
 	timing::timer							m_snds_timer;

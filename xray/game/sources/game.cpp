@@ -75,10 +75,16 @@ static bool s_draw_stats_value = true;
 static console_commands::cc_bool s_draw_stats("draw_stats", s_draw_stats_value, true, xray::console_commands::command_type_user_specific);
 
 static bool s_ph_draw_aabb_value = false;
-static console_commands::cc_bool s_ph_draw_aabb("ph_draw_aabb", s_ph_draw_aabb_value, true, xray::console_commands::command_type_user_specific);
-
 static bool s_ph_draw_sp_tree_value = false;
+static bool s_draw_collisions_value = false;
+
+#ifndef MASTER_GOLD
+
+static console_commands::cc_bool s_ph_draw_aabb("ph_draw_aabb", s_ph_draw_aabb_value, true, xray::console_commands::command_type_user_specific);
 static console_commands::cc_bool s_ph_draw_spatial("ph_draw_spatial_tree", s_ph_draw_sp_tree_value, true, xray::console_commands::command_type_user_specific);
+static console_commands::cc_bool s_draw_collisions("collision_geometry_draw_debug", s_draw_collisions_value, true, xray::console_commands::command_type_user_specific);
+
+#endif
 
 static float cam_fov = 58.5f; //70.5f
  
@@ -680,6 +686,14 @@ void game::tick( u32 const current_frame_id )
 	if (get_active_scene() && m_enabled && s_ph_draw_aabb_value)
 	{
 		static_cast<xray::physics::bullet_physics_world*>(m_game_world->get_physics_world())->debug_render_aabb(get_active_scene(), m_renderer.debug());
+	}
+
+	if (get_active_scene() && m_enabled && s_draw_collisions_value) {
+		std::for_each(m_collisions.begin(), m_collisions.end(), [&](game_object_* object)
+			{
+				auto collision = static_cast<object_collision_geometry*>(object);
+				collision->draw_collision();
+			});
 	}
 
 	renderer().draw_scene( 

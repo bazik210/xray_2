@@ -60,11 +60,11 @@ namespace stalker2
 		math::float4x4									m_transform;
 
 #ifndef MASTER_GOLD
-	private:
+	public:
 		void			draw_collision				( );
 
-	private:
-		bool											m_is_draw_collisions;
+//	private:
+//		bool											m_is_draw_collisions;
 #endif
 
 	}; // class object_collision_geometry

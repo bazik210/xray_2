@@ -202,6 +202,8 @@ void game_world::unload( )
 {
 //	DELETE(volumetric_test);
 
+	get_game().m_collisions.clear();
+
 #ifndef MASTER_GOLD
 		get_game().get_sound_stats()->clear_resources(get_game().get_sound_world().get_logic_world_user());
 		get_game().m_is_stats_cleared = true;
@@ -304,8 +306,8 @@ void game_world::on_project_loaded( resources::queries_result& data )
 
 		spawn_actor();
 		}
-
-		//m_hud = NEW(hud)( *this);
+	
+		//m_hud						= NEW(hud)( *this);
 }
 
 void game_world::on_activate( )

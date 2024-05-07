@@ -8,6 +8,7 @@
 #include "object_collision_geometry.h"
 #include "collision_object_types.h"
 #include "game_world.h"
+#include "game.h"
 //#include "game_camera.h"
 
 #include <xray/console_command.h>
@@ -39,11 +40,11 @@ object_collision_geometry::object_collision_geometry ( game_scene& w )
 	m_geometries				( 0, 0 ),
 	m_mode						( object_collision_geometry_mode_mesh_containment )
 { 
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 
-	static xray::console_commands::cc_bool		is_draw_collisions_cc		( "collision_geometry_draw_debug",		m_is_draw_collisions,	true, xray::console_commands::command_type_user_specific );
+//	static xray::console_commands::cc_bool		is_draw_collisions_cc		( "collision_geometry_draw_debug_testee",		m_is_draw_collisions,	true, xray::console_commands::command_type_user_specific );
 
-#endif
+//#endif
 }
 
 object_collision_geometry::~object_collision_geometry ( )
@@ -261,7 +262,7 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 
 void object_collision_geometry::load_contents ( )
 {
-
+	m_game_scene.get_game().m_collisions.push_back(this);
 }
 
 void object_collision_geometry::unload_contents ( )
@@ -274,9 +275,9 @@ bool object_collision_geometry::check_object_inside	( collision::geometry_instan
 	if( m_instances.empty( ) )
 		return 0;
 
-#ifndef MASTER_GOLD
-		draw_collision( );
-#endif //#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
+//		draw_collision( );
+//#endif //#ifndef MASTER_GOLD
 
 	bool ret_value = false;
 
@@ -401,8 +402,8 @@ void object_collision_geometry::draw_collision( )
 	render::scene_ptr			scene		= m_game_scene.get_render_scene( );
 	render::debug::renderer&	renderer	= m_game_scene.renderer( ).debug( );
 
-	if( !m_is_draw_collisions )
-		return;
+//	if( !m_is_draw_collisions )
+//		return;
 
 	instances_const_iterator	current		= m_instances.begin( );
 	instances_const_iterator	end			= m_instances.end( );
