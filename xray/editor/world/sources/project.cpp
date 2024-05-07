@@ -107,6 +107,7 @@ void project::on_project_config_loaded( resources::queries_result& data )
 																	project_name() +
 																	"' couldn't be found or loaded.\nDo you want to select other project?",
 																	MessageBoxButtons::YesNo, MessageBoxIcon::Warning );
+			m_level_editor->change_recent_list(project_name(), false);
 			if ( result == ::DialogResult::Yes )
 			{
 				m_level_editor->open_project_action( );

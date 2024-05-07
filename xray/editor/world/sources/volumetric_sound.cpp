@@ -262,22 +262,20 @@ void volumetric_sound::load_props ( configs::lua_config_value const& config_valu
 	String^ selected_collision_geometry = gcnew String( config_value["collision_geometry"] );
 	if ( selected_collision_geometry != "")
 		owner_tool( )->get_level_editor( )->get_project( )->query_project_item( selected_collision_geometry, gcnew xray::editor::queried_object_loaded( this, &volumetric_sound::collision_geometry_loaded ) );
-	String^ config_file_name = gcnew String( config_value["sound"] );
+	if (config_value.value_exists("sound")) {
+		String^ config_file_name = gcnew String(config_value["sound"]);
 
-	String^ rstr = gcnew String(config_value["radius"]);
-	if (rstr) {
-		m_config_radius = true;
-		float   cfg_radius = (float)(Convert::ToSingle(rstr));
-		radius = cfg_radius;
+		if (config_file_name != "") {
+			if (config_value.value_exists("radius")) {
+				radius = config_value["radius"];
+				m_config_radius = true;
+			}
+			if (config_value.value_exists("draw_radius"))
+				is_radius_shown = config_value["draw_radius"];
+		}
+
+		wav_filename = config_file_name;
 	}
-
-	String^ drad = gcnew String(config_value["draw_radius"]);
-	if (drad) {
-		is_radius_shown = config_value["draw_radius"];
-	}
-
-	if ( config_file_name != "" )
-		wav_filename			= config_file_name;
 }
 
 void volumetric_sound::save			( configs::lua_config_value config_value )

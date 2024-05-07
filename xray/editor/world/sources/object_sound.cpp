@@ -127,14 +127,16 @@ void object_sound::load_props(configs::lua_config_value const& config_value)
 {
 	super::load_props(config_value);
 
-	String^ config_file_name = gcnew String(config_value["sound"]);
-	String^	emitter_file_type = gcnew String(config_value["emitter_type"]);
+	if (config_value.value_exists("sound")) 
+	{
+		String^ config_file_name = gcnew String(config_value["sound"]);
 
-	if (emitter_file_type != "")
-	emitter_type = config_value["emitter_type"];
+		if (config_value.value_exists("emitter_type"))
+			emitter_type = config_value["emitter_type"];
 
-	if (config_file_name != "")
-		wav_filename = config_file_name;
+		if (config_file_name != "")
+			wav_filename = config_file_name;
+	}
 }
 
 void object_sound::initialize_collision( )
