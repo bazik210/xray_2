@@ -833,9 +833,13 @@ void sound_scene::calculate_3d_sound	( sound_voice& voice, panning_lut_ptr panni
 			iir_filter_coeff			= 0.0f;
 	}
 
-	voice.set_output_matrix			( channel_matrix );
-	voice.set_low_pass_filter_params( 1.0f - iir_filter_coeff );
-
+	if (voice.is_valid()) {
+		voice.set_output_matrix(channel_matrix);
+		voice.set_low_pass_filter_params(1.0f - iir_filter_coeff);
+	}
+	else {
+		LOG_WARNING("can't set 3d sound!");
+	}
 
 	//LOG_DEBUG							( "OpenaAL calc -----------------------------------------" );
 	//LOG_DEBUG							( "left channel		: %f", channel_matrix[0] );

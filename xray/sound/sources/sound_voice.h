@@ -89,6 +89,8 @@ private:
 			void		on_finish_playing							( );
 			void		submit_muted_buffers						( u32 msec );
 public:
+			bool		is_valid									( ) { if (m_voice) { return true; } else return false; }
+
 	sound_voice*					m_next_for_delete;
 	sound_voice*					m_next_for_active;
 private:

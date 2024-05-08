@@ -236,7 +236,12 @@ bool sound_voice::can_be_deleted	( ) const
 
 void sound_voice::set_output_matrix	( float const* level_matrix )
 {
-	R_ASSERT						( m_voice != 0 );
+//	R_ASSERT						( m_voice != 0 );
+	if (m_voice==0) {
+		LOG_WARNING("attempt to set output matrix for not existing voice!");
+		return;
+	}
+
 	if ( m_channels_type == mono )
 		m_voice->set_output_matrix	( level_matrix );
 	else if ( m_channels_type == stereo )

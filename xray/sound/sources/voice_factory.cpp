@@ -96,7 +96,7 @@ voice_bridge* voice_factory::new_voice ( voice_callback_handler* callback_handle
 		idle_voice			= voice_list_type::get_next_of_object( idle_voice );
 	}
 
-	UNREACHABLE_CODE		( return 0 );
+//	UNREACHABLE_CODE		( return 0 );
 }
 
 void voice_factory::delete_voice( voice_bridge* voice_to_be_deleted)

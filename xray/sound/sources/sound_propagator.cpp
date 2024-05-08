@@ -302,7 +302,7 @@ void sound_propagator::attach_sound_voice	( u32 delta_time_from_last_tick )
 
 
 	m_sound_voice						= get_world( m_proxy )->create_sound_voice( m_proxy.get_sound_scene(), offset, m_before_playing_offset, m_after_playing_offset, &m_proxy, m_emitter, m_emitter.get_sound_spl( ) );
-	if ( m_sound_voice == 0 )
+	if ( m_sound_voice == 0 || !m_sound_voice->is_valid() )
 		return;
 
 	m_proxy.get_sound_scene( ).calculate_3d_sound( *m_sound_voice, get_world( m_proxy )->get_panning_lut( ) );
@@ -314,7 +314,8 @@ void sound_propagator::attach_sound_voice	( u32 delta_time_from_last_tick )
 void sound_propagator::detach_sound_voice	( )
 {
 	R_ASSERT								( m_sound_voice != 0 );
-	m_sound_voice->stop						( );
+	if(m_sound_voice->is_valid())
+		m_sound_voice->stop						( );
 	LOG_DEBUG								( "voice detached" );
 	get_world( m_proxy )->delete_sound_voice( m_proxy.get_sound_scene(), m_sound_voice );
 	m_sound_voice							= 0;

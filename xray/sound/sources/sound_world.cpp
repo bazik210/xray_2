@@ -77,7 +77,7 @@ sound_world::sound_world	(
 	m_logic_world_user			( 0 ),
 	m_editor_world_user			( 0 ),
 	m_last_current_time_in_ms	( 0 ),
-	m_sound_voices_count		( 8 ),
+	m_sound_voices_count		( 16 ),
 	m_is_destroying				( false ),
 	m_L_wintop					( 50.0f ),
 	m_L_min						( 50.0f ),
@@ -462,7 +462,13 @@ voice_bridge* sound_world::get_voice ( voice_callback_handler* callback_handler,
 {
 	voice_bridge* voice		= m_voice_factory->new_voice	( callback_handler, type, sample_rate );
 #if XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
-	voice->set_output_voice	( submix_voice );
+	if (voice) {
+		voice->set_output_voice(submix_voice);
+	}
+	else {
+		LOG_WARNING("Can't get voice!");
+		return 0;
+	}
 #endif	// #if XRAY_PLATFORM_WINDOWS | XRAY_PLATFORM_XBOX_360
 	
 	return voice;
@@ -470,9 +476,11 @@ voice_bridge* sound_world::get_voice ( voice_callback_handler* callback_handler,
 
 void sound_world::free_voice ( voice_bridge* voice )
 {
-	R_ASSERT							( voice );
-	voice->set_output_voice				( 0 );
-	m_voice_factory->delete_voice		( voice );
+	//R_ASSERT							( voice );
+	if (voice) {
+		voice->set_output_voice(0);
+		m_voice_factory->delete_voice(voice);
+	}
 }
 
 sound_buffer* sound_world::get_sound_buffer( encoded_sound_ptr const& encoded_sound, u32 pcm_offset, u32& next_pcm_offset )
