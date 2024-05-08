@@ -93,6 +93,10 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 	if( !config_value.value_exists( "meshes" ) )
 		return;
 
+	float3 const& obj_scale		= config_value["scale"];
+	float3 const& obj_rotation	= config_value["rotation"];
+	float3 const& obj_position	= config_value["position"];
+
 	m_mode = (object_collision_geometry_mode)(u32)config_value["mode"];
 
 	u32 geometries_count;
@@ -136,7 +140,7 @@ void object_collision_geometry::load ( configs::binary_config_value const& confi
 		primitive.type		= primitive_type;
 		primitive.data_		= scale;
 
-		m_transform = create_scale(scale) * create_rotation(rotation) * create_translation(position);
+		m_transform			= create_scale( obj_scale ) * create_rotation( obj_rotation ) * create_translation( obj_position );
 		
 		float4x4 matrix		= create_rotation( rotation ) * create_translation( position ) * m_transform;
 

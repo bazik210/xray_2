@@ -487,8 +487,8 @@ void editor_world::tick( )
 						m_view_window->near_plane(),
 						m_view_window->far_plane(),
 						m_view_window->aspect_ratio(),
-						m_culling_view_matrix_inverted.c.xyz(),
-						m_culling_view_matrix_inverted.k.xyz(),
+						m_culling_view_matrix_inverted._c()->xyz(),
+						m_culling_view_matrix_inverted._k()->xyz(),
 						float3( 0.f, 1.f, 0.f ),
 						math::color( 0, 127, 0, 127 ),
 						true
@@ -499,8 +499,8 @@ void editor_world::tick( )
 						m_view_window->near_plane(),
 						m_view_window->far_plane(),
 						m_view_window->aspect_ratio(),
-						m_culling_view_matrix_inverted.c.xyz(),
-						m_culling_view_matrix_inverted.k.xyz(),
+						m_culling_view_matrix_inverted._c()->xyz(),
+						m_culling_view_matrix_inverted._k()->xyz(),
 						float3( 0.f, 1.f, 0.f ),
 						math::color( 0, 127, 127 ),
 						true
@@ -513,9 +513,9 @@ void editor_world::tick( )
 
 				engine().get_sound_world().get_editor_world_user().set_listener_properties_interlocked( 
 					*m_sound_scene,
-					m_view_window->get_inverted_view_matrix().c.xyz(),
-					m_view_window->get_inverted_view_matrix().k.xyz(),
-					m_view_window->get_inverted_view_matrix().j.xyz());
+					m_view_window->get_inverted_view_matrix()._c()->xyz(),
+					m_view_window->get_inverted_view_matrix()._k()->xyz(),
+					m_view_window->get_inverted_view_matrix()._j()->xyz());
 
 				get_renderer().scene().set_projection_matrix		( *m_scene_view, m_view_window->get_projection_matrix() );
 				math::float4 sel_color;

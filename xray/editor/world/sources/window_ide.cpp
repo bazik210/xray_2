@@ -13,6 +13,7 @@
 #include "about_dialog.h"
 #include "level_editor.h"
 #include "ide_log_form.h"
+#include "managed.h"
 
 #include <xray/sound/world.h>
 #include <xray/sound/world_user.h>
@@ -174,7 +175,8 @@ void window_ide::window_ide_KeyDown(System::Object^  sender, System::Windows::Fo
 
 void window_ide::key_combination_changed( System::String^ combination )
 {
-	System::String^ status	= "Keys: ["+combination+"]";
+	System::String^ status = gcnew System::String(("Keys: ["+convert_cli_string(combination)+"]").c_str());
+
 	set_status_label		( 1, status );
 }
 
