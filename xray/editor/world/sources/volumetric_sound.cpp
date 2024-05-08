@@ -272,9 +272,9 @@ void volumetric_sound::load_props ( configs::lua_config_value const& config_valu
 			}
 			if (config_value.value_exists("draw_radius"))
 				is_radius_shown = config_value["draw_radius"];
-		}
 
-		wav_filename = config_file_name;
+			wav_filename = config_file_name;
+		}
 	}
 }
 

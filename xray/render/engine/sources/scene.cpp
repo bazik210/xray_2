@@ -36,8 +36,8 @@
 
 static const u32 s_max_vertex_count	= 64*1024;
 
-static xray::command_line::key s_grass_key( "grass", "", "", "grass test" );
-static bool is_grass_loaded	= false;
+//static xray::command_line::key s_grass_key( "grass", "", "", "grass test" );
+//static bool is_grass_loaded	= false;
 
 
 namespace xray {

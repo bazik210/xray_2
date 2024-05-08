@@ -719,7 +719,6 @@ void process_folder( configs::lua_config_value const& t_folders,
 							configs::lua_config_value scenes_to_start = t_scenes.get_parent()["start"]["scenes_to_start"];
 							scenes_to_start[scenes_to_start.size()] = scene_name.c_str();
 						}
-						if (t_current_object) {
 							process_object(t_current_object,
 								t_objects,
 								t_scenes,
@@ -728,7 +727,6 @@ void process_folder( configs::lua_config_value const& t_folders,
 								tmp_cells,
 								cell_prefix,
 								sub_folder_name.c_str());
-						}
 					}
 					else {
 						LOG_INFO("Can't get config of t_current_object! t_objects size is %d", t_objects.size());
