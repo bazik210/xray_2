@@ -252,6 +252,19 @@ game::~game( )
 	deinitialize_modules		( );
 }
 
+bool game::check_level_exist(fixed_string512 &project_path)
+{
+	fixed_string512 res = "resources/projects/";
+	res.append(project_path.c_str());
+
+	fs::path_string path;
+	path.assignf("%s%s%s", res.c_str(), "/", "project.xprj");
+	
+	fs_new::physical_path_info fs_path = resources::get_physical_path_info( path, resources::sources_mount);
+
+	return fs_path.is_file();
+}
+
 void game::on_render_scene_created( xray::resources::queries_result& data )
 {
 //	m_scene						= static_cast_resource_ptr< xray::render::scene_ptr >( data[0].get_unmanaged_resource() );
@@ -305,7 +318,7 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_load_level				= s_level_key.is_set_as_string( &project_path );
 	
 	if ( !m_engine.command_line_editor() ) {
-			if ( m_load_level )
+			if ( m_load_level && check_level_exist(project_path))
 				load					( project_path.c_str() );
 			else 
 				switch_to_scene			( m_main_menu );
@@ -816,7 +829,8 @@ void game::clear_resources				( )
 
 void game::load_cmd						( pcstr project_name )
 {
-	load								( project_name );
+	if(project_name && check_level_exist((fixed_string512)project_name))
+		load(project_name);
 }
 
 void game::unload_cmd					( pcstr s )

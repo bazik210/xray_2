@@ -107,6 +107,8 @@ public:
 	virtual	void			load					( pcstr project_resource_name, pcstr project_resource_path = NULL );
 	virtual	void			unload					( pcstr, bool );
 
+			bool			check_level_exist		( fixed_string512 &project_path );
+
 	virtual	void			get_colliding_objects	( math::aabb const& query_aabb, xray::ai::ai_objects_type& results );
 	virtual	void			get_visible_objects		( math::cuboid const& cuboid, xray::ai::update_frustum_callback_type const& update_callback );
 	virtual	bool			ray_query				(
