@@ -30,6 +30,7 @@ public:
 	console_impl		( ui::world& uw, xray::memory::base_allocator& a );
 	virtual				~console_impl		( );
 
+			void			initialize			( );
 	virtual	void			on_activate			( );
 	virtual	void			on_deactivate		( );
 			void			tick				( xray::render::scene_view_ptr const& scene_view );
@@ -68,6 +69,8 @@ private:
 
 	vectora<pcstr>			m_tips;
 	enum_tips_mode			m_tips_mode;
+	float2					m_screen_size;
+	bool					m_initialized;
 	bool					m_active;
 };//class console_impl
 

@@ -277,8 +277,9 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 
 	initialize_modules			( );
 	
-	m_ui_world->set_base_screen_size(m_engine.get_render_window_size());
-
+	set_screen_size				( );
+	m_ui_world->is_editor = m_engine.command_line_editor();
+		
 	register_cooks				( );
 
 	m_initialized				= true;
@@ -544,6 +545,11 @@ void game::toggle_console			( )
 void game::exit( pcstr str )
 {
 	unload							( str, true );
+	
+	if (m_ui_world->is_editor)
+	{
+		m_skip = true;
+	}
 	
 	if (m_engine.command_line_editor())
 	{
@@ -854,8 +860,13 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 //	m_sound_world.get_logic_world_user().set_active_sound_scene( m_sound_scene, 0, 0 );
 }
 
-void game::unload( pcstr , bool destroying )
+void game::unload( pcstr , bool destroy )
 {
+	if (m_skip) {
+		m_skip = false;
+		return;
+	}
+
 	ASSERT								( m_game_world );
 
 	m_snds_cleaner = false;
@@ -876,10 +887,17 @@ void game::unload( pcstr , bool destroying )
 
 	m_active_sounds.clear();
 
+#ifndef MASTER_GOLD
+	//clear only in game
+	if (!m_is_editor()) {
+		get_sound_stats()->clear_resources(get_sound_world().get_logic_world_user());
+	}
+#endif //#ifndef MASTER_GOLD
+
 	R_ASSERT(m_active_sounds.empty());
 
-	m_game_world->unload				( );
-	
+	m_game_world->unload();
+
 	for ( human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
 	{
 		kill_npc( it_npc );
@@ -898,7 +916,7 @@ void game::unload( pcstr , bool destroying )
 
 	m_renderer.scene().clear_scene_render_model_instances(get_active_scene());
 
-	if(!destroying)
+	if(!destroy)
 		switch_to_scene					( m_main_menu );
 }
 
@@ -909,6 +927,11 @@ void game::activate_lobby( )
 
 	m_reserve_switch = true;
 	m_allow_ed_fire = false;
+}
+
+void game::set_screen_size()
+{
+	m_ui_world->set_base_screen_size(m_engine.get_render_window_size());
 }
 
 void game::switch_to_lobby( bool editor )

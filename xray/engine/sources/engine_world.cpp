@@ -209,6 +209,21 @@ void engine_world::activate_menu		( )
 	);
 }
 
+void engine_world::set_console_size ( )
+{
+	if ( command_line_editor_singlethread() ) {
+		engine_user_world().set_screen_size();
+		return;
+	}
+
+	apc::run							(
+		apc::logic,
+		boost::bind( &xray::engine_user::world::set_screen_size, &engine_user_world()),
+		apc::continue_process_loop,
+		apc::wait_for_completion
+	);
+}
+
 void engine_world::switch_to_menu		( )
 {
 	if ( command_line_editor_singlethread() ) {
@@ -239,16 +254,16 @@ void engine_world::allow_fire		( )
 	);
 }
 
-void engine_world::unload_level		( )
+void engine_world::unload_level		( bool destroy )
 {
 	if ( command_line_editor_singlethread() ) {
-		engine_user_world().unload		( "", false );
+		engine_user_world().unload		( "", destroy );
 		return;
 	}
 
 	apc::run							(
 		apc::logic,
-		boost::bind( &xray::engine_user::world::unload, &engine_user_world(), "", false ),
+		boost::bind( &xray::engine_user::world::unload, &engine_user_world(), "", destroy ),
 		apc::continue_process_loop,
 		apc::wait_for_completion
 	);

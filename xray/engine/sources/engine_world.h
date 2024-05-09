@@ -82,9 +82,10 @@ private:
 	virtual	pcstr			get_resources_path		( ) const;
 	virtual	void			enable_game				( bool value );
 	virtual	void 			load_level				( pcstr project_resource_name, pcstr project_resource_path=NULL );
-	virtual	void 			unload_level			( );
+	virtual	void 			unload_level			( bool destroy );
 	virtual	void 			switch_to_menu			( );
 	virtual	void 			activate_menu			( );
+	virtual	void 			set_console_size		( );
 	virtual	void 			allow_fire				( );
 	virtual bool			is_application_active	( );
 	virtual	void			run_renderer_commands	( );

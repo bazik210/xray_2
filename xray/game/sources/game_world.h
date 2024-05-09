@@ -112,7 +112,6 @@ public:
 	bool									m_key_camera;
 	bool									m_scenes_check;
 
-
 	timing::timer							m_timer;
 	u32										m_game_time_ms;
 	float									m_game_time_sec;

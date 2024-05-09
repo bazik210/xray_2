@@ -37,9 +37,10 @@ struct XRAY_NOVTABLE engine {
 	virtual	void			enter_editor_mode		( ) = 0;
 	virtual	void 			load_level				( pcstr project_resource_name, pcstr project_resource_path=NULL ) = 0;
 	virtual	pcstr			get_resources_path		( ) const = 0;
-	virtual	void 			unload_level			( ) = 0;
+	virtual	void 			unload_level			( bool destroy ) = 0;
 	virtual	void 			switch_to_menu			( ) = 0;
 	virtual	void 			activate_menu			( ) = 0;
+	virtual void			set_console_size		( ) = 0;
 	virtual	void 			allow_fire				( ) = 0;
 
 	virtual	render::world&	get_renderer_world		( ) = 0;

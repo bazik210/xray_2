@@ -171,6 +171,7 @@ public:
 
 			void			scene_close_query		( );
 			void			activate_lobby			( );
+			void			set_screen_size			( );
 			void			switch_to_lobby			( bool editor = false );
 			void			switch_to_menu			( );
 			void			allow_fire				( );
@@ -327,10 +328,6 @@ private:
 		flash_factory*							m_flash_factory;
 	#endif
 
-#ifndef MASTER_GOLD
-	xray::sound::sound_debug_stats*			m_sound_stats;
-#endif //#ifndef MASTER_GOLD
-
 	bool									m_is_active;
 
 	// tests for AI
@@ -376,8 +373,16 @@ private:
 	void									toggle_debug_window			();
 
 public:
+#ifndef MASTER_GOLD
+	xray::sound::sound_debug_stats*			m_sound_stats;
+#endif //#ifndef MASTER_GOLD
+
 	xray::sound::sound_debug_stats* 		get_sound_stats() { return m_sound_stats; };
 	bool									m_is_stats_cleared;
+	bool									m_is_editor() { return engine().command_line_editor(); };
+
+private:
+	bool m_skip = false;
 }; // class game
 
 } // namespace stalker2

@@ -873,15 +873,13 @@ void editor_world::editor_mode(bool beditor_mode)
 
 	if( beditor_mode ) 
 	{
-		engine().unload_level	( );
+		engine().unload_level	( true );
 
 		engine().enable_game	( false );
-		
+	
 		while ( ShowCursor(TRUE) <= 0 );
 
 			m_view_window->unclip_cursor();
-		
-	//		m_view_window->Update();
 	}else
 	{
 		m_level_editor->get_project()->save_intermediate( ); 
@@ -924,8 +922,10 @@ void editor_world::toggle_console( )
 
 	if(m_console_wrapper->get_active())
 		m_console_wrapper->on_deactivate( xray::editor_base::input_keys_holder::ref );
-	else
-		m_console_wrapper->on_activate( xray::editor_base::input_keys_holder::ref );
+	else {
+		m_console_wrapper->on_activate(xray::editor_base::input_keys_holder::ref);
+		m_input_engine->keys_holder->reset();
+	}
 }
 
 int	editor_world::exit_code			( ) const
@@ -953,6 +953,7 @@ void editor_world::on_render_resources_created(resources::queries_result& data)
 	m_camera_view_window->setup_scene( m_scene->c_ptr(), m_scene_view->c_ptr(), get_renderer(), false );
 	
 	m_ui_world						= ui::create_world( *this, get_renderer().ui(), *g_allocator );
+	m_ui_world->is_editor			= true;
 	m_console_wrapper->m_console	= m_engine.create_editor_console( *m_ui_world );
 	R_ASSERT						( m_console_wrapper->m_console );
 
@@ -974,6 +975,12 @@ void editor_world::on_sound_scene_created( resources::queries_result& data )
 	m_engine.get_sound_world().get_editor_world_user().set_active_sound_scene( *m_sound_scene, 0, 0 );
 
 	init_sound_statistics			( );
+
+	//after all editor windows'es were drawn, we can try to get and set screen_size
+	System::Drawing::Size size		= m_view_window->get_view_size();
+	m_ui_world->set_base_screen_size(float2(size.Width, size.Height));
+
+	engine().set_console_size();
 }
 
 void editor_world::query_scene( )
@@ -984,8 +991,6 @@ void editor_world::query_scene( )
 	scene_configuration.m_create_speedtree_world	= true;
 	scene_configuration.m_create_grass_world		= true;
 	scene_configuration.m_sky_enabled				= true;
-	
-
 	
 	render::output_window_configuration				window_configuration1;
 	window_configuration1.m_hwnd					= view_handle( );

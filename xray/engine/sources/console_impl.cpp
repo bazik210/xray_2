@@ -28,14 +28,29 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	m_active			( false ),
 	m_executed_history	( a ),
 	m_tips				( a ),
-	m_self_deactivate	( true )
+	m_self_deactivate	( true ),
+	m_initialized		( false ),
+	m_screen_size		( 1024,768 )
 {
-	float2 screen_size = m_ui_world.base_screen_size();
-	screen_size.y = screen_size.y * 0.5f;
+	//if not editor, intialize normal way
+	if (!m_ui_world.is_editor) {
+		initialize();
+		m_initialized = true;
+	}
+}
+
+void console_impl::initialize()
+{
+	m_screen_size = m_ui_world.base_screen_size();
+
+	//float aspect_ratio = screen_size.x / screen_size.y;
+	//4 * height == 3 * width or 16 * height == 9 * width
+
+	m_screen_size.y = m_screen_size.y * 0.5;
 
 	m_ui_dialog						= m_ui_world.create_dialog();
 	m_ui_dialog->w()->set_position	(float2(0,0));
-	m_ui_dialog->w()->set_size		(screen_size);
+	m_ui_dialog->w()->set_size		(m_screen_size);
 	//m_ui_dialog->w()->set_size		(float2(1020,530));
 
 	ui::image* img					= m_ui_world.create_image();
@@ -48,8 +63,8 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	m_ui_dialog->w()->add_child		(img->w(), true);
 
 	float2 view_screen_size(0.0f, 0.0f);
-	view_screen_size.x = screen_size.x - 2.0;
-	view_screen_size.y = screen_size.y - 30.0;
+	view_screen_size.x = m_screen_size.x - 2.0;
+	view_screen_size.y = m_screen_size.y - 30.0;
 
 	m_ui_view						= m_ui_world.create_scroll_view();
 	m_ui_view->w()->set_position	(float2(1,1));
@@ -59,10 +74,10 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	m_ui_dialog->w()->add_child		(m_ui_view->w(), true);
 
 	float2 edit_pos(1, 510);
-	edit_pos.y = screen_size.y - 20.0;
+	edit_pos.y = m_screen_size.y - 20.0;
 
 	float2 edit_size(0.0f, 0.0f);
-	edit_size.x = screen_size.x - 2.0;
+	edit_size.x = m_screen_size.x - 2.0;
 	edit_size.y = 18.0f;
 
 	m_text_edit						= m_ui_world.create_text_edit();
@@ -106,24 +121,26 @@ console_impl::console_impl( ui::world& uw, xray::memory::base_allocator& a )
 	m_ui_tips_view_hl->w()->set_visible	(true);
 }
 
-console_impl::~console_impl( )
+console_impl::~console_impl()
 {
-	m_ui_world.destroy_window		(m_ui_dialog->w());
-	m_ui_world.destroy_window		(m_ui_tips_view_hl->w());
-
-	vectora<ui::text*>::iterator it		= m_text_items.begin();
-	vectora<ui::text*>::iterator it_e	= m_text_items.end();
-	
-	for(; it!=it_e; ++it)
-		m_ui_world.destroy_window		((*it)->w());
-
-	vectora<pcstr>::iterator it2			= m_executed_history.begin();
-	vectora<pcstr>::iterator it2_e		= m_executed_history.end();
-
-	for(; it2!=it2_e; ++it2)
+	if (m_initialized)
 	{
-		pvoid p			= (pvoid)*it2;
-		XRAY_FREE_IMPL	( m_allocator, p );
+		m_ui_world.destroy_window(m_ui_dialog->w());
+		m_ui_world.destroy_window(m_ui_tips_view_hl->w());
+	}
+	vectora<ui::text*>::iterator it = m_text_items.begin();
+	vectora<ui::text*>::iterator it_e = m_text_items.end();
+
+	for (; it != it_e; ++it)
+		m_ui_world.destroy_window((*it)->w());
+
+	vectora<pcstr>::iterator it2 = m_executed_history.begin();
+	vectora<pcstr>::iterator it2_e = m_executed_history.end();
+
+	for (; it2 != it2_e; ++it2)
+	{
+		pvoid p = (pvoid)*it2;
+		XRAY_FREE_IMPL(m_allocator, p);
 	}
 }
 
@@ -147,6 +164,12 @@ ui::text* console_impl::get_item()
 
 void console_impl::on_activate( )
 {
+	//if editor, let's initialize on activate at once
+	if (!m_initialized) {
+		m_initialized = true;
+		initialize();
+	}
+
 	m_text_edit->w()->set_focused	( true );
 	m_active						= true;
 }

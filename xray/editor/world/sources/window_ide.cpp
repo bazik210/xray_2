@@ -425,7 +425,7 @@ void window_ide::OnFormClosing(FormClosingEventArgs^ e)
 	super::OnFormClosing(e);
 
 	if (!m_editor_world.editor_mode()) {
-		m_editor_world.engine().unload_level();
+		m_editor_world.engine().unload_level(true);
 		m_editor_world.engine().enable_game(false);
 	}
 }
