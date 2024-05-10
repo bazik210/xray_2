@@ -273,6 +273,7 @@ public:
 	xray::render::scene_ptr const			get_game_world_scene	( )	const;
 	bool									get_editor				( ) { return false; };
 	bool									gload;
+	bool									gunload;
 	bool									m_reserve_switch;
 	bool									m_allow_ed_fire;
 

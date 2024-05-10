@@ -111,6 +111,7 @@ public:
 	bool									m_key_actor;
 	bool									m_key_camera;
 	bool									m_scenes_check;
+	bool									m_cam_attached;
 
 	timing::timer							m_timer;
 	u32										m_game_time_ms;

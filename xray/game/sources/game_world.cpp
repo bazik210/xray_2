@@ -83,7 +83,8 @@ m_client				( game.get_network_world() ),
 m_scenes_check			( 0 ),
 m_actor_spawned			( false ),
 m_key_camera			( cl_cam ),
-m_key_actor				( cl_actor )
+m_key_actor				( cl_actor ),
+m_cam_attached			( false )
 {
 	init_physics						( );
 
@@ -298,12 +299,6 @@ void game_world::on_project_loaded( resources::queries_result& data )
 
 	//switch_to_hud_camera();
 
-	if(!m_key_camera) {
-		switch_to_free_fly_camera();
-
-		spawn_actor();
-		}
-	
 		//m_hud						= NEW(hud)( *this);
 }
 
@@ -362,6 +357,16 @@ void game_world::start_game( )
 		else {
 			LOG_ERROR("NULL Object! Can't process a scene!");
 		}
+	}
+
+	if(!m_key_camera && !m_cam_attached) {
+		switch_to_free_fly_camera();
+
+		spawn_actor();
+	}
+	else {
+		//if we don't spawn actor can do things in console
+		get_game().gload = false;
 	}
 	
 // 	pcstr start_scene		= (*m_game_project->m_config)["start"]["scene_name"];
@@ -442,6 +447,7 @@ void game_world::clear_resources( )
 
 void game_world::tmp_actor_ready( actor* a )
 {
+	//disable gload cause actor is ready to spawn
 	get_game().gload = false;
 
 	if (!m_actor_spawned)

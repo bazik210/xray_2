@@ -189,6 +189,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_rtp					( 0 ),
 	m_scene_to_activate		( 0 ),
 	gload					( 0 ),
+	gunload					( 0 ),
 	m_snds_cleaner			( false ),
 	m_dead_snd_it			( NULL ),
 	m_dead_sound			( NULL ),
@@ -859,7 +860,14 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 	if (gload)
 		return;
 
+	//if we had attached camera, disable on load
+	//game::unload doesn't work for level_load
+	get_game_world().m_cam_attached = false;
+
+	//on load make player won't do mess until actor spawned 
 	gload = true;
+	//disable object visuals unload check
+	gunload = false;
 
 	m_game_world->load		( project_resource_name, project_resource_path );
 	
@@ -876,6 +884,9 @@ void game::unload( pcstr, bool destroy )
 		m_skip = false;
 		return;
 	}
+
+	//do not load object visuals if unloading
+	gunload = true;
 
 	ASSERT								( m_game_world );
 

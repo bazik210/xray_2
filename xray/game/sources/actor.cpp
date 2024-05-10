@@ -262,6 +262,11 @@ void actor::on_resources_ready( resources::queries_result& data )
 
 void actor::on_load_animations(  resources::queries_result& data  ) 
 {
+	if (m_stop_query) {
+		data.empty();
+		return;
+	}
+
 	m_idle_stand_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[0].get_managed_resource());
 	m_idle_stand_01_animation	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[1].get_managed_resource());
 	m_look_animation_add	= static_cast_resource_ptr<animation::skeleton_animation_ptr>(data[2].get_managed_resource());

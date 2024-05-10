@@ -311,6 +311,7 @@ camera_director_behaviour::camera_director_behaviour( object_scene_job* owner,
 void camera_director_behaviour::attach_to_object( object_controlled* o )
 {
 	super::attach_to_object( o );
+	m_owner->get_game_world().m_cam_attached = true;
 	pcstr camera_name			= m_data["active_camera"];
 	game_object_ptr_ t			= m_owner->get_game_world().get_object_by_name	( camera_name );
 	R_ASSERT					( t );

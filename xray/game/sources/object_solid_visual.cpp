@@ -11,7 +11,7 @@
 #include "collision_object_types.h"
 #include <xray/render/facade/scene_renderer.h>
 #include <xray/physics/rigid_body.h>
-
+#include "game.h"
 
 namespace stalker2{
 
@@ -87,6 +87,10 @@ void object_solid_visual::on_render_ready( resources::queries_result& data )
 		return;
 
 	if( m_model )
+		return;
+
+	//we are unloading, stop process
+	if ( m_game_scene.get_game().gunload )
 		return;
 
 	m_model		= static_cast_resource_ptr<render::static_model_ptr>(data[0].get_unmanaged_resource());
