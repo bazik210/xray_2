@@ -873,6 +873,8 @@ void editor_world::editor_mode(bool beditor_mode)
 
 	if( beditor_mode ) 
 	{
+		engine().close_console	( );
+
 		engine().unload_level	( true );
 
 		engine().enable_game	( false );
@@ -924,8 +926,8 @@ void editor_world::toggle_console( )
 		m_console_wrapper->on_deactivate( xray::editor_base::input_keys_holder::ref );
 	else {
 		m_console_wrapper->on_activate(xray::editor_base::input_keys_holder::ref);
-		m_input_engine->keys_holder->reset();
 	}
+	m_input_engine->keys_holder->reset();
 }
 
 int	editor_world::exit_code			( ) const

@@ -258,8 +258,10 @@ void main_menu::tick( )
 		m_main_menu_ui->m_movie->Advance( deltaTime, 0 );		
 	}
 #else
-	m_ui->m_ui_dialog->w()->tick( );
-	m_ui->m_ui_dialog->w()->draw( m_game.ui_world().get_renderer(), get_render_scene_view() );
+	if (m_ui) {
+		m_ui->m_ui_dialog->w()->tick();
+		m_ui->m_ui_dialog->w()->draw(m_game.ui_world().get_renderer(), get_render_scene_view());
+	}
 #endif //#ifdef XRAY_STATIC_LIBRARIES
 }
 

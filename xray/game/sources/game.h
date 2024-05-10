@@ -175,6 +175,7 @@ public:
 			void			switch_to_lobby			( bool editor = false );
 			void			switch_to_menu			( );
 			void			allow_fire				( );
+			void			close_console			( );
 			void			exit					( pcstr str );
 
 			void			check_selected_npc		( );

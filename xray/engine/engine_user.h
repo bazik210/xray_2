@@ -61,6 +61,7 @@ struct XRAY_NOVTABLE world {
 	virtual	void	clear_resources				( ) = 0;
 	virtual	void 	load						( pcstr project_resource_name, pcstr project_resource_path=NULL ) = 0;
 	virtual	void 	unload						( pcstr, bool ) = 0;
+	virtual void	close_console				( ) = 0;
 	virtual	void 	activate_lobby				( ) = 0;
 	virtual	void 	set_screen_size				( ) = 0;
 	virtual	void 	switch_to_lobby				( bool editor ) = 0;

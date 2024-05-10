@@ -542,8 +542,18 @@ void game::toggle_console			( )
 		m_console->on_activate		( );
 }
 
+void game::close_console( )
+{
+	if ( m_console && m_console->get_active() )
+		m_console->on_deactivate	( );
+}
+
 void game::exit( pcstr str )
 {
+	if (!m_ui_world->is_editor) {
+		close_console();
+	}
+
 	unload							( str, true );
 	
 	if (m_ui_world->is_editor)
@@ -860,7 +870,7 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 //	m_sound_world.get_logic_world_user().set_active_sound_scene( m_sound_scene, 0, 0 );
 }
 
-void game::unload( pcstr , bool destroy )
+void game::unload( pcstr, bool destroy )
 {
 	if (m_skip) {
 		m_skip = false;
@@ -894,8 +904,6 @@ void game::unload( pcstr , bool destroy )
 	}
 #endif //#ifndef MASTER_GOLD
 
-	R_ASSERT(m_active_sounds.empty());
-
 	m_game_world->unload();
 
 	for ( human_npc_ptr it_npc = m_npcs.front(); it_npc; it_npc = m_npcs.get_next_of_object( it_npc ) )
@@ -903,7 +911,7 @@ void game::unload( pcstr , bool destroy )
 		kill_npc( it_npc );
 	}
 
-	for (monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob))
+	for ( monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object(it_mob) )
 	{
 		kill_mob( it_mob );
 	}

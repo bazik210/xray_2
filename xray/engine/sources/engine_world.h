@@ -83,6 +83,7 @@ private:
 	virtual	void			enable_game				( bool value );
 	virtual	void 			load_level				( pcstr project_resource_name, pcstr project_resource_path=NULL );
 	virtual	void 			unload_level			( bool destroy );
+	virtual	void			close_console			( );
 	virtual	void 			switch_to_menu			( );
 	virtual	void 			activate_menu			( );
 	virtual	void 			set_console_size		( );

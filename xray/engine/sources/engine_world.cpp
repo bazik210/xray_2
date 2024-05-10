@@ -224,6 +224,21 @@ void engine_world::set_console_size ( )
 	);
 }
 
+void engine_world::close_console		( )
+{
+	if ( command_line_editor_singlethread() ) {
+		engine_user_world().close_console();
+		return;
+	}
+
+	apc::run							(
+		apc::logic,
+		boost::bind( &xray::engine_user::world::close_console, &engine_user_world() ),
+		apc::continue_process_loop,
+		apc::wait_for_completion
+	);
+}
+
 void engine_world::switch_to_menu		( )
 {
 	if ( command_line_editor_singlethread() ) {
