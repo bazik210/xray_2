@@ -1,0 +1,10 @@
+{
+	"included_directories" : [
+	],
+	"included_projects" : [
+		"nvcore",
+		"nvimage",
+		"nvtt",
+		"squish"
+	]
+}

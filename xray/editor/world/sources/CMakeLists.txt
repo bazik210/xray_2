@@ -564,6 +564,8 @@ add_library(editor SHARED
 					"${CMAKE_CURRENT_SOURCE_DIR}/stage_selector_item_comparator.h"
 					"${CMAKE_CURRENT_SOURCE_DIR}/stage_selector_source.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/stage_selector_source.h"
+					# managed
+					"${CMAKE_CURRENT_SOURCE_DIR}/managed.h"
 					# material
 					"${CMAKE_CURRENT_SOURCE_DIR}/material.cpp"
 					"${CMAKE_CURRENT_SOURCE_DIR}/material.h"

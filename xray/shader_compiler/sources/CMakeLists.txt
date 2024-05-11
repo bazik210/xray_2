@@ -68,7 +68,12 @@ target_link_libraries(shader_compiler PRIVATE
 	fs
 	vfs
 	core
+	core_cs
+	script_cs
 	lua.5.1.4
+	luabind.0.8.1
+	debugging
+	logging
 	renderer_core_pc_dx11
 )
 
