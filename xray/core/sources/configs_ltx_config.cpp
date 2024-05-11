@@ -4,6 +4,7 @@
 //	Copyright (C) GSC Game World - 2009
 ////////////////////////////////////////////////////////////////////////////
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "configs_ltx_config.h"
 #include "configs_binary_config.h"
 #include <xray/fs/synchronous_device_interface.h>
@@ -557,3 +558,4 @@ xray::core::configs::binary_config* xray::core::configs::create_from_ltx_text(pc
 	XRAY_FREE_IMPL	(*allocator, binary_buff);
 	return			result;
 }
+#endif

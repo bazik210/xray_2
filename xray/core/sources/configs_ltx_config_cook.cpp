@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "configs_ltx_config_cook.h"
 #include "configs_ltx_config.h"
 #include "configs_binary_config.h"
@@ -56,3 +57,4 @@ void   ltx_config_cook::create_resource (resources::query_result_for_cook &	in_o
 } // namespace core
 } // namespace configs
 } // namespace xray
+#endif

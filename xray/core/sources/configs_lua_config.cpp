@@ -8,6 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "script_engine_wrapper.h"
 #include <boost/crc.hpp>
 #include <xray/configs.h>
@@ -3691,3 +3692,4 @@ static void export_classes						( )
 		,def( "normalize_safe",			(float4 (*)(float4_pod const&,float4_pod const&)) &math::normalize_safe )
 	];
 }
+#endif
