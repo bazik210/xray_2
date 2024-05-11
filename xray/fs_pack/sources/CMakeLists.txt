@@ -13,6 +13,18 @@ add_executable(fs_pack
 				# ./
 )
 
+target_include_directories(fs_pack PRIVATE
+	${SOLUTION_DIR_INCLUDE_PATH}
+	${THIRDPARTY_DIR_INCLUDE_PATH}
+)
+
+target_compile_definitions(fs_pack PRIVATE
+	PLATFORM_WIN64
+	WIN64
+	WINDOWS
+	_HAS_EXCEPTIONS=0
+)
+
 target_link_libraries(fs_pack PRIVATE
 	fs
 	script_cs
