@@ -5,11 +5,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_extruder.h"
 #include "graph_generator_adjacency_builder.h"
-
 using xray::ai::navigation::graph_generator_extruder;
 using xray::ai::navigation::triangles_mesh_type;
+
 using xray::math::float3;
 
 graph_generator_extruder::graph_generator_extruder ( triangles_mesh_type& triangles_mesh ) :
@@ -175,3 +176,4 @@ void graph_generator_extruder::extrude_triangles ( )
 		);
 	}
 }
+#endif

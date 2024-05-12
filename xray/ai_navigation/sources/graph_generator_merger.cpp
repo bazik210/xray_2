@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_merger.h"
 #include "graph_generator_predicates.h"
 #include "graph_generator_adjacency_builder.h"
@@ -253,3 +254,4 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 		}
 	}
 }
+#endif

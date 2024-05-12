@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_fuser.h"
 #include "delaunay_triangulator.h"
 #include "graph_generator_adjacency_builder.h"
@@ -566,3 +567,4 @@ graph_generator_fuser::graph_generator_fuser( triangles_mesh_type& triangles_mes
 
 	m_triangles_mesh.remove_marked_triangles ( );
 }
+#endif

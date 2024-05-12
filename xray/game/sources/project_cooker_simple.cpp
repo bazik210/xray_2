@@ -67,7 +67,7 @@ void project_cooker_simple::translate_query( resources::query_result_for_cook& p
 	resources::query_resource(
 		game_proj_path.c_str(),
 		resources::config_class,
-		boost::bind(&project_cooker::on_game_project_loaded, this, _1, &parent ),
+		boost::bind( &project_cooker_simple::on_game_project_loaded, this, _1, &parent ),
 		g_allocator,
 		0,
 		& parent
@@ -126,8 +126,7 @@ void project_cooker_simple::on_game_project_loaded( resources::queries_result& d
 	parent->finish_query			( result_success );
 }
 
-
-
+#ifndef MASTER_GOLD
 void project_cooker_simple::on_editor_project_loaded( resources::queries_result& data, 
 	resources::query_result_for_cook* parent )
 {
@@ -169,7 +168,6 @@ void process_object	(	configs::lua_config_value const& current,
 		t_res_project_objects[count]["full_name"]		= full_name.c_str();
 	}
 }
-
 
 void process_folder( configs::lua_config_value const& t_folders,
 					configs::lua_config_value const& t_objects,
@@ -245,7 +243,6 @@ void process_folder( configs::lua_config_value const& t_folders,
 	} //  for
 }
 
-
 void project_cooker_simple::make_game_project( configs::lua_config_ptr& editor_config, 
 									   resources::query_result_for_cook* parent_query )
 {
@@ -304,6 +301,7 @@ void project_cooker_simple::make_game_project( configs::lua_config_ptr& editor_c
 	xray::configs::binary_config_ptr resource_config_ptr	= game_config_lua->get_binary_config();
 	create_game_objects( resource_config_ptr, parent_query );
 }
+#endif
 
 void project_cooker_simple::create_game_objects( xray::configs::binary_config_ptr project_cfg, resources::query_result_for_cook* parent_query )
 {

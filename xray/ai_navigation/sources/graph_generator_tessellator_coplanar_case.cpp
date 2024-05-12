@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_tessellator.h"
 #include "delaunay_triangulator.h"
 #include "constrained_delaunay_triangulator.h"
@@ -1138,3 +1139,4 @@ bool graph_generator_tessellator::tessellate_triangle_impl2( u32 const triangle_
 	}
 	return was_processed;
 }
+#endif

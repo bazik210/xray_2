@@ -125,8 +125,6 @@ void project_cooker::on_game_project_loaded( resources::queries_result& data,
 	parent->finish_query			( result_success );
 }
 
-
-
 #ifndef MASTER_GOLD
 void project_cooker::on_editor_project_loaded( resources::queries_result& data, 
 												resources::query_result_for_cook* parent )

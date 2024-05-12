@@ -40,6 +40,7 @@ void n_ary_tree_dumper::visit			( n_ary_tree_animation_node& node )
 	xray::memory::fill8		( string, buffer_size, ' ', m_offset + 4 );
 	string[m_offset]		= 0;
 
+#ifndef MASTER_GOLD
 	if ( !node.driving_animation() )
 		LOG_DEBUG				(
 			"%sanimation: %s, to zero[%s], intervals[%d]",
@@ -56,7 +57,7 @@ void n_ary_tree_dumper::visit			( n_ary_tree_animation_node& node )
 			node.driving_animation()->identifier(),
 			node.animation_intervals_count()
 		);
-
+#endif
 	string[m_offset]		= ' ';
 	string[m_offset + 4]	= 0;
 	LOG_DEBUG				( "%sinterpolator:", string );

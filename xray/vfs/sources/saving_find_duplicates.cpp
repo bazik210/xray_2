@@ -376,7 +376,11 @@ fat_node_info *   archive_saver::find_duplicate_file (fat_node_info * node_info)
 		native_path_string	path		=	get_node_physical_path(it_node->node);
 
 		file_type_pointer	f_cur			(path, device, file_mode::open_existing, file_access::read);
+#ifndef MASTER_GOLD
 		R_ASSERT_U							(f_cur);
+#else
+		R_ASSERT							(f_cur);
+#endif
 		
 		file_size_type const cur_offs	=	get_file_offs(it_node->node);
 		device->seek						(f_cur, cur_offs, seek_file_begin);

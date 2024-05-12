@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator.h"
 #include <xray/configs_lua_config.h>
 #include <xray/resources.h>
@@ -145,3 +146,4 @@ void graph_generator::load_navigation_mesh ( triangles_mesh_type& navigation_mes
 		}
 	}
 }
+#endif

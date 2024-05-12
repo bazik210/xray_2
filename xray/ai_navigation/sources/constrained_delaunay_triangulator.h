@@ -46,7 +46,11 @@ public:
 			return vertex_index0 == rhs.vertex_index0 && vertex_index1 == rhs.vertex_index1;
 		}
 	}; // struct constraint_edge
+#ifndef MASTER_GOLD
 	typedef debug::vector< constraint_edge >	constraint_edges_type;
+#else+
+	typedef std::vector< constraint_edge >	constraint_edges_type;
+#endif
 	typedef delaunay_triangulator::indices_type indices_type;
 	typedef delaunay_triangulator::input_indices_type input_indices_type;
 
@@ -68,9 +72,15 @@ private:
 		intersection_info intersection;
 	};
 	
+#ifndef MASTER_GOLD
 	typedef debug::vector< u32 > polygon_indices_type;
 	typedef debug::vector<triangle_info> triangles_info_type;
 	typedef debug::vector<intersection_info> intersections_type;
+#else
+	typedef std::vector< u32 > polygon_indices_type;
+	typedef std::vector<triangle_info> triangles_info_type;
+	typedef std::vector<intersection_info> intersections_type;
+#endif
 
 public:
 		template< typename VerticesContainer, typename InputIndicesContainer, typename ConstraintContainer >

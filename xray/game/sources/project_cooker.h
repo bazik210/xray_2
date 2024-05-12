@@ -17,14 +17,14 @@ class game_project ;
 class project_cooker	:	public resources::translate_query_cook,
 							public boost::noncopyable					
 {
-	typedef resources::translate_query_cook		super;
-public:
+		typedef resources::translate_query_cook		super;
+	public:
 								project_cooker			( bool editor_present );
 
 	virtual	void				translate_query			( resources::query_result_for_cook&	parent );
 	virtual void				delete_resource			( resources::resource_base* resource );
 
-private:
+	private:
 			void				on_game_project_loaded( resources::queries_result& data, 
 														  resources::query_result_for_cook* parent );
 #ifndef MASTER_GOLD	

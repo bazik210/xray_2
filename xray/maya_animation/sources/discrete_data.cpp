@@ -27,11 +27,11 @@ public:
 	typedef	t_animation_data< anim_track_discrete_channels > discrete_bone_data;
 
 								discrete_data_impl	( );
-
+#ifndef MASTER_GOLD
 	virtual	void				save				( xray::configs::lua_config_value &cfg ) const ;
 	virtual	void				load				( xray::configs::lua_config_value const& cfg, bool bone_names_only = false ) ;
 	virtual	void				check				( xray::configs::lua_config_value &discrete_data ) const;
-
+#endif
 	virtual void				add_frame			( u32 bone, frame const& frm, frame const& base_frm );
 	virtual	void				calculate			( );
 
@@ -172,7 +172,7 @@ void	discrete_data_impl::object_mover_calculate( )
 
 	}
 }
-
+#ifndef MASTER_GOLD
 void	discrete_data_impl::save( xray::configs::lua_config_value &cfg ) const 
 {
 	for( u32 ch = channel_translation_x ; ch < channel_max; ++ch )
@@ -202,7 +202,7 @@ void	discrete_data_impl::check( xray::configs::lua_config_value &discrete_data )
 {
 	data.check	( discrete_data["bones"]["animation_data"] );
 }
-
+#endif
 
 void	discrete_data_impl::get_frame( u32 bone, u32 number, float &time, frame& frame )const
 {
@@ -542,4 +542,4 @@ void	maya_animation_world::build_animation_data( const discrete_data &data, bi_s
 }
 
 };	// namespace maya_animation
-};	// namespace xray 
+};	// namespace xray

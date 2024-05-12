@@ -380,7 +380,7 @@ inline bool	is_not_a_number	( float const value )
 	return		is_signalling_not_a_number( value ) || is_quiet_not_a_number( value );
 }
 
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 
 inline bool valid		( float const& value )
 {
@@ -399,7 +399,7 @@ inline bool valid		( float const& value )
 	return		true;
 }
 
-#endif
+//#endif
 
 inline int floor		( float const value )
 {

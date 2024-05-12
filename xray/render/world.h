@@ -74,7 +74,9 @@ private:
 	engine::world*				m_render_engine_world;
 	render::engine::renderer*	m_engine_renderer;
 	render::game::renderer*		m_game_renderer;
+#ifndef MASTER_GOLD
 	render::editor::renderer*	m_editor_renderer;
+#endif
 	u32							m_last_frame_time_in_ms;
 	threading::atomic32_type	m_is_logic_enabled;
 	threading::atomic32_type	m_is_logic_frame_ended;

@@ -195,8 +195,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_dead_sound			( NULL ),
 	m_delay					( 0 ),
 	m_reserve_switch		( false ),
-	m_allow_ed_fire			( true ),
-	m_is_stats_cleared		( false )
+	m_allow_ed_fire			( true )
 //	m_sound_created			( false )
 {
 	query_render_scene		( );
@@ -337,12 +336,12 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 		on_application_activate	( );
 	}
 }
-
+#ifndef MASTER_GOLD
 void game::load_sound_stats()
 {
 	m_sound_stats				= NEW( xray::sound::sound_debug_stats )( g_allocator, m_sound_world.get_logic_world_user(), get_game_world().get_sound_scene(), *m_ui_world);
 }
-
+#endif
 void game::speedtree_loaded(resources::queries_result& data, xray::render::game::renderer* r)
 {
 	if (!data.is_successful())
@@ -717,7 +716,7 @@ void game::tick( u32 const current_frame_id )
 	{
 		static_cast<xray::physics::bullet_physics_world*>(m_game_world->get_physics_world())->debug_render_aabb(get_active_scene(), m_renderer.debug());
 	}
-
+#ifndef MASTER_GOLD
 	if (get_active_scene() && m_enabled && s_draw_collisions_value) {
 		std::for_each(m_collisions.begin(), m_collisions.end(), [&](game_object_* object)
 			{
@@ -725,7 +724,7 @@ void game::tick( u32 const current_frame_id )
 				collision->draw_collision();
 			});
 	}
-
+#endif
 	renderer().draw_scene( 
 							get_active_scene(), 
 							get_active_scene_view(), 

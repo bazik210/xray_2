@@ -16,7 +16,7 @@ inline void read( xray::maya_animation::anim_track_discrete_channels &v, FILE* f
 {
 	v.load( f );
 } 
-
+#ifndef MASTER_GOLD
 inline void lua_write( const xray::maya_animation::anim_track_discrete_channels &ch, xray::configs::lua_config_value f )
 {
 	ch.save( f );
@@ -26,6 +26,6 @@ inline void lua_read(  xray::maya_animation::anim_track_discrete_channels &ch, x
 {
 	ch.load( f );
 }
-
+#endif
 } // namespace maya_animation
 } // namespace xray

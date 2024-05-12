@@ -6,3 +6,7 @@ set currentDir=%~dp0
 
 START /B /WAIT python %currentDir%\RemoveDebugDefinition.py
 START /B /WAIT python %currentDir%\RemoveDebugDefinition2.py
+
+:: MASTER_GOLD
+:: START /B /WAIT python %currentDir%\ReplaceToMasterGold.py
+:: START /B /WAIT python %currentDir%\RemoveMasterGold.py

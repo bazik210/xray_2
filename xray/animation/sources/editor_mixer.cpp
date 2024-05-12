@@ -4,6 +4,7 @@
 //	Copyright (C) GSC Game World - 2010
 ////////////////////////////////////////////////////////////////////////////
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "editor_mixer.h"
 #include <xray/animation/skeleton.h>
 #include <xray/render/facade/debug_renderer.h>
@@ -156,3 +157,4 @@ void editor_mixer::get_current_anim_states( xray::vectora<xray::animation::edito
 	m_animation_player.tick						( current_time_in_ms );
 	m_animation_player.fill_animation_states	( result );
 }
+#endif

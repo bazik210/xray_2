@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator.h"
 
 #include "delaunay_triangulator.h"
@@ -54,3 +55,4 @@ void graph_generator::test_delaunay( )
 
 	m_input_triangles.build_spatial_tree ( );
 }
+#endif

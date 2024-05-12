@@ -148,7 +148,9 @@ void capsule_geometry_instance::enumerate_primitives ( float4x4 const& transform
 
 void capsule_geometry_instance::set_matrix ( math::float4x4 const& matrix )
 {
+#ifndef MASTER_GOLD
 	if(!matrix.valid()) return;
+#endif
 	m_half_length		= m_true_half_length * matrix.j.xyz( ).length( );
 	m_matrix			= matrix;
 	m_matrix.set_scale	( float3( 1, 1, 1 ) );

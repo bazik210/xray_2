@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "preview_particle_system_instance.h"
 #include "particle_world.h"
 #include "particle_system.h" // because of particle_system_lod only!
@@ -77,3 +78,4 @@ void preview_particle_system_instance::updated_from_config			( particle_system_l
 
 } // namespace particle
 } // namespace xray
+#endif

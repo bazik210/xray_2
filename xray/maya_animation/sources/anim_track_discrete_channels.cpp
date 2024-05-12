@@ -30,7 +30,7 @@ void	anim_track_discrete_channels::load( FILE* f )
 	for(u32 i = channel_translation_x; i < channel_max; ++i )
 		read( m_channels[i], f ); 
 }
-
+#ifndef MASTER_GOLD
 void	anim_track_discrete_channels::check( configs::lua_config_value const& f )const
 {
 	for ( u32 i = channel_translation_x; i < channel_max; ++i ) {
@@ -59,8 +59,7 @@ void			anim_track_discrete_channels::load(  xray::configs::lua_config_value cons
 		lua_read_vector( m_channels[i], f["data"][i] );
 		
 }
-
-
+#endif
 
 void		anim_track_discrete_channels::setup_header(  animation_curve_data_header &h )
 {
@@ -157,7 +156,6 @@ void anim_track_discrete_channels::bone_pos( xray::float4x4 &, float )
 
 } // namespace maya_animation
 } // namespace xray
-
 
 
 

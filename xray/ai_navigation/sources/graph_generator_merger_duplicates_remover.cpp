@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_merger.h"
 #include "navigation_mesh_types.h"
 #include <xray/math_randoms_generator.h>
@@ -301,3 +302,4 @@ void graph_generator_merger::remove_duplicated_edge_vertices ( u32 const old_ver
 	);
 
 }
+#endif

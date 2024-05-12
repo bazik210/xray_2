@@ -159,6 +159,7 @@ void object_volumetric_sound::play			(  )
 			);
 
 	} else {
+#ifndef MASTER_GOLD
 			m_proxy = m_emitter->emit_volumetric_sound
 			(
 				m_sound_scene,
@@ -166,6 +167,15 @@ void object_volumetric_sound::play			(  )
 				*collision::new_sphere_geometry_instance(&debug::g_mt_allocator, float4x4().identity(), 1.0f),
 				m_radius
 			);
+#else
+			m_proxy = m_emitter->emit_volumetric_sound
+			(
+				m_sound_scene,
+				m_world_user,
+				*collision::new_sphere_geometry_instance(&memory::g_mt_allocator, float4x4().identity(), 1.0f),
+				m_radius
+			);
+#endif
 	}
 
 	if (!m_proxy.c_ptr())

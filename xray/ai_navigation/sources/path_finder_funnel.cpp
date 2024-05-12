@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "path_finder_funnel.h"
 
 using xray::ai::navigation::path_finder_funnel;
@@ -181,3 +182,4 @@ path_finder_funnel::path_finder_funnel (
 	}
 	add( goal, vertex_type_point );
 }
+#endif

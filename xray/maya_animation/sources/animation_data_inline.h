@@ -6,7 +6,9 @@
 //using xray::animation::animation_data;
 //using xray::animation::anim_track_discrete;
 //using xray::animation::animation_data_discret;
+#ifndef MASTER_GOLD
 #include <xray/configs_lua_config.h>
+#endif
 #include "anim_track_discrete_channels.h"
 
 namespace xray {
@@ -99,7 +101,7 @@ bool t_animation_data< TrackType >::load_file( pcstr fn )
 	return true;
 
 }
-
+#ifndef MASTER_GOLD
 template < typename T >
 inline void lua_write( T const& v,  xray::configs::lua_config_value &cfg )
 {
@@ -179,6 +181,6 @@ void	t_animation_data< TrackType >::check( configs::lua_config_value const& cfg 
 		m_bone_animations[i].check	( cfg["vector_data"][i] );
 	}
 }
-
+#endif
 } // namespace maya_animation
 } // namespace xray

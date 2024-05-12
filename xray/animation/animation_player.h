@@ -58,9 +58,9 @@ public:
 public:
 #ifndef MASTER_GOLD
 			void			set_controller_callback	( boost::function<void (mixing::expression const&, u32)> const& callback );
-			void			reset					( bool clear_callbacks = false );
 			void			fill_animation_states	( vectora< editor_animation_state >& result );
 #endif // #ifndef MASTER_GOLD
+			void			reset					( bool clear_callbacks = false );
 
 			bool			set_target				( mixing::expression const& expression, u32 const current_time_in_ms );
 private:

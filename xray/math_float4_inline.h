@@ -208,14 +208,14 @@ inline bool float4_pod::is_similar					( float4_pod const& other, float epsilon 
 	return		( true );
 }
 
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 
 inline bool float4_pod::valid					( ) const
 {
 	return		( math::valid( x ) && math::valid( y ) && math::valid( z ) && math::valid( w ) );
 }
 
-#endif
+//#endif
 
 inline float dot_product					( const float4_pod &left, const float4_pod &right )
 {

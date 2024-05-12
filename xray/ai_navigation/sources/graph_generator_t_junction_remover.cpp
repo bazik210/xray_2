@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_t_junction_remover.h"
 
 using xray::ai::navigation::graph_generator_t_junction_remover;
@@ -209,3 +210,4 @@ bool graph_generator_t_junction_remover::remove_t_junctions (
 	}
 	return false;
 }
+#endif

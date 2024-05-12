@@ -77,9 +77,9 @@ public:
 
 			float4x4*   get_instance                    ( );
 
-	#ifndef MASTER_GOLD
+	//#ifndef MASTER_GOLD
 	inline	bool		valid							( ) const;
-	#endif
+	//#endif
 }; // struct float4
 
 inline float4x4			operator *						( float4x4 const& left, float4x4::type right );

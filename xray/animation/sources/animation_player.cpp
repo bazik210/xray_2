@@ -150,6 +150,12 @@ void animation_player::set_controller_callback	( boost::function<void (xray::ani
 	m_controller_callback		= callback;
 }
 
+void animation_player::fill_animation_states	( xray::vectora<xray::animation::editor_animation_state>& result )
+{
+	m_mixing_tree.fill_animation_states	( result );
+}
+#endif // #ifndef MASTER_GOLD
+
 void animation_player::reset					( bool const clear_callbacks )
 {
 	m_mixing_tree				= n_ary_tree( float4x4().identity() );
@@ -161,12 +167,6 @@ void animation_player::reset					( bool const clear_callbacks )
 		new (&m_callbacks_buffer) mutable_buffer( m_callbacks_buffer_raw, sizeof(m_callbacks_buffer_raw) );
 	}
 }
-
-void animation_player::fill_animation_states	( xray::vectora<xray::animation::editor_animation_state>& result )
-{
-	m_mixing_tree.fill_animation_states	( result );
-}
-#endif // #ifndef MASTER_GOLD
 
 void animation_player::subscribe				( pcstr const channel_id, callback_type const& callback, u8 const callback_id )
 {

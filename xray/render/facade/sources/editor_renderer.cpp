@@ -4,6 +4,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include <xray/render/facade/editor_renderer.h>
 #include <xray/render/facade/debug_renderer.h>
 #include <xray/render/facade/ui_renderer.h>
@@ -502,3 +503,4 @@ void renderer::apply_material_changes( fs_new::virtual_path_string const& materi
 } // namespace editor
 } // namespace render
 } // namespace xray
+#endif

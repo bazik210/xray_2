@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "console_commands.h"
 #include <xray/console_command.h>
 #include <xray/sound/world_user.h>
@@ -90,3 +91,4 @@ world_user* console_commands::get_thread_world_user	( ) const
 
 } // namespace sound
 } // namespace xray
+#endif

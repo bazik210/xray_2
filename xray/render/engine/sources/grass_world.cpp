@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "grass_world.h"
 #include "render_model_grass.h"
 #include "grass_template.h"
@@ -502,3 +503,4 @@ void grass_world::on_sub_resources_loaded(xray::resources::queries_result& data)
 
 } // namespace render
 } // namespace xray
+#endif

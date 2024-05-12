@@ -5,12 +5,15 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #include "constrained_delaunay_triangulator.h"
 #include <xray/strings_stream.h>
 
 using xray::ai::navigation::delaunay_triangulator;
 using xray::ai::navigation::constrained_delaunay_triangulator;
+#ifndef MASTER_GOLD
 using xray::ai::navigation::triangles_mesh_type;
+#endif
 using xray::math::float3;
 
 u32 segment_intersects_triangle	(
@@ -422,8 +425,9 @@ void constrained_delaunay_triangulator::triangulate_pseudo_polygon (
 		);
 	}
 }
-
+#ifndef MASTER_GOLD
 void copy_config_to_clipboard ( xray::configs::lua_config_ptr& /*config*/ ) 
 {
 
 }
+#endif

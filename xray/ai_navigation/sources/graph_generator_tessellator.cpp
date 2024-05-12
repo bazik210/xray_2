@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_tessellator.h"
 #include "graph_generator_predicates.h"
 #include <xray/collision/geometry.h>
@@ -307,3 +308,4 @@ void graph_generator_tessellator::tessellate_passable_triangles()
 	m_triangles_mesh.remove_marked_triangles ( );
 
 }
+#endif

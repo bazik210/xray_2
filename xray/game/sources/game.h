@@ -253,8 +253,9 @@ private:
 	}
 
 public:
+#ifndef MASTER_GOLD
 	void					load_sound_stats		();
-
+#endif
 private:
 	typedef intrusive_list< human_npc,
 							human_npc_ptr,
@@ -377,10 +378,8 @@ private:
 public:
 #ifndef MASTER_GOLD
 	xray::sound::sound_debug_stats*			m_sound_stats;
-#endif //#ifndef MASTER_GOLD
-
 	xray::sound::sound_debug_stats* 		get_sound_stats() { return m_sound_stats; };
-	bool									m_is_stats_cleared;
+#endif //#ifndef MASTER_GOLD
 	bool									m_is_editor() { return engine().command_line_editor(); };
 
 private:

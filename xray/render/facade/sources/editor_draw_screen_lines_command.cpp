@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "editor_draw_screen_lines_command.h"
 #include <xray/render/engine/world.h>
 
@@ -29,3 +30,4 @@ void draw_screen_lines_command::defer_execution	( )
 } // namespace editor
 } // namespace render
 } // namespace xray
+#endif

@@ -10,14 +10,14 @@ ET.register_namespace('', namespace)
 # Load config file
 cfg = []
 try:
-    with open('./script_configs/RemoveDebugDefinition2.json') as cfgFile:
+    with open('./script_configs/RemoveDebugDefinition.json') as cfgFile:
         cfg = json.load(cfgFile)
 except IOError:
-    print('Config file not found (./script_configs/RemoveDebugDefinition2.json) - falling back to example file.')
+    print('Config file not found (./script_configs/RemoveDebugDefinition.json) - falling back to example file.')
     cfgFile = open('./script_configs/RemoveDebugDefinition.json.example')
     cfg = json.load(cfgFile)
 
-# Parse each project file and remove DEBUG, _DEBUG and NDEBUG from Release and MinSizeRel configuration
+# Parse each project file and remove DEBUG, _DEBUG and NDEBUG from Release configuration
 for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
     for filename in fnmatch.filter(files, '*.vcxproj'):
         skip = 1
@@ -46,13 +46,6 @@ for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
             for element in groupElement:
                 # Remove preprocessor definitions
                 if element.tag == '{'+ namespace + '}' + 'PreprocessorDefinitions' and 'Release' in group.get('Condition'):
-                        element.text = element.text.replace('_DEBUG;', '')
-                        element.text = element.text.replace('NDEBUG;', '')
-                        element.text = element.text.replace('DEBUG;', '')
-                elif element.tag == '{'+ namespace + '}' + 'PreprocessorDefinitions' and 'MinSizeRel' in group.get('Condition'):
-                        element.text = element.text.replace('_DEBUG;', '')
-                        element.text = element.text.replace('NDEBUG;', '')
-                        element.text = element.text.replace('DEBUG;', '')
-                
-                        
+                    element.text = element.text.replace("MASTER_GOLD;", "")
+     
         contents.write(vcxproj, '')

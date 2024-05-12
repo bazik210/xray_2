@@ -134,9 +134,9 @@ inline float			squared_length	( float3 const& object);
 inline bool				is_similar		( float3 const& left, float3 const& right, float epsilon = epsilon_5 );
 inline bool		is_relatively_similar	( float3 const& left, float3 const& right, float epsilon = epsilon_6 );
 
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 	inline bool			valid			( float3 const& object );
-#endif // #ifndef MASTER_GOLD
+//#endif // #ifndef MASTER_GOLD
 
 XRAY_CORE_API void	generate_orthonormal_basis	( float3 const& direction, float3& up, float3& right );
 XRAY_CORE_API float3 normalize_precise			( float3 const& object );

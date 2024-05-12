@@ -72,9 +72,9 @@ public:
 
 	inline	bool		is_similar		( float4_pod const& other, float epsilon = epsilon_5 ) const;
 
-	#ifndef MASTER_GOLD
+	//#ifndef MASTER_GOLD
 	inline	bool		valid			( ) const;
-	#endif
+	//#endif
 }; // struct float4_pod(
 
 class float4 : public float4_pod {

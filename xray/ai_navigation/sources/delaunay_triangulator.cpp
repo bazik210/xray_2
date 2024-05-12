@@ -5,11 +5,14 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #include "delaunay_triangulator.h"
 #include <xray/math_randoms_generator.h>
 
 using xray::ai::navigation::delaunay_triangulator;
+#ifndef MASTER_GOLD
 using xray::ai::navigation::triangles_mesh_type;
+#endif
 using xray::math::float3;
 
 float XRAY_AI_NAVIGATION_API cross_product	(

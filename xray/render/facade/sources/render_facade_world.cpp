@@ -38,18 +38,19 @@ world::world								(
 
 	m_engine_renderer			= NEW( render::engine::renderer ) ( *m_render_engine_world );
 	m_game_renderer				= NEW( render::game::renderer ) ( *this, *m_render_engine_world );
-#ifndef XRAY_STATIC_LIBRARIES
-	m_editor_renderer			= editor_allocator ? NEW( render::editor::renderer ) ( *this, *m_render_engine_world ) : 0;
-#else // #ifndef XRAY_STATIC_LIBRARIES
-	m_editor_renderer			= 0;
-#endif // #ifndef XRAY_STATIC_LIBRARIES
-
+#ifndef MASTER_GOLD
+	#ifndef XRAY_STATIC_LIBRARIES
+		m_editor_renderer			= editor_allocator ? NEW( render::editor::renderer ) ( *this, *m_render_engine_world ) : 0;
+	#else // #ifndef XRAY_STATIC_LIBRARIES
+		m_editor_renderer			= 0;
+	#endif // #ifndef XRAY_STATIC_LIBRARIES
+#endif
 	m_timer.start				( );
 }
 
 world::~world								( )
 {
-#ifndef XRAY_STATIC_LIBRARIES
+#if !defined(XRAY_STATIC_LIBRARIES) && !defined(MASTER_GOLD)
 	DELETE						( m_editor_renderer );
 #endif // #ifndef XRAY_STATIC_LIBRARIES
 	DELETE						( m_game_renderer );

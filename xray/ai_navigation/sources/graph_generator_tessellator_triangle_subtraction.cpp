@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_tessellator.h"
 
 using xray::ai::navigation::graph_generator_tessellator;
@@ -410,3 +411,4 @@ bool graph_generator_tessellator::subtract_triangle (
 	}
 	return was_intersected;
 }
+#endif

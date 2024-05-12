@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "grass_template.h"
 #include "grass_instance.h"
 #include "render_model_grass.h"
@@ -40,3 +41,4 @@ void grass_template::apply()
 
 } // namespace render
 } // namespace xray
+#endif

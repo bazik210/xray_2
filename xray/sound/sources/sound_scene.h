@@ -220,7 +220,9 @@ private:
 								);
 public:
 	// stats
+#ifndef MASTER_GOLD
 		    debug_statistic* statistic;
+#endif
 			proxy_statistic* prx_stats;
 			propagator_statistic* prop_stats;
 

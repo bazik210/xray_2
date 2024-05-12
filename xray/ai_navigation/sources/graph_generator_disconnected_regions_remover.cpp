@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_disconnected_regions_remover.h"
 #include "navigation_mesh_functions.h"
 
@@ -78,3 +79,4 @@ void graph_generator_disconnected_regions_remover::remove_region ( u32 const tri
 		}
 	}
 }
+#endif

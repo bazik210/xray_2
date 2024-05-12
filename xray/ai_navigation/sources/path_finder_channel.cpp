@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "path_finder_channel.h"
 #include "path_finder_modified_funnel.h"
 #include "navigation_mesh_functions.h"
@@ -693,3 +694,4 @@ path_finder_channel::path_finder_channel (
 	if ( !channel.empty() )
 		channel[0] = start_vertex_id;
 }
+#endif

@@ -18,7 +18,9 @@
 #include <xray/render/core/backend.h>
 #include <xray/render/core/effect_manager.h>
 #include "effect_editor_gbuffer_to_screen.h"
+#ifndef MASTER_GOLD
 #include "grass_world.h"
+#endif
 #ifdef XRAY_RENDERER_FLASH
 #include "flash_renderer.h"
 #endif
@@ -335,10 +337,10 @@ void renderer::render(scene_ptr const& in_scene,
 	
 	if (part_world)
 		part_world->tick( time_delta, m_renderer_context->get_v() );
-	
+#ifndef MASTER_GOLD
 	if (scene->get_grass())
 		scene->get_grass()->process_culling(m_renderer_context, 100.0f);
-	
+#endif	
 	backend::ref().reset();
 	//backend::ref().flush();
 	

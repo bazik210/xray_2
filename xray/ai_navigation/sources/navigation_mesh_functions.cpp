@@ -5,10 +5,12 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include "navigation_mesh_functions.h"
 
+#include "navigation_mesh_functions.h"
+#ifndef MASTER_GOLD
 using xray::ai::navigation::triangles_mesh_type;
 using xray::ai::navigation::distance_to_segment;
+#endif
 using xray::math::float3;
 
 // Angle between ab and bc
@@ -16,7 +18,7 @@ static inline bool is_angle_obtuse ( float3 const& a, float3 const& b, float3 co
 {
 	return ((a-b) | (c-b)) <= 0.0f;
 }
-
+#ifndef MASTER_GOLD
 static inline bool is_constrained( triangles_mesh_type const& triangles_mesh, u32 const triangle_id, u32 const edge_id ) 
 {
 	return ( triangles_mesh.data[ triangle_id ].neighbours[ edge_id ] == u32(-1) ) || ( triangles_mesh.data[ triangle_id ].obstructions[ edge_id ] != 0.0f );
@@ -54,7 +56,7 @@ float search_triangle_width (
 	distance = search_triangle_width( triangles_mesh, vertex, opposite_triangle_id, other_edges[0], distance, check_angle );
 	return search_triangle_width( triangles_mesh, vertex, opposite_triangle_id, other_edges[1], distance, check_angle );
 }
-
+#endif
 namespace xray {
 namespace ai {
 namespace navigation {
@@ -75,7 +77,7 @@ float distance_to_segment					( float3 const& v, float3 const& s0, float3 const&
 
 	return							length( v_minus_s0 - direction*projection );
 }
-
+#ifndef MASTER_GOLD
 float calculate_triangle_width (
 		triangles_mesh_type const& triangles_mesh,
 		float3 const vertex,
@@ -110,7 +112,7 @@ bool can_stand(
 	}
 	return true;
 }
-
+#endif
 bool is_null_square ( 
 		float3 const& a,
 		float3 const& b,

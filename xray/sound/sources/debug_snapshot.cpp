@@ -5,8 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#include "debug_snapshot.h"
 
+#ifndef MASTER_GOLD
+#include "debug_snapshot.h"
 
 namespace xray {
 namespace sound {
@@ -133,3 +134,4 @@ void debug_snapshot::dump						( memory::writer& writer )
 
 } // namespace sound
 } // namespace xray
+#endif

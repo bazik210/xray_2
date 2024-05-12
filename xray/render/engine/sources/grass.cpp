@@ -5,6 +5,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
+#if 0
 #include "grass.h"
 #include "material_manager.h"
 #include "material_effects.h"
@@ -14,9 +16,6 @@
 #include <xray/render/core/resource_manager.h>
 
 #include <xray/math_randoms_generator.h>
-
-#if 0
-
 
 static xray::math::random32 randomizer(100);
 static u32 const random_max = 65535;

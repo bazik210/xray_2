@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include <xray/animation/editable_animation_event_channels.h>
 
 namespace xray {
@@ -65,3 +66,4 @@ namespace animation {
 
 } // namespace animation
 } // namespace xray
+#endif

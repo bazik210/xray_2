@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_merger.h"
 #include "constrained_delaunay_triangulator.h"
 
@@ -286,3 +287,4 @@ void graph_generator_merger::merge_constraint_edges ( float3 const& normal )
 	);
 
 }
+#endif

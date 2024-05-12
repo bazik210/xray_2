@@ -17,8 +17,13 @@ class XRAY_AI_NAVIGATION_API delaunay_triangulator : private core::noncopyable {
 public:
 	typedef xray::buffer_vector< float3 >			vertices_type;
 	typedef xray::buffer_vector< u32 >				indices_type;
+#ifndef MASTER_GOLD
 	typedef debug::vector< u32 >					input_indices_type;
 	typedef debug::vector< u32 >					error_vertices_indices_type;
+#else
+	typedef std::vector< u32 >						input_indices_type;
+	typedef std::vector< u32 >						error_vertices_indices_type;
+#endif
 
 public:
 						template < typename VerticesContainer >

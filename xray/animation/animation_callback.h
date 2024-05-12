@@ -8,6 +8,7 @@
 #define XRAY_ANIMATION_ANIMATION_CALLBACK_H_INCLUDED
 
 #include <xray/animation/skeleton_animation.h>
+#include <xray/type_extensions.h>
 
 namespace xray {
 namespace animation {

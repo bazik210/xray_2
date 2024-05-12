@@ -31,9 +31,9 @@
 #include "speedtree_tree.h"
 #include "speedtree_forest.h"
 #include "speedtree_convert_type.h"
-
+#ifndef MASTER_GOLD
 #include "grass_world.h"
-
+#endif
 #include "material.h"
 
 #include <xray/render/core/resource_manager.h>
@@ -192,11 +192,12 @@ void stage_gbuffer::execute()
 //		cnt++;
 	}
 	//m_context->scene()->get_grass()->render(m_context, (u32)geometry_render_stage);
-	
+#ifndef MASTER_GOLD
 	if (m_context->scene()->get_grass())
 	{
 		m_context->scene()->get_grass()->render(m_context, m_context->get_view_pos(), geometry_render_stage, tech_index);
 	}
+#endif
 	/*if (m_context->scene()->get_grass() && m_context->scene()->get_grass()->m_model.c_ptr())
 	{
 		grass_render_model::children::iterator it_begin		=	m_context->scene()->get_grass()->m_model->m_children.begin();

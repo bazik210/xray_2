@@ -26,10 +26,11 @@ public:
 	virtual			~discrete_data(){}
 
 public:
+#ifndef MASTER_GOLD
 	virtual	void	save	( xray::configs::lua_config_value & cfg ) const									= 0;
 	virtual	void	load	( xray::configs::lua_config_value const& cfg, bool bone_names_only = false )	= 0;
 	virtual	void	check	( xray::configs::lua_config_value &discrete_data ) const						= 0;
-
+#endif
 public:
 	virtual void	add_frame		( u32 bone, animation::frame const& frm, animation::frame const& base_frm )	= 0;
 	virtual	void	calculate		( )																			= 0;

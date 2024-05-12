@@ -13,10 +13,12 @@
 
 namespace xray {
 
+#ifndef MASTER_GOLD
 namespace configs
 {
 	class lua_config_value;
 } // namespace configs
+#endif
 
 namespace maya_animation {
 
@@ -32,11 +34,11 @@ public:
 		void			load				( FILE* f );
 		bool			save_file			( pcstr fn )const;
 		bool			load_file			( pcstr fn );
-
+#ifndef MASTER_GOLD
 		void			save				( configs::lua_config_value &cfg )const;
 		void			load				( configs::lua_config_value const& cfg );
 		void			check				( configs::lua_config_value const& cfg ) const;
-
+#endif
 		void			bone_pose			( xray::float4x4 &pose, u32 id, float time );
 		u32				anim_bone_count		( )const		{ return m_bone_animations.size(); }
 		void			set_anim_bone_count	( u32 cnt )		{ return m_bone_animations.resize(cnt); }

@@ -16,7 +16,9 @@
 #include "speedtree_forest.h"
 #include "speedtree_tree.h"
 #include "speedtree_instance_impl.h"
+#ifndef MASTER_GOLD
 #include "grass_world.h"
+#endif
 #include "render_particle_emitter_instance.h"
 #include <xray/particle/world.h>
 #include "light.h"
@@ -91,7 +93,9 @@ scene::scene( xray::render::scene_configuration const& renderer_configuration)
 	m_terrain			( renderer_configuration.m_create_terrain ? NEW(render::terrain) : NULL ),
 	m_particle_world	( NULL ),
 	m_scene_slomo		( 1.0f ),
+#ifndef MASTER_GOLD
 	m_grass				( renderer_configuration.m_create_grass_world ? NEW(grass_world) : NULL ),
+#endif
 	m_decals_tree		( &*collision::new_space_partitioning_tree( g_allocator, 1.f, 1024 ) ),
 	m_models_tree		( &*collision::new_space_partitioning_tree( g_allocator, 1.f, 1024 ) ),
 	m_sky_enabled		( renderer_configuration.m_sky_enabled)
@@ -108,8 +112,9 @@ scene::scene( xray::render::scene_configuration const& renderer_configuration)
 scene::~scene()
 {
 	MT_DELETE		( m_speedtree_forest );
+#ifndef MASTER_GOLD
 	DELETE			( m_grass );
-	
+#endif	
 	collision::delete_space_partitioning_tree( m_decals_tree );
 	collision::delete_space_partitioning_tree( m_models_tree );
 }

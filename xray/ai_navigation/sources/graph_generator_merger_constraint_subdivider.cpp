@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_merger.h"
 #include <xray/collision/api.h>
 #include <xray/collision/space_partitioning_tree.h>
@@ -301,3 +302,4 @@ void graph_generator_merger::subdivide_constraint_edges ( float3 const& normal )
 	}
 	collision::delete_space_partitioning_tree( &*spatial_tree );
 }
+#endif

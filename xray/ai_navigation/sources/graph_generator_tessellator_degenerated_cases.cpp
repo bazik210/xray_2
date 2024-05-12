@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_tessellator.h"
 
 using xray::ai::navigation::graph_generator_tessellator;
@@ -46,3 +47,4 @@ bool graph_generator_tessellator::process_degenerated_cases(
 	return								true;
 
 }
+#endif

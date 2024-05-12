@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_merger.h"
 #include <xray/collision/geometry.h>
 #include <xray/collision/geometry_instance.h>
@@ -307,4 +308,4 @@ void graph_generator_merger::collect_constraint_edges ( u32 const triangle_id, f
 	}
 	m_triangles_mesh.data[ triangle_id ].is_marked = true;
 }
-
+#endif

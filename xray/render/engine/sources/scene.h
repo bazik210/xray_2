@@ -64,7 +64,9 @@ class lights_db;
 class terrain;
 struct scene_configuration;
 struct speedtree_forest;
+#ifndef MASTER_GOLD
 struct grass_world;
+#endif
 //class model_manager;
 
 class scene : public base_scene {
@@ -112,9 +114,9 @@ public:
 			// Set scene slow motion.
 			void				set_slomo				( float time_multiplier );
 			float				get_slomo				( ) const { return m_scene_slomo; }
-			
+#ifndef MASTER_GOLD
 			grass_world*		get_grass				( ) const { return m_grass; }
-			
+#endif			
 			// TODO: move to environment			
 			void				set_sky_material		(material_effects_instance_ptr const& in_material) { m_sky_material = in_material; }
 			material_effects_instance_ptr const& get_sky_material() const { return m_sky_material; }
@@ -198,7 +200,9 @@ private:
 	unique_ptr< render::terrain >		m_terrain;
 	particle::world_ptr					m_particle_world;
 	render::speedtree_forest*			m_speedtree_forest;
+#ifndef MASTER_GOLD
 	grass_world*						m_grass;
+#endif
 	float								m_scene_slomo;
 	bool								m_sky_enabled;
 }; // class scene

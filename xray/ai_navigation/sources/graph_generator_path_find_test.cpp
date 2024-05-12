@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator.h"
 #include "navigation_mesh_functions.h"
 #include "path_finder_channel.h"
@@ -128,3 +129,4 @@ void graph_generator::add_channel_triangle ( float3 const& position, float3 cons
 		m_goal_node = triangle_id;
 	}
 }
+#endif

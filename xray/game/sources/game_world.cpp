@@ -433,8 +433,10 @@ void game_world::on_resources_ready( resources::queries_result& data )
 	m_scene_view		= static_cast_resource_ptr< xray::render::scene_view_ptr >( data[1].get_unmanaged_resource() );
 	m_sound_scene		= static_cast_resource_ptr< xray::sound::sound_scene_ptr >( data[2].get_unmanaged_resource() );
 
+#ifndef MASTER_GOLD
 	//we are forced to use game_world sound scene, for some reason game sound_scene produce a crash :[
 	get_game().load_sound_stats();
+#endif
 
 	if(is_active()) //if we are in game
 		get_game().get_sound_world().get_logic_world_user().set_active_sound_scene( get_sound_scene(), 1000, 0 );

@@ -5,6 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#ifndef MASTER_GOLD
 #include "graph_generator_subdivider.h"
 #include "graph_generator_predicates.h"
 #include <xray/collision/geometry.h>
@@ -956,3 +957,4 @@ u32 graph_generator_subdivider::subdivide( triangles_mesh_type& triangles_mesh, 
 		return 5;
 	}
 }
+#endif

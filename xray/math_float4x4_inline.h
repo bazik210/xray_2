@@ -123,14 +123,14 @@ inline float float4x4::determinant4x3		( ) const
 	);
 }
 
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 
 inline bool float4x4::valid					( ) const
 {
 	return		( i.valid( ) && j.valid( ) && k.valid( ) && c.valid( ) );
 }
 
-#endif
+//#endif
 
 inline float3 float4x4::get_scale			( ) const
 {
