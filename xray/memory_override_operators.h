@@ -9,7 +9,7 @@
 
 #define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
 #define XRAY_HEAP_PROCESS_ALLOCATOR	  1
-#define XRAY_DISABLE_CRT_ALLOCATOR    0
+#define XRAY_DISABLE_CRT_ALLOCATOR    1
 
 #ifdef _MSC_VER
 #	define XRAY_RESTRICT	__declspec( restrict )

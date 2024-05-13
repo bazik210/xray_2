@@ -30,21 +30,22 @@
 #define XRAY_MAX_CACHE_LINE_PAD					char XRAY_STRING_CONCAT(m_cache_line_pad_$, __LINE__) [XRAY_MAX_CACHE_LINE_SIZE]
 
 #define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
+#define	XRAY_DISABLE_CRT_ALLOCATOR 1
 
 namespace xray {
 namespace memory {
 
-#ifdef XRAY_STATIC_LIBRARIES
+#if defined(XRAY_STATIC_LIBRARIES) || XRAY_DISABLE_CRT_ALLOCATOR
 	class doug_lea_mt_allocator;
 	typedef memory::doug_lea_mt_allocator		crt_allocator_type;
 #else // #ifdef XRAY_STATIC_LIBRARIES
 	typedef memory::crt_allocator				crt_allocator_type;
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
-#ifdef XRAY_STATIC_LIBRARIES
-	extern "C" XRAY_CORE_API crt_allocator_type* g_crt_allocator;
+#if defined(XRAY_STATIC_LIBRARIES) || XRAY_DISABLE_CRT_ALLOCATOR
+	extern "C" XRAY_CORE_API crt_allocator_type * g_crt_allocator;
 #else
-	extern XRAY_CORE_API crt_allocator_type * g_crt_allocator;
+	extern XRAY_CORE_API crt_allocator_type* g_crt_allocator;
 #endif
 
 } // namespace memory

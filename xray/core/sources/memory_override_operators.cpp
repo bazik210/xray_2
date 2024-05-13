@@ -13,6 +13,8 @@
 #include <xray/construction.h>
 #include <xray/memory_doug_lea_mt_allocator.h>
 
+#define XRAY_DISABLE_CRT_ALLOCATOR 1
+
 #if 0//def XRAY_STATIC_LIBRARIES
 
 pvoid __cdecl operator new		( size_t buffer_size )
@@ -139,6 +141,7 @@ struct inplace_constructor {
 	}
 }; // struct inplace_constructor
 
+#if !XRAY_DISABLE_CRT_ALLOCATOR
 void initialize_crt_allocator			( )
 {
 	R_ASSERT					( g_crt_allocations_are_enabled );
@@ -162,12 +165,14 @@ inline void check_if_CRT_allocations_enabled	( )
 		R_ASSERT				( xray::memory::g_crt_allocator );
 	}
 }
+#endif
 
 //#if 0//def XRAY_STATIC_LIBRARIES
 
 #if defined(_MSC_VER) && !defined(_DLL)
 extern "C" {
 
+#if !XRAY_DISABLE_CRT_ALLOCATOR
 pvoid malloc					( size_t size )
 {
 	check_if_CRT_allocations_enabled( );
@@ -178,7 +183,7 @@ pvoid malloc					( size_t size )
 	return						g_crt_allocator->malloc_impl( size );
 #endif // #ifdef DEBUG
 }
-
+#endif
 /*
 pvoid calloc					( size_t count, size_t element_size )
 {

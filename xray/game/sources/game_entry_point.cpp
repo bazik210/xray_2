@@ -47,8 +47,8 @@ static xray::uninitialized_reference< stalker2::game >							s_game;
 
 namespace stalker2 {
 
-#ifdef XRAY_STATIC_LIBRARIES
-xray::uninitialized_reference< xray::memory::doug_lea_allocator_type >	g_physics_allocator;
+#if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	xray::uninitialized_reference< xray::memory::doug_lea_allocator_type >	g_physics_allocator;
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
 xray::memory::doug_lea_allocator_type*	g_allocator		= NULL;
@@ -60,9 +60,9 @@ xray::engine_user::world* game_module::create_world	(
 		xray::network::world& network
 	)
 {
-#ifdef XRAY_STATIC_LIBRARIES
+#if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	g_physics_allocator->user_current_thread_id			( );
-	xray::physics::set_memory_allocator					( g_physics_allocator.c_ptr() );
+	xray::physics::set_memory_allocator					( g_physics_allocator.c_ptr());
 #else // #ifdef XRAY_STATIC_LIBRARIES
 	xray::physics::set_memory_allocator					( memory::g_crt_allocator );
 #endif // #ifdef XRAY_STATIC_LIBRARIES
@@ -121,7 +121,7 @@ static void register_rtp_allocator( )
 
 void game_module::register_memory_allocators	( )
 {
-#ifdef XRAY_STATIC_LIBRARIES
+#if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	XRAY_CONSTRUCT_REFERENCE				( g_physics_allocator, xray::memory::doug_lea_allocator_type );
 	g_physics_allocator->do_register		( 16*Mb,	"physics" );
 #endif

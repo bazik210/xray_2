@@ -11,3 +11,4 @@ START /B /WAIT python %currentDir%\RemoveDebugDefinition2.py
 :: START /B /WAIT python %currentDir%\ReplaceToMasterGold.py
 :: START /B /WAIT python %currentDir%\RemoveMasterGold.py
 :: START /B /WAIT python %currentDir%\ReplaceMD_DefinitionMT.py
+pause

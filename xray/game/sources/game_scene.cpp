@@ -14,7 +14,7 @@
 
 namespace stalker2 {
 
-#ifdef XRAY_STATIC_LIBRARIES
+#if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
 extern xray::uninitialized_reference< xray::memory::doug_lea_allocator_type >	g_physics_allocator;
 #endif // #ifdef XRAY_STATIC_LIBRARIES
 
@@ -29,8 +29,8 @@ m_game_world	( NULL )
 
 void game_scene::init_physics( )
 {
-#ifdef XRAY_STATIC_LIBRARIES
-	m_physics_world					= xray::physics::create_world_bt( stalker2::g_physics_allocator.c_ptr(), *this );
+#if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
+	m_physics_world					= xray::physics::create_world_bt( stalker2::g_physics_allocator.c_ptr(), *this);
 #else // #ifdef XRAY_STATIC_LIBRARIES
 	m_physics_world					= xray::physics::create_world_bt( memory::g_crt_allocator, *this );
 #endif // #ifdef XRAY_STATIC_LIBRARIES

@@ -1,0 +1,7 @@
+{
+	"included_directories" : [
+		"xray"
+	],
+	"included_projects" : [
+	]
+}

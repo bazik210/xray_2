@@ -538,6 +538,7 @@ void engine::world::apply_render_options_changes	( )
 	NOT_IMPLEMENTED					( );
 }
 
+#ifndef MASTER_GOLD
 void engine::world::select_particle_system_instance	( scene_ptr const& scene, particle::particle_system_instance_ptr const& instance, bool selected )
 {
 	XRAY_UNREFERENCED_PARAMETERS	( &scene, &instance, selected );
@@ -573,6 +574,7 @@ void engine::world::apply_material_changes			( fs_new::virtual_path_string const
 	XRAY_UNREFERENCED_PARAMETERS	( &material_name, &config_value );
 	NOT_IMPLEMENTED					( );
 }
+#endif
 
 void engine::world::add_speedtree_instance			( scene_ptr const& in_scene, render::speedtree_instance_ptr const& v, float4x4 const& transform, bool populate_forest )
 {
