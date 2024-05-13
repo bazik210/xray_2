@@ -130,7 +130,7 @@ inline bool float4x4::valid					( ) const
 	return		( i.valid( ) && j.valid( ) && k.valid( ) && c.valid( ) );
 }
 
-//#endif
+//#endif //#ifndef MASTER_GOLD
 
 inline float3 float4x4::get_scale			( ) const
 {

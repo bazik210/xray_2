@@ -11,7 +11,7 @@
 #	define DEBUG_RESOURCES					1
 #else
 #	define DEBUG_RESOURCES					0
-#endif
+#endif //#ifndef MASTER_GOLD
 
 #include <xray/text_tree_item.h>
 #include <xray/fs/native_path_string.h>

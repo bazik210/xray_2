@@ -74,7 +74,7 @@ public:
 
 	//#ifndef MASTER_GOLD
 	inline	bool		valid			( ) const;
-	//#endif
+	//#endif //#ifndef MASTER_GOLD
 }; // struct float4_pod(
 
 class float4 : public float4_pod {

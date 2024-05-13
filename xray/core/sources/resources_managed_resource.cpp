@@ -49,9 +49,9 @@ log_string_type   managed_resource::log_string () const
 {
 #ifndef MASTER_GOLD
 	pcstr request_path				=		m_request_path.c_str();
-#else
+#else // #ifndef MASTER_GOLD
 	pcstr request_path				=		"<was not saved>";
-#endif
+#endif // #ifndef MASTER_GOLD
 	u32 const size					=		get_size();
 
 	pvoid const this_ptr			=		dynamic_cast<pvoid>((managed_resource*)this);

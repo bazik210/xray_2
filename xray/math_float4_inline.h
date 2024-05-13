@@ -215,7 +215,7 @@ inline bool float4_pod::valid					( ) const
 	return		( math::valid( x ) && math::valid( y ) && math::valid( z ) && math::valid( w ) );
 }
 
-//#endif
+//#endif //#ifndef MASTER_GOLD
 
 inline float dot_product					( const float4_pod &left, const float4_pod &right )
 {

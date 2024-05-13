@@ -136,7 +136,7 @@ void   resources_manager::deallocate_unmanaged_resource (unmanaged_resource_buff
 
 #ifndef MASTER_GOLD
 	LOGI_INFO								("resources", "deallocating '%s'", request_path.c_str());
-#endif
+#endif // #ifndef MASTER_GOLD
 
 	memory_usage_type const memory_usage	=	resource_buffer->get_memory_usage();
 	class_id_enum const class_id			=	resource_buffer->get_class_id();

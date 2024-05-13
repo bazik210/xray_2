@@ -79,7 +79,7 @@ public:
 
 	//#ifndef MASTER_GOLD
 	inline	bool		valid							( ) const;
-	//#endif
+	//#endif //#ifndef MASTER_GOLD
 }; // struct float4
 
 inline float4x4			operator *						( float4x4 const& left, float4x4::type right );

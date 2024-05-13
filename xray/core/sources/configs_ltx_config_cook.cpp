@@ -57,4 +57,4 @@ void   ltx_config_cook::create_resource (resources::query_result_for_cook &	in_o
 } // namespace core
 } // namespace configs
 } // namespace xray
-#endif
+#endif // #ifndef MASTER_GOLD

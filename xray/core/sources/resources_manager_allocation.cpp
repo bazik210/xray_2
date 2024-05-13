@@ -408,9 +408,9 @@ void   resources_manager::free_managed_resource (managed_resource * resource)
 	fixed_string512 request_name		=	
 #ifdef MASTER_GOLD
 		"";
-#else
+#else // #ifdef MASTER_GOLD
 		resource->m_request_path.c_str();
-#endif
+#endif // #ifdef MASTER_GOLD
 
 	memory_usage_type const memory_usage	=	resource->memory_usage();
 	query_result * const destruction_observer	=	resource->get_destruction_observer();

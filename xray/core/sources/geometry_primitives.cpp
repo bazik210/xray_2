@@ -1042,7 +1042,7 @@ inline  float3 	calculate_torus_vertex( float outer_radius, float inner_radius, 
 
 	#ifndef MASTER_GOLD
 	int a = 0;
-	#endif
+	#endif // #ifndef MASTER_GOLD
 	float cos_theta = math::cos( theta); 
 
 	result.x = (outer_radius + inner_radius*cos_phi)*cos_theta;
@@ -1062,7 +1062,7 @@ inline  float3 	calculate_torus_vertex( float outer_radius, float inner_radius, 
 	if( !math::valid	( result.z ))
 		a = a;
 
-	#endif
+	#endif // #ifndef MASTER_GOLD
 
 	return result;	
 }

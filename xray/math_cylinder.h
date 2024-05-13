@@ -22,7 +22,7 @@ public:
 
 	#ifndef MASTER_GOLD
 	inline	bool		valid		( ) const;
-	#endif
+	#endif // #ifndef MASTER_GOLD
 
 public:
 	intersection		intersect	( float3 const& position, float3 const& direction, float& distance ) const;

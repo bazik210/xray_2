@@ -83,4 +83,4 @@ void   lua_config_cook::create_resource (resources::query_result_for_cook &	in_o
 } // namespace configs
 } // namespace core
 } // namespace xray
-#endif
+#endif // #ifndef MASTER_GOLD

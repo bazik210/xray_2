@@ -211,6 +211,6 @@ XRAY_CORE_API	lua_config_value create_lua_config_value	( binary_config_value con
 
 #ifdef MASTER_GOLD
 #error class must not be used in MASTER_GOLD
-#endif
+#endif // #ifdef MASTER_GOLD
 
 #endif // #ifndef XRAY_CONFIGS_LUA_CONFIG_VALUE_H_INCLUDED

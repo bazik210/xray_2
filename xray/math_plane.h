@@ -45,7 +45,7 @@ public:
 
 	#ifndef MASTER_GOLD
 	inline	bool		valid					( ) const;
-	#endif
+	#endif // #ifndef MASTER_GOLD
 }; // class plane
 
 inline	plane			transform				( plane const& left, float4x4 const& right );

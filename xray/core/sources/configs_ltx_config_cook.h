@@ -37,6 +37,6 @@ public:
 
 #ifdef MASTER_GOLD
 #error class must not be used in MASTER_GOLD
-#endif
+#endif // #ifndef MASTER_GOLD
 
 #endif // #ifndef CONFIGS_LTX_CONFIG_COOK_H_INCLUDED

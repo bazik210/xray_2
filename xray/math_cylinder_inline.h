@@ -25,7 +25,7 @@ inline bool cylinder::valid		( ) const
 	return		( center.valid( ) && direction.valid( ) && math::valid( height ) && math::valid( radius ) );
 }
 
-#endif
+#endif // #ifndef MASTER_GOLD
 
 } // namespace math
 } // namespace xray

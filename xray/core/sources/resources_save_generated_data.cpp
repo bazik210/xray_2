@@ -18,7 +18,7 @@ save_generated_data	*	save_generated_data::create (const_buffer const &					data
 #ifdef MASTER_GOLD
 	XRAY_UNREFERENCED_PARAMETERS( data, copy_data, physical_path, virtual_path );
 	NOT_IMPLEMENTED							("save_generated is turned off in master-gold!");
-#else
+#else // #ifdef MASTER_GOLD
 	save_generated_data	* const out		=	allocate(physical_path, virtual_path);
 	if ( copy_data )
 	{
@@ -30,7 +30,7 @@ save_generated_data	*	save_generated_data::create (const_buffer const &					data
 
 	out->m_allocated					=	copy_data;
 	return									out;
-#endif
+#endif // #ifdef MASTER_GOLD
 }	
 
 save_generated_data	*	save_generated_data::create (managed_resource_ptr const &			resource,
@@ -48,13 +48,13 @@ save_generated_data	*	save_generated_data::allocate (fs_new::native_path_string 
 #ifdef MASTER_GOLD
 	XRAY_UNREFERENCED_PARAMETERS( physical_path, virtual_path );
 	NOT_IMPLEMENTED							("save_generated is turned off in master-gold!");
-#else 
+#else // #ifndef MASTER_GOLD
 	u32 const allocation_size			=	sizeof(save_generated_data) + physical_path.length() + 1
 											+ virtual_path.length() + 1;
 	save_generated_data * const	out		=	(save_generated_data *)DEBUG_ALLOC(char, allocation_size);
 	new (out) save_generated_data			(physical_path, virtual_path);
 	return									out;
-#endif
+#endif // #ifndef MASTER_GOLD
 }
 
 save_generated_data::save_generated_data	(fs_new::native_path_string const &		physical_path, 
@@ -71,7 +71,7 @@ void   save_generated_data::delete_this	()
 {
 #ifdef MASTER_GOLD
 	NOT_IMPLEMENTED							("save_generated is turned off in master-gold!");
-#else
+#else // #ifndef MASTER_GOLD
 	if ( m_allocated )
 	{
 		pvoid buffer					=	m_data.c_ptr();
@@ -80,7 +80,7 @@ void   save_generated_data::delete_this	()
 	save_generated_data * this_ptr		=	this;
 	this_ptr->~save_generated_data			();
 	DEBUG_FREE								(this_ptr);
-#endif 
+#endif // #ifndef MASTER_GOLD
 }
 
 } // namespace resources

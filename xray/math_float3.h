@@ -136,7 +136,7 @@ inline bool		is_relatively_similar	( float3 const& left, float3 const& right, fl
 
 //#ifndef MASTER_GOLD
 	inline bool			valid			( float3 const& object );
-//#endif // #ifndef MASTER_GOLD
+//#endif //#ifndef MASTER_GOLD
 
 XRAY_CORE_API void	generate_orthonormal_basis	( float3 const& direction, float3& up, float3& right );
 XRAY_CORE_API float3 normalize_precise			( float3 const& object );

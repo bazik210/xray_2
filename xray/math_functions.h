@@ -75,7 +75,7 @@ inline bool				is_denormal		( float value );
 
 //#ifndef MASTER_GOLD
 inline bool				valid			( float const& value );
-//#endif // #ifndef MASTER_GOLD
+//#endif //#ifndef MASTER_GOLD
 
 inline int				floor			( float value );
 inline int				ceil			( float value );

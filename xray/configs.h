@@ -32,6 +32,6 @@ enum enum_types {
 
 #ifndef MASTER_GOLD
 	#include <xray/configs_lua_config.h>
-#endif
+#endif // #ifndef MASTER_GOLD
 
 #endif // #ifndef XRAY_CONFIGS_H_INCLUDED

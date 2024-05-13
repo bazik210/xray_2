@@ -50,7 +50,7 @@ private:
 	managed_resource *		m_next_delay_delete;
 #ifndef MASTER_GOLD
 	fs_new::virtual_path_string			m_request_path;
-#endif
+#endif // #ifndef MASTER_GOLD
 
 	friend class			resource_base;
 	friend class			query_result;

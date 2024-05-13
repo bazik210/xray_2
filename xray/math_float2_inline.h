@@ -196,7 +196,7 @@ inline bool float2_pod::valid					( ) const
 	return		( math::valid( x ) && math::valid( y ) );
 }
 
-#endif
+#endif // #ifndef MASTER_GOLD
 
 inline float2::float2							( ) 
 {

@@ -99,7 +99,7 @@ inline bool plane::valid							( ) const
 	return			( vector.valid( ) );
 }
 
-#endif
+#endif // #ifndef MASTER_GOLD
 
 inline plane transform								( plane const& left, float4x4 const& right )
 {

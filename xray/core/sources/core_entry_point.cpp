@@ -78,7 +78,7 @@ namespace configs {
 } // namespace configs
 } // namespace core
 
-#endif	// MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 namespace threading {
 	void preinitialize	( );
@@ -309,7 +309,7 @@ void xray::core::finalize			( )
 
 #ifndef	MASTER_GOLD
 	core::configs::finalize	( );
-#endif	//MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 	strings::finalize		( );
 //	build::finalize			( );

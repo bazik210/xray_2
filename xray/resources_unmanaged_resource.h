@@ -41,7 +41,7 @@ public:
 #else
 	pcstr					request_path			() const { return m_request_path.c_str(); }
 	fs::path_string			m_request_path;
-#endif
+#endif // #ifdef MASTER_GOLD
 	
 protected:
 							unmanaged_resource		(resource_flags_enum flags, u32 quality_levels_count);
@@ -110,7 +110,7 @@ public:
 	pcstr							request_name					() const { return ""; }
 #else // #ifdef MASTER_GOLD
 	pcstr							request_name					() const { return m_request_name.c_str(); }
-#endif
+#endif // #ifdef MASTER_GOLD
 	
 	query_result *					get_destruction_observer		() const { return m_destruction_observer; }
 
@@ -122,7 +122,7 @@ public:
 private:
 #ifndef MASTER_GOLD
 	fs_new::virtual_path_string		m_request_name;
-#endif
+#endif // #ifndef MASTER_GOLD
 	resource_base::creation_source_enum	m_creation_source;
 
 	memory_usage_type				m_memory_usage;

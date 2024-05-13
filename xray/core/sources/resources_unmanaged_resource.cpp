@@ -81,9 +81,9 @@ log_string_type   unmanaged_resource::log_string () const
 { 
 #ifndef MASTER_GOLD
 	pcstr request_path				=		m_request_path.c_str();
-#else
+#else // #ifndef MASTER_GOLD
 	pcstr request_path				=		"<was not saved>";
-#endif
+#endif // #ifndef MASTER_GOLD
 
 	pvoid const this_ptr			=		dynamic_cast<pvoid>((unmanaged_resource*)this);
 
@@ -133,7 +133,7 @@ void   unmanaged_resource::set_creation_source (creation_source_enum creation_so
 	XRAY_UNREFERENCED_PARAMETER				(request_path);
 #ifndef MASTER_GOLD
 	m_request_path						=	request_path;
-#endif
+#endif // #ifndef MASTER_GOLD
 }
 
 void   unmanaged_resource::set_as_inlined_in_fat ()

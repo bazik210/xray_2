@@ -24,6 +24,6 @@ binary_config*	create_from_ltx_text( pcstr text, memory::base_allocator* allocat
 
 #ifdef MASTER_GOLD
 #error file must not be used in MASTER_GOLD
-#endif
+#endif // #ifndef MASTER_GOLD
 
 #endif // #ifndef CONFIG_LTX_H_INCLUDED

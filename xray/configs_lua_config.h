@@ -109,6 +109,6 @@ XRAY_CORE_API	void			export_enum			( pcstr const table_id, enum_tuple const* beg
 
 #ifdef MASTER_GOLD
 #	error class must not be used in MASTER_GOLD
-#endif
+#endif // #ifdef MASTER_GOLD
 
 #endif // #ifndef XRAY_CONFIGS_LUA_CONFIG_H_INCLUDED

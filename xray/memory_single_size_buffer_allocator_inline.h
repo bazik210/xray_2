@@ -61,7 +61,7 @@ inline void single_size_buffer_allocator< DataSize, ThreadingPolicy >::deallocat
 	for ( byte* i = (byte*)( ( (int*) pointer ) + count ), *e = i + tail; i != e; ++i )
 		*i									= 0xDD;
 #endif
-#endif
+#endif //#ifndef MASTER_GOLD
 	pointer								= 0;
 }
 

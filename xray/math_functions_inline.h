@@ -399,7 +399,7 @@ inline bool valid		( float const& value )
 	return		true;
 }
 
-//#endif
+//#endif //#ifndef MASTER_GOLD
 
 inline int floor		( float const value )
 {

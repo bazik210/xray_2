@@ -228,7 +228,7 @@ inline bool float3_pod::valid					( ) const
 {
 	return		( math::valid( x ) && math::valid( y ) && math::valid( z ) );
 }
-//#endif // #ifndef MASTER_GOLD
+//#endif //#ifndef MASTER_GOLD
 
 inline float3 operator +					( float3_pod const& left, float3_pod const& right )
 {
@@ -479,7 +479,7 @@ inline bool valid		( float3_pod const& object )
 {
 	return			( object.valid( ) );
 }
-//#endif // #ifndef MASTER_GOLD
+//#endif //#ifndef MASTER_GOLD
 
 inline float3 pow		( float3_pod const& object, float3_pod::type power )
 {

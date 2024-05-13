@@ -558,4 +558,4 @@ xray::core::configs::binary_config* xray::core::configs::create_from_ltx_text(pc
 	XRAY_FREE_IMPL	(*allocator, binary_buff);
 	return			result;
 }
-#endif
+#endif // #ifndef MASTER_GOLD

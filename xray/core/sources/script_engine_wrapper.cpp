@@ -420,4 +420,4 @@ void script_engine_wrapper::lua_studio_backend_file_path( int file_type, const c
 		UNREACHABLE_CODE( );
 	}
 }
-#endif
+#endif // #ifndef MASTER_GOLD

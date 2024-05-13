@@ -325,7 +325,7 @@ query_result::~query_result	()
 		m_save_generated_data->delete_this	();
 		m_save_generated_data			=	NULL;
 	}
-#endif
+#endif // #ifndef MASTER_GOLD
 
 	if ( has_flag(flag_uses_physical_path) )
 	{

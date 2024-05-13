@@ -3692,4 +3692,4 @@ static void export_classes						( )
 		,def( "normalize_safe",			(float4 (*)(float4_pod const&,float4_pod const&)) &math::normalize_safe )
 	];
 }
-#endif
+#endif // #ifndef MASTER_GOLD

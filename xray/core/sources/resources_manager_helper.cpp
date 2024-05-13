@@ -16,7 +16,7 @@
 #ifndef MASTER_GOLD
 	#include "configs_ltx_config_cook.h"
 	#include "configs_lua_config_cook.h"
-#endif  //MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 namespace xray {
 namespace resources {
@@ -48,7 +48,7 @@ void   resources_manager::register_cooks ()
 	register_cook							(& ltx_cook);
 
 	get_lua_config_cook						();
-#endif //MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 	register_cook							(& s_sub_fat_cook);
 
@@ -76,7 +76,7 @@ xray::core::configs::lua_config_cook& resources_manager::get_lua_config_cook	()
 	return									cook;
 }
 
-#endif //MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 
 

@@ -140,7 +140,7 @@ void binary_config_cook::on_fs_iterators_ready	(queries_result & results)
 		parent->finish_query				(query_result_for_user::error_type_file_not_found, assert_on_fail_false);
 		return;
 	}
-#endif // #ifndef	MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 	vfs::vfs_iterator const & converted_path_it	=	results[1].get_result_iterator();
 

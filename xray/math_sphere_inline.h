@@ -60,7 +60,7 @@ inline bool sphere::valid			( ) const
 	return			( vector.valid( ) );
 }
 
-#endif
+#endif // #ifndef MASTER_GOLD
 
 } // namespace math
 } // namespace xray
