@@ -161,18 +161,18 @@ void stage_gbuffer::execute()
 			);
 		}
 		
-//		backend::ref().set_ps_constant(
-//			m_ambient_color, 
-//			float4(
-//				m_context->scene_view()->post_process_parameters().environment_ambient_color,
-//				0
-//			)
-//		);
+		backend::ref().set_ps_constant(
+			m_ambient_color, 
+			float4(
+				m_context->scene_view()->post_process_parameters().environment_ambient_color,
+				0
+			)
+		);
 
 		// TODO: remove skylight from sun pass, add the skylight_pass
-//		backend::ref().set_ps_constant( m_c_environment_skylight_upper_color, m_context->get_scene_view()->post_process_parameters().environment_skylight_upper_color );
-//		backend::ref().set_ps_constant( m_c_environment_skylight_lower_color, m_context->get_scene_view()->post_process_parameters().environment_skylight_lower_color );
-//		backend::ref().set_ps_constant( m_c_environment_skylight_parameters, m_context->get_scene_view()->post_process_parameters().environment_skylight_parameters );
+		backend::ref().set_ps_constant( m_c_environment_skylight_upper_color, m_context->get_scene_view()->post_process_parameters().environment_skylight_upper_color );
+		backend::ref().set_ps_constant( m_c_environment_skylight_lower_color, m_context->get_scene_view()->post_process_parameters().environment_skylight_lower_color );
+		backend::ref().set_ps_constant( m_c_environment_skylight_parameters, m_context->get_scene_view()->post_process_parameters().environment_skylight_parameters );
 		
 		if (tech_index==0)
 		{
@@ -495,10 +495,10 @@ void stage_gbuffer::execute()
 	END_CPUGPU_TIMER;
 	
 	//if (m_is_pre_pass)
-//	backend::ref().reset_render_targets();
-//	backend::ref().reset_depth_stencil_target();
-//	
-//	m_context->set_w					(float4x4().identity());
+	backend::ref().reset_render_targets();
+	backend::ref().reset_depth_stencil_target();
+	
+	m_context->set_w					(float4x4().identity());
 }
 
 } // namespace render

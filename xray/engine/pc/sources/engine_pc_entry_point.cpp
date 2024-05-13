@@ -22,6 +22,7 @@
 #include <xray/type_extensions.h>
 #include <boost/noncopyable.hpp>
 #include <xray/detail_noncopyable.h>
+#include <xray/debug/macros.h>
 #include <xray/memory_base_allocator.h>
 #include <stdio.h>
 #include <xray/os_extensions.h>
