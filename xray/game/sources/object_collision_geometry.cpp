@@ -306,9 +306,9 @@ bool object_collision_geometry::check_object_inside_containment_mode( collision:
 		render::scene_ptr			scene		= m_game_scene.get_render_scene( );
 		render::debug::renderer&	renderer	= m_game_scene.renderer().debug( );
 
-		if( xray::collision::contains( **current, testee, &renderer, &scene ) )
+		if( !m_game_scene.get_game().gload && xray::collision::contains( **current, testee, &renderer, &scene ) )
 #else
-		if( xray::collision::contains( **current, testee ) )
+		if( !m_game_scene.get_game().gload && xray::collision::contains( **current, testee ) )
 #endif //#ifndef MASTER_GOLD
 		{
 			ret_value = true;
@@ -328,9 +328,9 @@ bool object_collision_geometry::check_object_inside_containment_mode( collision:
 		render::scene_ptr			scene		= m_game_scene.get_render_scene( );
 		render::debug::renderer&	renderer	= m_game_scene.renderer( ).debug( );
 
-		if( xray::collision::intersects( **current, testee, &renderer, &scene ) )
+		if( !m_game_scene.get_game().gload && xray::collision::intersects( **current, testee, &renderer, &scene ) )
 #else
-		if( xray::collision::intersects( **current, testee ) )
+		if( !m_game_scene.get_game().gload && xray::collision::intersects( **current, testee ) )
 #endif //#ifndef MASTER_GOLD
 		{
 			return false;
@@ -353,9 +353,9 @@ bool object_collision_geometry::check_object_inside_intersection_mode	( collisio
 		render::scene_ptr			scene		= m_game_scene.get_render_scene( );
 		render::debug::renderer&	renderer	= m_game_scene.renderer( ).debug( );
 
-		if( xray::collision::intersects( **current, testee, &renderer, &scene ) )
+		if( !m_game_scene.get_game().gload && xray::collision::intersects( **current, testee, &renderer, &scene ) )
 #else
-		if( xray::collision::intersects( **current, testee ) )
+		if( !m_game_scene.get_game().gload && xray::collision::intersects( **current, testee ) )
 #endif //#ifndef MASTER_GOLD
 		{
 			ret_value = true;
@@ -375,9 +375,9 @@ bool object_collision_geometry::check_object_inside_intersection_mode	( collisio
 		render::scene_ptr			scene		= m_game_scene.get_render_scene( );
 		render::debug::renderer&	renderer	= m_game_scene.renderer( ).debug( );
 
-		if( xray::collision::contains( **current, testee, &renderer, &scene ) )
+		if( !m_game_scene.get_game().gload && xray::collision::contains( **current, testee, &renderer, &scene ) )
 #else
-		if( xray::collision::contains( **current, testee ) )
+		if( !m_game_scene.get_game().gload && xray::collision::contains( **current, testee ) )
 #endif //#ifndef MASTER_GOLD
 		{
 			return false;
