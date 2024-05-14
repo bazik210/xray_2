@@ -517,7 +517,11 @@ public:
 			channel_type& channel = m_path_constructor.path();
 			channel[0] = m_start_vertex_id;
 
+#ifdef MASTER_GOLD
 			path_type path( xray::ai::navigation::g_allocator );
+#else
+			path_type path;
+#endif
 			path_finder_modified_funnel			( m_graph, channel, m_start_position, m_target_position, m_agent_radius, path );
 			R_ASSERT					( !path.empty() );
 			float distance				= 0;
@@ -686,7 +690,11 @@ path_finder_channel::path_finder_channel (
 	m_triangles_mesh	( triangles_mesh )	
 {
 	search_service service;
-	search_service::path_type path(xray::vectora< vertex_id_type >( g_allocator ));
+#ifdef MASTER_GOLD
+			search_service::path_type path(xray::vectora< vertex_id_type >( g_allocator ));
+#else
+			search_service::path_type path;
+#endif
 	service.search		(
 		triangles_mesh,
 		&channel,

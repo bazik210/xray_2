@@ -42,11 +42,13 @@ graph_generator::graph_generator			(
 	m_scene								( scene ),
 	m_renderer							( renderer ),
 	m_geometry							( 0 ),
+#ifdef MASTER_GOLD
 	m_debug_edges						( vectora< edge > ( g_allocator ) ),
 	m_path								( vectora< math::float3 > ( g_allocator ) ),
 	m_channel							( vectora< u32 > (g_allocator) ),
 	m_transformed_vertices				( vectora< math::float3 > ( g_allocator ) ),
 	m_restricted_areas					( vectora<cuboid_type> ( g_allocator ) ),
+#endif
 	m_subdivision_max_operation_id		( u32(-1) ),
 	m_tessellation_max_operation_id		( u32(-1) ),
 	m_merger_max_operation_id			( u32(-1) ),

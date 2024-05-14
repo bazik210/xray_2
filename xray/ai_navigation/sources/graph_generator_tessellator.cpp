@@ -20,7 +20,9 @@ using xray::math::float3;
 
 graph_generator_tessellator::graph_generator_tessellator(triangles_mesh_type& triangles_mesh, u32 tessellation_max_operation_id ) :
 	m_triangles_mesh					( triangles_mesh ),
+#ifdef MASTER_GOLD
 	m_triangle_info						( xray::vectora< triangle_info >( g_allocator ) ),
+#endif
 	m_tessellation_max_operation_id		( tessellation_max_operation_id ),
 	m_tessellation_current_operation_id	( 0 )
 {

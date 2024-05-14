@@ -137,10 +137,12 @@ public:
 public:
 	inline			triangles_mesh		( ) :
 		spatial_tree( 0 ),
-		m_save_marked		( false ),
-		vertices	( vectora< float3 > ( g_allocator ) ),
+		m_save_marked		( false )
+#ifdef MASTER_GOLD
+		,vertices	( vectora< float3 > ( g_allocator ) ),
 		indices( vectora< u32 > ( g_allocator ) ),
 		data( vectora< T > ( g_allocator ) )
+#endif
 	{
 	}
 	

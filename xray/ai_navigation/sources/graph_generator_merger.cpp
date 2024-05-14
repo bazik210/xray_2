@@ -41,8 +41,10 @@ graph_generator_merger::graph_generator_merger(
 		m_triangles_mesh				( triangles_mesh ),
 		m_merge_max_operation_id		( merge_max_operation_id ),
 		m_debug_edges					( debug_edges ),
+#ifdef MASTER_GOLD
 		m_constraint_edges ( xray::vectora< constraint_edge >( g_allocator ) ),
 		m_triangle_connections ( xray::vectora<triangle_connection>( g_allocator ) ),
+#endif
 		m_edge_merge_angle_epsilon		( edge_merge_angle_epsilon ),
 		m_edge_merge_height_epsilon		( edge_merge_height_epsilon ),
 		m_merge_current_operation_id	(0),
@@ -239,8 +241,11 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 
 		mark_constraint_edges			( new_triangle_id );
 	}
-
+#ifdef MASTER_GOLD
 	triangle_connections_type triangle_connections( g_allocator );
+#else
+	triangle_connections_type triangle_connections;
+#endif
 	triangle_connections.resize ( new_triangles_count );
 	graph_generator_adjacency_builder ( indices, triangle_connections );
 

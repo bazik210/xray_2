@@ -273,7 +273,12 @@ bool navigation_world::find_path (
 	)
 {
 #ifndef MASTER_GOLD_
-	path_finder_funnel::channel_type channel(g_allocator);
+
+#ifdef MASTER_GOLD
+	path_finder_funnel::channel_type channel( g_allocator );
+#else
+	path_finder_funnel::channel_type channel;
+#endif
 	path_finder_channel(
 		m_navigation_mesh,
 		channel,
