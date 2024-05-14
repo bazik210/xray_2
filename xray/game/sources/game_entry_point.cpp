@@ -123,7 +123,7 @@ void game_module::register_memory_allocators	( )
 {
 #if defined(XRAY_STATIC_LIBRARIES) || !XRAY_USE_CRT_MEMORY_ALLOCATOR
 	XRAY_CONSTRUCT_REFERENCE				( g_physics_allocator, xray::memory::doug_lea_allocator_type );
-	g_physics_allocator->do_register		( 16*Mb,	"physics" );
+	g_physics_allocator->do_register		( 64*Mb,	"physics" );
 #endif
 
 	XRAY_CONSTRUCT_REFERENCE				( s_input_allocator, xray::memory::doug_lea_allocator_type );

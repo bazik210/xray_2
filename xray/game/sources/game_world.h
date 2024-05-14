@@ -65,6 +65,7 @@ public:
 	bool			empty					( );
 //	game&			get_game				( ) const { return m_game; }
 	void			delete_actor();
+	void			clean_actor();
 	void			spawn_actor();
 	bullet_manager&					get_bullet_manager		( ) const			{ return *m_bullet_manager; }
 	xray::collision::space_partitioning_tree*	get_collision_tree	( ) const	{ return m_collision_tree; };

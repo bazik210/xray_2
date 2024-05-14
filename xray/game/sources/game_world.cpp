@@ -299,6 +299,16 @@ void game_world::on_project_loaded( resources::queries_result& data )
 
 	//switch_to_hud_camera();
 
+	if(!m_key_camera && !m_cam_attached) {
+		switch_to_free_fly_camera();
+
+		spawn_actor();
+	}
+	else {
+		//if we don't spawn actor can do things in console
+		get_game().gload = false;
+	}
+
 		//m_hud						= NEW(hud)( *this);
 }
 
@@ -358,16 +368,6 @@ void game_world::start_game( )
 			LOG_ERROR("NULL Object! Can't process a scene!");
 		}
 	}
-
-	if(!m_key_camera && !m_cam_attached) {
-		switch_to_free_fly_camera();
-
-		spawn_actor();
-	}
-	else {
-		//if we don't spawn actor can do things in console
-		get_game().gload = false;
-	}
 	
 // 	pcstr start_scene		= (*m_game_project->m_config)["start"]["scene_name"];
 // 	game_object_ptr_ s		= get_object_by_name(start_scene);
@@ -421,8 +421,11 @@ void game_world::query_resources( )
 void game_world::delete_actor() {
 	if (m_local_actor) {
 		m_local_actor->m_stop_query = true;
-		DELETE(m_local_actor);
 	}
+}
+
+void game_world::clean_actor() {
+	DELETE(m_local_actor);
 }
 
 void game_world::on_resources_ready( resources::queries_result& data )

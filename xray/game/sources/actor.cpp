@@ -198,6 +198,8 @@ void actor::on_resources_ready( resources::queries_result& data )
 
 	if (m_stop_query) {
 		data.empty();
+		m_game_world.get_game().gload = false;
+		m_game_world.clean_actor();
 		return;
 	}
 
@@ -264,6 +266,8 @@ void actor::on_load_animations(  resources::queries_result& data  )
 {
 	if (m_stop_query) {
 		data.empty();
+		m_game_world.get_game().gload = false;
+		m_game_world.clean_actor();
 		return;
 	}
 
