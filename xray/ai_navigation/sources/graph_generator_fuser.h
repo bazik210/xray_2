@@ -18,7 +18,11 @@ public:
 	graph_generator_fuser( triangles_mesh_type& triangles_mesh, u32 const fuser_max_operation_id );
 
 private:
+#ifndef MASTER_GOLD
 	typedef debug::vector< u32 >	vertices_indices_type;
+#else
+	typedef std::vector< u32 >	vertices_indices_type;
+#endif
 	typedef fixed_vector< u32, 3 >	edge_ids_type;
 	typedef buffer_vector< u32 >	triangle_indices_type;
 
@@ -70,8 +74,11 @@ private:
 
 		u32 next_triangle;
 	}; // struct triangle_info
+#ifndef MASTER_GOLD
 	typedef debug::vector< triangle_info > triangles_info_type;
-
+#else
+	typedef std::vector< triangle_info > triangles_info_type;
+#endif
 	triangles_info_type			m_triangles_info;
 	triangles_mesh_type&		m_triangles_mesh;
 	u32							m_fuser_current_operation_id;

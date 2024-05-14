@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator_merger.h"
 #include "graph_generator_predicates.h"
 #include "graph_generator_adjacency_builder.h"
@@ -154,9 +154,12 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 		),
 		vertex_indices.end()
 	);
-
-	//! Debug
+#ifndef MASTER_GOLD
+	//! Debug 
 	debug::vector< float3 > vertices;
+#else
+	std::vector< float3 > vertices;
+#endif
 	for ( u32 i = 0 ; i < vertex_indices.size(); ++i ) {
 		vertices.push_back ( m_triangles_mesh.vertices[ vertex_indices[i] ] );
 	}
@@ -179,7 +182,7 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 		for	( u32 q = 0; q < pop_count; ++q)
 			vertex_indices.pop_back();
 	*/
-
+#ifndef MASTER_GOLD
 	dump_constrained_triangulation_input(
 		m_triangles_mesh.vertices,
 		vertex_indices,
@@ -195,7 +198,7 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 			m_constraint_edges 
 		)
 	);
-
+#endif
 	constrained_delaunay_triangulator (																																		
 		m_triangles_mesh.vertices,
 		vertex_indices, 

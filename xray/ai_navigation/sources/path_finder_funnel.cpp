@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "path_finder_funnel.h"
 
 using xray::ai::navigation::path_finder_funnel;

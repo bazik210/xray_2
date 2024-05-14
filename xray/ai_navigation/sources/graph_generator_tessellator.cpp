@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator_tessellator.h"
 #include "graph_generator_predicates.h"
 #include <xray/collision/geometry.h>

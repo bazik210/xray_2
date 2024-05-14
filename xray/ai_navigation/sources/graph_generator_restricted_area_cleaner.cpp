@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator.h"
 #include "navigation_mesh_types.h"
 #include "graph_generator_subdivider.h"

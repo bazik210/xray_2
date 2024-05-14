@@ -10,7 +10,7 @@
 #include <xray/collision/api.h>
 #include <xray/ai_navigation/api.h>
 
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 
 namespace xray {
 namespace ai {
@@ -122,9 +122,15 @@ public:
 
 	inline void set_save_marked( bool flag ) { m_save_marked = flag; }
 public:
+#ifndef MASTER_GOLD
 	typedef xray::debug::vector< float3 >	vertices_type;
 	typedef xray::debug::vector< u32 >		indices_type;
 	typedef xray::debug::vector< T >		data_type;
+#else
+	typedef std::vector< float3 >			vertices_type;
+	typedef std::vector< u32 >				indices_type;
+	typedef std::vector< T >				data_type;
+#endif
 
 public:
 	vertices_type			vertices;
@@ -138,6 +144,6 @@ public:
 } // namespace ai
 } // namespace xray
 
-#endif //#ifndef MASTER_GOLD
+#endif //#ifndef MASTER_GOLD_
 
 #endif // #ifndef TRIANGLES_MESH_H_INCLUDED

@@ -67,7 +67,9 @@ public:
 
 			void	add_geometry				( xray::collision::geometry* geometry, float4x4 const& transform );
 			void	add_geometry_triangle		( float3 const& v0, float3 const& v1, float3 const& v2 );
+#ifndef MASTER_GOLD
 			void	save_geometry				( pcstr filename );
+#endif
 			void	clear_geometry				( );
 
 			typedef fixed_vector< float3, 8 >	cuboid_type;
@@ -90,7 +92,11 @@ private:
 private:
 	typedef collision::triangles_type			triangles_type;
 	typedef buffer_vector< collision::triangle_result >	buffer_triangles_type;
+#ifndef MASTER_GOLD
 	typedef debug::vector< math::float3 >		vertices_type;
+#else
+	typedef std::vector< math::float3 >		vertices_type;
+#endif
 
 private:
 	math::float4x4	const			m_transform;
@@ -113,7 +119,9 @@ private:
 	void	change_path_find_object_radius		( pcstr const args );
 	void	mark_triangle						( pcstr const args );
 	void	generate_mesh						( pcstr const args );
+#ifndef MASTER_GOLD
 	void	save_navigation_mesh_console_command( pcstr const args );
+#endif
 	void	load_navigation_mesh_console_command( pcstr const args );
 
 public:
@@ -165,7 +173,11 @@ private:
 ///////
 public:
 	typedef buffer_vector< u32 >		buffer_indices_type;
+#ifndef MASTER_GOLD
 	typedef debug::vector<cuboid_type>	restricted_areas_type;
+#else
+	typedef std::vector<cuboid_type>	restricted_areas_type;
+#endif
 
 	triangles_mesh_type&				m_input_triangles;
 	restricted_areas_type				m_restricted_areas;
@@ -183,7 +195,9 @@ private:
 	static	void		remove_areas_in_cuboid			( triangles_mesh_type& triangles_mesh, triangles_type& triangles, cuboid_type& cuboid );
 
 public:
+#ifndef MASTER_GOLD
 	static	void		save_navigation_mesh		( triangles_mesh_type& navigation_mesh, pcstr file_name );
+#endif
 	static	void		load_navigation_mesh		( triangles_mesh_type& navigation_mesh, configs::binary_config_ptr config );
 
 private:
@@ -194,6 +208,6 @@ private:
 } // namespace ai
 } // namespace xray
 
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 #endif // #if XRAY_DEBUG_ALLOCATOR

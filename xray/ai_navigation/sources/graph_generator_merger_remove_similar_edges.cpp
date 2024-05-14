@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator_merger.h"
 #include "constrained_delaunay_triangulator.h"
 

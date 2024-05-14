@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator.h"
 #include <xray/configs_lua_config.h>
 #include <xray/resources.h>
@@ -28,7 +28,7 @@ void graph_generator::on_binary_config_resource ( xray::resources::queries_resul
 		m_input_triangles.build_spatial_tree	( );
 	}
 }
-
+#ifndef MASTER_GOLD
 void graph_generator::save_navigation_mesh_console_command	( pcstr const args )
 {
 	string_path file_name;
@@ -37,7 +37,7 @@ void graph_generator::save_navigation_mesh_console_command	( pcstr const args )
 	STR_JOINA( full_path, "resources/navmesh/", file_name );
 	save_navigation_mesh		( m_input_triangles, full_path );
 }
-
+#endif
 void graph_generator::load_navigation_mesh_console_command	( pcstr const args )
 {
 	string_path file_name;
@@ -52,7 +52,7 @@ void graph_generator::load_navigation_mesh_console_command	( pcstr const args )
 		g_allocator
 	);
 }
-
+#ifndef MASTER_GOLD
 void graph_generator::save_geometry					( pcstr filename )
 {
 	save_navigation_mesh( m_input_triangles, filename );
@@ -97,7 +97,7 @@ void graph_generator::save_navigation_mesh ( triangles_mesh_type& navigation_mes
 
 	config->save								( xray::configs::target_sources );
 }
-
+#endif
 void graph_generator::load_navigation_mesh ( triangles_mesh_type& navigation_mesh, binary_config_ptr config )
 {
 	binary_config_value root_table = config->get_root();

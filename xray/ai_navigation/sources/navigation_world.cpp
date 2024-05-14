@@ -11,10 +11,10 @@
 #include <xray/input/keyboard.h>
 #include <xray/ai_navigation/sources/navigation_mesh_types.h>
 
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #	include <xray/ai_navigation/sources/path_finder_channel.h>
 #	include <xray/ai_navigation/sources/path_finder_modified_funnel.h>
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 #include <xray/configs.h>
 #include "navigation_mesh_functions.h"
@@ -173,7 +173,7 @@ void navigation_world::debug_render			(
 
 void navigation_world::on_binary_config_resource ( xray::resources::queries_result& resources ) 
 {
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	if ( resources.is_successful() ) {
 		m_navigation_mesh.indices.clear();
 		m_navigation_mesh.vertices.clear();
@@ -185,7 +185,7 @@ void navigation_world::on_binary_config_resource ( xray::resources::queries_resu
 		graph_generator::load_navigation_mesh( m_navigation_mesh, static_cast_resource_ptr<binary_config_ptr>( resources[0].get_unmanaged_resource() ) );
 		m_navigation_mesh.build_spatial_tree	( );
 	}
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 }
 
 void navigation_world::load_navmesh		( pcstr project_name )
@@ -214,7 +214,7 @@ u32	navigation_world::get_node_id_at		( xray::math::float3 const& position )
 	float min_distance = 0;
 	u32 min_node_id = u32(-1);
 
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	u32 const coordinate_indices[2] = { 0, 2 };
 	u32 const triangles_count = m_navigation_mesh.data.size();
 	for ( u32 i = 0; i < triangles_count; ++i ) {
@@ -236,7 +236,7 @@ u32	navigation_world::get_node_id_at		( xray::math::float3 const& position )
 			}
 		}
 	}
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 	return min_node_id;
 }
@@ -272,7 +272,7 @@ bool navigation_world::find_path (
 		xray::ai::navigation::path_type& path
 	)
 {
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	path_finder_funnel::channel_type channel;
 	path_finder_channel(
 		m_navigation_mesh,
@@ -295,7 +295,7 @@ bool navigation_world::find_path (
 		agent_radius,
 		path
 	);
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 	return true;
 }
@@ -306,9 +306,9 @@ bool navigation_world::can_stand	(
 		float const agent_radius
 	)
 {
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	return					xray::ai::navigation::can_stand( m_navigation_mesh, vertex, triangle_id, agent_radius );
-#else // #ifndef MASTER_GOLD
+#else // #ifndef MASTER_GOLD_
 	return					false;
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 }

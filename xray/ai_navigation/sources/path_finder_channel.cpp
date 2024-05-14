@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "path_finder_channel.h"
 #include "path_finder_modified_funnel.h"
 #include "navigation_mesh_functions.h"
@@ -368,8 +368,11 @@ public:
 		{
 		}
 	};
-
+#ifndef MASTER_GOLD
 	typedef xray::debug::vector< vertex_id_type >				path_type;
+#else
+	typedef std::vector< vertex_id_type >						path_type;
+#endif
 	typedef euclidian_distance_heuristics						path_heuristics_type;
 	typedef path_constructor_helper_type::impl<
 				vertex_type,

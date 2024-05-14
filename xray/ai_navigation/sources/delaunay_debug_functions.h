@@ -7,6 +7,7 @@
 #ifndef DELAUNAY_DEBUG_FUNCTIONS_H_INCLUDED
 #define DELAUNAY_DEBUG_FUNCTIONS_H_INCLUDED
 
+#ifndef MASTER_GOLD
 namespace xray {
 namespace ai {
 namespace navigation {
@@ -119,7 +120,6 @@ void dump_triangulation_input (
 	//config->save_as( "D:/triangulation_input.lua" );
 }
 
-
 template< typename VerticesContainer, typename InputIndicesContainer, typename EdgesContainer>
 bool is_correct_triangulation_input_data( 
 		math::float3 const& normal, 
@@ -183,5 +183,6 @@ bool is_correct_triangulation_input_data(
 } // namespace navigation
 } // namespace ai
 } // namespace xray
+#endif
 
 #endif // #ifndef DELAUNAY_DEBUG_FUNCTIONS_H_INCLUDED

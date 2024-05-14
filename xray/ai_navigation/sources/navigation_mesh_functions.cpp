@@ -7,7 +7,7 @@
 #include "pch.h"
 
 #include "navigation_mesh_functions.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 using xray::ai::navigation::triangles_mesh_type;
 using xray::ai::navigation::distance_to_segment;
 #endif
@@ -18,7 +18,7 @@ static inline bool is_angle_obtuse ( float3 const& a, float3 const& b, float3 co
 {
 	return ((a-b) | (c-b)) <= 0.0f;
 }
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 static inline bool is_constrained( triangles_mesh_type const& triangles_mesh, u32 const triangle_id, u32 const edge_id ) 
 {
 	return ( triangles_mesh.data[ triangle_id ].neighbours[ edge_id ] == u32(-1) ) || ( triangles_mesh.data[ triangle_id ].obstructions[ edge_id ] != 0.0f );
@@ -77,7 +77,7 @@ float distance_to_segment					( float3 const& v, float3 const& s0, float3 const&
 
 	return							length( v_minus_s0 - direction*projection );
 }
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 float calculate_triangle_width (
 		triangles_mesh_type const& triangles_mesh,
 		float3 const vertex,

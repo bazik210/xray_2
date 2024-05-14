@@ -7,7 +7,7 @@
 #ifndef NAVIGATION_MESH_FUNCTIONS_H_INCLUDED
 #define NAVIGATION_MESH_FUNCTIONS_H_INCLUDED
 
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 
 #include "navigation_mesh_types.h"
 
@@ -49,6 +49,6 @@ bool is_null_square (
 } // namespace ai
 } // namespace xray
 
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 #endif // #ifndef NAVIGATION_MESH_FUNCTIONS_H_INCLUDED

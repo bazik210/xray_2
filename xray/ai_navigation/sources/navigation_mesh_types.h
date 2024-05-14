@@ -64,7 +64,7 @@ struct edge {
 	u32 vertex_index1;
 }; // struct edge
 
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 
 typedef triangles_mesh< navigation_triangle >			triangles_mesh_type;
 
@@ -72,15 +72,23 @@ bool intersect_triangles	( triangles_mesh_type const& triangles_mesh, u32 const 
 
 typedef collision::triangles_type						triangles_type;
 typedef buffer_vector< collision::triangle_result >		buffer_triangles_type;
+#ifndef MASTER_GOLD
 typedef debug::vector< math::float3 >					vertices_type;
 typedef debug::vector< edge >							edges_type;
 
 typedef debug::vector< math::float3 >					path_type;
 typedef debug::vector< u32 >							channel_type;
+#else
+typedef std::vector< math::float3 >					vertices_type;
+typedef std::vector< edge >							edges_type;
 
-#else // #ifndef MASTER_GOLD
+typedef std::vector< math::float3 >					path_type;
+typedef std::vector< u32 >							channel_type;
+#endif
+
+#else // #ifndef MASTER_GOLD_
 typedef vectora< math::float3 >							path_type;
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 
 } // namespace navigation
 } // namespace ai

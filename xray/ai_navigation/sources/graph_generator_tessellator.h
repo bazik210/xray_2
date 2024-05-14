@@ -165,7 +165,11 @@ private:
 	static	inline	bool	insert_edge ( edge_intersections_type& edge_intersections, float3 const vertex, u32 const edge_id );
 
 	triangles_mesh_type&			m_triangles_mesh;
+#ifndef MASTER_GOLD
 	debug::vector< triangle_info >	m_triangle_info;
+#else
+	std::vector< triangle_info >	m_triangle_info;
+#endif
 	u32 const						m_tessellation_max_operation_id;
 	u32								m_tessellation_current_operation_id;
 

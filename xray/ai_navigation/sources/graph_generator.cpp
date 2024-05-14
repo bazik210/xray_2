@@ -85,13 +85,13 @@ graph_generator::graph_generator			(
 		boost::bind( &graph_generator::change_tessellation_operation_id, this, _1 ),
 		console_commands::command_type_engine_internal
 	);
-
+#ifndef MASTER_GOLD
 	static xray::console_commands::cc_delegate s_save_navigation_mesh_console_command(
 		"navigation_save_navigation_mesh",
 		boost::bind( &graph_generator::save_navigation_mesh_console_command, this, _1 ),
 		console_commands::command_type_engine_internal
 	);
-
+#endif
 	static xray::console_commands::cc_delegate s_load_navigation_mesh_console_command(
 		"navigation_load_navigation_mesh",
 		boost::bind( &graph_generator::load_navigation_mesh_console_command, this, _1 ),

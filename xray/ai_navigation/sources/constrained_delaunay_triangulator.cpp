@@ -11,7 +11,7 @@
 
 using xray::ai::navigation::delaunay_triangulator;
 using xray::ai::navigation::constrained_delaunay_triangulator;
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 using xray::ai::navigation::triangles_mesh_type;
 #endif
 using xray::math::float3;

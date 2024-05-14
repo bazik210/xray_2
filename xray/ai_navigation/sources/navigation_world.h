@@ -61,9 +61,9 @@ private:
 			void	on_binary_config_resource	( xray::resources::queries_result& resources );
 
 private:
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	triangles_mesh_type			m_navigation_mesh;
-#endif // #ifndef MASTER_GOLD
+#endif // #ifndef MASTER_GOLD_
 	graph_generator*			m_graph_generator;
 	engine&						m_engine;
 	render::debug::renderer&	m_renderer;

@@ -27,9 +27,14 @@ private:
 		bool	visited;
 		u32		neighbours[3];
 	}; // struct triangle_data
+#ifndef MASTER_GOLD
 	typedef debug::vector<triangle_connection> triangle_connections_type;
-	typedef buffer_vector< u32 > triangle_indices_type;
 	typedef debug::vector< u32 > vertex_indices_type;
+#else
+	typedef std::vector<triangle_connection> triangle_connections_type;
+	typedef std::vector< u32 > vertex_indices_type;
+#endif
+	typedef buffer_vector< u32 > triangle_indices_type;
 	typedef buffer_vector< u32 > edges_indices_type;
 	typedef buffer_vector< u32 > buffer_indices_type;
 	typedef buffer_vector< bool > markers_type;
@@ -154,8 +159,12 @@ private:
 		float3				edge_direction;
 		bool				is_region_edge;
 
-	}; // struct onstraint_edges_info_type 
+	}; // struct onstraint_edges_info_type
+#ifndef MASTER_GOLD
 	typedef debug::vector< constraint_edge > constraint_edges_type;
+#else
+	typedef std::vector< constraint_edge > constraint_edges_type;
+#endif
 
 private:
 	triangles_mesh_type&									m_triangles_mesh;

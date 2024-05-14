@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 #include "graph_generator_fuser.h"
 #include "delaunay_triangulator.h"
 #include "graph_generator_adjacency_builder.h"
