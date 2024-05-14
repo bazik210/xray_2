@@ -745,7 +745,6 @@ void process_folder( configs::lua_config_value const& t_folders,
 	} //  for
 }
 
-
 void project_cooker::make_game_project( configs::lua_config_ptr const& editor_config, 
 									   resources::query_result_for_cook* parent_query )
 {

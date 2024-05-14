@@ -184,8 +184,10 @@ game::game(		xray::engine_user::engine& engine,
 	m_initialized			( false ),
 	m_is_active				( false ),
 	m_sound_scene			( 0 ),
+#ifndef MASTER_GOLD
 	m_debug_window_type		( debug_window_none ),
 	m_debug_window			( NULL ),
+#endif
 	m_rtp					( 0 ),
 	m_scene_to_activate		( 0 ),
 	gload					( 0 ),
@@ -306,8 +308,9 @@ void game::on_render_scene_created( xray::resources::queries_result& data )
 	m_key_binder				= NEW( key_binder )( *this );
 
 	m_lobby_menu				= NEW( lobby_menu )( *this );
-
+#ifndef MASTER_GOLD
 	create_debug_window			( );
+#endif
 	register_console_commands	( );
 
 	m_viewport.left				= 0.f;
@@ -703,10 +706,10 @@ void game::tick( u32 const current_frame_id )
 
 	if(m_is_active && m_active_scene && m_active_scene == m_game_world && get_game_world().m_local_actor)
 		m_actor_hud->render(ui_world().get_renderer(), m_game_world->get_render_scene_view());
-
+#ifndef MASTER_GOLD
 	if ( (m_debug_window_type != debug_window_none) && !m_console->get_active() )
 		draw_debug_window			( );
-
+#endif
 	if (get_active_scene() && m_enabled && m_spatial_tree && s_ph_draw_sp_tree_value)
     {
         m_spatial_tree->render(get_active_scene(), m_renderer.debug());
@@ -804,8 +807,9 @@ float game::get_current_fps()
 
 void game::clear_resources				( )
 {
+#ifndef MASTER_GOLD
 	destroy_debug_window				( );
-
+#endif
 	m_lobby_menu->clear_resources		( );
 
 	for ( monster_npc_ptr it_mob = m_mobs.front(); it_mob; it_mob = m_mobs.get_next_of_object( it_mob ) )
@@ -1658,6 +1662,7 @@ void game::on_behaviour_created(resources::queries_result& data)
 		m_selected_npc->set_behaviour(new_behaviour);
 }
 
+#ifndef MASTER_GOLD
 void game::draw_debug_window			()
 {
 	using namespace						xray;
@@ -1715,6 +1720,7 @@ void game::toggle_debug_window			()
 	else
 		m_debug_window_type				=	debug_window_none;
 }
+#endif
 
 xray::render::scene_view_ptr const game::get_active_scene_view( )	const
 {

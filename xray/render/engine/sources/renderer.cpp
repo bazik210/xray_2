@@ -205,7 +205,7 @@ renderer::~renderer()
 		DELETE		(*it);
 }
 
-#ifndef MASTER_GOLD
+#if 1
 // TODO: Make as a general functions.
 static void fill_surface(ref_rt surf, renderer_context* context)
 {
@@ -236,7 +236,7 @@ static void fill_surface(ref_rt surf, renderer_context* context)
 	
 	backend::ref().render_indexed( D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, 2*3, 0, offset);
 }
-#endif // #ifndef MASTER_GOLD
+#endif // #if 1
 
 void renderer::setup_render_output_window ( render_output_window_ptr in_output_window, viewport_type const& viewport)
 {
@@ -353,10 +353,10 @@ void renderer::render(scene_ptr const& in_scene,
 	backend::ref().reset_depth_stencil_target();
 	backend::ref().clear_depth_stencil	(D3D_CLEAR_DEPTH|D3D_CLEAR_STENCIL, 1.0f, 0);
 	
-#ifdef MASTER_GOLD
+#if 0
 	execute_stages();
 	XRAY_UNREFERENCED_PARAMETER(view_mode);
-#else // #ifdef MASTER_GOLD
+#else // #if 0
 	
 	if (m_view_mode_stage && m_view_mode_stage->is_support_view_mode(view_mode))
 	{
@@ -426,8 +426,7 @@ void renderer::render(scene_ptr const& in_scene,
 				
 				m_gbuffer_to_screen_shader->apply();
 				backend::ref().set_ps_constant(m_gbuffer_to_screen_type, view_mode_type);
-				fill_surface(m_renderer_context->m_targets->m_rt_present, m_renderer_context);
-				
+				fill_surface(m_renderer_context->m_targets->m_rt_present, m_renderer_context);		
 				break;
 			}
 			case normals_view_mode:
@@ -523,11 +522,13 @@ void renderer::render(scene_ptr const& in_scene,
 	
 	if (m_stages[lighting_render_stage])
 		m_stages[lighting_render_stage]->debug_render	( );
-	
+
+#ifndef MASTER_GOLD
 	if (scene->get_grass())
 		scene->get_grass()->render_debug(m_renderer_context);
+#endif
 	
-#endif // #ifdef MASTER_GOLD
+#endif // #if 0
 	
 	statistics::ref().visibility_stat_group.num_total_rendered_triangles.value = backend::ref().num_total_rendered_triangles;
 	statistics::ref().visibility_stat_group.num_total_rendered_points.value = backend::ref().num_total_rendered_points;

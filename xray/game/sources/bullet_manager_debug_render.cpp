@@ -6,10 +6,7 @@
 
 #include "pch.h"
 
-
-#ifndef MASTER_GOLD	
-
-
+#ifndef MASTER_GOLD
 #include "bullet_manager.h"
 #include "bullet.h"
 #include "game.h"

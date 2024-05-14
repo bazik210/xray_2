@@ -20,7 +20,7 @@
 
 namespace stalker2 {
 
-#ifndef MASTER_GOLD
+//#if 0
 
 struct animation_space_vertex_id {
 	xray::math::quaternion	rotation;
@@ -74,8 +74,13 @@ animation_space_vertex_id get_movement	(
 class animation_space_graph /*: private boost::noncopyable*/ {
 public:
 	typedef std::pair< xray::animation::skeleton_animation_ptr, pcstr >		animation_pair_type;
+#ifndef MASTER_GOLD
 	typedef xray::debug::vector< animation_space_edge >						edges_type;
 	typedef xray::debug::vector< animation_pair_type >						animations_type;
+#else
+	typedef std::vector< animation_space_edge >						edges_type;
+	typedef std::vector< animation_pair_type >						animations_type;
+#endif
 
 public:
 	template < int AnimationsCount >
@@ -154,10 +159,10 @@ public:
 	}
 
 private:
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 	animations_type				m_animations;
 	edges_type					m_edges;
-#endif // #ifndef MASTER_GOLD
+//#endif // #ifndef MASTER_GOLD
 	xray::ai::navigation::world& m_navigation_world;
 	float const					m_agent_radius;
 	float						m_step_time;
@@ -410,7 +415,11 @@ public:
 		}
 	};
 
+#ifndef MASTER_GOLD
 	typedef xray::debug::vector< edge_id_type >					path_type;
+#else
+	typedef std::vector< edge_id_type >					path_type;
+#endif
 	typedef animation_space_heuristics							path_heuristics_type;
 	typedef xray::ai::path_constructor::edge::impl<
 				vertex_type,
@@ -461,7 +470,7 @@ inline	u32	hash_value	( stalker2::vertex_id_type const& vertex_id )
 } // namespace vertex_manager
 } // namespace ai
 
-#endif // #ifndef MASTER_GOLD
+//#endif // #if 0
 
 } // namespace xray
 

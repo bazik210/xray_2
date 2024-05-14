@@ -115,11 +115,11 @@ human_npc::human_npc		(
 
 human_npc::~human_npc		( )
 {
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 	DELETE					( m_target_vertex );
 	DELETE					( m_search_service );
 	DELETE					( m_animation_space_graph );
-#endif // #ifndef MASTER_GOLD
+//#endif // #ifndef MASTER_GOLD
 }
 
 void human_npc::clear_resources	( )
@@ -549,9 +549,9 @@ void human_npc::move_to_position		( ai::movement_target const* const target )
 
 	);
 	float4x4 const& transform			= m_model_instance->m_animation_player->get_object_transform();
-#ifndef MASTER_GOLD
+//#ifndef MASTER_GOLD
 	m_model_instance->m_animation_player->reset( false );
-#endif // #ifndef MASTER_GOLD
+//#endif // #ifndef MASTER_GOLD
 	m_model_instance->m_animation_player->set_object_transform( transform );
 	setup_animations					( m_ai_world.get_current_time_in_ms() );
 }

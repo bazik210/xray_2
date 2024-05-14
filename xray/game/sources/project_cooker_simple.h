@@ -41,6 +41,7 @@ namespace stalker2 {
 			resources::query_result_for_cook* parent,
 			game_project* project );
 #endif // MASTER_GOLD
+
 		void create_game_objects( xray::configs::binary_config_ptr project_cfg, resources::query_result_for_cook* parent_query );
 
 		bool				m_editor_present;

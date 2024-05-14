@@ -10,7 +10,7 @@
 
 namespace stalker2 {
 
-#ifndef MASTER_GOLD
+//#if 0
 
 animation_space_vertex_id get_movement	(
 		xray::animation::animation_player& player,
@@ -94,6 +94,6 @@ bool search_service::search	(
 	return							true;
 }
 
-#endif // #ifndef MASTER_GOLD
+//#endif // #if 0
 
 } // namespace stalker2

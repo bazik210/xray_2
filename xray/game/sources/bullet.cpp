@@ -378,8 +378,9 @@ float bullet::get_check_time ( float const start_low, float high, float3 const& 
 
 		check_time			= ( low + high ) * .5f;
 	}
-
+//#ifndef MASTER_GOLD
 	R_ASSERT				( low <= start_high );
+//#endif
 	return					low;
 }
 

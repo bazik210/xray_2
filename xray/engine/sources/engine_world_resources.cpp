@@ -47,7 +47,7 @@ void engine_world::cooker_thread ( apc::threads_enum const apc_thread_id )
 	apc::process						( apc_thread_id );
 }
 
-#if XRAY_FS_NEW_WATCHER_ENABLED
+#if XRAY_FS_NEW_WATCHER_ENABLED && !MASTER_GOLD
 void engine_world::watcher_thread ( apc::threads_enum const apc_thread_id )
 {
 	apc::assign_thread_id				( apc_thread_id, threading::current_thread_id( ) );
@@ -76,7 +76,7 @@ void   engine_world::initialize_resources ()
 	apc::assign_thread_id				( apc::res_cook, u32(-1) );
 	apc::assign_thread_id				( apc::fs_watcher, u32(-1) );
 
-#if XRAY_FS_NEW_WATCHER_ENABLED
+#if XRAY_FS_NEW_WATCHER_ENABLED && !MASTER_GOLD
 	if ( !s_no_fs_watch && !threading::g_debug_single_thread )
 	{
 		threading::spawn					(

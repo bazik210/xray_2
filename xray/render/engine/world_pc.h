@@ -213,7 +213,7 @@ public:
 
 #ifndef MASTER_GOLD
 			void		update_preview_particle_system	( particle::particle_system** preview_ps, scene_ptr const& scene, configs::lua_config_value config_value );
-			void update_preview_particle_system_transform ( particle::particle_system** preview_ps, scene_ptr const& scene, math::float4x4 const& transform );
+			void		update_preview_particle_system_transform ( particle::particle_system** preview_ps, scene_ptr const& scene, math::float4x4 const& transform );
 			void		add_preview_particle_system		( particle::particle_system** preview_ps, scene_ptr const& scene, configs::lua_config_value init_values, math::float4x4 const& transform = math::float4x4().identity() );
 			void		remove_preview_particle_system	( particle::particle_system** preview_ps, scene_ptr const& scene );
 			void		restart_preview_particle_system	( particle::particle_system** preview_ps, scene_ptr const& scene );
@@ -225,8 +225,7 @@ public:
 			void		select_speedtree_instance		( scene_ptr const& scene, render::speedtree_instance_ptr const& instance, bool is_selected );
 			void		select_model					( scene_ptr const& scene, render_model_instance_ptr const& v, bool is_selected );
 			void		enable_terrain_debug_mode		( bool is_enabled );
-			void		draw_render_statistics			( xray::ui::world* ui_world );
-			
+			void		draw_render_statistics			( xray::ui::world* ui_world );	
 			void		apply_material_changes			( fs_new::virtual_path_string const& material_name, xray::configs::lua_config_value const& config_value );
 			
 #endif // #ifndef MASTER_GOLD

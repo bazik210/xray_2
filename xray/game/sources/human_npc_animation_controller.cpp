@@ -28,7 +28,7 @@ static float const agent_radius	= .35f;
 
 void human_npc::setup_animations_controller	( )
 {
-#ifndef MASTER_GOLD
+//#if 0
 	animation_space_graph::animation_pair_type const animations[] =
 	{
 		std::make_pair			( m_walk_forward_arc_left_animation, "left arc" ),
@@ -42,7 +42,7 @@ void human_npc::setup_animations_controller	( )
 	m_target_vertex->rotation	= math::quaternion( float3( 0.f, 0.f, 0.f ) );
 	m_target_vertex->translation = m_transform.c.xyz();
 	m_game_world.get_game().movement_target() = m_target_vertex->translation;
-#endif // #ifndef MASTER_GOLD
+//#endif // #if 0
 
 	m_model_instance->m_animation_player->subscribe	(
 		xray::animation::channel_id_on_animation_interval_end,
@@ -77,7 +77,7 @@ void human_npc::setup_animations	( u32 const current_time_in_ms )
 	R_ASSERT						( m_animation_space_graph );
 	R_ASSERT						( m_search_service );
 
-#ifndef MASTER_GOLD
+//#if 0
 	//m_target_vertex->rotation		= math::quaternion( float3( 0.f, 0.f, 0.f ) );
 
 	float3 const& direction			= m_current_movement_target->direction;
@@ -216,7 +216,7 @@ void human_npc::setup_animations	( u32 const current_time_in_ms )
 	);
 
 	m_model_instance->m_animation_player->set_target_and_tick( left_animation * left_weight + right_animation * ( 1.f - left_weight ), current_time_in_ms );
-#endif // #ifndef MASTER_GOLD
+//#endif // #if 0
 }
 
 } // namespace stalker2

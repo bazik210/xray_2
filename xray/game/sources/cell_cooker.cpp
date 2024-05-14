@@ -33,7 +33,7 @@ void cell_cooker::translate_query( resources::query_result_for_cook& parent )
 		parent.set_unmanaged_resource	( resource, resources::nocache_memory, sizeof(game_cell) );
 		parent.finish_query				( result_success );
 	}else
-#endif
+#endif // #ifndef MASTER_GOLD
 	{
 		// ready config query 
 		fs_new::virtual_path_string		req_path = resources_converted_path;
@@ -72,7 +72,7 @@ game_cell* cell_cooker::create_game_cell( configs::lua_config_ptr const& lua_con
 	configs::binary_config_ptr binary_config = lua_config->get_binary_config();
 	return create_game_cell( binary_config );
 }
-#endif
+#endif // #ifndef MASTER_GOLD
 
 game_cell* cell_cooker::create_game_cell( configs::binary_config_ptr const& config )
 {
