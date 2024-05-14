@@ -71,7 +71,11 @@ using xray::console_commands::cc_delegate;
 using xray::console_commands::cc_float3;
 using xray::console_commands::cc_float;
 
+#ifndef MASTER_GOLD
 static bool s_draw_stats_value = true;
+#else
+static bool s_draw_stats_value = false;
+#endif
 static console_commands::cc_bool s_draw_stats("draw_stats", s_draw_stats_value, true, xray::console_commands::command_type_user_specific);
 
 static bool s_ph_draw_aabb_value = false;
@@ -749,10 +753,11 @@ void game::update_stats				( u32 const current_frame_id )
 	{
 		m_stats->set_fps_stats		( m_fps_graph->average_value() );
 		//m_stats->set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
+#ifndef MASTER_GOLD
 		string64					buff;
 		xray::sprintf				( buff, "Q: %d", xray::resources::pending_queries_count() );
 		m_stats->set_resources_stats( buff );
-
+#endif
 		m_stats->draw				( ui_world().get_renderer(), get_active_scene_view() );
 	}
 
@@ -1383,12 +1388,12 @@ void game::update_npc_stats()
 		m_active_npc_stats->draw(ui_world().get_renderer(), get_active_scene_view());
 	}
 }
-
+#ifndef MASTER_GOLD
 void game::set_navmesh_info(pcstr text) const
 {
 	m_stats->set_navmesh_info(text);
 }
-
+#endif
 void game::query_npc_dictionary()
 {
 	query_resource(

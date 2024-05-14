@@ -164,9 +164,7 @@ private:
 			void			finalize_resources				( );
 			void			resources_thread				( apc::threads_enum const apc_thread_id );
 			void			cooker_thread					( apc::threads_enum const apc_thread_id );
-#ifndef MASTER_GOLD
 			void			watcher_thread					( apc::threads_enum const apc_thread_id );
-#endif // #ifndef MASTER_GOLD
 
  			void			initialize_file_system_devices	( );
 			void			finalize_file_system_device		( fs_new::asynchronous_device_interface * const device );

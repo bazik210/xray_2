@@ -98,9 +98,9 @@ struct receiver_unconditional_erasing_predicate : private boost::noncopyable
 
 sound_scene::~sound_scene	( )
 {
-//#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_ //if asserts enabled
 	R_ASSERT						( !is_debug_stream_writing_enabled( ) );
-//#endif
+#endif //#ifndef MASTER_GOLD_
 	delete_space_partitioning_tree	( m_spatial_tree );
 
 	if ( !m_receivers.empty( ) )

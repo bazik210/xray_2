@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_subdivider.h"
 #include "graph_generator_predicates.h"
 #include <xray/collision/geometry.h>
@@ -731,7 +733,11 @@ private:
 
 void graph_generator_subdivider::subdivide_passable_triangles()
 {
-	triangles_type triangles(debug::g_mt_allocator);
+#ifndef MASTER_GOLD
+	triangles_type triangles( debug::g_mt_allocator );
+#else
+	triangles_type triangles( memory::g_mt_allocator );
+#endif
 	
 	u32 triangles_count = m_triangles_mesh.data.size();
 	for (u32 i = 0; i<triangles_count; ++i) {

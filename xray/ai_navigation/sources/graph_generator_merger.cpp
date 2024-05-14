@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_merger.h"
 #include "graph_generator_predicates.h"
 #include "graph_generator_adjacency_builder.h"
@@ -39,6 +41,8 @@ graph_generator_merger::graph_generator_merger(
 		m_triangles_mesh				( triangles_mesh ),
 		m_merge_max_operation_id		( merge_max_operation_id ),
 		m_debug_edges					( debug_edges ),
+		m_constraint_edges ( xray::vectora< constraint_edge >( g_allocator ) ),
+		m_triangle_connections ( xray::vectora<triangle_connection>( g_allocator ) ),
 		m_edge_merge_angle_epsilon		( edge_merge_angle_epsilon ),
 		m_edge_merge_height_epsilon		( edge_merge_height_epsilon ),
 		m_merge_current_operation_id	(0),
@@ -158,7 +162,8 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 	//! Debug 
 	debug::vector< float3 > vertices;
 #else
-	std::vector< float3 > vertices;
+	typedef xray::vectora< float3 > vertices_type;
+	vertices_type vertices( g_allocator );
 #endif
 	for ( u32 i = 0 ; i < vertex_indices.size(); ++i ) {
 		vertices.push_back ( m_triangles_mesh.vertices[ vertex_indices[i] ] );
@@ -235,7 +240,7 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 		mark_constraint_edges			( new_triangle_id );
 	}
 
-	triangle_connections_type triangle_connections;
+	triangle_connections_type triangle_connections( g_allocator );
 	triangle_connections.resize ( new_triangles_count );
 	graph_generator_adjacency_builder ( indices, triangle_connections );
 

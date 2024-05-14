@@ -82,7 +82,9 @@ void lobby_menu::tick( )
 	super::tick							( );
 	m_camera_director->tick				( );
 	m_camera_director->apply			( );
+#ifndef MASTER_GOLD
 	get_game().get_stats().set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
+#endif
 }
 
 void lobby_menu::query_resources( )

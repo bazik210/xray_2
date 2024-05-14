@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator.h"
 #include "navigation_mesh_types.h"
 #include "graph_generator_subdivider.h"
@@ -106,7 +108,11 @@ void graph_generator::remove_areas_in_cuboid( triangles_mesh_type& triangles_mes
 
 void graph_generator::remove_restricted_areas( triangles_mesh_type& triangles_mesh, restricted_areas_type& areas )
 {
+#ifndef MASTER_GOLD
 	triangles_type triangles			( debug::g_mt_allocator );
+#else
+	triangles_type triangles			( memory::g_mt_allocator );
+#endif
 //	u32 const triangle_count			= triangles_mesh.data.size( );
 
 	for ( u32 i = 0, n=areas.size(); i < n; ++i )

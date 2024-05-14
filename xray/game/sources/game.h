@@ -216,9 +216,9 @@ private:
 
 	virtual	void 		on_application_activate		( );
 	virtual	void 		on_application_deactivate	( );
-
+#ifndef MASTER_GOLD
 	virtual	void			set_navmesh_info		( pcstr text ) const;
-	
+#endif
 			void			query_render_scene		( );
 			void			on_render_scene_created	( resources::queries_result& data );
 

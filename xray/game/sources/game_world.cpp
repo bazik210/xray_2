@@ -175,9 +175,9 @@ void game_world::tick()
 		m_inverted_view_matrix.c.xyz(),
 		m_inverted_view_matrix.k.xyz(),
 		m_inverted_view_matrix.j.xyz());
-
+#ifndef MASTER_GOLD
 	get_game().get_stats().set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
-
+#endif
 }
 
 u32 game_world::game_time_ms	( )

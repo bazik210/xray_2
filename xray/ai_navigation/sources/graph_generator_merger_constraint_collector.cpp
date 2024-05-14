@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_merger.h"
 #include <xray/collision/geometry.h>
 #include <xray/collision/geometry_instance.h>
@@ -119,8 +121,11 @@ inline bool is_adjanced( triangles_mesh_type const& triangles_mesh, u32 const tr
 void graph_generator_merger::collect_obstructed_constraint_edges ( u32 const triangle_id )
 {
 	u32 coordinate_indices[2] = { 0, 2 };
-
+#ifndef MASTER_GOLD
 	triangles_type triangles(debug::g_mt_allocator);
+#else
+	triangles_type triangles(memory::g_mt_allocator);
+#endif
 
 	math::aabb						aabb(math::create_invalid_aabb());
 	aabb.modify						( m_triangles_mesh.vertices[m_triangles_mesh.indices[3*triangle_id + 0]] );

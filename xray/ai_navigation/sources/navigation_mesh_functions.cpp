@@ -7,7 +7,9 @@
 #include "pch.h"
 
 #include "navigation_mesh_functions.h"
+
 #ifndef MASTER_GOLD_
+
 using xray::ai::navigation::triangles_mesh_type;
 using xray::ai::navigation::distance_to_segment;
 #endif

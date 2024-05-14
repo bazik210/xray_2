@@ -124,7 +124,7 @@ XRAY_CORE_API	void unlock_process_heap			( );
 
 inline pvoid fill_uninitialized( pvoid buffer, u32 const buffer_size )
 {
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_
 	u32 const u32_count	= buffer_size/4;
 	if ( u32_count )
 		memory::fill32	( buffer, buffer_size, (u32)debug::uninitialized_memory, u32_count );

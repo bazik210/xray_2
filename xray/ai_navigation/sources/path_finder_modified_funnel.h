@@ -19,8 +19,8 @@ public:
 	typedef debug::vector< u32 >		channel_type;
 	typedef debug::vector< float3 >		path_type;
 #else
-	typedef std::vector< u32 >			channel_type;
-	typedef std::vector< float3 >		path_type;
+	typedef vectora< u32 >				channel_type;
+	typedef vectora< float3 >			path_type;
 #endif
 
 public:

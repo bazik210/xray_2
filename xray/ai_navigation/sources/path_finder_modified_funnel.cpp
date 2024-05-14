@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "path_finder_modified_funnel.h"
 #include "navigation_mesh_functions.h"
 
@@ -373,4 +375,4 @@ path_finder_modified_funnel::path_finder_modified_funnel (
 	add( goal, vertex_type_point );
 	build_path( start.y );
 }
-#endif
+#endif // #ifndef MASTER_GOLD_

@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_fuser.h"
 #include "delaunay_triangulator.h"
 #include "graph_generator_adjacency_builder.h"
@@ -516,7 +518,11 @@ graph_generator_fuser::graph_generator_fuser( triangles_mesh_type& triangles_mes
 	m_fuser_current_operation_id	( 0 ),
 	m_fuser_max_operation_id		( fuser_max_operation_id )
 {
+#ifndef MASTER_GOLD
 	triangles_type triangles ( debug::g_mt_allocator );
+#else
+	triangles_type triangles ( memory::g_mt_allocator );
+#endif
 
 	u32 const triangles_count = m_triangles_mesh.data.size();
 	m_triangles_info.resize ( triangles_count );

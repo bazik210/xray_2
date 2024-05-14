@@ -168,7 +168,7 @@ private:
 #ifndef MASTER_GOLD
 	debug::vector< triangle_info >	m_triangle_info;
 #else
-	std::vector< triangle_info >	m_triangle_info;
+	xray::vectora< triangle_info >	m_triangle_info;
 #endif
 	u32 const						m_tessellation_max_operation_id;
 	u32								m_tessellation_current_operation_id;

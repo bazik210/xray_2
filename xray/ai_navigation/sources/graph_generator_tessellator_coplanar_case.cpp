@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_tessellator.h"
 #include "delaunay_triangulator.h"
 #include "constrained_delaunay_triangulator.h"

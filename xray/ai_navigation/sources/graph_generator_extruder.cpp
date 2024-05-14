@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_extruder.h"
 #include "graph_generator_adjacency_builder.h"
 using xray::ai::navigation::graph_generator_extruder;
@@ -30,7 +32,7 @@ static inline xray::math::float3 extrude_vertex( xray::math::float3 const& verte
 static inline bool valid_triangle( xray::debug::vector<xray::math::float3> const& vertices, u32 const index0, u32 const index1, u32 const index2 )
 {
 #else
-static inline bool valid_triangle( std::vector<xray::math::float3> const& vertices, u32 const index0, u32 const index1, u32 const index2 )
+static inline bool valid_triangle( xray::vectora<xray::math::float3> const& vertices, u32 const index0, u32 const index1, u32 const index2 )
 {
 #endif
 	xray::math::float3 const& vertex0 = vertices[ index0 ];

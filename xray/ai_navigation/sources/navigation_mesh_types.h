@@ -79,11 +79,11 @@ typedef debug::vector< edge >							edges_type;
 typedef debug::vector< math::float3 >					path_type;
 typedef debug::vector< u32 >							channel_type;
 #else
-typedef std::vector< math::float3 >					vertices_type;
-typedef std::vector< edge >							edges_type;
+typedef vectora< math::float3 >							vertices_type;
+typedef vectora< edge >									edges_type;
 
-typedef std::vector< math::float3 >					path_type;
-typedef std::vector< u32 >							channel_type;
+typedef vectora< math::float3 >							path_type;
+typedef vectora< u32 >									channel_type;
 #endif
 
 #else // #ifndef MASTER_GOLD_

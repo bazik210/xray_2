@@ -36,16 +36,16 @@
 #	define LOGI_TRACE( ... )
 #endif // #ifdef DEBUG
 
-#ifndef XRAY_MASTER_GOLD
+#ifndef MASTER_GOLD
 #	define LOG_DEBUG( ... )				::xray::logging::check_verbosity(XRAY_LOG_MODULE_INITIATOR ":" , ::xray::logging::debug) ? \
 										::xray::logging::helper	( __FILE__, __FUNCSIG__, __LINE__, XRAY_LOG_MODULE_INITIATOR ":", ::xray::logging::debug	) ( ##__VA_ARGS__ ) : 0
 
 #	define LOGI_DEBUG( initiator, ... )	::xray::logging::check_verbosity(XRAY_LOG_MODULE_INITIATOR ":" initiator ":", ::xray::logging::debug) ? \
 										::xray::logging::helper	( __FILE__, __FUNCSIG__, __LINE__, XRAY_LOG_MODULE_INITIATOR ":" initiator ":", ::xray::logging::debug) ( ##__VA_ARGS__ ) : 0
-#else // #ifndef XRAY_MASTER_GOLD
+#else // #ifndef MASTER_GOLD
 #	define LOG_DEBUG( ... )
 #	define LOGI_DEBUG( ... )
-#endif // #ifndef XRAY_MASTER_GOLD
+#endif // #ifndef MASTER_GOLD
 
 #define LOGI_ERROR( initiator, ... )	::xray::logging::check_verbosity(XRAY_LOG_MODULE_INITIATOR ":" initiator ":", ::xray::logging::error) ? \
 										::xray::logging::helper	( __FILE__, __FUNCSIG__, __LINE__, XRAY_LOG_MODULE_INITIATOR ":" initiator ":", ::xray::logging::error)	( ##__VA_ARGS__ ) : 0

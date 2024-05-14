@@ -18,6 +18,4 @@
 
 #include "ai_navigation_memory.h"
 
-//#undef XRAY_DEBUG_ALLOCATOR
-
 #endif // #ifndef PCH_H_INCLUDED

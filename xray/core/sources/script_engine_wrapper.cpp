@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD
+
 #include "script_engine_wrapper.h"
 #include <xray/resources_fs.h>
 #include <xray/core_entry_point.h>
@@ -420,4 +422,5 @@ void script_engine_wrapper::lua_studio_backend_file_path( int file_type, const c
 		UNREACHABLE_CODE( );
 	}
 }
+
 #endif // #ifndef MASTER_GOLD

@@ -78,17 +78,17 @@ void   key::protected_construct ()
 #ifndef MASTER_GOLD
 	pcstr const wrong_key_assert_message	=	"command_line_key with delimiter characters specified (they are not supported): \"%s\"";
 	pcstr const empty_key_assert_message	=	"command_line_key with empty shortname specified";
-#endif // #ifndef MASTER_GOLD
+//#endif // #ifndef MASTER_GOLD
 
 	R_ASSERT	(!* i, wrong_key_assert_message, m_short_name);
-
+#endif // #ifndef MASTER_GOLD
 	for ( i = m_full_name; * i; ++i )
 		if ( is_delimiter(* i, " \t=-") )
 			break;
-
+#ifndef MASTER_GOLD
 	R_ASSERT	(!* i, wrong_key_assert_message, m_full_name);
 	R_ASSERT	(strings::length(m_short_name) + strings::length(m_full_name) > 0, empty_key_assert_message);
-
+#endif // #ifndef MASTER_GOLD
 	if ( !s_command_line_keys )
 	{
 		bind_pointer_to_buffer_mt_safe	(	s_command_line_keys, 

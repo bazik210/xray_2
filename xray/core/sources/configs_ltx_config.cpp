@@ -6,6 +6,7 @@
 #include "pch.h"
 #ifndef MASTER_GOLD
 #include "configs_ltx_config.h"
+#endif
 #include "configs_binary_config.h"
 #include <xray/fs/synchronous_device_interface.h>
 #include <xray/fs/file_type_pointer.h>
@@ -395,7 +396,7 @@ static void save_bin(memory::base_allocator* allocator, pbyte* dest, u32& dest_s
 	dest_size					= u32(out_ptr-data_ptr);
 	XRAY_FREE_IMPL				(*allocator,plain_data_begin);
 }
-
+#ifndef MASTER_GOLD
 void xray::core::configs::parse_string_data(memory::reader F, memory::base_allocator* allocator, pbyte* dest, u32& dest_size)
 {
 	values_type				load_data(*allocator);

@@ -32,7 +32,7 @@ navigation_world::navigation_world			( xray::ai::navigation::engine& engine, xra
 {
 //	float4x4 const transform	= math::create_translation( float3( 0.f, 0.f, 10.f ) );
 	float4x4 const transform	= math::create_translation( float3( 0.f, 0.f, 0.f ) );
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 	m_graph_generator	= NEW( graph_generator) ( engine, transform, scene, renderer, m_navigation_mesh );
 #else // #if XRAY_DEBUG_ALLOCATOR
 	XRAY_UNREFERENCED_PARAMETER	( scene );
@@ -41,14 +41,14 @@ navigation_world::navigation_world			( xray::ai::navigation::engine& engine, xra
 
 navigation_world::~navigation_world			( )
 {
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 	DELETE				( m_graph_generator );
 #endif // #if XRAY_DEBUG_ALLOCATOR
 }
 
 void navigation_world::clear_resources		( )
 {
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 	if ( m_graph_generator )
 		m_graph_generator->clear_resources	( );
 #endif // #if XRAY_DEBUG_ALLOCATOR
@@ -56,7 +56,7 @@ void navigation_world::clear_resources		( )
 
 void navigation_world::tick					( )
 {
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 	if ( m_graph_generator )
 		m_graph_generator->tick				( );
 #endif // #if XRAY_DEBUG_ALLOCATOR
@@ -273,7 +273,7 @@ bool navigation_world::find_path (
 	)
 {
 #ifndef MASTER_GOLD_
-	path_finder_funnel::channel_type channel;
+	path_finder_funnel::channel_type channel(g_allocator);
 	path_finder_channel(
 		m_navigation_mesh,
 		channel,

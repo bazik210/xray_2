@@ -7,7 +7,7 @@
 #ifndef GRAPH_GENERATOR_H_INCLUDED
 #define GRAPH_GENERATOR_H_INCLUDED
 
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 
 #include <xray/render/facade/model.h>
 #include <xray/collision/common_types.h>
@@ -95,7 +95,7 @@ private:
 #ifndef MASTER_GOLD
 	typedef debug::vector< math::float3 >		vertices_type;
 #else
-	typedef std::vector< math::float3 >		vertices_type;
+	typedef vectora< math::float3 >				vertices_type;
 #endif
 
 private:
@@ -176,7 +176,7 @@ public:
 #ifndef MASTER_GOLD
 	typedef debug::vector<cuboid_type>	restricted_areas_type;
 #else
-	typedef std::vector<cuboid_type>	restricted_areas_type;
+	typedef vectora<cuboid_type>		restricted_areas_type;
 #endif
 
 	triangles_mesh_type&				m_input_triangles;
@@ -208,6 +208,6 @@ private:
 } // namespace ai
 } // namespace xray
 
-#endif // #ifndef MASTER_GOLD_
+#endif // #ifndef XRAY_DEBUG_ALLOCATOR
 
-#endif // #if XRAY_DEBUG_ALLOCATOR
+#endif // #if GRAPH_GENERATOR_H_INCLUDED

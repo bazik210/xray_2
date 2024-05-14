@@ -118,7 +118,9 @@ public:
 
 	u32							cooker_thread_id					() const	{ return m_cooker_thread_id; }
 
+#ifndef MASTER_GOLD
 	core::configs::lua_config_cook &	get_lua_config_cook			();
+#endif
 	core::configs::binary_config_cook &	get_binary_config_cook		();
 
 	void						mount_mounts_path					(pcstr mount_path);

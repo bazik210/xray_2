@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_merger.h"
 #include <xray/collision/api.h>
 #include <xray/collision/space_partitioning_tree.h>
@@ -209,7 +211,11 @@ void graph_generator_merger::subdivide_constraint_edges ( float3 const& normal )
 	fill_coordinate_indices( normal, coordinate_indices );
 
 	non_null<collision::space_partitioning_tree>::ptr	spatial_tree = collision::new_space_partitioning_tree (
-		&debug::g_mt_allocator,
+#ifndef MASTER_GOLD
+			&debug::g_mt_allocator,
+#else
+			&memory::g_mt_allocator,
+#endif
 		1.0,
 		1
 	);
@@ -232,7 +238,11 @@ void graph_generator_merger::subdivide_constraint_edges ( float3 const& normal )
 		float3 extents = math::abs( *segment_vertices[0] - segment_center ) + float3( 1.5f, 1.5f, 1.5f );
 
 		non_null<collision::object>::ptr object	= collision::new_aabb_object (
+#ifndef MASTER_GOLD
 			&debug::g_mt_allocator,
+#else
+			&memory::g_mt_allocator,
+#endif
 			1,
 			segment_center,
 			extents,
@@ -257,8 +267,11 @@ void graph_generator_merger::subdivide_constraint_edges ( float3 const& normal )
 +		min	{x=-4.7553029 y=-5.2685590 z=4.2735095}	xray::math::float3
 +		max	{x=-4.7443194 y=4.7314410 z=4.3493409}	xray::math::float3
 	*/
-
+#ifndef MASTER_GOLD
 	objects_type objects( debug::g_mt_allocator );
+#else
+	objects_type objects( memory::g_mt_allocator );
+#endif
 	for ( u32 i = 0; i < constraint_edges_count; ++i ) {
 		float3 const* segment_vertices[] = {
 			&m_triangles_mesh.vertices[ m_constraint_edges[i].vertex_index0 ],
@@ -298,7 +311,11 @@ void graph_generator_merger::subdivide_constraint_edges ( float3 const& normal )
 	object_list_type::iterator const e = object_list.end();
 	for ( ; i != e; ++i ) {
 		spatial_tree->erase( *i );
+#ifndef MASTER_GOLD
 		collision::delete_object( &debug::g_mt_allocator, *i );
+#else
+		collision::delete_object( &memory::g_mt_allocator, *i );
+#endif
 	}
 	collision::delete_space_partitioning_tree( &*spatial_tree );
 }

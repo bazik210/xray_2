@@ -42,18 +42,6 @@ private:
 	}; // class is_marked_predicate
 
 public:
-	inline			triangles_mesh		( ) :
-		spatial_tree( 0 ),
-		m_save_marked		( false )
-	{
-	}
-	
-	inline			~triangles_mesh		( )
-	{
-		if ( spatial_tree )
-			destroy_spatial_tree( );
-	}
-
 	inline	void	build_spatial_tree	( )
 	{
 		if ( spatial_tree )
@@ -63,7 +51,11 @@ public:
 		R_ASSERT_CMP			( index_count % 3, ==, 0 );
 		spatial_tree			= 
 			&*collision::new_triangle_mesh_geometry(
+#ifndef MASTER_GOLD
 				&debug::g_mt_allocator,
+#else
+				&memory::g_mt_allocator,
+#endif
 				&*vertices.begin(),
 				vertices.size(),
 				&*indices.begin(),
@@ -87,11 +79,14 @@ public:
 			);
 	}
 
-
 	inline	void	destroy_spatial_tree( )
 	{
 		if ( spatial_tree ) {
+#ifndef MASTER_GOLD
 			collision::delete_geometry	( &debug::g_mt_allocator, spatial_tree );
+#else
+			collision::delete_geometry	( &memory::g_mt_allocator, spatial_tree );
+#endif
 			spatial_tree				= 0;
 		}
 	}
@@ -127,9 +122,9 @@ public:
 	typedef xray::debug::vector< u32 >		indices_type;
 	typedef xray::debug::vector< T >		data_type;
 #else
-	typedef std::vector< float3 >			vertices_type;
-	typedef std::vector< u32 >				indices_type;
-	typedef std::vector< T >				data_type;
+	typedef vectora< float3 >				vertices_type;
+	typedef vectora< u32 >					indices_type;
+	typedef vectora< T >					data_type;
 #endif
 
 public:
@@ -138,6 +133,23 @@ public:
 	data_type				data;
 	collision::geometry*	spatial_tree;
 	bool					m_save_marked;
+
+public:
+	inline			triangles_mesh		( ) :
+		spatial_tree( 0 ),
+		m_save_marked		( false ),
+		vertices	( vectora< float3 > ( g_allocator ) ),
+		indices( vectora< u32 > ( g_allocator ) ),
+		data( vectora< T > ( g_allocator ) )
+	{
+	}
+	
+	inline			~triangles_mesh		( )
+	{
+		if ( spatial_tree )
+			destroy_spatial_tree( );
+	}
+	
 }; // class triangles_mesh
 
 } // namespace navigation

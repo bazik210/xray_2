@@ -29,7 +29,11 @@ void stats::draw(render::ui::renderer& w, render::scene_view_ptr const& scene_vi
 void stats::set_fps_stats(float fps)
 {
 	string64		buff;
+#ifdef MASTER_GOLD
+	xray::sprintf	(buff, "fps: %3.2f", fps);
+#else
 	xray::sprintf	(buff, "%3.2f", fps);
+#endif
 	m_fps->set_text	(buff);
 }
 
@@ -54,12 +58,12 @@ void stats::set_resources_stats( pcstr str )
 {
 	m_resources_activity->set_text	( str );
 }
-
+#ifndef MASTER_GOLD
 void stats::set_navmesh_info			( pcstr str )
 {
 	m_navmesh_info->set_text( str );
 }
-
+#endif
 void stats::create()
 {
 	m_main_window						= m_ui_world.create_window();

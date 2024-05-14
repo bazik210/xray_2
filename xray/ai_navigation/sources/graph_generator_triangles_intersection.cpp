@@ -6,7 +6,7 @@
 
 #include "pch.h"
 
-#if XRAY_DEBUG_ALLOCATOR
+#if 1 //XRAY_DEBUG_ALLOCATOR
 
 #include "graph_generator.h"
 #include "navigation_mesh_types.h"

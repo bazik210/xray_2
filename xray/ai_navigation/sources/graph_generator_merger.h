@@ -31,8 +31,8 @@ private:
 	typedef debug::vector<triangle_connection> triangle_connections_type;
 	typedef debug::vector< u32 > vertex_indices_type;
 #else
-	typedef std::vector<triangle_connection> triangle_connections_type;
-	typedef std::vector< u32 > vertex_indices_type;
+	typedef xray::vectora<triangle_connection> triangle_connections_type;
+	typedef xray::vectora< u32 > vertex_indices_type;
 #endif
 	typedef buffer_vector< u32 > triangle_indices_type;
 	typedef buffer_vector< u32 > edges_indices_type;
@@ -163,7 +163,7 @@ private:
 #ifndef MASTER_GOLD
 	typedef debug::vector< constraint_edge > constraint_edges_type;
 #else
-	typedef std::vector< constraint_edge > constraint_edges_type;
+	typedef xray::vectora< constraint_edge > constraint_edges_type;
 #endif
 
 private:

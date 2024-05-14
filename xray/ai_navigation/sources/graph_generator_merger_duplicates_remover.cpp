@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_merger.h"
 #include "navigation_mesh_types.h"
 #include <xray/math_randoms_generator.h>

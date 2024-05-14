@@ -6,7 +6,7 @@
 
 #include "pch.h"
 
-#if XRAY_DEBUG_ALLOCATOR
+#if 1//XRAY_DEBUG_ALLOCATOR
 
 #include "graph_generator.h"
 #include "graph_generator_subdivider.h"
@@ -18,14 +18,17 @@
 #include <xray/render/facade/scene_renderer.h>
 #include <xray/collision/api.h>
 #include <xray/collision/geometry_instance.h>
-#include <xray/memory_debug_allocator.h>
+#ifndef MASTER_GOLD
+	#include <xray/memory_debug_allocator.h>
+#endif
 #include <xray/console_command.h>
 
 using xray::ai::navigation::graph_generator;
 using xray::collision::ray_triangles_type;
 
+#ifndef MASTER_GOLD
 static xray::command_line::key		s_test_navigation( "test_navigation", "", "", "test navigation graph generation" );
-
+#endif
 graph_generator::graph_generator			( 
 	xray::ai::navigation::engine& engine, 
 	xray::math::float4x4 const& transform, 
@@ -39,6 +42,11 @@ graph_generator::graph_generator			(
 	m_scene								( scene ),
 	m_renderer							( renderer ),
 	m_geometry							( 0 ),
+	m_debug_edges						( vectora< edge > ( g_allocator ) ),
+	m_path								( vectora< math::float3 > ( g_allocator ) ),
+	m_channel							( vectora< u32 > (g_allocator) ),
+	m_transformed_vertices				( vectora< math::float3 > ( g_allocator ) ),
+	m_restricted_areas					( vectora<cuboid_type> ( g_allocator ) ),
 	m_subdivision_max_operation_id		( u32(-1) ),
 	m_tessellation_max_operation_id		( u32(-1) ),
 	m_merger_max_operation_id			( u32(-1) ),
@@ -218,9 +226,10 @@ graph_generator::graph_generator			(
 	pstr const buffer	= static_cast<pstr>( ALLOCA(buffer_size*sizeof(char)) );
 	buffer_string	string( buffer, buffer_size );
 
+#ifndef MASTER_GOLD
 	if ( !s_test_navigation.is_set_as_string(&string) )
 		return;
-
+#endif
 	/*
 	resources::query_resource	(
 		string.c_str(),
@@ -509,6 +518,7 @@ void graph_generator::tick					( )
 	}
 #endif
 
+#ifndef MASTER_GOLD
 	if ( m_show_triangle_id < m_input_triangles.data.size() ) {
 		u32 const* indices = &m_input_triangles.indices[0 + m_show_triangle_id * 3];//m_input_triangles.indices.begin() + m_show_triangle_id * 3;
 		string256 str;
@@ -556,7 +566,7 @@ void graph_generator::tick					( )
 		);
 		m_engine.set_navmesh_info( str );
 	}
-
+#endif
 	/*
 		+		[385]	{x=15.398192 y=3.0733371 z=39.866676}	xray::math::float3
 		+		[386]	{x=15.090755 y=3.0733368 z=39.801331}	xray::math::float3
@@ -624,7 +634,11 @@ void graph_generator::tick					( )
 	/**/
 
 	/**/
+#ifndef MASTER_GOLD
 	triangles_type triangles(debug::g_mt_allocator);
+#else
+	triangles_type triangles(memory::g_mt_allocator);
+#endif
 	if ( m_input_triangles.spatial_tree == 0 )
 		return;
 

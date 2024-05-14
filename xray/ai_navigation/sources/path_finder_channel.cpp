@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "path_finder_channel.h"
 #include "path_finder_modified_funnel.h"
 #include "navigation_mesh_functions.h"
@@ -371,7 +373,7 @@ public:
 #ifndef MASTER_GOLD
 	typedef xray::debug::vector< vertex_id_type >				path_type;
 #else
-	typedef std::vector< vertex_id_type >						path_type;
+	typedef xray::vectora< vertex_id_type >						path_type;
 #endif
 	typedef euclidian_distance_heuristics						path_heuristics_type;
 	typedef path_constructor_helper_type::impl<
@@ -515,7 +517,7 @@ public:
 			channel_type& channel = m_path_constructor.path();
 			channel[0] = m_start_vertex_id;
 
-			path_type path;
+			path_type path( xray::ai::navigation::g_allocator );
 			path_finder_modified_funnel			( m_graph, channel, m_start_position, m_target_position, m_agent_radius, path );
 			R_ASSERT					( !path.empty() );
 			float distance				= 0;
@@ -684,7 +686,7 @@ path_finder_channel::path_finder_channel (
 	m_triangles_mesh	( triangles_mesh )	
 {
 	search_service service;
-	search_service::path_type path;
+	search_service::path_type path(xray::vectora< vertex_id_type >( g_allocator ));
 	service.search		(
 		triangles_mesh,
 		&channel,

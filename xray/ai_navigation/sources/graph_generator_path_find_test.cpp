@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator.h"
 #include "navigation_mesh_functions.h"
 #include "path_finder_channel.h"

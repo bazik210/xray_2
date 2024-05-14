@@ -189,7 +189,9 @@ public:
 	void								updated_render_options_list();
 	xray::physics::world&				get_physics_world		( ) { return *m_physics_world; }
 	xray::ai::navigation::world&		get_ai_navigation_world	( ) { return *m_ai_navigation_world; }
+#ifndef MASTER_GOLD
 	void								set_navmesh_info(pcstr) const { }
+#endif
 private:
 	fs_new::virtual_path_string			m_selected_renderer_configuration;
 	xray::ui::world*					m_ui_world;

@@ -5,7 +5,9 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+
 #ifndef MASTER_GOLD_
+
 #include "graph_generator_tessellator.h"
 #include "graph_generator_predicates.h"
 #include <xray/collision/geometry.h>
@@ -18,6 +20,7 @@ using xray::math::float3;
 
 graph_generator_tessellator::graph_generator_tessellator(triangles_mesh_type& triangles_mesh, u32 tessellation_max_operation_id ) :
 	m_triangles_mesh					( triangles_mesh ),
+	m_triangle_info						( xray::vectora< triangle_info >( g_allocator ) ),
 	m_tessellation_max_operation_id		( tessellation_max_operation_id ),
 	m_tessellation_current_operation_id	( 0 )
 {
@@ -276,7 +279,11 @@ void graph_generator_tessellator::tessellate_triangle ( u32 triangle_id, triangl
 
 void graph_generator_tessellator::tessellate_passable_triangles()
 {
+#ifndef MASTER_GOLD
 	triangles_type triangles			( debug::g_mt_allocator );
+#else
+	triangles_type triangles			( memory::g_mt_allocator );
+#endif
 
 	u32 const triangle_count			= m_triangles_mesh.data.size( );
 

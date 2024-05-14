@@ -37,8 +37,9 @@ public:
 	void			set_active_scene			( pcstr scene_name );
 	void			set_camera_stats			( float3 const& pos, float3 const& dir );
 	void			set_resources_stats			( pcstr str );
+#ifndef MASTER_GOLD
 	void			set_navmesh_info			( pcstr str );
-
+#endif
 protected:
 	void			create						( );
 	

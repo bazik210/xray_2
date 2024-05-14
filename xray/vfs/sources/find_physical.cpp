@@ -17,10 +17,10 @@ using namespace fs_new;
 
 bool   check_is_archive_file			(pcstr physical_path, synchronous_device_interface & device)
 {
-#ifndef MASTER_GOLD
+#ifndef MASTER_GOLD_ //game incomplete at the moment
 	if ( strings::equal(fs_new::extension_from_path(physical_path), "orig") )
 		return								false;
-#endif // ifndef MASTER_GOLD
+#endif // ifndef MASTER_GOLD_
 
 	file_type_pointer file				(physical_path, device, file_mode::open_existing, file_access::read, assert_on_fail_false);
 	if ( !file )

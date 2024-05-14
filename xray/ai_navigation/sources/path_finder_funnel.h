@@ -19,8 +19,8 @@ public:
 	typedef debug::vector< u32 >		channel_type;
 	typedef debug::vector< float3 >		path_type;
 #else
-	typedef std::vector< u32 >		channel_type;
-	typedef std::vector< float3 >		path_type;
+	typedef vectora< u32 >				channel_type;
+	typedef vectora< float3 >			path_type;
 #endif
 
 public:
@@ -46,7 +46,11 @@ private:
 	void			add_path_vertex( float3 const& vertex );
 
 private:
+#ifndef MASTER_GOLD
 	typedef debug::deque< float3 >		funnel_type;
+#else
+	typedef std::deque< float3 >		funnel_type;
+#endif
 
 	funnel_type					m_funnel;
 	float3						m_funnel_apex;
