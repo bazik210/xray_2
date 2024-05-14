@@ -10,7 +10,9 @@
 #include <xray/core/core.h>
 #include <xray/core/simple_engine.h>
 #include <xray/os_include.h>		// for GetCommandLine
+#ifndef MASTER_GOLD
 #include <xray/configs_lua_config.h>
+#endif
 #include "shader_compiler.h"
 #include "define_manager.h"
 #include "resource_parser.h"
@@ -61,11 +63,11 @@ public:
 
 typedef shader_compiler_core_engine						core_engine_type;
 static xray::uninitialized_reference< shader_compiler_core_engine >	s_core_engine;
-
+#ifndef MASTER_GOLD
 using xray::configs::lua_config_ptr;
 using xray::configs::lua_config_value;
 using xray::configs::lua_config_iterator;
-
+#endif
 void application::initialize( )
 {
 	m_exit_code				= 0;

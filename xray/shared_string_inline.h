@@ -59,7 +59,7 @@ inline u32 xray::shared_string::size						( ) const
 }
 
 // Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
-#if _MSC_VER < 1600
+#if _MSC_VER < 1600 || defined(_USING_V100_SDK71_)
  inline xray::shared_string::operator unspecified_bool_type	( ) const
  {
  	if ( !m_pointer )

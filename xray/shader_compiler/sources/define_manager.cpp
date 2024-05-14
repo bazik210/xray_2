@@ -116,7 +116,7 @@ void define_manager::on_load( resources::queries_result & in_result )
 		printf("Failed to load defines file!");
 		return;
 	}
-
+#ifndef MASTER_GOLD
 	configs::lua_config_ptr config_ptr = static_cast_checked<configs::lua_config *>(in_result[0].get_unmanaged_resource().c_ptr());
 	configs::lua_config_value const & config	=	config_ptr->get_root()["DEFINES"];
 
@@ -253,6 +253,7 @@ void define_manager::on_load( resources::queries_result & in_result )
 			}
 		}
 	}
+#endif
 	m_valid = true;
 }
 
@@ -363,13 +364,14 @@ define_manager::define_manager( char const* alt_path_to_defines)
 		if (new_file_name[i]=='\\')
 			new_file_name[i]='/';
 	}
+#ifndef MASTER_GOLD
 	xray::resources::query_resource_and_wait(
 		new_file_name.c_str(),
 		xray::resources::lua_config_class,
 		boost::bind( &define_manager::on_load, this, _1 ),
 		&g_allocator);
 	//xray::resources::wait_and_dispatch_callbacks(true);
-	
+#endif
 	m_prev_set = m_defines_set;
 	
 	SetCurrentDirectory(curr_dir);

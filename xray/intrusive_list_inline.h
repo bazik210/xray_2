@@ -10,21 +10,24 @@
 
 #include <xray/intrusive_list.h>
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list	() 
+#define TEMPLATE_SIGNATURE	template <typename BaseWithMember, typename PointerType, PointerType BaseWithMember::*MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+#define INTRUSIVE_LIST		xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>
+
+TEMPLATE_SIGNATURE
+inline INTRUSIVE_LIST::intrusive_list	() 
 	: m_first(NULL), m_last(NULL)
 {
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list	(intrusive_list const& other)
+TEMPLATE_SIGNATURE
+inline INTRUSIVE_LIST::intrusive_list	(intrusive_list const& other)
 	: m_first(NULL), m_last(NULL)
 {
 	ASSERT_U								(other.empty());
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::swap		(intrusive_list & other)
+TEMPLATE_SIGNATURE
+inline void INTRUSIVE_LIST::swap		(intrusive_list & other)
 {
 	ThreadingPolicy::lock					();
 	other.lock								();
@@ -37,8 +40,8 @@ inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thread
 	ThreadingPolicy::unlock					();
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::clear		()
+TEMPLATE_SIGNATURE
+inline void INTRUSIVE_LIST::clear		()
 {
 	typename ThreadingPolicy::mutex_raii	raii(*this);
 	m_first								=	 NULL;
@@ -46,8 +49,8 @@ inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thread
 	SizePolicy::set_zero_size				();
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::push_back	(PointerType const object, bool * out_pushed_first)
+TEMPLATE_SIGNATURE
+inline void INTRUSIVE_LIST::push_back	(PointerType const object, bool * out_pushed_first)
 {
 	set_next_of_object						(object, NULL);
 
@@ -71,8 +74,8 @@ inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thread
 	m_last								=	object;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::push_front	(PointerType const object, bool * out_pushed_first)
+TEMPLATE_SIGNATURE
+inline void INTRUSIVE_LIST::push_front	(PointerType const object, bool * out_pushed_first)
 {
 	typename ThreadingPolicy::mutex_raii	raii	(*this);
 
@@ -95,8 +98,8 @@ inline void xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thread
 	m_first								=	object;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::pop_front	(bool * out_popped_last)
+TEMPLATE_SIGNATURE
+inline PointerType INTRUSIVE_LIST::pop_front	(bool * out_popped_last)
 {
 	if ( empty() )
 	{
@@ -133,8 +136,8 @@ inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext,
 	return									NULL;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::pop_front	()
+TEMPLATE_SIGNATURE
+inline PointerType INTRUSIVE_LIST::pop_front	()
 {
 	if ( empty() )
 		return								NULL;
@@ -155,8 +158,8 @@ inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext,
 	return									NULL;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::pop_all_and_clear	(u32 * out_size)
+TEMPLATE_SIGNATURE
+inline PointerType INTRUSIVE_LIST::pop_all_and_clear	(u32 * out_size)
 {
 	if ( empty() )
 	{
@@ -177,26 +180,26 @@ inline PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext,
 	return									result;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline	PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::front	() const
+TEMPLATE_SIGNATURE
+inline	PointerType INTRUSIVE_LIST::front	() const
 {
 	return									m_first;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline	PointerType xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::back	() const
+TEMPLATE_SIGNATURE
+inline	PointerType INTRUSIVE_LIST::back	() const
 {
 	return									m_last;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline bool xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::empty		() const
+TEMPLATE_SIGNATURE
+inline bool INTRUSIVE_LIST::empty		() const
 {
 	return									!m_first;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline bool xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::erase		(PointerType object)
+TEMPLATE_SIGNATURE
+inline bool INTRUSIVE_LIST::erase		(PointerType object)
 {
 	if ( empty() )
 		return								false;
@@ -222,9 +225,9 @@ inline bool xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thread
 	return				true;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::find_if	(Predicate const & pred) const
+PointerType   INTRUSIVE_LIST::find_if	(Predicate const & pred) const
 {
 	if ( empty() )
 		return								NULL;
@@ -242,16 +245,16 @@ PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thre
 	return									NULL;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::find_if	(Predicate & pred)
+PointerType   INTRUSIVE_LIST::find_if	(Predicate & pred)
 {
 	return									find_if(bool_predicate_ref<Predicate>(pred));
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::remove_if	(Predicate const & predicate)
+PointerType   INTRUSIVE_LIST::remove_if	(Predicate const & predicate)
 {
 	if ( empty() )
 		return								NULL;
@@ -288,16 +291,16 @@ PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, Thre
 	return									result;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-PointerType   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::remove_if (Predicate & predicate)
+PointerType   INTRUSIVE_LIST::remove_if (Predicate & predicate)
 {
 	return									remove_if(bool_predicate_ref<Predicate>(predicate));
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-void   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::for_each			(Predicate const & pred) const
+void   INTRUSIVE_LIST::for_each			(Predicate const & pred) const
 {
 	if ( empty() )
 		return;
@@ -312,22 +315,22 @@ void   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPo
 	}
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-void   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::for_each			(Predicate & pred) const
+void   INTRUSIVE_LIST::for_each			(Predicate & pred) const
 {
 	for_each								(void_predicate_ref<Predicate>(pred));
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
+TEMPLATE_SIGNATURE
 template <class Predicate>
-void   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::for_each			(Predicate & pred)
+void   INTRUSIVE_LIST::for_each			(Predicate & pred)
 {
 	for_each								(void_predicate_ref<Predicate>(pred));
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::contains_object	(PointerType object)
+TEMPLATE_SIGNATURE
+bool   INTRUSIVE_LIST::contains_object	(PointerType object)
 {
 	if ( empty() )
 		return								false;
@@ -336,8 +339,8 @@ bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPo
 	return									contains_object_thread_unsafe(object);
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::contains_object_thread_unsafe	(PointerType object)
+TEMPLATE_SIGNATURE
+bool   INTRUSIVE_LIST::contains_object_thread_unsafe	(PointerType object)
 {
 	for ( BaseWithMember *	current	=	m_first ? (& * m_first) : NULL;
 							current;
@@ -350,8 +353,8 @@ bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPo
 	return									false;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::push_back_unique	(PointerType object, bool * out_pushed_first)
+TEMPLATE_SIGNATURE
+bool   INTRUSIVE_LIST::push_back_unique	(PointerType object, bool * out_pushed_first)
 {
 	typename ThreadingPolicy::mutex_raii		raii(*this);
 	if ( !contains_object_thread_unsafe(object) )
@@ -363,8 +366,8 @@ bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPo
 	return									false;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>::intrusive_list::push_front_unique	(PointerType object, bool * out_pushed_first)
+TEMPLATE_SIGNATURE
+bool   INTRUSIVE_LIST::push_front_unique	(PointerType object, bool * out_pushed_first)
 {
 	typename ThreadingPolicy::mutex_raii	raii(*this);
 	if ( !contains_object_thread_unsafe(object) )
@@ -376,11 +379,14 @@ bool   xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPo
 	return									false;
 }
 
-template<typename BaseWithMember, typename PointerType, PointerType BaseWithMember::* MemberNext, typename ThreadingPolicy, typename SizePolicy, typename DebugPolicy>
-inline void   swap						(xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>& left, xray::intrusive_list<BaseWithMember, PointerType, MemberNext, ThreadingPolicy, SizePolicy, DebugPolicy>& right)
+TEMPLATE_SIGNATURE
+inline void   swap						(INTRUSIVE_LIST& left, INTRUSIVE_LIST& right)
 {
 	left.swap								(right);
 }
+
+#undef INTRUSIVE_LIST
+#undef TEMPLATE_SIGNATURE
 
 inline void	 swap			(xray::size_policy & left, xray::size_policy & right)
 {

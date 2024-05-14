@@ -77,7 +77,7 @@ inline bool INTRUSIVE_PTR::operator!	( ) const
 	return			( !m_object );
 }
 
-#if _MSC_VER < 1600
+#if (_MSC_VER < 1600) || defined(_USING_V100_SDK71_)
 // Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
 TEMPLATE_SIGNATURE
 inline INTRUSIVE_PTR::operator typename INTRUSIVE_PTR::unspecified_bool_type() const

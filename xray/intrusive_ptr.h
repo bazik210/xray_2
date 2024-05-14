@@ -37,7 +37,7 @@ public:
 	inline	object_type		&operator*		( ) const;
 	inline	object_type		*operator->		( ) const;
 	inline	bool			operator!		( ) const;
-#if _MSC_VER < 1600
+#if (_MSC_VER < 1600)  || defined(_USING_V100_SDK71_)
 	// Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
 	inline	operator unspecified_bool_type	( ) const;
 #else

@@ -37,7 +37,7 @@ public:
 
 	// Deprecated: https://en.cppreference.com/w/cpp/io/basic_ios/operator_bool
 	//inline				operator unspecified_bool_type		( ) const;
-#if _MSC_VER > 1500
+#if (_MSC_VER > 1500) && !defined(_USING_V100_SDK71_)
 	inline  explicit	operator bool						( ) const;
 #else
 	inline				operator unspecified_bool_type		() const;
