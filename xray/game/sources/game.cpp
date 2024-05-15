@@ -876,6 +876,8 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 	gload = true;
 	//disable object visuals unload check
 	gunload = false;
+	//no spawned actor yet
+	m_game_world->m_actor_spawned = false;
 
 	m_game_world->load		( project_resource_name, project_resource_path );
 	

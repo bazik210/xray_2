@@ -96,7 +96,8 @@ m_walk				( false ),
 m_walk_bcwd			( false ),
 m_frames			( 0 ),
 m_walk_speed		( 1.f /*0.45f*/ ),
-m_sw_delay			( false )
+m_sw_delay			( false ),
+m_actor_loaded		( false )
 {
 	m_animation_player			= NEW(animation::animation_player)( );
 	m_animation_player->set_no_delete();// ??
@@ -199,7 +200,7 @@ void actor::on_resources_ready( resources::queries_result& data )
 	if (m_stop_query) {
 		data.empty();
 		m_game_world.get_game().gload = false;
-		m_game_world.clean_actor();
+		m_game_world.delete_actor_impl();
 		return;
 	}
 
@@ -267,7 +268,7 @@ void actor::on_load_animations(  resources::queries_result& data  )
 	if (m_stop_query) {
 		data.empty();
 		m_game_world.get_game().gload = false;
-		m_game_world.clean_actor();
+		m_game_world.delete_actor_impl();
 		return;
 	}
 

@@ -6,6 +6,8 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "pch.h"
+#include <iostream>
+#include <fstream>
 #include "game_world.h"
 #include "game.h"
 //#include "camera_director.h"
@@ -28,6 +30,9 @@
 #include <xray/network/packet_reader.h>
 
 #include <xray/render/facade/scene_renderer.h>
+
+#include <boost/range/algorithm/remove_if.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 //static void server_on_packet_received	( xray::network::server& server, xray::network::client_session& client, xray::network::packet_reader& packet )
 //{
@@ -59,13 +64,12 @@ static void client_on_connected			( xray::network::client& client )
 static xray::command_line::key	cl_cam("cam", "", "", "free camera");
 static xray::command_line::key	cl_actor("actor", "", "", "force actor");
 
+using std::ifstream;
+
 namespace stalker2 {
-
-
 extern pcstr  editor_project_ext;
 extern pcstr  resources_converted_path;
 extern pcstr  resources_path;
-
 
 game_world::game_world( game& game )
 :super					( game ),
@@ -299,6 +303,65 @@ void game_world::on_project_loaded( resources::queries_result& data )
 
 	//switch_to_hud_camera();
 
+	std::string name = m_project_resource_path.c_str();
+	std::string path = "..//..//resources//sources//projects//" + name + "//project.xprj";
+	std::string info = "";
+
+	ifstream project;
+	project.open(path, std::ios::in);
+	if (!project.is_open()) {
+		path = "..//..//resources//platforms//pc_dx11//projects//" + name + "//project.lua";
+
+	}
+	std::vector<std::string> v; std::string guid;
+	bool cond1(false), cond2(false), check(false);
+	if (project.is_open()) {
+		while (!project.eof())
+		{
+			std::getline(project, info);
+			v.push_back(info);
+			if (info.find("active_camera =") != std::string::npos && !cond1)
+			{
+				//let's get guid of active_camera
+				std::string ln_guid = v[v.size() - 4];
+				ln_guid.erase(boost::remove_if(ln_guid, boost::is_any_of("[\"")), ln_guid.end());
+				ln_guid.erase(boost::remove_if(ln_guid, boost::is_any_of("\"] = {")), ln_guid.end());
+				guid = ln_guid.substr(3, ln_guid.length());
+				cond1 = true;
+			}
+			//we found that active_camera should execute on level start
+			else if (info.find("= \"immediate") != std::string::npos && !check)
+			{
+				//check StartScene
+				check = true;
+			}
+			//we are in guid end of active camera and camera_director
+			else if (check && info.find(guid) != std::string::npos)
+			{
+				check = false;
+				std::string diff = v[v.size() - 13];
+				//we are in camera director job
+				if (diff.find("\"camera_director\"") != std::string::npos)
+				{
+					std::string r = v[v.size() - 4];
+					//if we need to activate scene on level start
+					if (r.find("\"#StartScene\"") != std::string::npos)
+					{
+						cond2 = true;
+						break;
+					}
+					break;
+				}
+				break;
+			}
+		}
+		if ( cond1 && cond2 ) {
+			m_cam_attached = true;
+		}
+		project.close();
+		v.clear();
+	}
+
 	if(!m_key_camera && !m_cam_attached) {
 		switch_to_free_fly_camera();
 
@@ -419,13 +482,17 @@ void game_world::query_resources( )
 }
 
 void game_world::delete_actor() {
-	if (m_local_actor) {
+	if (m_local_actor && !m_local_actor->m_actor_loaded) {
 		m_local_actor->m_stop_query = true;
+	}
+	else {
+		delete_actor_impl();
 	}
 }
 
-void game_world::clean_actor() {
+void game_world::delete_actor_impl() {
 	DELETE(m_local_actor);
+	m_actor_spawned = false;
 }
 
 void game_world::on_resources_ready( resources::queries_result& data )
@@ -467,6 +534,8 @@ void game_world::tmp_actor_ready( actor* a )
 	a->activate				( initial_matrix );
 
 	m_camera_director->switch_to_camera	( m_actor_input_controller, "actor camera" );
+
+	m_local_actor->m_actor_loaded = true;
 
 //	volumetric_test = NEW(object_volumetric_sound)(*this);
 //	volumetric_test->load_custom("rain");

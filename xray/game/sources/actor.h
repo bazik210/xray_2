@@ -59,6 +59,7 @@ public:
 	void			particle_fire_attach		(resources::queries_result& data);
 	
 	bool			m_noclip;
+	bool			m_actor_loaded;
 
 	void			disable_noclip				( );
 

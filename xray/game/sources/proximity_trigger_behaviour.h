@@ -28,6 +28,7 @@ namespace stalker2
 	public:
 									proximity_trigger_behaviour	( object_scene_job* owner, configs::binary_config_value const& data, pcstr name );
 									~proximity_trigger_behaviour( );
+				void				initialize					( );
 		virtual void				attach_to_object			( object_controlled* o );
 		virtual void				detach_from_object			( object_controlled* o );
 		virtual void				tick						( );
@@ -36,6 +37,9 @@ namespace stalker2
 	private:
 		object_proximity_trigger*		m_proximity_trigger;
 		collision::geometry_instance *	m_testee;
+		object_scene_job*				m_owner;
+		pcstr							testees_source;
+		bool							m_start;
 
 #ifndef MASTER_GOLD
 

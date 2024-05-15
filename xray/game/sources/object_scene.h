@@ -50,6 +50,10 @@ private:
 	configs::binary_config_value		m_data;
 	pcstr								m_name;
 	event_manager						m_event_manager;
+
+public:
+	configs::binary_config_value   get_data ( ) { return m_data; };
+
 }; // class object_scene
 
 class object_scene_job : private boost::noncopyable 

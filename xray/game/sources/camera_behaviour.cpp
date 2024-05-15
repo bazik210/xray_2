@@ -311,14 +311,13 @@ camera_director_behaviour::camera_director_behaviour( object_scene_job* owner,
 void camera_director_behaviour::attach_to_object( object_controlled* o )
 {
 	super::attach_to_object( o );
-	m_owner->get_game_world().m_cam_attached = true;
 	pcstr camera_name			= m_data["active_camera"];
 	game_object_ptr_ t			= m_owner->get_game_world().get_object_by_name	( camera_name );
 	R_ASSERT					( t );
 	game_camera* c				= static_cast_checked<game_camera*>(t.c_ptr());
+	m_owner->get_game_world().m_cam_attached = true; //for some reason we missed you
 
-	if (!m_owner->get_game_world().m_key_actor && !m_owner->get_game_world().m_key_camera /*m_owner->get_game_world().m_actor_spawned == true*/) {
-		m_owner->get_game_world().m_actor_spawned = false;
+	if ( !m_owner->get_game_world().m_key_actor && !m_owner->get_game_world().m_key_camera ) {
 		m_owner->get_game_world().delete_actor();
 	}
 

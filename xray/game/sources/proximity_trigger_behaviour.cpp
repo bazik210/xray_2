@@ -32,15 +32,11 @@ namespace stalker2{
 proximity_trigger_behaviour::proximity_trigger_behaviour ( object_scene_job* owner, configs::binary_config_value const& data, pcstr name )
 	:super				( owner, data, name ),
 	m_proximity_trigger	( NULL ),
-	m_testee			( NULL )
+	m_testee			( NULL ),
+	m_owner				( owner ),
+	m_start				( false )
 {
-	pcstr testees_source = data["testees_source"];
-
-	if( xray::strings::compare( testees_source, "HUD" ) == 0 )
-	{
-		//m_testee = &owner->get_game_world().get_hud()->get_caracter_capsule();
-		m_testee = &owner->get_game_world().m_local_actor->get_caracter_capsule();
-	}
+	testees_source = data["testees_source"];
 
 #ifndef MASTER_GOLD
 	static xray::console_commands::cc_bool		is_testee_volume_enabled_cc	( "proximity_trigger_testee_volume_enabled", m_is_testee_volume_enabled, true, console_commands::command_type_user_specific );
@@ -56,10 +52,21 @@ proximity_trigger_behaviour::proximity_trigger_behaviour ( object_scene_job* own
 		m_is_input_handler_enabled_catched = true;
 	}
 
+#endif //#ifndef MASTER_GOLD
+}
+
+void proximity_trigger_behaviour::initialize( )
+{
+	if( xray::strings::compare( testees_source, "HUD" ) == 0 )
+	{
+		//m_testee = &m_owner->get_game_world().get_hud()->get_caracter_capsule();
+		m_testee = &m_owner->get_game_world().m_local_actor->get_caracter_capsule();
+	}
+#ifndef MASTER_GOLD
 	m_testee_primitive.data_		= float3( 1, 1, 1 );
 	m_testee_primitive.type			= collision::primitive_capsule;
 	m_last_testee_primitive_type	= collision::primitive_capsule;
-#endif //#ifndef MASTER_GOLD
+#endif
 }
 
 #ifndef MASTER_GOLD
@@ -122,7 +129,6 @@ struct primitive_callback: collision::enumerate_primitives_callback
 
 void proximity_trigger_behaviour::tick ( )
 {
-
 #ifndef MASTER_GOLD
 	if( m_testee == NULL || m_testee_primitive.type != m_last_testee_primitive_type )
 	{
@@ -162,6 +168,12 @@ void proximity_trigger_behaviour::tick ( )
 #endif //#ifndef MASTER_GOLD
 
 	if (m_proximity_trigger->get_game_world().m_local_actor) {
+
+		if (m_proximity_trigger->get_game_world().m_local_actor->m_actor_loaded && !m_start)
+		{
+			m_start = true;
+			initialize ( );
+		}
 
 		if (m_is_actor_reset) {
 			m_is_actor_reset = false;
