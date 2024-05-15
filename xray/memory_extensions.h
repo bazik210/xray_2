@@ -30,7 +30,11 @@
 #define XRAY_MAX_CACHE_LINE_PAD					char XRAY_STRING_CONCAT(m_cache_line_pad_$, __LINE__) [XRAY_MAX_CACHE_LINE_SIZE]
 
 #define XRAY_USE_CRT_MEMORY_ALLOCATOR 0
-#define	XRAY_DISABLE_CRT_ALLOCATOR 1
+#ifdef MASTER_GOLD
+	#define XRAY_DISABLE_CRT_ALLOCATOR 1
+#else
+	#define XRAY_DISABLE_CRT_ALLOCATOR 0
+#endif
 
 namespace xray {
 namespace memory {

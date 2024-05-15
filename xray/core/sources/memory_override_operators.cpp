@@ -13,7 +13,11 @@
 #include <xray/construction.h>
 #include <xray/memory_doug_lea_mt_allocator.h>
 
-#define XRAY_DISABLE_CRT_ALLOCATOR 1
+#ifdef MASTER_GOLD
+	#define XRAY_DISABLE_CRT_ALLOCATOR 1
+#else
+	#define XRAY_DISABLE_CRT_ALLOCATOR 0
+#endif
 
 #if 0//def XRAY_STATIC_LIBRARIES
 
