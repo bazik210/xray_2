@@ -24,7 +24,7 @@ void bullet_free( void* memblock )
 namespace xray {
 namespace physics {
 
-class PhysicsDebugDrawer : public btIDebugDraw
+class physics_debug_draw : public btIDebugDraw
 {
 public:
 	//void init();
@@ -38,8 +38,8 @@ public:
 	void setDebugMode(int debugMode) override;
 	int getDebugMode() const override;
 
-	void XR_SetScene(xray::render::scene_ptr const* scene);
-	void XR_SetDebugRenderer(xray::render::debug::renderer* debug_renderer);
+	void set_xray_scene(xray::render::scene_ptr const* scene);
+	void set_xray_debug_renderer(xray::render::debug::renderer* debug_renderer);
 
 private:
 	xray::render::scene_ptr const* m_scene;
@@ -47,21 +47,15 @@ private:
 	int m_debugMode;
 };
 
-PhysicsDebugDrawer g_physicsDebugDrawer;
+physics_debug_draw g_phys_debug_draw;
 
-void PhysicsDebugDrawer::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
+void physics_debug_draw::drawLine(const btVector3& from, const btVector3& to, const btVector3& color)
 {
 	m_debug_renderer->draw_line(*m_scene, from_bullet(from),
 		from_bullet(to), xray::math::color(color.x(), color.y(), color.z(), 1.f), true);
-
-	//g_debugRender->DrawLine(
-	//	glm::vec3(from.x(), from.y(), from.z()),
-	//	glm::vec3(to.x(), to.y(), to.z()),
-	//	glm::vec3(color.x(), color.y(), color.z())
-	//);
 }
 
-void PhysicsDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+void physics_debug_draw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
 {
 	drawLine(
 		PointOnB,
@@ -70,31 +64,30 @@ void PhysicsDebugDrawer::drawContactPoint(const btVector3& PointOnB, const btVec
 	);
 }
 
-void PhysicsDebugDrawer::reportErrorWarning(const char* warningString)
+void physics_debug_draw::reportErrorWarning(const char* warningString)
 {
 }
 
-void PhysicsDebugDrawer::draw3dText(const btVector3& location, const char* textString)
+void physics_debug_draw::draw3dText(const btVector3& location, const char* textString)
 {
 }
 
-void PhysicsDebugDrawer::setDebugMode(int debugMode)
+void physics_debug_draw::setDebugMode(int debugMode)
 {
 	m_debugMode = debugMode;
 }
 
-int PhysicsDebugDrawer::getDebugMode() const
+int physics_debug_draw::getDebugMode() const
 {
 	return m_debugMode;
 }
 
-
-void PhysicsDebugDrawer::XR_SetScene(xray::render::scene_ptr const* scene)
+void physics_debug_draw::set_xray_scene(xray::render::scene_ptr const* scene)
 {
 	m_scene = scene;
 }
 
-void PhysicsDebugDrawer::XR_SetDebugRenderer(xray::render::debug::renderer* debug_renderer)
+void physics_debug_draw::set_xray_debug_renderer(xray::render::debug::renderer* debug_renderer)
 {
 	m_debug_renderer = debug_renderer;
 }
@@ -248,56 +241,56 @@ void bullet_physics_world::debug_render( xray::render::scene_ptr const& scene, x
 
 void bullet_physics_world::debug_render_aabb(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
 {
-	g_physicsDebugDrawer.XR_SetScene(&scene);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
-	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+	g_phys_debug_draw.set_xray_scene(&scene);
+	g_phys_debug_draw.set_xray_debug_renderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_phys_debug_draw);
 
 	int debugDrawMode = 0;
 	debugDrawMode |= btIDebugDraw::DBG_DrawAabb;
-	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+	g_phys_debug_draw.setDebugMode(debugDrawMode);
 
 	m_dynamicsWorld->debugDrawWorld();
 
-	g_physicsDebugDrawer.setDebugMode(0);
+	g_phys_debug_draw.setDebugMode(0);
 
-	g_physicsDebugDrawer.XR_SetScene(nullptr);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+	g_phys_debug_draw.set_xray_scene(nullptr);
+	g_phys_debug_draw.set_xray_debug_renderer(nullptr);
 }
 
 void bullet_physics_world::debug_render_contacts(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
 {
-	g_physicsDebugDrawer.XR_SetScene(&scene);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
-	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+	g_phys_debug_draw.set_xray_scene(&scene);
+	g_phys_debug_draw.set_xray_debug_renderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_phys_debug_draw);
 
 	int debugDrawMode = 0;
 	debugDrawMode |= btIDebugDraw::DBG_DrawContactPoints;
-	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+	g_phys_debug_draw.setDebugMode(debugDrawMode);
 
 	m_dynamicsWorld->debugDrawWorld();
 
-	g_physicsDebugDrawer.setDebugMode(0);
+	g_phys_debug_draw.setDebugMode(0);
 
-	g_physicsDebugDrawer.XR_SetScene(nullptr);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+	g_phys_debug_draw.set_xray_scene(nullptr);
+	g_phys_debug_draw.set_xray_debug_renderer(nullptr);
 }
 
 void bullet_physics_world::debug_render_wireframe(xray::render::scene_ptr const& scene, xray::render::debug::renderer& renderer) const
 {
-	g_physicsDebugDrawer.XR_SetScene(&scene);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(&renderer);
-	m_dynamicsWorld->setDebugDrawer(&g_physicsDebugDrawer);
+	g_phys_debug_draw.set_xray_scene(&scene);
+	g_phys_debug_draw.set_xray_debug_renderer(&renderer);
+	m_dynamicsWorld->setDebugDrawer(&g_phys_debug_draw);
 
 	int debugDrawMode = 0;
 	debugDrawMode |= btIDebugDraw::DBG_DrawWireframe;
-	g_physicsDebugDrawer.setDebugMode(debugDrawMode);
+	g_phys_debug_draw.setDebugMode(debugDrawMode);
 
 	m_dynamicsWorld->debugDrawWorld();
 
-	g_physicsDebugDrawer.setDebugMode(0);
+	g_phys_debug_draw.setDebugMode(0);
 
-	g_physicsDebugDrawer.XR_SetScene(nullptr);
-	g_physicsDebugDrawer.XR_SetDebugRenderer(nullptr);
+	g_phys_debug_draw.set_xray_scene(nullptr);
+	g_phys_debug_draw.set_xray_debug_renderer(nullptr);
 }
 
 
