@@ -17,7 +17,7 @@ except IOError:
     cfgFile = open('./script_configs/RemoveDebugDefinition.json.example')
     cfg = json.load(cfgFile)
 
-# Parse each project file and remove DEBUG, _DEBUG and NDEBUG from Release configuration
+# Parse each project file and replace MultiThreaded to MultiThreadedDLL in Release configuration
 for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
     for filename in fnmatch.filter(files, '*.vcxproj'):
         skip = 1
@@ -44,7 +44,7 @@ for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
             # Iterate through contents and look for preprocessor definitions that meet criteria
             groupElement = group.iter()
             for element in groupElement:
-                # Remove preprocessor definitions
+                # Replace preprocessor definition
                 if element.tag == '{'+ namespace + '}' + 'RuntimeLibrary' and 'Release' in group.get('Condition'):
                     element.text = element.text.replace("MultiThreaded","MultiThreadedDLL")
      

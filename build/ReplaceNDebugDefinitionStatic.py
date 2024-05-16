@@ -17,7 +17,7 @@ except IOError:
     cfgFile = open('./script_configs/RemoveDebugDefinition.json.example')
     cfg = json.load(cfgFile)
 
-# Parse each project file and remove DEBUG, _DEBUG and NDEBUG from Release and MinSizeRel configuration
+# Parse each project file and replace NDEBUG to "NDEBUG;XRAY_STATIC_LIBRARIES;" in Release configuration
 for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
     for filename in fnmatch.filter(files, '*.vcxproj'):
         skip = 1
@@ -39,7 +39,7 @@ for path, dirs, files in os.walk(os.path.abspath(os.getcwd())):
         contents = ET.parse(vcxproj)
         root = contents.getroot()
 
-        # Find all tags related to configuration groups
+        # Find all tags related to configuration group
         for group in root.findall('{'+ namespace + '}' + 'ItemDefinitionGroup'):
             # Iterate through contents and look for preprocessor definitions that meet criteria
             groupElement = group.iter()
