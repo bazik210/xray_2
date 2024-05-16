@@ -1,0 +1,519 @@
+//
+//  Nicolas Pastrana Script File
+//  site: http://n.pastrana.free.fr
+//  help: http://n.pastrana.free.fr/mel/
+//  mail: n.pastrana@free.fr
+//
+// I DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+// INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+// EVENT SHALL I BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+// CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+// DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+// TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+// PERFORMANCE OF THIS SOFTWARE.                  
+//
+//
+//  more informations on: http://n.pastrana.free.fr/mel/
+//
+//  MODIFY THIS AT YOUR OWN RISK
+//
+proc string assembleCmdPathAnimation(string $path)
+{
+	$name = ($path + "_PathAnimation");
+	string $cmd = ("pathAnimation -name " + $name);
+
+	int $index = `optionVar -query pathAnimFrontAxisRB`;
+	string			$followAxis = "y";
+	if( $index == 1 ) 	$followAxis = "x";
+	else if( $index == 3 ) 	$followAxis = "z";
+	
+	$index = `optionVar -query pathAnimUpAxisRB`;
+	string 			$upAxis = "z";
+	if( $index == 1 ) 	$upAxis = "x";
+	else if( $index == 2 )	$upAxis = "y";
+
+	if( `optionVar -query pathAnimFollowCB` ) {
+		$cmd = ($cmd 
+				+ " -follow true"
+				+ " -followAxis " + $followAxis
+				+ " -upAxis " + $upAxis
+				);
+
+		string $worldUpType = `optionVar -query pathAnimWorldUpTypeOM`;
+		$cmd = ($cmd  + " -worldUpType " + "\"" + $worldUpType + "\"" );
+		switch ( $worldUpType )
+		{
+		case "scene":
+		case "normal":
+			break;
+		case "object":
+			string $worldUpObject = `optionVar -query pathAnimWorldUpObjectTF`;
+			if ($worldUpObject != "") {
+				$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+			}
+			break;
+		case "objectrotation":
+			float $worldUpVector[] = `optionVar -query pathAnimWorldUpVectorFF`;
+			$cmd = ($cmd  + " -worldUpVector " 
+					+ $worldUpVector[0] + " "
+					+ $worldUpVector[1] + " "
+					+ $worldUpVector[2]);
+			string $worldUpObject = `optionVar -query pathAnimWorldUpObjectTF`;
+			if ($worldUpObject != "") {
+				$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+			}
+			break;
+		case "vector":
+			float $worldUpVector[] = `optionVar -query pathAnimWorldUpVectorFF`;
+			$cmd = ($cmd  + " -worldUpVector " 
+					+ $worldUpVector[0] + " "
+					+ $worldUpVector[1] + " "
+					+ $worldUpVector[2]);
+			break;
+		}
+
+		if( `optionVar -query pathAnimInverseUpCB` ) {
+			$cmd = ($cmd  + " -inverseUp true" );
+		}
+		else {
+			$cmd = ($cmd  + " -inverseUp false" );
+		}
+
+		if( `optionVar -query pathAnimInverseFrontCB` ) {
+			$cmd = ($cmd  + " -inverseFront true" );
+		}	
+		else {
+			$cmd = ($cmd  + " -inverseFront false" );
+		}
+
+		if( `optionVar -query pathAnimBankCB` ) {
+			$cmd = ($cmd 
+					+ " -bank true"
+					+ " -bankScale " + `optionVar -query pathAnimBankScaleSG`
+					+ " -bankThreshold " + `optionVar -query pathAnimBankMaxSG`
+				);
+		}
+		else {
+			$cmd = ($cmd + " -bank false" );
+		}
+	}
+	else {
+		$cmd = ($cmd + " -follow false" );
+	}
+
+	int $state = `optionVar -q _NP_duplicateAlongCurvesCountMethod`;
+
+	switch ($state)
+	{
+		case 1:	// "Number"
+			if( `optionVar -query pathAnimParametricLengthCB` ) {
+				$cmd = ($cmd  + " -fractionMode false" );
+			}
+			else {
+				$cmd = ($cmd  + " -fractionMode true" );
+			}
+
+			$cmd = ($cmd + " -startTimeU 1 -endTimeU "+ `optionVar -query _NP_duplicateAlongCurvesNumber`);
+			break;
+		case 2: // "Start/End"
+			if( `optionVar -query pathAnimParametricLengthCB` ) {
+				$cmd = ($cmd  + " -fractionMode false" );
+			}
+			else {
+				$cmd = ($cmd  + " -fractionMode true" );
+			}
+			
+			float $startTime = `optionVar -q pathAnimStartTimeSG`;
+			float $endTime = `optionVar -q pathAnimEndTimeSG`;
+			$cmd = ($cmd + " -startTimeU " + $startTime + " -endTimeU " + $endTime);
+
+			break;
+		case 3: // "Distance"
+			$cmd = ($cmd  + " -fractionMode true" );
+			
+			float $tolerance = `optionVar -q _NP_duplicateAlongCurvesTolerance`;
+			float $arcLen = `arclen $path`;
+
+			$endTimeU = $arcLen / $tolerance;
+			$cmd = ($cmd + " -startTimeU 0 -endTimeU " + $endTimeU);
+			break;
+	}
+
+	return $cmd;
+}
+
+proc string assembleCmdSnapshot(string $path)
+{
+	$name = ($path + "_Snapshot");
+	string $cmd = ("snapshot -name " + $name);
+
+	int $state = `optionVar -q _NP_duplicateAlongCurvesCountMethod`;
+	switch ($state)
+	{
+		case 1:	// "Number"
+			$cmd += (" -increment 1 -startTime 1 -endTime " + `optionVar -query _NP_duplicateAlongCurvesNumber`);				
+			break;
+		case 2: // "Start/End"
+			float $startTime = `optionVar -q snapshotStartTime`;
+			float $endTime = `optionVar -q snapshotEndTime`;
+			$cmd += (" -startTime " + $startTime + " -endTime " + $endTime + " -increment " + `optionVar -query snapshotByTime`);
+			break;
+		case 3: // "Distance"
+			float $tolerance = `optionVar -q _NP_duplicateAlongCurvesTolerance`;
+			float $arcLen = `arclen $path`;
+			float $startTime = (`optionVar -q _NP_duplicateAlongCurvesOffsetDistance` / $tolerance);
+			float $endTime = ($arcLen / $tolerance);
+			float $increment = (`optionVar -q _NP_duplicateAlongCurvesDistance` / $tolerance );
+			
+			$cmd += (" -startTime " + $startTime + " -endTime " + $endTime + " -increment " + $increment);
+			break;
+	}
+	$cmd += " -constructionHistory ";
+	string $updateStyle = "demand";
+	if (`optionVar -query snapshotForceUpdate` == 0) {
+		$updateStyle = "animCurve";
+	} else if (`optionVar -query snapshotForceUpdate` == 1) {
+		$updateStyle = "always";
+	}
+	$cmd +=	("1 -update " + $updateStyle);
+	return $cmd;
+}
+
+
+global proc perform_NP_duplicateAlongCurve ()
+{
+string $prefix = "_NP_";				
+
+string $tempname, $snapshotNameArray[], $duplicatedArray[], $duplicated;
+string $selected[] = `ls -selection`;
+string $pathshape[] = `ls -selection -dag -type nurbsCurve`;
+string $pathArray[] = `listRelatives -p $pathshape`;
+
+string $tocopyArray[] = stringArrayRemove($pathArray, $selected);
+string $tocopy = $tocopyArray[0];
+
+int $CountMethod = `optionVar -q _NP_duplicateAlongCurvesCountMethod`;
+
+if (size($tocopyArray)>1) {warning "Only one non-nurbsCurve must be selected!";}
+else if (size($tocopyArray)==0) {warning "At least one non-nurbsCurve must be selected!";}
+if (size($pathArray)==0) {warning "At least one nurbsCurve must be selected!";}
+
+if((size($pathArray)>=1) && (size($tocopyArray)==1)){
+	cycleCheck -e off;
+	waitCursor -state on;
+
+	string $ParentGroup = `group -name "DuplicateAlongCurves" -empty`;
+	setAttr -l true -k false ($ParentGroup + ".translate");
+	setAttr -l true -k false ($ParentGroup + ".rotate");
+	setAttr -l true -k false ($ParentGroup + ".scale");
+	setAttr -l true -k false ($ParentGroup + ".shear");
+	setAttr -l true -k false ($ParentGroup + ".rotateAxis");
+	
+	string $currentPath;
+
+	for ( $i=0; $i<size($pathArray); $i++)
+	{
+		string $cmd = "";
+		$currentPath = $pathArray[$i];
+
+		select $tocopy;
+		$tempname = $prefix + $tocopy + "_" + $i;
+		$duplicatedArray = `duplicate -rr -name $tempname $tocopy`;
+		$duplicated = $duplicatedArray[0];
+
+		select -r $duplicated;
+		select -add $currentPath;
+		$cmd = `assembleCmdPathAnimation($currentPath)`;
+		string $pathAnim = `eval ($cmd)`;
+		select $duplicated;
+		$cmd = `assembleCmdSnapshot($currentPath)`;
+		$snapshotNameArray = `eval ($cmd)`;
+
+		string $snapshotName = $snapshotNameArray[1];
+		if (`optionVar -query snapshotForceUpdate` == 2) updateMotionTrail;
+		int $scriptJobArray[]={};
+		if (`optionVar -q _NP_duplicateAlongCurvesAttibutes`)
+		{
+			string $animCurveScaleX;
+			string $animCurveScaleY;
+			string $animCurveScaleZ;
+			if (size($snapshotNameArray)>1) $snapshotName = $snapshotNameArray[1];
+			
+			string $changeKey = ("updateDuplicateAlongCurve (\"" + $ParentGroup + "\", \"" + $currentPath + "\", " + $CountMethod + ", " + `optionVar -q _NP_duplicateAlongCurvesKeyTwist` + ", " + `optionVar -q _NP_duplicateAlongCurvesKeyScale` + ");");
+			float $startTimeU;
+			float $endTimeU;
+			switch ($CountMethod)
+			{
+				case 1://Number
+					$startTimeU = 1;
+					$endTimeU = `optionVar -q _NP_duplicateAlongCurvesNumber`;
+
+					select -r $ParentGroup;
+					addAttr -longName ($currentPath + "Number") -shortName ($currentPath + "_nb") -defaultValue $endTimeU -attributeType "long" -keyable 1;
+
+					string $attrPath = ($ParentGroup + "." + $currentPath + "Number");
+					keyTangent -e -t 1 -l 1 ($currentPath + "_PathAnimation_uValue");
+
+					$scriptJobArray[size($scriptJobArray)] = `scriptJob -attributeChange $attrPath $changeKey`;
+					connectAttr -f -l 1 $attrPath ($snapshotName + ".endTime");
+					break;
+				case 2://Start/End
+					$startTimeU = `optionVar -q pathAnimStartTimeSG`;
+					$endTimeU = `optionVar -q pathAnimEndTimeSG`;
+					float $startTime = `optionVar -q snapshotStartTime`;
+					float $endTime = `optionVar -q snapshotEndTime`;
+					float $increment = `optionVar -q snapshotByTime`;
+
+					select -r $ParentGroup;
+					addAttr -ln ($currentPath + "PathAnimTimes") -sn ($currentPath + "Anim") -at double2 -k 1;
+						addAttr -ln ($currentPath + "PathAnimStartTime") -sn ($currentPath + "AnimStart") -p ($currentPath + "PathAnimTimes") -dv $startTimeU -at double -k 1;
+						addAttr -ln ($currentPath + "PathAnimEndTime") -sn ($currentPath + "AnimEnd") -p ($currentPath + "PathAnimTimes") -dv $endTimeU -at double -k 1;
+					$scriptJobArray[size($scriptJobArray)] = `scriptJob -attributeChange ($ParentGroup + "." + $currentPath + "PathAnimTimes") $changeKey`;
+					addAttr -ln ($currentPath + "Snapshot") -sn ($currentPath + "Snap") -at double3 -k 1;
+						addAttr -ln ($currentPath + "SnapshotStartTime") -sn ($currentPath + "SnapStart") -p ($currentPath + "Snapshot") -dv $startTime -at double -k 1;
+						addAttr -ln ($currentPath + "SnapshotEndTime") -sn ($currentPath + "SnapEnd") -p ($currentPath + "Snapshot") -dv $endTime -at double -k 1;
+						addAttr -ln ($currentPath + "SnapshotIncrement") -sn ($currentPath + "SnapEnd") -p ($currentPath + "Snapshot") -dv $increment -at double -k 1;
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "SnapshotStartTime") ($snapshotName + ".startTime");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "SnapshotEndTime") ($snapshotName + ".endTime");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "SnapshotIncrement") ($snapshotName + ".increment");
+					break;
+				case 3://Incremental Distance
+					$startTimeU = `optionVar -q pathAnimStartTimeSG`;
+					$endTimeU = `optionVar -q pathAnimEndTimeSG`;
+					float $startTime = `optionVar -q snapshotStartTime`;
+					float $endTime = `optionVar -q snapshotEndTime`;
+					float $increment = `optionVar -q snapshotByTime`;
+					float $distance = `optionVar -q _NP_duplicateAlongCurvesDistance`;
+					float $offset = `optionVar -q _NP_duplicateAlongCurvesOffsetDistance`;
+					float $tolerance = `optionVar -q _NP_duplicateAlongCurvesTolerance`;
+					
+					string $attrName[] = {"_distance", "_offset", "_tolerance"};
+					string $attrShortName[] = {"_id", "_oD", "Tol"};
+					float $attrValue[] = {$distance, $offset, $tolerance};
+
+					string $curveInfoNode = `arclen -ch on $currentPath`;
+					float $arcLen = `getAttr ($curveInfoNode + ".arcLength")`;
+
+					for ($k=0; $k<size($attrName); $k++)
+					{
+						string $longName = ($currentPath + $attrName[$k]);
+						string $shortName = ($currentPath + $attrShortName[$k]);
+						select $ParentGroup;
+						addAttr -longName $longName -shortName $shortName -defaultValue $attrValue[$k] -attributeType double -keyable 1;
+					}
+					
+					float $startTimeU = 0;
+					$endTimeU = $arcLen / $tolerance;
+					
+					select $ParentGroup;
+					addAttr -longName ($currentPath + "_arcLength") -attributeType double -keyable 0;
+					connectAttr -f -l 1 ($curveInfoNode + ".arcLength") ($ParentGroup + "." + $currentPath + "_arcLength");
+					string $div = `createNode multiplyDivide`;
+					setAttr ($div+".operation") 2;
+					string $mult = `createNode multiplyDivide`;
+					setAttr ($mult+".operation") 1;
+					connectAttr -f -l 1 ($curveInfoNode + ".arcLength") ($div+".input1X");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_tolerance") ($div+".input2X");
+					connectAttr -f -l 1 ($div+".outputX") ($snapshotName+".endTime");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_distance") ($div+".input1Y");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_tolerance") ($div+".input2Y");
+					connectAttr -f -l 1 ($div+".outputY") ($snapshotName+".increment");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_tolerance") ($div+".input2Z");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_offset") ($div+".input1Z");
+					connectAttr -f -l 1 ($div+".outputZ") ($snapshotName+".startTime");
+					break;
+				}
+				if (`optionVar -q _NP_duplicateAlongCurvesKeyTwist`)
+				{
+					setKeyframe -t $startTimeU ($pathAnim+".ft");
+					setKeyframe -t $startTimeU ($pathAnim+".ut");
+					setKeyframe -t $startTimeU ($pathAnim+".st");
+					setKeyframe -t $endTimeU ($pathAnim+".ft");
+					setKeyframe -t $endTimeU ($pathAnim+".ut");
+					setKeyframe -t $endTimeU ($pathAnim+".st");
+				}
+				if (`optionVar -q _NP_duplicateAlongCurvesKeyScale`)
+				{
+					$animCurveScaleX = `createNode -name ($currentPath + "_animCurveScaleX") animCurveTL`;
+					setKeyframe -t $startTimeU -itt linear -ott linear -value 1 $animCurveScaleX;
+					setKeyframe -t $endTimeU -itt linear -ott linear -value 1 $animCurveScaleX;
+					connectAttr -f ($animCurveScaleX+".output") ($duplicated+".scaleX");
+					$animCurveScaleY = `createNode -name ($currentPath + "_animCurveScaleY") animCurveTL`;
+					setKeyframe -t $startTimeU -itt linear -ott linear -value 1 $animCurveScaleY;
+					setKeyframe -t $endTimeU -itt linear -ott linear -value 1 $animCurveScaleY;
+					connectAttr -f ($animCurveScaleY+".output") ($duplicated+".scaleY");
+					$animCurveScaleZ = `createNode -name ($currentPath + "_animCurveScaleZ") animCurveTL`;
+					setKeyframe -t $startTimeU -itt linear -ott linear -value 1 $animCurveScaleZ;
+					setKeyframe -t $endTimeU -itt linear -ott linear -value 1 $animCurveScaleZ;
+					connectAttr -f ($animCurveScaleZ+".output") ($duplicated+".scaleZ");
+				}
+
+
+
+				select -r $ParentGroup;
+				addAttr -longName ($currentPath + "_FrontAxis") -shortName ($currentPath + "_front") -defaultValue (`optionVar -query pathAnimFrontAxisRB`-1) -attributeType enum -enumName "X:Y:Z:" -keyable 0;
+				connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_FrontAxis") ($pathAnim + ".frontAxis");
+				addAttr -longName ($currentPath + "_UpAxis") -shortName ($currentPath + "_up") -defaultValue (`optionVar -query pathAnimUpAxisRB`-1) -attributeType enum -enumName "X:Y:Z:" -keyable 0;
+				connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_UpAxis") ($pathAnim + ".upAxis");
+
+				if( `optionVar -query pathAnimBankCB` ) {
+					
+					addAttr -longName ($currentPath + "_bankScale") -shortName ($currentPath + "_bkS") -defaultValue `optionVar -query pathAnimBankScaleSG` -attributeType "double" -keyable 1;
+					addAttr -longName ($currentPath + "_bankLimit") -shortName ($currentPath + "_bkL") -defaultValue `optionVar -query pathAnimBankMaxSG` -attributeType "double" -keyable 1;
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_bankScale") ($pathAnim + ".bankScale");
+					connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_bankLimit") ($pathAnim + ".bankLimit");
+				}
+				addAttr -longName ($currentPath + "_Update") -shortName ($currentPath + "_upd") -defaultValue `optionVar -query snapshotForceUpdate` -attributeType enum -enumName "demand:always:animCurve:" -keyable 0;
+				connectAttr -f -l 1 ($ParentGroup + "." + $currentPath + "_Update") ($snapshotName + ".update");
+
+
+				if (`optionVar -q _NP_duplicateAlongCurvesKeyTwist` && `optionVar -q _NP_duplicateAlongCurvesKeyScale`)
+				{
+					addAttr -longName ($currentPath + "_GraphIt") -shortName ($currentPath + "_Gr") -defaultValue `optionVar -query pathAnimBankScaleSG` -attributeType enum -enumName " :graph_it" -keyable 0;
+					setAttr ($ParentGroup + "." + $currentPath + "_GraphIt") 0;
+					string $changeKey1 = ("if (`getAttr " + $ParentGroup + "." + $currentPath + "_GraphIt` == 1) {setAttr " + $ParentGroup + "." + $currentPath + "_GraphIt 0; ");
+					if (`optionVar -q _NP_duplicateAlongCurvesKeyTwist`)
+					$changeKey1 += ("select -add "+ $pathAnim + "; ");
+					if (`optionVar -q _NP_duplicateAlongCurvesKeyScale`)
+					$changeKey1 += ("select -add "+ $duplicated + "; ");
+					$changeKey1 += (" GraphEditor;select -add " + $ParentGroup + ";}");
+					$scriptJobArray[size($scriptJobArray)] = `scriptJob -attributeChange ($ParentGroup + "." + $currentPath + "_GraphIt") $changeKey1`;
+				}
+			}
+
+			setAttr ($duplicated + ".visibility") 0;
+
+			if (`optionVar -q _NP_duplicateAlongCurvesMesh`)
+			{	
+				select -r $tocopy;
+				select -hi;
+				string $tocopyShape[] = `ls -shapes -selection`;
+				select -r $duplicated;
+				select -hi;
+				string $copiedShape[] = `ls -shapes -selection`;
+		
+				connectAttr -f -l 1 ($tocopyShape[0] + ".outMesh") ($copiedShape[0] + ".inMesh");
+			}
+			if (`optionVar -q _NP_duplicateAlongCurvesAttibutes`)
+			{
+				string $script = ("updateDuplicateAlongCurve (\"" + $ParentGroup + "\", \"" + $currentPath + "\", " + $CountMethod + ", " + `optionVar -q _NP_duplicateAlongCurvesKeyTwist` + ", " + `optionVar -q _NP_duplicateAlongCurvesKeyScale` + ");");
+				
+				string $nodeUpdateNode = `scriptNode -st 1 -n ($currentPath + "scriptScriptJobs")`;
+				//Remove ScriptNodes (scriptJob)
+				//
+				$script = "if (`objExists " + $ParentGroup + "`==0 ) {select -r " + $nodeUpdateNode + ";delete;}";
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ro 1 -ad ($ParentGroup + ".translateX") $script`;
+
+				//Remove ScriptJobs (scriptNode)
+				//
+				int $scriptJobID;
+				string $tempArrayID = "{";
+				for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray)-1; $scriptJobID ++)
+				{
+					$tempArrayID += $scriptJobArray[$scriptJobID];
+					if ($scriptJobID<(size($scriptJobArray)-2)) $tempArrayID += ", ";
+				}
+				$tempArrayID +="}";
+				$script = "int $scriptJobArray[] = " + $tempArrayID + ";\nint $scriptJob;\nfor ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}";
+				scriptNode -e -as $script $nodeUpdateNode;
+				
+				//Create ScriptJobs (scriptNode)
+				
+				$script = "int $scriptJobArray[]={};\n";
+				$script += "string $changeKey = \"updateDuplicateAlongCurve (\\\"" + $ParentGroup + "\\\", \\\"" + $currentPath + "\\\",  \\\"" + $CountMethod + "\\\",  \\\"" + `optionVar -q _NP_duplicateAlongCurvesKeyTwist` + "\\\",  \\\"" + `optionVar -q _NP_duplicateAlongCurvesKeyScale` + "\\\")\";\n";
+
+				$script += "string $changeKey1 = \"if (`getAttr " + $ParentGroup + "." + $currentPath + "_GraphIt` == 1) {setAttr " + $ParentGroup + "." + $currentPath + "_GraphIt 0;\";\n";
+				$script += "if (`objExists " + $pathAnim + "_frontTwist`) \n";
+				$script += "$changeKey1 += (\"select -add " + $pathAnim + "; \");\n";
+				$script += "if (`objExists " + $currentPath + "_animCurveScaleX`) \n";
+				$script += "$changeKey1 += (\"select -add "+ $duplicated + "; \");\n";
+				$script += "$changeKey1 += (\"GraphEditor;select -add " + $ParentGroup + ";}\");\n";
+				
+				$script += "if (`attributeExists (\"" + $currentPath + "Number\") " + $ParentGroup + "`)\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac \"" + $ParentGroup + "." + $currentPath + "Number\" $changeKey`;\n";
+				$script += "if (`attributeExists (\"" + $currentPath + "PathAnimTimes\") " + $ParentGroup + "`)\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac \"" + $ParentGroup + "." + $currentPath + "PathAnimTimes\" $changeKey`;\n";
+				$script += "if (`attributeExists (\"" + $currentPath + "_GraphIt\") " + $ParentGroup + "`)\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac \"" + $ParentGroup + "." + $currentPath + "_GraphIt\" $changeKey1`;\n";
+
+				$script += "int $scriptJobID;\n";
+				$script += "string $tempArrayID = \"{\";\n";
+				$script += "for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray); $scriptJobID ++)\n";
+				$script += "{\n\t";
+				$script += "$tempArrayID += $scriptJobArray[$scriptJobID];\n\t";
+				$script += "if ($scriptJobID<(size($scriptJobArray)-1)) $tempArrayID += \", \";\n}\n";
+				$script += "$tempArrayID +=\"}\";\n";
+				$script += "string $script = \"int $scriptJobArray[] = \"+$tempArrayID+\";int $scriptJob;for ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}\";\n";
+				$script += "scriptNode -e -as $script " + $nodeUpdateNode + ";";
+				$script += "$script = \"if (`objExists \\\"" + " + $ParentGroup + " + "\\\"`==0 ) {select -r " + $nodeUpdateNode + ";delete;}\";";
+				$script += "scriptJob -ro 1 -ad "+$ParentGroup+".translateX $script;";
+				scriptNode -e -bs $script $nodeUpdateNode;
+			}
+			parent $snapshotNameArray[0] $ParentGroup;
+			parent $duplicated $ParentGroup;
+			
+		}
+		select $ParentGroup;
+		waitCursor -state off;
+	}
+}
+
+
+global proc updateDuplicateAlongCurve (string $ParentGroup, string $currentPath, int $CountMethod, int $keyTwist, int $keyScale)
+{
+	float $startTimeU;
+	float $endTimeU;
+	
+	switch ($CountMethod)
+	{
+		case 1://Number
+			$endTimeU = `getAttr ($ParentGroup + "." + $currentPath + "Number")`;
+			$startTimeU = 1;
+			break;
+		case 2://Start/End
+			$startTimeU = `getAttr ($ParentGroup + "." + $currentPath + "PathAnimStartTime")`;
+			$endTimeU = `getAttr ($ParentGroup + "." + $currentPath + "PathAnimEndTime")`;
+			break;
+		case 3://Incremental Distance
+			float $tolerance = `getAttr ($ParentGroup + "." + $currentPath + "_tolerance")`;
+			float $arcLen = `getAttr ($ParentGroup + "." + $currentPath + "_arcLength")`;
+			$startTimeU = 0;
+			$endTimeU = $arcLen / $tolerance;
+			break;
+	}
+	int $index = `keyframe -q -keyframeCount ($currentPath + "_PathAnimation_uValue")`;
+	
+	keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_PathAnimation_uValue");
+	keyframe -e -a -o over -tc $endTimeU -index ($index - 1) ($currentPath + "_PathAnimation_uValue");
+	if (getAttr ($currentPath + "_PathAnimation.fractionMode"))
+	{
+		selectKey -add -k -t $startTimeU -t $endTimeU ($currentPath + "_PathAnimation_uValue");
+		keyTangent -itt linear -ott linear;
+	}
+	if ($keyTwist)
+	{
+		int $indexFront = `keyframe -q -keyframeCount ($currentPath + "_PathAnimation_frontTwist")`;
+		int $indexUp = `keyframe -q -keyframeCount ($currentPath + "_PathAnimation_upTwist")`;
+		int $indexSide = `keyframe -q -keyframeCount ($currentPath + "_PathAnimation_sideTwist")`;
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_PathAnimation_frontTwist");
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_PathAnimation_upTwist");
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_PathAnimation_sideTwist");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexFront - 1) ($currentPath + "_PathAnimation_frontTwist");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexUp - 1) ($currentPath + "_PathAnimation_upTwist");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexSide - 1) ($currentPath + "_PathAnimation_sideTwist");
+	}
+	if ($keyScale)
+	{
+
+		int $indexX = `keyframe -q -keyframeCount ($currentPath + "_animCurveScaleX")`;
+		int $indexY = `keyframe -q -keyframeCount ($currentPath + "_animCurveScaleY")`;
+		int $indexZ = `keyframe -q -keyframeCount ($currentPath + "_animCurveScaleZ")`;
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_animCurveScaleX");
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_animCurveScaleY");
+		keyframe -e -a -o over -tc $startTimeU -index 0 ($currentPath + "_animCurveScaleZ");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexX - 1) ($currentPath + "_animCurveScaleX");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexY - 1) ($currentPath + "_animCurveScaleY");
+		keyframe -e -a -o over -tc $endTimeU -index ($indexZ - 1) ($currentPath + "_animCurveScaleZ");
+	}
+	updateMotionTrail;
+}

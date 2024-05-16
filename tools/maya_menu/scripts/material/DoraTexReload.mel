@@ -1,0 +1,303 @@
+global string $gDoraTexReload_fileList[];
+global string $gDoraTexReload_texNameList[];
+
+
+
+global string $gDoraTexReload_ver = "1.02";
+
+proc DoraTexReload_fileTextureReloadCmd (string $ftn)
+{
+    string $currFile = `getAttr $ftn`;
+	if ($currFile != "") {
+		int $i;
+		string $allTextures[] = `ls -typ file`;
+
+
+
+
+		for ($i = 0; $i < size($allTextures); $i++) {
+			string $ithFile = `getAttr ($allTextures[$i] + ".ftn")`;
+			if ($ithFile == $currFile)
+				setAttr ($allTextures[$i] + ".ftn") -type "string" $currFile;
+		}
+	}
+}
+
+
+
+proc string DoraTexReload_stringSpace( string $text, int $len )
+	{
+	string $textNew;
+	$textNew= $text;
+
+	while( size($textNew)<$len )
+		{
+		$textNew= ( $textNew + " " );
+		}
+	return $textNew;
+	}
+
+
+proc int DoraTexReload_maxStringLen( string $list[] )
+	{
+	int $listN;
+	int $len;
+	int $i;
+
+	$listN= `size($list)`;
+
+	for( $i=0, $len=0 ; $i<$listN ; $i++ )
+		{
+		$len= max( $len, size($list[$i]));
+		}
+	return( $len );
+	}
+
+
+proc DoraTexReload_getTexNameList()
+	{
+	global string $gDoraTexReload_fileList[];
+	global string $gDoraTexReload_texNameList[];
+
+	string $texfileList[];
+
+
+	int $objListN;
+	int $i,$j;
+
+	clear $gDoraTexReload_fileList;
+	clear $gDoraTexReload_texNameList;
+
+	$texfileList= `ls -tex`;
+	$objListN= `size($texfileList)`;
+
+	if( $objListN>=1 )
+		{
+		for( $i=0,$j=0 ; $i<$objListN ; $i++ )
+			{
+			if (`attributeExists "fileTextureName" $texfileList[$i]`)
+				{
+				$gDoraTexReload_fileList[$j]= $texfileList[$i];
+				$gDoraTexReload_texNameList[$j]= basename( `getAttr ($texfileList[$i] + ".fileTextureName" )`, "" );
+				$j++;
+				}
+			}
+		}
+
+	}
+
+
+proc string DoraTexReload_maketextNameTSL()
+	{
+	global string $gDoraTexReload_fileList[];
+	global string $gDoraTexReload_texNameList[];
+
+	string $ret;
+	int $fLen;
+	int $nLen;
+	int $i,$n;
+
+	$fLen= DoraTexReload_maxStringLen($gDoraTexReload_fileList);
+	$nLen= DoraTexReload_maxStringLen($gDoraTexReload_texNameList);
+
+	$ret= "-allowMultiSelection true -fn \"smallFixedWidthFont\" -doubleClickCommand \"DoraTexReload_allSelect();\" ";
+
+	$n= size( $gDoraTexReload_fileList );
+	for( $i=0 ; $i<$n ; $i++ )
+		{
+		$ret= $ret + "-append \"" + "[ " + DoraTexReload_stringSpace( $gDoraTexReload_fileList[$i], $fLen ) + " ] " +  DoraTexReload_stringSpace( $gDoraTexReload_texNameList[$i], $nLen ) + "\" ";
+		}
+
+
+	return( $ret );
+
+	}
+
+
+
+global proc DoraTexReload_updateTexNameList()
+	{
+	global string $gDoraTexReload_fileList[];
+	global string $gDoraTexReload_texNameList[];
+	string $texNameTSL;
+
+	int $sii[];
+	int $i,$n;
+
+	$sii=`textScrollList -q -sii DoraTexReloadWindow|FL|TS_list`;
+
+	DoraTexReload_getTexNameList();
+
+	textScrollList -e -ra DoraTexReloadWindow|FL|TS_list;
+
+	$texNameTSL= DoraTexReload_maketextNameTSL();
+
+	eval( "textScrollList -e " + $texNameTSL + "DoraTexReloadWindow|FL|TS_list;" );
+
+	$n= size( $gDoraTexReload_fileList );
+	for( $i in $sii)
+		{
+		if( $n>=$i )
+			{
+			textScrollList -e -sii $i DoraTexReloadWindow|FL|TS_list;
+			}
+		}
+
+
+	}
+
+
+
+global proc DoraTexReload_allSelect()
+	{
+	int $i;
+	int $n;
+
+	$n= `textScrollList -q -ni DoraTexReloadWindow|FL|TS_list`;
+
+
+	for( $i=0 ; $i<$n ; $i++ )
+		{
+		textScrollList -e -sii ($i+1) DoraTexReloadWindow|FL|TS_list;
+		}
+
+	}
+
+
+global proc int DoraTexReload_reload()
+	{
+	global string $gDoraTexReload_fileList[];
+	global string $gDoraTexReload_texNameList[];
+
+	int $n;
+	int $i;
+	int $ch;
+	int $sii[];
+
+
+	$sii= `textScrollList -q -sii DoraTexReloadWindow|FL|TS_list`;
+
+
+	$ch= 0;
+
+	$n= `size($sii)`;
+
+	if( $n <= 0 ){return( $ch );}
+
+	$n= size( $sii );
+	for( $i=0 ; $i<$n ; $i++ )
+		{
+		text -e -label ( "Reloading(" + ($i+1) + "/" + $n + ") - " + $gDoraTexReload_texNameList[$sii[$i]-1] ) DoraTexReloadWindow|FL|TXT_st;
+		if (`attributeExists "fileTextureName" $gDoraTexReload_fileList[$sii[$i]-1]`)
+			{
+			DoraTexReload_fileTextureReloadCmd ( $gDoraTexReload_fileList[$sii[$i]-1] + ".fileTextureName" );
+			$ch++;
+			}
+		}
+
+	text -e -label ( "Reloaded " + $n + " Texture" ) DoraTexReloadWindow|FL|TXT_st;
+
+
+	return( $ch );
+	}
+
+
+global proc DoraTexReload()
+	{
+	global string $gDoraTexReload_fileList[];
+	global string $gDoraTexReload_texNameList[];
+	global string $gDoraTexReload_ver;
+	string $texNameTSL;
+
+	int $os;
+
+	print ( "Dora Texture Reload " + $gDoraTexReload_ver + "\n");
+
+	DoraTexReload_getTexNameList();
+
+	if( `windowPref -ex DoraTexReloadWindow` == true )
+		{
+		windowPref -r DoraTexReloadWindow;
+		}
+
+	if( `window -ex DoraTexReloadWindow` == false )
+		{
+		window -wh 300 400
+		       -t ( "Dora Texture Reload " + $gDoraTexReload_ver )
+		       -mnb on
+		       -s on
+		       -i on
+		       DoraTexReloadWindow;
+
+
+		scriptJob -uid "DoraTexReloadWindow" "clear($gDoraTexReload_fileList);clear($gDoraTexReload_texNameList);";
+
+		$os= 5;
+
+		formLayout -numberOfDivisions 100 FL;
+
+
+
+		$texNameTSL= DoraTexReload_maketextNameTSL();
+
+		eval( "textScrollList " + $texNameTSL + "TS_list;" );
+
+
+		text -label "Textures Node List" TXT_l;
+		text -label "" TXT_st;
+		button -label "List Update" BTN_update;
+		button -label "Reload Selection" BTN_reload1;
+		button -label "Reload All" BTN_reload2;
+		text -label "(C) 2004 DoraYuki " -al "right" TXT_copy;
+
+
+		formLayout -edit
+		-af BTN_update "top" ($os)
+		-an BTN_update "left"
+		-an BTN_update "bottom"
+		-af BTN_update "right" ($os)
+
+		-ac TS_list "top" ($os) BTN_update
+		-af TS_list "left" ($os)
+		-ac TS_list "bottom" ($os) TXT_st
+		-af TS_list "right" ($os)
+
+		-an TXT_l "top"
+		-af TXT_l "left" ($os)
+		-ac TXT_l "bottom" ($os) TS_list
+		-an TXT_l "right"
+
+		-an TXT_st "top"
+		-af TXT_st "left" ($os)
+		-ac TXT_st "bottom" ($os) BTN_reload1
+		-af TXT_st "right"($os)
+
+		-an BTN_reload2 "top"
+		-af BTN_reload2 "left" ($os)
+		-af BTN_reload2 "bottom" ($os+12)
+		-ap BTN_reload2 "right" ($os) 50
+
+		-an BTN_reload1 "top"
+		-ap BTN_reload1 "left" ($os) 50
+		-af BTN_reload1 "bottom" ($os+12)
+		-af BTN_reload1 "right" ($os)
+
+		-an TXT_copy "top"
+		-af TXT_copy "left" ($os)
+		-af TXT_copy "bottom" 0
+		-af TXT_copy "right" ($os)
+
+		FL;
+
+
+
+
+
+
+		button -edit -command "DoraTexReload_updateTexNameList();" DoraTexReloadWindow|FL|BTN_update;
+		button -edit -command "DoraTexReload_reload();DoraTexReload_updateTexNameList();" DoraTexReloadWindow|FL|BTN_reload1;
+		button -edit -command "DoraTexReload_allSelect();DoraTexReload_reload();DoraTexReload_updateTexNameList();" DoraTexReloadWindow|FL|BTN_reload2;
+		showWindow DoraTexReloadWindow;
+		}
+
+	}

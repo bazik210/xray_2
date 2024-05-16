@@ -1,0 +1,177 @@
+//==============================================================================
+//Name:
+//  autoWeld.mel
+//==============================================================================
+//Purpose:
+//  Auto weld
+//==============================================================================
+//Usage:
+//  1. Save the autoWeld.mel to your scripts directory.
+//  2. Start Maya. In the command line type autoWeld(); - run script.
+//  3. Start Maya. In the command line type weldOptions(); - run options setup.
+//  4. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+
+/*
+Author: David Keegan (eyelink@sbcglobal.net)
+Copyright (C) 2004 David Keegan
+www.keegan3d.com
+
+Version 1.0
+
+Function: Automatically merges the first selected vertice with the next.
+        Verticies can be merged to the middle of the points or to the last
+        selected vertex. This only works on two vertices.
+
+Last Updated:(09-02-04)
+
+How To;
+
+-Install
+        1. Move autoWeld.mel to your Maya scripts directory.
+        2. Move autoWeld.bmp to your Maya icons directory.
+        2. Launch Maya.
+        3. Type "autoWeld" into Maya's command line.
+
+        When the script is first run, an option box will appear.
+        In the menu click "Shelf Button" to add a autoWeld shelf
+        button to the current shelf tab.  This box also allows the
+        user to chose how the verticies will be welded.  This option
+        box can be accessed at any time by double clicking on the shelf
+        button.
+
+        Click on the shelf button to turn the autoWeld on, and click on it
+        again to turn it off.  autoWelds on/off state will be printed when you
+        click on the shelf button.
+*/
+
+
+global proc autoWeld()
+{
+global string $gWeldSelection = "";
+global int $gSelectJobToggleWeld;
+global int $gSelectJobWeld;
+
+if (!`optionVar -exists "weldVersion"`)
+        {
+                weldOptions;
+                optionVar -intValue "weldVersion" 1;
+        }
+
+if (!`optionVar -exists "weldMergeType"`)
+        optionVar -intValue "weldMergeType" 1;
+
+int $toggle;
+
+if($gSelectJobToggleWeld == 0)
+        {
+                $gSelectJobWeld = `scriptJob -e "SelectionChanged" "weldSelected"`;
+                $toggle = 1;
+                print "Auto Weld : ON";
+        }
+
+if($gSelectJobToggleWeld == 1)
+        {
+                scriptJob -kill $gSelectJobWeld;
+                $toggle = 0;
+                print "Auto Weld : OFF";
+        }
+
+$gSelectJobToggleWeld = $toggle;
+}
+
+global proc weldSelected()
+{
+global string $gWeldSelection;
+
+int $check;
+int $weldType = `optionVar -q "weldMergeType"`;
+
+string $selBD[];
+string $sel[] = `ls -sl -fl`;
+
+tokenize $sel[0] ".[" $selBD;
+if($selBD[1]=="vtx")
+        $check = 1;
+
+if($check)
+        {
+                if(`size($gWeldSelection)` == 0)
+                        $gWeldSelection = $sel[0];
+
+                else
+                        {
+                                if($weldType==0)
+                                        {
+                                                float $pos[] = `pointPosition $sel[0]`;
+                                                move -ws $pos[0] $pos[1] $pos[2] $gWeldSelection;
+                                        }
+
+                                polyMergeVertex -d 1000 $sel[0] $gWeldSelection;
+                                print ($sel[0] + " and " + $gWeldSelection + " succesfully welded.");
+                                $gWeldSelection = "";
+                        }
+        }
+}
+
+global proc weldOptions()
+{
+int $weldType = `optionVar -q "weldMergeType"`;
+
+if(`window -q -ex weldOptions`)
+        deleteUI weldOptions;
+
+window -mb 1 -t "Weld" -tlb 1 -s 0 weldOptions;
+menu -l "Options" -to 0;
+        menuItem -l "Shelf Button" -ann "Create Auto Weld shelf button" -c "weldShelf";
+        menuItem -l "Close" -ann "Close Auto Weld option box" -c "deleteUI weldOptions";
+
+columnLayout -adj 1;
+        radioCollection weldRadioSet;
+                radioButton -l "Snap" -ann "Weld at last selected vertex position" -al left weldRadio_0;
+                radioButton -l "Average" -ann "Weld at center of both vertices" -al left weldRadio_1;
+        radioButton -edit -sl ("weldRadio_" + $weldType);
+        button -l "Apply" -ann "Apply settings" -c "setWeldType";
+
+window -edit -wh 82 98 weldOptions;
+showWindow weldOptions;
+}
+
+global proc setWeldType()
+{
+global int $gSelectJobToggleWeld;
+
+int $n;
+string $radioBD[];
+string $radio = `radioCollection -q -sl weldRadioSet`;
+
+tokenize $radio "_" $radioBD;
+$n = $radioBD[1];
+
+optionVar -intValue "weldMergeType" $n;
+
+if(`window -q -ex weldOptions`)
+        deleteUI weldOptions;
+
+if(!$gSelectJobToggleWeld)
+        {
+                autoWeld;
+                select -cl;
+        }
+}
+
+global proc weldShelf()
+{
+setShelfVisible 1;
+global string $gShelfTopLevel;
+
+shelfButton
+        -parent ($gShelfTopLevel + "|" + `tabLayout -q -st $gShelfTopLevel`)
+        -l "Auto Weld"
+        -ann "Automatically weld selcted pionts, double click for options"
+        -i1 (`internalVar -ubd` + "autoWeld.bmp")
+        -c "autoWeld"
+        -dcc "weldOptions"
+        ;
+}

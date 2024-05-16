@@ -1,0 +1,29 @@
+//James Parks 06/09/04
+//jpFilterList.mel
+
+//Given an array of objects (such as resulting from `ls -sl`) and a string
+//will return only the objects that are both in that list and whose names
+//contain the given string
+
+global proc string[] jpFilterList(string $selected[], string $filter)
+{
+//string $initialSelected[] = `ls -sl`;
+string $filterSelected[] = `ls -r 1 -tr $filter`;
+string $bothSelected[];
+int $i = 0;
+
+for($obj in $selected)
+{
+	for($filteredObj in $filterSelected)
+	{
+		if($obj == $filteredObj)
+		{
+			$bothSelected[$i] = $obj;
+			$i++;
+		}//end if
+	}//end for
+}//end for
+
+return $bothSelected;
+
+}//end proc jpFilterList

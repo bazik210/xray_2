@@ -1,0 +1,24 @@
+global proc float averageTexeleration()
+{
+string $edges[] = conv(sel(), "e");
+string $edge;
+float $texels[] = {};
+float $tex;
+for ($edge in $edges)
+	{
+	//$edge = $edges[0];
+	float $texs[] = edgeTexels($edge);
+	for ($tex in $texs)
+		{
+		$texels[`size $texels`] = $tex;
+		}
+	}
+
+float $value = 0;
+for ($tex in $texels)
+	{
+	$value += $tex;
+	}
+$value /= `size $texels`;
+return $value;
+}

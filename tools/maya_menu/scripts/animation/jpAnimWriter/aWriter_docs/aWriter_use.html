@@ -1,0 +1,374 @@
+<html>
+<head>
+<title>Using jpAnimWriter v1.2.2</title>
+</head>
+
+<body background=images/grad3.jpg>
+
+<!---<center><table width = 600>
+<tr>
+<td>--->
+
+<h2>Welcome to Animation Writer v1.2.2</h2>
+
+<font size=2>
+<ul>
+<li><a href=aWriter_use.html#installation>Installation</a>
+<li><a href=aWriter_use.html#structure>Making a Directory Structure</a>
+<li><a href=aWriter_use.html#layout>Basic Layout</a>
+<li><a href=aWriter_use.html#settings>Settings</a>
+<ul>
+<li><a href=aWriter_use.html#animSettings>Animation Settings</a>
+<li><a href=aWriter_use.html#osSettings>Operating System Settings</a>
+<li><a href=aWriter_use.html#overwrite>Overwrite Protection</a>
+<li><a href=aWriter_use.html#saveSettings>Save Settings</a>
+</ul>
+<li><a href=aWriter_use.html#subFolders>Working with SubFolders</a>
+<ul>
+<li><a href=aWriter_use.html#createSubFolder>Creating</a>
+<li><a href=aWriter_use.html#renameSubFolder>Renaming</a>
+<li><a href=aWriter_use.html#deleteSubFolder>Deleting</a>
+<li><a href=aWriter_use.html#explore>Exploring</a>
+</ul>
+<li><a href=aWriter_use.html#saving>Saving Selections, Poses, and Animations</a>
+<ul>
+<li><a href=aWriter_use.html#saveSelection>Selections</a>
+<li><a href=aWriter_use.html#savePose>Poses</a>
+<li><a href=aWriter_use.html#saveAnim>Animations</a>
+<li><a href=aWriter_use.html#keysCurves>The Difference between Keys and Curves</a>
+</ul>
+<li><a href=aWriter_use.html#applying>Applying Selections, Poses, and Animations</a>
+<ul>
+<li><a href=aWriter_use.html#applySelection>Selection Options</a>
+<li><a href=aWriter_use.html#applyPose>Pose Options</a>
+<li><a href=aWriter_use.html#applyAnim>Animation Options</a>
+</ul>
+<li><a href=aWriter_use.html#deleting>Deleting Selections, Poses, and Animations</a>
+</ul>
+</font>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=installation>
+<h3><u>Installation</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+For Animation Writer 1.2 I've split up many of the functions into seperate files for easier maintenance 
+on my part and greater usability on your part. All of the .mel files in the jpAnimV1.2 folder should 
+be placed in your scripts directory. They will all be sourced when Maya is started. Starting with Maya6.0 
+you can also use the "rehash" command if maya is already started.<p>
+
+Once all of the files have been sourced you can start Animation Writer by typing jpAnimWriter() in the script 
+editor and hitting the numeric keypad enter.<p>
+
+This folder, aWriter_docs, can be placed in your documentation folder so you can access all of these files 
+through the "Help" menu in Animation Writer.<br>
+<img src=images/firstOpen.jpg>
+</tr>
+</table>
+
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=structure>
+<h3><u>Making a Directory Structure</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+Once you've got the Animation Writer window open for the first time you'll need to create a directory 
+structure for Animation Writer to work in. Because Animation Writer places it's folders and files in 
+your current project you'll have to do this once for each new project.<br>
+
+<img src=images/createFolders.jpg><br>
+
+By picking Writer->Create Folders Animation Writer will make three new folders in whatever your current 
+project is. These folders are "ANIMS", "POSES", and "SELS". All of the Animation Clips, Poses, and 
+Selection Sets that you create using Animation Writer will be placed in these folders, respectively.<br>
+</tr>
+</table>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=layout>
+<h3><u>Basic Layout</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+The Animation Writer window is split up into four main sections. And the interface is set up so 
+that controls go gray and non-editible when they are not applicable to the current mode. The first 
+section is the File Type selection bar at the top. This group of radio buttons lets you choose 
+wether to create or apply selections, poses, or animations.<br>
+
+<img src=images/fileType.jpg><br>
+
+The next section is the file list on the left hand side. The file list displays all of the files that 
+contain the information that you've saved about selections, poses, and animation segments.<br>
+
+<img src=images/fileList.jpg><br>
+
+The Write Options section on the right hand side of the window lets you specify the name, the start/end 
+frames for animation sequences, wether you save only keys that are inbetween the start/end frames or the 
+value of the curve if your start/end frames lie between keyframes. (more on this in the 
+<a href=aWriter_use.html#keysCurves>Difference between Keys and Curves</a> section) The recursive box allows you to select 
+objects that are children of the currently selected object for inclusion in the saved files, filtered by 
+a text string that accepts wildcards.<br>
+
+<img src=images/writeOptions.jpg><br>
+
+The Write New File button,... uh,... writes a new file based on the objects you have selected and the 
+settings listed in the window. The Delete File Button will delete the currently selected file in the File 
+List. The "Paste Curves at Current Values" checkbox will paste the saved curves into the current scene 
+starting at each channel's current value. The Apply Button applies the currently selected file. The Default 
+Button sets the selected object back to it's default position: 0 translates, 0 rotates, 1 scales.<br>
+
+<img src=images/applyOptions.jpg><br>
+
+This section shows the current project and allows you to change projects. Alas, this line does not update 
+if you change your project through the file->project->set method. You'll need to refresh the 
+Animation Writer window to show updates after that.<br>
+
+<img src=images/project.jpg><br>
+</tr>
+</table>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=subFolders>
+<h3><u>Working with SubFolders</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+Animation Writer creates three folders inside your current project to save selections, poses, and animations 
+but you can even further subdivide your saved files with subfolders inside each of these main folders. You can 
+create a subfolder for each character, or for each animator, or for each scene, or for each mood, or for whatever 
+division suits your needs.<br>
+<img src=images/subFolders.jpg><br>
+
+<a name=createSubFolder>
+<h4><u>Creating SubFolders</u></h4>
+Click on subFolders->New subFolder... This will pop up a window asking you to name the folder. This name will be 
+suffixed with "_Folder". The Animation Writer window should then refresh and you can go into the subFolders menu 
+and select your newly created subFolder and start using it.<br>
+
+<a name=renameSubFolder>
+<h4><u>Renaming SubFolders</u></h4>
+Click on subFolders->Rename subFolder... This will pop up a renaming window with the old folder name and a text 
+field for a new file name. Be sure to keep the "_Folder" at the end of the new folder name, otherwise it won't show 
+up in the subFolder selection menu.<br>
+
+<a name=deleteSubFolder>
+<h4><u>Deleting SubFolders</u></h4>
+As of yet I haven't found a satisfactory way of deleting subFolders. Maya does not provide a non-OS-specific 
+way of doing this. I need to do some more experimenting. In the meantime you'll just have to delete folders 
+by hand.<br>
+
+<a name=explore>
+<h4><u>Exploring Folders</u></h4>
+To open up Animation Writer's folders and mess around with them and the files by hand you can use the 
+Writer->Explore Folders->"specific folder" menu. Right now this only works in Windows. I need access to a Mac 
+and a Linux box to get it fully working.<br>
+<img src=images/exploreFolders.jpg>
+
+</tr>
+</table>
+
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=settings>
+<h3><u>Settings</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+<a name=animSettings>
+<h4><u>Animation Settings</u></h4>
+You have two options on how to save animations. The first, brute force, method saves only the time and value 
+of keys. The second, more elegant,  method saves time, value, and various tangency information of keys. There's really 
+no need to use the "No Tangents" method anymore. You shouldn't need to touch this setting at all.<br>
+<img src=images/animSettings.jpg><br>
+
+<a name=osSettings>
+<h4><u>Operating Systems Settings</u></h4>
+Animation Writer should be able to automatically detect the operating system that you're using Maya on. If it does not, 
+you can manually change it here. This OS information is used for exploring and manipulating the folders and subFolders 
+as Maya does not provide a non-OS-specific method for doing this. Again, you shouldn't need to touch this setting at all.<br>
+<img src=images/OSsettings.jpg><br>
+
+<a name=overwrite>
+<h4><u>Overwrite Protection</u></h4>
+At the request of a user I added some protection for overwriting files. She had apparently spent quite some time making 
+difficult and intricate selections and then promptly overwritten that file by accidently hitting the "Write New File" button 
+instead of the "Apply" button. I, however, vehemently dislike file overwrite protection dialogs that ask "Are you sure you 
+want to do that?" If I didn't want to overwrite a file I wouldn't have done the things that lead up to overwriting that 
+file in the first place. Stupid computer questioning my decisions.<br>
+Anyway, you now have the option of file overwrite protection by checking on the "Overwrite Protection" menu item in the 
+Settings menu. 
+
+<a name=saveSettings>
+<h4><u>Save Settings</u></h4>
+Seems like I've been adding a lot of options for users to set recently. Some users may not agree with my default settings 
+and I don't want to force them to change all their settings everytime they start up Animation Writer. So I added the "Save 
+Settings" menu item. It reads the settings you are currently using and writes them out to a file called "AnimWriterPrefs.txt" 
+in your prefs folder. Then when Animation Writer starts up again it checks for the existence of this file and if it exists 
+it reads it in and restores the settings to what was saved in the file.<br>
+The only settings saved are the ones in the Settings Menu. I consider these settings less likely to change than 
+the options that are presented in the GUI such as frame range and keys/curves which may change for each file. Perhaps I should 
+rename it to the Preferences Menu.
+
+
+</tr>
+</table>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=saving>
+<h3><u>Saving Selections, Poses, and Animations</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+<a name=saveSelection>
+<h4><u>To save a selection with Animation writer:</u></h4>
+<ol>
+<li>Select all the objects you wish to be in the selection.
+<li>Make sure you're in the "Selection" mode in the Animation Writer window.
+<li>Give your selection a name in the "Name" field.
+<li>Click the "Write New File" button. (or go to Writer->Write New File)
+</ol>
+
+At this point an entry should appear in the list with the name you specified with a ".SEL" appended to the end.<p>
+
+<a name=savePose>
+<h4><u>To save a pose with Animation Writer:</u></h4>
+<ol>
+<li>Select all the objects that you want to save the positions of. (usually your character controls)
+<li>Make sure you're in the "Pose" mode in the Animation Writer window.
+<li>Give your pose a name in the "Name" field.
+<li>Click the "Write New File" button. (or go to Writer->Write New File)
+</ol>
+An entry should now appear in the list with the specified name followed by a ".POSE"<p>
+
+<a name=saveAnim>
+<h4><u>To save an animation segment with Animation Writer:</u></h4>
+<ol>
+<li>Select all the objects that you wish to save animation from. (again, probably your controls)
+<li>Make sure you're in the "Animation" mode in the Animation Writer window.
+<li>Give your animation segment a name in the "Name" field.
+<li>Pick the start and end frames of the segment you wish to save.
+<li>Choose wether to save just the keys in that range or the curve in that range. (if you don't have keys exactly at the begin and end of your range, animWriter will create keys there and then export those keys)
+<li>Click the "Write New File" button.
+<li>A progress window should now open and list the objects that Animation Writer is currently writing curves for.
+</ol>
+
+You may have guessed that you can expect to find a file list entry with the name you chose followed by .ANIM
+
+<a name=keysCurves>
+<h4><u>The Difference between Keys and Curves</u></h4>
+<img src=images/sourceCurve.jpg width=200> <img src=images/keys.jpg width=200> <img src=images/curves.jpg width=200>
+
+
+</tr>
+</table>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=applying>
+<h3><u>Applying Selections, Poses, and Animations</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+
+To apply any existing selection set, pose, or animation all you have to do is double click on the name of the file you want to apply in the file list. Alternately you can click on the "Apply" button in the lower-right section of the interface, you may use the Writer->Apply Selected menu choice, you may right click on the desired file to get a popup window with "Apply Selected" as an option.
+
+<a name=applySelection>
+<h4><u>Selection Options</u></h4>
+When in the Selections mode you get a new Add/Replace radio button group active. This allows you to either 
+add the stored selection to the current selection list or to completely replace the current selection list 
+with the stored selection. Replace is checked by default as this is the more likely work method.<br>
+
+<img src=images/addReplace.jpg><br>
+
+<a name=applyPose>
+<h4><u>Pose Options</u></h4>
+
+There aren't any yet. But in the next major release I plan on letting you blend between the current pose and a stored pose. 
+There will be a "Blend" button.<br>
+
+<a name=applyAnim>
+<h4><u>Animation Options</u></h4>
+
+The Animation Options at the moment consist of the "Paste Curves at Current Values" checkbox. This is checked by default 
+as it is probably the more useful option.<br>
+<img src=images/pasteCurves.jpg><br>
+In the next major release I plan on adding more paste/insert/overwrite options for animation curves. This may involve changing 
+the .ANIM file format though which would invalidate any previously saved .ANIMs. I'm not sure I want to take that step yet.<br>
+
+</tr>
+</table>
+
+
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td colspan=2>
+<a name=deleting>
+<h3><u>Deleting Selections, Poses, and Animations</u></h3>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+
+To delete your selection sets, poses, or animation clips all you need do is click on the file you want to delete in the file list and hit backspace. Or you may also use Writer->Delete Selected. There is also a Delete Selected in the right button popup menu. You also have the option of deleting all of your files with the Delete All command.<p>
+
+This does not ACTUALLY delete the files that you've specified. What it does is rename the files to filemane.ext.deleted. This way if you accidently delete something you can go into the folder and remove the .deleted extention and you have your file back. To permanently delete *.deleted files you need to use Writer->Clean Folders...<br>
+<img src=images/cleanFolders.jpg><br>
+This will prompt you if you're sure you want to clean the folders of deleted files and then actually delete them. Once you've cleaned the folders these files are REALLY gone.
+
+</tr>
+</table>
+
+<p>
+<center><hr width=600></center>
+<p>
+
+<table width=800 border=0>
+<tr>
+<td width=50>
+<td>
+Thank you for using Animation Writer. If you have any comments, complaints, or suggestions please feel free to email me at 
+<b>arcsecond@hotmail.com</b> and visit my website at <a href=http://www.arcsecond.net>www.arcsecond.net</a>.
+</tr>
+</table>
+
+</body>
+</html>

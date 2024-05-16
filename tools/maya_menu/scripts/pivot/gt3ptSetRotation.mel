@@ -1,0 +1,313 @@
+/* This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: GT 3 Point Set Rotation
+''    Author: heathgr
+''    Last Updated: Dec 29, 2006
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/poly_tools/998.html
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//GT Three Point Set Roation v1.0
+//Copyright 2006 Grant Heath
+//WWW.GRANTHEATH.COM
+
+global proc gtExecute3ptSetRotation3(string $vert3[],string $selectionString[],string $objs[]){
+
+    float $DCM[];
+    float $eulerAngles[];
+
+    $vert3 = stringArrayRemove($selectionString,$vert3);
+    $selectionString[size($selectionString)] = $vert3[0];
+    SelectToggleMode;
+    print("selection order:\n");
+    print($selectionString);
+    $DCM = gt3vertDCM($selectionString);
+    $eulerAngles = gtMatrixToEuler($DCM);
+    gtSetObjectRotation($objs,$eulerAngles);
+}
+
+global proc gtExecute3ptSetRotation2(string $vert2[],string $selectionString[],string $objs[]){
+    $vert2 = stringArrayRemove($selectionString,$vert2);
+    $selectionString[size($selectionString)] = $vert2[0];
+    scriptCtx -edit -finalCommandScript ("gtExecute3ptSetRotation3 $Selection1 {\"" + stringArrayToString($selectionString,"\",\"") + "\"} {\"" + stringArrayToString($objs,"\",\"") + "\"}") gt3ptSetRotationCtx3;
+    evalDeferred("setToolTo gt3ptSetRotationCtx3");
+}
+
+global proc gtExecute3ptSetRotation1(string $vert1[],string $objs[]) {
+    scriptCtx -edit -finalCommandScript ("gtExecute3ptSetRotation2 $Selection1 {\"" + $vert1[0] + "\"} {\"" + stringArrayToString($objs,"\",\"") + "\"}") gt3ptSetRotationCtx2;
+    evalDeferred("setToolTo gt3ptSetRotationCtx2");
+}
+
+global proc gt3ptSetRotation() {
+
+    if(`contextInfo -exists gt3ptSetRotationCtx1`)
+        deleteUI gt3ptSetRotationCtx1;
+    if(`contextInfo -exists gt3ptSetRotationCtx2`)
+        deleteUI gt3ptSetRotationCtx2;
+    if(`contextInfo -exists gt3ptSetRotationCtx3`)
+        deleteUI gt3ptSetRotationCtx3;
+
+    scriptCtx
+        -title "3 Point Set Rotation"
+        -totalSelectionSets 1
+        -cumulativeLists true
+        -showManipulators false
+        -expandSelectionList true
+        -finalCommandScript ("")
+        -setNoSelectionPrompt("select the first vert in the x vector")
+        -setAutoToggleSelection true
+        -setAutoComplete true
+        -setSelectionCount 1
+        -vertex true
+        gt3ptSetRotationCtx1;
+
+    scriptCtx
+        -title "3 Point Set Rotation"
+        -totalSelectionSets 1
+        -cumulativeLists true
+        -showManipulators false
+        -expandSelectionList true
+        -finalCommandScript ("")
+        -setNoSelectionPrompt("select the second vert in the x vector")
+        -setAutoToggleSelection true
+        -setAutoComplete true
+        -setSelectionCount 2
+        -vertex true
+        gt3ptSetRotationCtx2;
+
+    scriptCtx
+        -title "3 Point Set Rotation"
+        -totalSelectionSets 1
+        -cumulativeLists true
+        -showManipulators false
+        -expandSelectionList true
+        -finalCommandScript ("")
+        -setNoSelectionPrompt("select the final vert to define the xz plane")
+        -setAutoToggleSelection true
+        -setAutoComplete true
+        -setSelectionCount 3
+        -vertex true
+        gt3ptSetRotationCtx3;
+
+    //variable declarations
+    string $objs[] = `filterExpand -sm 12`;
+    //check to see if initial selection is valid
+    if(size($objs) == 0)
+        error("You must have one or more polygonal objects selected to run this tool");
+    SelectVertexMask;
+    scriptCtx -edit -finalCommandScript ("gtExecute3ptSetRotation1 $Selection1 {\"" + stringArrayToString($objs,"\",\"") + "\"}") gt3ptSetRotationCtx1;
+    setToolTo gt3ptSetRotationCtx1;
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+/* This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: GT 3 Point Set Rotation
+''    Author: heathgr
+''    Last Updated: Dec 29, 2006
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/poly_tools/998.html
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//gtFunctions v1.1
+//Copyright 2006 Grant Heath
+//WWW.GRANTHEATH.COM
+
+
+//3x3 direction cosine matrix for maya
+//cos(y) * cos(z)                                   cos(y) * sin(z)     															-sin(y);
+//(sin(x) * sin(y) * cos(z)) - (cos(x) * sin(z))		(sin(x) * sin(y) * sin(z)) + (cos(x) * cos(z))		sin(x) * cos(y)
+//(cos(x) * sin(y) * cos(z)) + (sin(x) * sin(z))		(cos(x) * sin(y) * sin(z)) - (sin(x) * cos(z})		cos(x) * cos(y)
+//
+//Converts a set of euler angles into the equivalent direction cosine matrix.
+//The DCM is outputted as a float array in the following format:
+//array[0] = DCM[0][0]		array[1] = DCM[0][1]		array[2] = DCM[0][2]
+//array[3] = DCM[1][0]		array[4] = DCM[1][1]		array[5] = DCM[1][2]
+//array[6] = DCM[2][0]		array[7] = DCM[2][1]		array[8] = DCM[2][2]
+global proc float[] gtEulerToMatrix(float $eulerAngles[]) {
+
+	float $sx = sind($eulerAngles[0]);
+	float $cx = cosd($eulerAngles[0]);
+	float $sy = sind($eulerAngles[1]);
+	float $cy = cosd($eulerAngles[1]);
+	float $sz = sind($eulerAngles[2]);
+	float $cz = cosd($eulerAngles[2]);
+	float $DCM[];
+
+	$DCM[0] = $cy * $cz;
+	$DCM[1] = $cy * $sz;
+	$DCM[2] = -1 * $sy;
+	$DCM[3] = ($sx * $sy * $cz) - ($cx * $sz);
+	$DCM[4] = ($sx * $sy * $sz) + ($cx * $cz);
+	$DCM[5] = $sx * $cy;
+	$DCM[6] = ($cx * $sy * $cz) + ($sx * $sz);
+	$DCM[7] = ($cx * $sy * $sz) - ($sx * $cz);
+	$DCM[8] = $cx * $cy;
+	return($DCM);
+}
+
+//matrix euler conversion for maya:
+//x = atan2(DCM[1][2],DCM[2][2])
+//y = asind(-DCM[0][2]
+//z = atan2(DCM[0][1],DCM[0][0]
+//
+//Converts a direction cosine matrix into the equivalent set of euler angles.
+//The DCM must be submitted as a float array in the following format:
+//array[0] = DCM[0][0]		array[1] = DCM[0][1]		array[2] = DCM[0][2]
+//array[3] = DCM[1][0]		array[4] = DCM[1][1]		array[5] = DCM[1][2]
+//array[6] = DCM[2][0]		array[7] = DCM[2][1]		array[8] = DCM[2][2]
+global proc float[] gtMatrixToEuler(float $DCM[]){
+
+	float $eulerAngles[];
+
+	$eulerAngles[0] = atan2d($DCM[5],$DCM[8]);
+	$eulerAngles[1] = asind(-1 * $DCM[2]);
+	$eulerAngles[2] = atan2d($DCM[1],$DCM[0]);
+	return($eulerAngles);
+}
+
+//returns a 3x3 DCM based off of the positons of 3 submitted verticies in the same
+//format outlined in the descriptions of gtMatrixToEuler and gtEulerToMatrix.  The
+//order of the verticies in the submitted string is important.  The X vector of the DCM
+//will be the defined by the position of the first vertex subtraced by the positon of
+//the second vertex.  The Y vector of the DCM will be defined by the cross product of
+//the vector defined by the position of the 3rd submitted vertex substracted by the
+//position of the second submitted vertex and the X vector. The z vector of the DCM is
+//defined by the cross product of the x vector and y vector.
+
+global proc float[] gt3vertDCM(string $points[]) {
+
+    float $vertPos1[] = `xform -q -ws -t $points[0]`;
+    float $vertPos2[] = `xform -q -ws -t $points[1]`;
+    float $vertPos3[] = `xform -q -ws -t $points[2]`;
+    vector $xVector = <<$vertPos1[0] - $vertPos2[0],$vertPos1[1] - $vertPos2[1],$vertPos1[2] - $vertPos2[2]>>;
+    vector $zVector = <<$vertPos3[0] - $vertPos2[0],$vertPos3[1] - $vertPos2[1],$vertPos3[2] - $vertPos2[2]>>;
+    vector $yVector = cross($zVector,$xVector);
+
+    $zVector = cross($xVector,$yVector);
+    $xVector = unit($xVector);
+    $yVector = unit($yVector);
+    $zVector = unit($zVector);
+    return({$xVector.x,$xVector.y,$xVector.z,$yVector.x,$yVector.y,$yVector.z,$zVector.x,$zVector.y,$zVector.z});
+}
+
+//Explicitly sets the rotation values of the submitted objects without moving the ojbects verticies,faces,etc.
+global proc gtSetObjectRotation(string $objs[],float $eulerAngles[]) {
+
+	string $objVerts[];
+
+	makeIdentity -apply true -t 0 -r 1 -s 0 $objs;
+	for($i=0;$i<size($objs);$i++) {
+		$objVerts = `polyListComponentConversion -tv $objs[$i]`;
+		xform -ws -ro $eulerAngles[0] $eulerAngles[1] $eulerAngles[2] $objs[$i];
+		xform -ws -r -ro 0 0 (-1 * $eulerAngles[2]) $objVerts;
+		xform -ws -r -ro 0 (-1 * $eulerAngles[1]) 0 $objVerts;
+		xform -ws -r -ro (-1 * $eulerAngles[0]) 0 0 $objVerts;
+	}
+}
+
+//rotates the move manipulator to the specified angles
+global proc gtSetCustomAxisOrientation(float $eulerAngles[]) {
+	$eulerAngles[0] = `deg_to_rad $eulerAngles[0]`;
+	$eulerAngles[1] = `deg_to_rad $eulerAngles[1]`;
+	$eulerAngles[2] = `deg_to_rad $eulerAngles[2]`;
+	manipMoveContext -e -m 6 -oa $eulerAngles[0] $eulerAngles[1] $eulerAngles[2] Move;
+	manipOptions -forceRefresh;
+}
+
+//returns the current highlighted model panel
+//if no model panel is highlighted a blank string is returned
+global proc string gtGetCurrentModelPanel() {
+
+	string $currentPanel = `getPanel -withFocus`;
+	if(`modelPanel -exists $currentPanel`)
+		return $currentPanel;
+	else
+		return("");
+}
+
+//this function averages all the values contained in the submitted and returns the resulst as a float
+global proc float gtAverageFloatArray(float $floats[]) {
+
+	float $addedFloats = 0;
+
+	for($float in $floats) {
+		$addedFloats+=$float;
+	}
+	return($addedFloats/size($floats));
+}
+
+//this function takes the submitted poly elements, finds the positions of the verticies of those elements, averages those positions, then returns the result
+global proc float[] gtGetPolyElementsCenter(string $polyElements[]) {
+
+	float $positions[];
+	float $xPositions[];
+	float $yPositions[];
+	float $zPositions[];
+
+	$polyElements = `polyListComponentConversion -tv $polyElements`;
+	$polyElements = `ls -fl $polyElements`;
+	$positions = `xform -q -ws -t $polyElements`;
+	for($i=0;$i<size($positions);$i+=3) {
+		$xPositions[size($xPositions)] = $positions[$i];
+	}
+	for($i=1;$i<size($positions);$i+=3) {
+		$yPositions[size($yPositions)] = $positions[$i];
+	}
+	for($i=2;$i<size($positions);$i+=3) {
+		$zPositions[size($zPositions)] = $positions[$i];
+	}
+	return{gtAverageFloatArray($xPositions),gtAverageFloatArray($yPositions),gtAverageFloatArray($zPositions)};
+}
+
+//this function returns a string[] containing the verticies of the submitted face in their render order
+//it relies on the polyInfo command the only mel command that returns face verticies in their render order
+global proc string[] gtGetVertsInRenderOrder(string $face){
+
+	string $vertTokens[];
+	string $objTokens[];
+	string $faceVerts[];
+	string $faceVertsSorted[];
+
+	tokenize $face "." $objTokens;
+	$faceVerts = `polyInfo -faceToVertex $face`;
+	tokenize $faceVerts[0] " :\n\r" $vertTokens;
+	for ($i = 2;$i<size($vertTokens);$i++) {
+		$faceVertsSorted[size($faceVertsSorted)] = $objTokens[0] + ".vtx[" + $vertTokens[$i] + "]";
+	}
+	return $faceVertsSorted;
+}
+
+//this function finds the normal of the face submitted to it and returns that normal in world space coordinates
+//this function relies on the gtGetVertsInRenderOrder function
+global proc float[] gtGetFaceNormal(string $face) {
+
+	string $faceVerts[] = gtGetVertsInRenderOrder($face);
+	float $p1[],$p2[];
+	vector $v1,$v2;
+	vector $normalVector;
+
+	$p1 = `xform -q -ws -t $faceVerts[0]`;
+	$p2 = `xform -q -ws -t $faceVerts[1]`;
+	$v1 = <<$p1[0] - $p2[0],$p1[1] - $p2[1],$p1[2] - $p2[2]>>;
+	$p2 = `xform -q -ws -t $faceVerts[2]`;
+	$v2 = <<$p1[0] - $p2[0],$p1[1] - $p2[1],$p1[2] - $p2[2]>>;
+	$normalVector = cross($v1,$v2);
+	for($i=3;$i<size($faceVerts);$i++) {
+		$p2 = `xform -q -ws -t $faceVerts[$i]`;
+		$v2 = <<$p1[0] - $p2[0],$p1[1] - $p2[1],$p1[2] - $p2[2]>>;
+		$normalVector+=cross($v1,$v2);
+	}
+	return(gtVectorToFloatArray(unit($normalVector/(size($faceVerts)-2))));
+}

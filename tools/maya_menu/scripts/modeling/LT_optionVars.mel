@@ -1,0 +1,660 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_optionVars.mel
+//
+// Defines the default setting for LT_UI.mel
+//
+// Author:		Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_optionVars()
+{
+	//Define optionVars if they don't already exist
+
+	//////////////////////
+	//		Tabs
+	//
+	if (`optionVar -ex LT_selectedTab` == 0)
+		optionVar -intValue LT_selectedTab 2;   //1:Import 2:Placement 3:Assembly 4:Display     
+	
+	//////////////////////
+	//		General
+	//
+	if (`optionVar -ex LT_UIMode` == 0)
+		optionVar -intValue LT_UIMode 0; //0:Floating 1:Docked
+		
+	if (`optionVar -ex LT_UIDockSide` == 0)
+		optionVar -intValue LT_UIDockSide 1; //0:Left 1:Right
+		
+	if (`optionVar -ex LT_RebuildUI` == 0)  //check to see if UI needs rebuilding or just refreshing
+		optionVar -intValue LT_RebuildUI 1;  //rebuild by default
+				
+	if (`optionVar -ex LT_UIWidth` == 0)
+		optionVar -intValue LT_UIWidth 300;		
+	
+	if (`optionVar -ex LT_UIHeight` == 0)
+		optionVar -intValue LT_UIHeight 400;		
+		
+	if (`optionVar -ex LT_generalFrame` == 0)
+		optionVar -intValue LT_generalFrame 0; //set to expanded
+	
+	//////////////////////
+	//		Settings
+	//
+	if (`optionVar -ex LT_settingsFrame` == 0)
+		optionVar -intValue LT_settingsFrame 1; //set to expanded
+	
+		
+	//////////////////////
+	//		Import/Ref
+	//	
+	if (`optionVar -ex LT_iconSize` == 0)
+		optionVar -intValue LT_iconSize 32;   //always render 128x128 now that QT will scale icon size down accordingly
+	if (`optionVar -ex LT_iconFormat` == 0)
+		optionVar -stringValue LT_iconFormat ".png";  //Starting with Maya2011 the default icon format for all platforms is now png
+	if (`optionVar -ex LT_iconFormatNumber` == 0)
+		optionVar -intValue LT_iconFormatNumber 32;  //7:iff 20:bmp 32:png		
+		
+    if (`optionVar -ex LT_iconRenderer` == 0)
+		optionVar -stringValue LT_iconRenderer "Maya";  // Uncomment below lines to change renderer
+		//optionVar -stringValue LT_iconRenderer "MentalRay";
+		//optionVar -stringValue LT_iconRenderer "Hardware";		
+
+	if (`optionVar -ex LT_groundValue` == 0)
+		optionVar -floatValue LT_groundValue 0; 
+
+	if (`optionVar -ex LT_userImportPath ` == 0)
+	{
+                python( "import maya.cmds as cmds" );
+                python( "import maya.OpenMaya as OpenMaya" );
+                python( "import os" );
+                $path = python( "'%s/' %os.path.split( OpenMaya.MFileIO.currentFile())[0]" );
+		optionVar -stringValue LT_userImportPath $path;
+        }
+	if (`optionVar -ex LT_relativeToProject` == 0)
+		optionVar -intValue LT_relativeToProject 0;   // 1=project : 0=user
+	if (`optionVar -ex LT_includeSubfolders` == 0)
+		optionVar -intValue LT_includeSubfolders 0;   // 1=recursive : 0=non
+	if (`optionVar -ex LT_importPrefix` == 0)
+		optionVar -stringValue LT_importPrefix "";
+
+	// File formats - turn ma and mb on by default and fbx off
+	if (`optionVar -ex LT_MB` == 0)
+		optionVar -intValue LT_MB 1;
+	if (`optionVar -ex LT_MA` == 0)
+		optionVar -intValue LT_MA 1;
+	if (`optionVar -ex LT_FBX` == 0)
+		optionVar -intValue LT_FBX 0;
+
+	if (`optionVar -ex LT_reference` == 0)
+		optionVar -intValue LT_reference 1;  // 1=reference : 0=import
+
+	if (`optionVar -ex LT_shareShadingNetworks` == 0)
+		optionVar -iv LT_shareShadingNetworks 1;
+	if (`optionVar -ex LT_shareLayers` == 0)
+		optionVar -intValue LT_shareLayers 1;
+	if (`optionVar -ex LT_createRefLocator` == 0)
+		optionVar -intValue LT_createRefLocator 0;
+		
+
+	//////////////////////
+	//		Position
+	//
+	if (`optionVar -ex LT_positionFrame` == 0)
+		optionVar -intValue LT_positionFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_moveOffsetAxis` == 0)
+		optionVar -intValue LT_moveOffsetAxis 1;
+	if (`optionVar -ex LT_moveSpace` == 0)
+		optionVar -stringValue LT_moveSpace "-ws";
+	if (`optionVar -ex LT_moveValue` == 0)
+		optionVar -floatValue LT_moveValue 5;
+	
+
+	//////////////////////
+	//		Orient
+	//
+	if (`optionVar -ex LT_orientFrame` == 0)
+		optionVar -intValue LT_orientFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_rotateOffsetAxis` == 0)
+		optionVar -intValue LT_rotateOffsetAxis 2;
+	if (`optionVar -ex LT_rotateSpace` == 0)
+		optionVar -stringValue LT_rotateSpace "-os";
+	if (`optionVar -ex LT_rotateValue` == 0)
+		optionVar -floatValue LT_rotateValue 45;
+	
+	if (`optionVar -ex LT_orientToolType` == 0)
+		optionVar -stringValue LT_orientToolType "vert";	
+	
+
+	//////////////////////
+	//		Scale
+	//
+	if (`optionVar -ex LT_scaleFrame` == 0)
+		optionVar -intValue LT_scaleFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_scaleOffsetX` == 0)
+		optionVar -intValue LT_scaleOffsetX 1;
+	if (`optionVar -ex LT_randomOffsetY` == 0)
+		optionVar -intValue LT_scaleOffsetY 1;
+	if (`optionVar -ex LT_scaleOffsetZ` == 0)
+		optionVar -intValue LT_scaleOffsetZ 1;
+	if (`optionVar -ex LT_scaleSpace` == 0)
+		optionVar -stringValue LT_scaleSpace "-os";
+	if (`optionVar -ex LT_scaleValue` == 0)
+		optionVar -floatValue LT_scaleValue 150;
+
+
+	//////////////////////
+	//		Random
+	//
+	if (`optionVar -ex LT_randomeFrame` == 0)
+		optionVar -intValue LT_randomFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_randomOffsetX` == 0)
+		optionVar -intValue LT_randomOffsetX 1;
+	if (`optionVar -ex LT_randomOffsetY` == 0)
+		optionVar -intValue LT_randomOffsetY 1;
+	if (`optionVar -ex LT_randomOffsetZ` == 0)
+		optionVar -intValue LT_randomOffsetZ 1;
+
+
+	if (`optionVar -ex LT_randMoveMinValue` == 0)
+		optionVar -floatValue LT_randMoveMinValue -0.1;
+	if (`optionVar -ex LT_randMoveMaxValue` == 0)
+		optionVar -floatValue LT_randMoveMaxValue 0.1;
+	if (`optionVar -ex LT_randRotMinValue` == 0)
+		optionVar -intValue LT_randRotMinValue -30;
+	if (`optionVar -ex LT_randRotMaxValue` == 0)
+		optionVar -intValue LT_randRotMaxValue 30;
+	if (`optionVar -ex LT_randScaleMinValue` == 0)
+		optionVar -intValue LT_randScaleMinValue 90;
+	if (`optionVar -ex LT_randScaleMaxValue` == 0)
+		optionVar -intValue LT_randScaleMaxValue 110;
+
+		
+	//////////////////////
+	//		Align
+	//
+	if (`optionVar -ex LT_alignFrame` == 0)
+		optionVar -intValue LT_alignFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_alignAxis` == 0)
+		optionVar -intValue LT_alignAxis 1;	
+	
+	//////////////////////
+	//		Snap
+	//
+	if (`optionVar -ex LT_snapFrame` == 0)
+		optionVar -intValue LT_snapFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_edgeSegment` == 0)
+		{
+		optionVar -intValue LT_edgeSegment 0;
+		//set default prefs for edge snapping
+		snapMode -edgeMagnet 1;
+		snapMode -edgeMagnetTolerance 0;
+
+		// using LT_edgeSegment just to see if optionVars exist
+		// if not then set default face and orient option for snapTogether
+		snapTogetherCtx -edit -spf 0 snapTogetherToolCtx;				 
+		snapTogetherCtx -edit -so 0 snapTogetherToolCtx;
+		}
+
+		
+	//////////////////////
+	//		Target
+	//		
+	if (`optionVar -ex LT_targetFrame` == 0)
+		optionVar -intValue LT_targetFrame 0; //set to expanded	
+		
+	if (`optionVar -ex LT_targetOrient` == 0)
+		optionVar -intValue LT_targetOrient 1;	
+		
+	if (`optionVar -ex LT_targetConstrain` == 0)
+		optionVar -intValue LT_targetConstrain 0;
+		
+	if (`optionVar -ex LT_targetParent` == 0)
+		optionVar -intValue LT_targetParent 0;
+		
+				
+		
+	//////////////////////
+	//		Replicate
+	//
+	if (`optionVar -ex LT_replicateFrame` == 0)
+		optionVar -intValue LT_replicateFrame 0; //set to expanded
+	if (`optionVar -ex LT_replicateConstrain` == 0)
+		optionVar -intValue LT_replicateConstrain 0;
+	if (`optionVar -ex LT_replicateParent` == 0)
+		optionVar -intValue LT_replicateParent 0;
+	if (`optionVar -ex LT_replicateOrient`  == 0)
+		optionVar -intValue LT_replicateOrient 1;
+	if (`optionVar -ex LT_replicateType` == 0)
+		optionVar -intValue LT_replicateType 1;  //1:copy  2:instance 
+	if (`optionVar -ex LT_replicateVerts` == 0)
+		optionVar -intValue LT_replicateVerts 0;
+	if (`optionVar -ex LT_replicateEdges` == 0)
+		optionVar -intValue LT_replicateEdges 0;
+	if (`optionVar -ex LT_replicateFaces` == 0)
+		optionVar -intValue LT_replicateFaces 1;
+	if (`optionVar -ex LT_replicateCount ` == 0)
+		optionVar -intValue LT_replicateCount 10;
+
+
+		
+	//////////////////////
+	//		Replace
+	//
+	if (`optionVar -ex LT_replaceFrame` == 0)
+		optionVar -intValue LT_replaceFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_replaceType` == 0)
+		optionVar -intValue LT_replaceType 1;  //1:copy  2:instance  3:reference
+	if (`optionVar -ex LT_replaceRotate` == 0)
+		optionVar -intValue LT_replaceRotate 1;
+	if (`optionVar -ex LT_replaceScale` == 0)
+		optionVar -intValue LT_replaceScale 1;
+	if (`optionVar -ex LT_keepOrig` == 0)
+		optionVar -intValue LT_keepOrig 1;		
+		
+		
+	
+	//////////////////////
+	//		Info
+	//
+	if (`optionVar -ex LT_infoFrame` == 0)
+		optionVar -intValue LT_infoFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_setPopupTime` == 0)
+		optionVar -intValue LT_setPopupTime 7;
+	
+	
+	//////////////////////
+	//		View
+	//
+	if (`optionVar -ex LT_axisVisibility` == 0)
+		optionVar -intValue LT_axisVisibilty 0; //0:off 1:View 2:Origin 3:Both
+	
+	if (`optionVar -ex LT_wosView` == 0)
+		optionVar -intValue LT_wosView 0;		
+
+	if (`optionVar -ex LT_selectHighlight` == 0)
+		optionVar -intValue LT_selectHighlight 1;
+	
+	if (`optionVar -ex LT_fastInteract` == 0)
+		optionVar -intValue LT_fastInteract 1;
+	
+	if (`optionVar -ex LT_textureFilter` == 0)
+		optionVar -intValue LT_textureFilter 1;	
+	
+	if (`optionVar -ex LT_xRay` == 0)
+		optionVar -intValue LT_xRay 0;	
+	
+	if (`optionVar -ex LT_viewFrame` == 0) //set to expanded
+		optionVar -intValue LT_viewFrame 0;
+	
+	if (`optionVar -ex LT_walkCamSpeed` == 0)
+		optionVar -floatValue LT_walkCamSpeed 0.5;	
+	
+
+	
+	//////////////////////
+	//		Poly
+	//
+	if (`optionVar -ex LT_polyFrame` == 0)
+		optionVar -intValue LT_polyFrame 0; //set to expanded
+	
+	if (`optionVar -ex LT_doubleSided` == 0)
+		optionVar -intValue LT_doubleSided 1;	
+	
+	if (`optionVar -ex LT_boundingBox` == 0)
+		optionVar -intValue LT_boundingBox 1;
+
+	if (`optionVar -ex LT_culling` == 0)
+		optionVar -intValue LT_culling 1;			
+
+	//////////////////////
+	//		Color
+	//
+	if (`optionVar -ex LT_colorFrame` == 0)
+		optionVar -intValue LT_colorFrame 0; //set to expanded
+
+}
+
+
+global proc LT_deleteImportOptionVars()
+{
+	//Delete import optionVars so they can be reset back to default values
+		
+	//////////////////////
+	//		Import/Ref
+	//
+	optionVar -rm LT_userImportPath;
+	optionVar -rm LT_relativeToProject;  
+	optionVar -rm LT_includeSubfolders; 
+	optionVar -rm LT_importPrefix;
+
+	// file formats
+	optionVar -rm LT_FBX;
+	optionVar -rm LT_MB;
+	optionVar -rm LT_MA;
+
+	optionVar -rm LT_shareShadingNetworks;
+	
+	optionVar -rm LT_reference;
+	optionVar -rm LT_shareLayers;
+	optionVar -rm LT_createRefLocator;
+	
+	optionVar -rm LT_groundValue; 
+	
+	//////////////////////
+	//		Settings
+	//
+	optionVar -rm LT_settingsFrame;	
+	
+	//Icons
+	optionVar -rm LT_iconSize;
+	optionVar -rm LT_iconFormat; 
+	optionVar -rm LT_iconFormatNumber; 
+	optionVar -rm LT_iconRenderer;
+
+	
+	
+	//////////////////////
+	//		Tab
+	//
+	//Reset selected tab to import
+	if (`optionVar -ex LT_selectedTab` == 1)
+		optionVar -intValue LT_selectedTab 1;   //1:Import 2:Offset 3:Layout 4:Display  	
+}		
+
+
+
+global proc LT_deleteLayoutOptionVars()
+{
+	//Delete layout optionVars so they can be reset back to default values
+	
+	//////////////////////
+	//		General
+	//
+	//optionVar -rm  LT_UIMode;
+	//optionVar -rm LT_RebuildUI;
+	
+	optionVar -rm LT_generalFrame;
+		
+    optionVar -rm LT_UIWidth;		
+    optionVar -rm LT_UIHeight;		
+	
+	//////////////////////
+	//		Position
+	//
+	optionVar -rm LT_positionFrame;
+	optionVar -rm LT_moveOffsetAxis;
+	optionVar -rm LT_moveSpace;
+	optionVar -rm LT_moveValue;
+
+	//////////////////////
+	//		Orient
+	//
+	optionVar -rm LT_orientFrame;
+	optionVar -rm LT_rotateOffsetAxis;
+	optionVar -rm LT_rotateSpace;
+	optionVar -rm LT_rotateValue;
+
+	//////////////////////
+	//		Scale
+	//
+	optionVar -rm LT_scaleFrame;
+	optionVar -rm LT_scaleOffsetX;
+	optionVar -rm LT_scaleOffsetY;
+	optionVar -rm LT_scaleOffsetZ;
+	optionVar -rm LT_scaleSpace;
+	optionVar -rm LT_scaleValue;
+
+	//////////////////////
+	//		Random
+	//
+	optionVar -rm LT_randomFrame;
+	optionVar -rm LT_randomOffsetX;
+	optionVar -rm LT_randomOffsetY;
+	optionVar -rm LT_randomOffsetZ;
+
+	optionVar -rm LT_randMoveMinValue;
+	optionVar -rm LT_randMoveMaxValue;
+	optionVar -rm LT_randRotMinValue;
+	optionVar -rm LT_randRotMaxValue;
+	optionVar -rm LT_randScaleMinValue;
+	optionVar -rm LT_randScaleMaxValue;
+	
+	
+	//////////////////////
+	//		Align
+	//
+	optionVar -rm LT_alignFrame;
+	optionVar -rm LT_alignAxis;	
+	
+	//////////////////////
+	//		Snap
+	//
+	optionVar -rm LT_snapFrame;
+	optionVar -rm LT_edgeSegment;
+
+	
+	//////////////////////
+	//		Target
+	//
+	optionVar -rm LT_targetFrame;
+	optionVar -rm LT_targetConstrain;
+	optionVar -rm LT_targetParent;
+	optionVar -rm LT_targetOrient;
+	
+	//////////////////////
+	//		Replicate
+	//
+	optionVar -rm LT_replicateFrame;
+	optionVar -rm LT_replicateConstrain;
+	optionVar -rm LT_replicateParent;
+	optionVar -rm LT_replicateOrient;
+	optionVar -rm LT_replicateType;
+	optionVar -rm LT_replicateVerts;
+	optionVar -rm LT_replicateEdges;
+	optionVar -rm LT_replicateFaces;
+	optionVar -rm LT_replicateCount;
+
+	//////////////////////
+	//		Replace
+	//
+	optionVar -rm LT_replaceFrame;
+	optionVar -rm LT_replaceType;
+	optionVar -rm LT_replaceRotate;
+	optionVar -rm LT_replaceScale;
+	optionVar -rm LT_keepOrig;
+		
+	//////////////////////
+	//		Info
+	//
+	optionVar -rm LT_infoFrame;
+	optionVar -rm LT_setPopupTime;
+
+		
+	//////////////////////
+	//		View
+	//
+	optionVar -rm LT_axisVisibilty;
+	optionVar -rm LT_wosView;
+	optionVar -rm LT_selectHighlight;
+	optionVar -rm LT_fastInteract;
+	optionVar -rm LT_textureFilter;
+	optionVar -rm LT_xRay;
+	
+	optionVar -rm LT_viewFrame;
+	optionVar -rm LT_walkCamSpeed;
+	
+	//////////////////////
+	//		Poly
+	//
+	optionVar -rm LT_polyFrame;
+	
+	optionVar -rm LT_doubleSided;
+	optionVar -rm LT_culling;
+
+	optionVar -rm LT_boundingBox;
+
+	
+	//////////////////////
+	//		Color
+	//
+	optionVar -rm LT_colorFrame;	
+
+
+	//////////////////////
+	//		Tab
+
+	//Reset selected tab to offset
+	if (`optionVar -ex LT_selectedTab` == 0)
+		optionVar -intValue LT_selectedTab 2;   //1:Import 2:Placement 3:Assembly 4:Display  	
+
+}
+
+
+//////////////////////////////////////////////////////////////////
+// Procs for getting optionVar values from UI
+//////////////////////////////////////////////////////////////////
+
+
+
+global proc float LT_setFloatFieldValue(string $id, string $optVar)
+{
+	// Return number from float field change
+	//
+
+	float $val = `floatField -q -value $id` ;
+	optionVar -fv $optVar $val;
+	return $val;
+}
+
+
+
+global proc int LT_setIntFieldValue(string $id, string $optVar)
+{
+	// Return number from integer field change
+	//
+
+	int $val = `intField -q -value $id` ;
+	optionVar -iv $optVar $val;
+	return $val;
+}
+
+
+
+global proc float LT_setWalkCamSpeed(string $id)
+{
+	// Return number from float slider change
+	//
+
+	float $val = `floatSlider -q -value $id` ;
+	optionVar -fv LT_walkCamSpeed $val;
+	return $val;
+}
+
+
+
+global proc int LT_setEdgeSegment(string $id)
+{
+	int $val = `optionMenu -q -sl $id` ;
+
+	if ($val > 3)
+		{
+		PreferencesWindow;
+		switchPrefTabs 19;
+		}
+	else
+		{
+		optionVar -iv LT_edgeSegment $val;
+		snapMode -edgeMagnet $val;
+		}
+	return $val;
+}
+	
+	
+
+global proc float LT_setPopupTime(string $id)
+{
+	// Return number from integer field change
+	//
+
+	int $val = `intField -q -value $id` ;
+	optionVar -iv LT_setPopupTime $val;
+	//set pref for popup time
+	help -popupDisplayTime $val;
+	return $val;
+}
+
+
+
+global proc  LT_setUserImportPathName ()
+{
+
+    string $path[] = `fileDialog2 -fm 3 -ds 1 -okc "Set Path"`; 
+    if (`size $path[0]` > 0)
+    	optionVar -sv LT_userImportPath ($path[0] + "/");
+    else
+    	print "No change to path.\n";
+}
+
+
+
+global proc string LT_setImportPrefix (string $id)
+{
+	string $text = `textField -q -tx $id`;
+	optionVar -sv LT_importPrefix $text;
+	return $text;
+}
+
+
+
+global proc LT_updateOrientToolOptions()
+{
+	if (`optionVar -q LT_orientToolType` == "vert")
+		LT_orientToVertToolValues orientToVertTool;
+	else if (`optionVar -q LT_orientToolType` == "edge")
+		LT_orientToEdgeToolValues orientToEdgeTool;
+	else 
+		warning ("No tool to update.");
+}
+		
+		

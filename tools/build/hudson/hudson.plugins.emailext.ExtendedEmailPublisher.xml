@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.emailext.ExtendedEmailPublisher_-DescriptorImpl>
+  <hudsonUrl>http://buildstation.gsc-game.kiev.ua/</hudsonUrl>
+  <adminAddress>mailnull@gsc-game.kiev.ua</adminAddress>
+  <smtpHost>smtp.gsc-game.kiev.ua</smtpHost>
+  <useSsl>false</useSsl>
+  <defaultSubject>$BUILD_STATUS Build # $BUILD_NUMBER $PROJECT_NAME!</defaultSubject>
+  <defaultBody>Fellow developer,&#xd;
+$BUILD_STATUS Build # $BUILD_NUMBER $PROJECT_NAME!&#xd;
+&#xd;
+Check console output at $BUILD_URL to view the results.</defaultBody>
+</hudson.plugins.emailext.ExtendedEmailPublisher_-DescriptorImpl>

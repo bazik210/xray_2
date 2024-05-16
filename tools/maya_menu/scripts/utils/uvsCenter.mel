@@ -1,0 +1,23 @@
+global proc float[] uvsCenter(string $uvs[])
+{
+//$uvs = `ls -sl -fl`;
+float $us[] = {};
+float $vs[] = {};
+float $pos[] = {};
+for ($uv in $uvs)
+	{
+//$uv = $uvs[0];
+	$pos = pointPositionUV($uv);
+	$us[`size $us`] = $pos[0];
+	$vs[`size $vs`] = $pos[1];
+	}
+float $uPos = (maxOf($us) + minOf($us)) / 2;
+float $vPos = (maxOf($vs) + minOf($vs)) / 2;
+return {$uPos, $vPos};
+}
+
+global proc float intToFloat(int $int)
+{
+float $float = $int;
+return $float;
+}

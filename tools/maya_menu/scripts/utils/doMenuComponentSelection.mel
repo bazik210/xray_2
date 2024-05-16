@@ -1,0 +1,20 @@
+global proc doMenuComponentSelection(string $item, string $mask)
+//
+// Changes the selection/display state on this object to allow
+// selection of the specified selection mask type.
+{
+	string $selectCmd;
+
+	if (`selectMode -q -object`) {
+		hilite $item;
+		selectType -ocm -alc false;
+		$selectCmd = "selectType -ocm -" + $mask + " true;";
+	} else {
+		selectType -ocm -alc false;
+		$selectCmd = "selectType -" + $mask + " true;";
+		if (!`selectMode -q -preset`) {
+			$selectCmd = $selectCmd + "hilite " + $item + ";";
+		}
+	}
+	eval $selectCmd;
+}

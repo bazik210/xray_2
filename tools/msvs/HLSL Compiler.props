@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(HLSL_CompilerBeforeTargets)' == '' and '$(HLSL_CompilerAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <HLSL_CompilerBeforeTargets>Midl</HLSL_CompilerBeforeTargets>
+    <HLSL_CompilerAfterTargets>CustomBuild</HLSL_CompilerAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <HLSL_CompilerDependsOn
+      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(HLSL_CompilerDependsOn)</HLSL_CompilerDependsOn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <HLSL_Compiler>
+      <CommandLineTemplate>$(SolutionDir)../resources/sources/shaders/shader_compiler_vs.exe" "%(FullPath)" "$(SolutionDir)../resources/sources/shaders/sm_4_0/defines_full.def" -dx10 -shader_model="4.0" -ext="ps,vs" -vs_output="$(IntDir)%(Filename)%(Extension).obj</CommandLineTemplate>
+      <Outputs>$(IntDir)%(Filename)%(Extension).obj</Outputs>
+      <ExecutionDescription>%(Filename)%(Extension)</ExecutionDescription>
+      <ShowOnlyRuleProperties>false</ShowOnlyRuleProperties>
+    </HLSL_Compiler>
+  </ItemDefinitionGroup>
+</Project>

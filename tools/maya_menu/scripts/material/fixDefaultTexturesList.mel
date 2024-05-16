@@ -1,0 +1,10 @@
+global proc fixDefaultTexturesList()
+{
+string $texList[] = `ls -typ file`;
+//string $texList[] = (`ls -l`);
+//string $texList[] = (`ls -sl`);
+for ($i = 0; $i < size($texList); $i++)
+{
+connectAttr -f ($texList[$i]+".message") defaultTextureList1.textures[$i];
+}
+}

@@ -1,0 +1,83 @@
+// Creates a new shader and assign it to the selected faces.
+// Used makeMat.mel
+global proc assignMat()
+{
+
+	string $selection[] = `ls -sl`;		// Get selected faces.
+	string $sgName = `makeMat 1`;		// Make a new material.
+
+
+	// Assign material to all selected faces.
+	for ($item in $selection)
+	{
+		eval ("sets -edit -forceElement " + $sgName + " " + $item);
+	}
+
+
+	// When a material is created, it is also selected.
+	// Clear material selection and re-select faces.
+	select -cl;
+
+	for ($item in $selection)
+	{
+		select -add $item;
+	}
+
+	// Strip "SG" from the shading group name to get the material name.
+	string $buffer[];
+	tokenize $sgName "SG" $buffer;
+
+	print ($buffer[0] + " assigned to selection.\n");
+
+	// kbMod
+	select -cl;
+}
+//end assignMat()
+
+
+global proc string makeMat(int $matNum)
+{
+	int $i = 1;				// Initialize increment variable.
+	vector $color;			// Initialize vector to hold RGB color values.
+
+	if ($matNum < 1)
+	{
+		// If the user enters a value less than 1, do nothing.
+		error "Enter a number greater than or equal to 1.";
+	}
+	else
+	{
+		// Create the specified number of materials.
+
+
+		// MOD by kbrown - Init the string which holds the last SG name
+		string $lastSG;
+
+		while ($i <= $matNum)
+		{
+			// Create a Lambert shader.
+			eval("shadingNode -asShader -name material_" + $i + " lambert");
+
+			// Get the name of the current shader and assign a random color to it.
+			string $matName[] = (`ls -sl`);
+			$color = eval("rand <<1,1,1>>");
+			eval("setAttr " + $matName[0] + ".color -type double3 " + $color);
+
+			// MOD by kbrown - create shading group for the current shader
+			$lastSG = $matName[0] + "SG";
+			eval("sets -renderable true -noSurfaceShader true -empty -name " + $lastSG);
+			eval("connectAttr -f " + $matName[0] + ".outColor " + $lastSG + ".surfaceShader");
+
+			$i = $i + 1;
+		}
+
+		// Informs user of the number of materials created.
+
+		// print ($matNum + " materials created.\n");
+
+		// MOD by kbrown - return the SG name.
+		return $lastSG;
+
+	} 	// end else
+}
+// end makeMat()

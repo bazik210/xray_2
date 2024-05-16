@@ -1,0 +1,537 @@
+/* This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: dgRandomiser
+''    Author:
+''    Last Updated: Nov 26, 2006
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/misc/4405.html
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//////////////////////////////////////////////////////////////////
+// dgRandomiser v1.0 - script file
+// Creation Date - 26.11.2006
+//
+//Author:   Denislav Georgiev
+//web:	    www.denisg.com
+//e-mail:	denis@denisg.com
+//
+// Description:
+//	 	With this script you can randomise selected object by
+// 		a custom added values in the fields.
+// 		You can choose between "Absolute" and "Relative" randomisation.
+//
+// For additional information on using the script go to Help,
+//
+// 	or use the "?" button's on the right side of the window
+//***************************************************************
+// source and call the script with "dgRandomiser"
+//***************************************************************
+///////////////////////////////////////////////////////////////////
+
+global proc Randomiser()
+{
+	if (`window -exists dgRandomiserUI`)
+		deleteUI dgRandomiserUI;
+
+	window -t "dgRandomiser 1.0"
+		   -wh 275 510
+		   -s 0
+			dgRandomiserUI;
+
+	///START Creating the Menu for the window....
+	menuBarLayout randMenuBar;
+		menu -l "Edit" -parent randMenuBar editMenu;
+			menuItem -l "Reset Translates" -c "resetFields (\"negTransFFG\", \"posTransFFG\", 0, 0)" resetTransMI;
+			menuItem -l "Reselt Rotates" -c "resetFields (\"negRotsFFG\", \"posRotsFFG\", 0, 0)" resetRotsMI;
+			menuItem -l "Reset Scales" -c "resetFields (\"negScaleFFG\", \"posScaleFFG\", 0, 0)" resetScalesMI;
+			menuItem -divider 1;
+			menuItem -l "Reset All" -c "resetAllFields()" resetAllMI;
+		menu -l "Help" -parent randMenuBar helpMenu;
+			menuItem -l "Help" -c "helpWindow()" helpMI;
+			menuItem -divider 1;
+			menuItem -l "About" -c "aboutWindow()" aboutMI;
+	///END Creating the Menu for the window....
+
+	columnLayout -adj 1 randMainCol;
+
+	// START Creating the form Layout abd it's content
+
+		formLayout randMainForm;
+
+		radioCollection randRadioCol;
+
+			radioButton -l "Randomise based on absolute positions"
+				-onCommand "changeText()"
+				absPosRB;
+
+			radioButton -l "Randomise based on relative positions"
+						-onCommand "changeText()"
+						-sl
+						relPosRB;
+
+		button -l "?" -w 20
+				-ann "Help for this tool"
+				-c "radioColHelp()"
+				lastPosHelpButton;
+
+
+		separator -style "double" sep1;
+
+		text -l "--------------->  TRANSLATES  <--------------" transText;
+		text -l "X                  Y                  Z" xyzTransText;
+
+		floatFieldGrp -l "Negative"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  negTransFFG;
+
+		floatFieldGrp -l "Positive"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  posTransFFG;
+
+		button -l "?"
+				-w 25
+				-ann "Help for this tool"
+				-c "FFGHelp()"
+				fieldsHelpButton;
+
+
+		button -l "Rand - X" -w 50 -c "randSingle(\".translateX\", \"negTransFFG\", \"posTransFFG\", \"-value1\")"  randTransX;
+		button -l "Rand - Y" -w 50 -c "randSingle(\".translateY\", \"negTransFFG\", \"posTransFFG\", \"-value2\")" randTransY;
+		button -l "Rand - Z" -w 50 -c "randSingle(\".translateZ\", \"negTransFFG\", \"posTransFFG\", \"-value3\")" randTransZ;
+
+		separator sep2;
+
+
+
+		text -l "-------------> ROTATES <-------------" rotText;
+		text -l "X                  Y                  Z" xyzRotsText;
+
+		floatFieldGrp -l "Negative"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  negRotsFFG;
+
+		floatFieldGrp -l "Positive"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  posRotsFFG;
+
+
+		button -l "Rand - X" -w 50 -c "randSingle(\".rotateX\", \"negRotsFFG\", \"posRotsFFG\", \"-value1\")" randRotsX;
+		button -l "Rand - Y" -w 50 -c "randSingle(\".rotateY\", \"negRotsFFG\", \"posRotsFFG\", \"-value2\")" randRotsY;
+		button -l "Rand - Z" -w 50 -c "randSingle(\".rotateZ\", \"negRotsFFG\", \"posRotsFFG\", \"-value3\")" randRotsZ;
+
+		separator sep3;
+
+
+		text -l "-------------> SCALES <-------------" scaleText;
+		text -l "X                  Y                  Z" xyzScaleText;
+
+		floatFieldGrp -l "Negative"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  negScaleFFG;
+
+		floatFieldGrp -l "Positive"
+					  -numberOfFields 3
+					  -columnAttach4 "both" "both" "both" "both"
+					  -columnAlign 1 "left"
+					  -columnOffset4 0 4 4 4
+					  -columnWidth4 50 60 60 60
+					  posScaleFFG;
+
+		button -l "Rand - X" -w 50 -c "randSingle(\".scaleX\", \"negScaleFFG\", \"posScaleFFG\", \"-value1\")" randScaleX;
+		button -l "Rand - Y" -w 50 -c "randSingle(\".scaleY\", \"negScaleFFG\", \"posScaleFFG\", \"-value2\")" randScaleY;
+		button -l "Rand - Z" -w 50 -c "randSingle(\".scaleZ\", \"negScaleFFG\", \"posScaleFFG\", \"-value3\")" randScaleZ;
+
+		separator -style "double" sep4;
+
+		button -l "RANDOMISE ALL" -c "randAll()" randAllButton;
+
+
+// END Creating the form Layout abd it's content
+/////////////////////////////////////////////////////////////
+
+/// START Editing the form Layout...
+
+		formLayout -e
+
+			-af absPosRB "top" 5
+			-af absPosRB "left" 5
+			-an absPosRB "right"
+
+			-af relPosRB "left" 5
+			-an relPosRB "right"
+			-ac relPosRB "top" 5 absPosRB
+
+			-ap lastPosHelpButton "left" 0 90
+			-af lastPosHelpButton "right" 10
+			-aoc lastPosHelpButton "top" 5 absPosRB
+
+			-af sep1 "left" 0
+			-af sep1 "right" 0
+			-ac sep1 "top" 7 relPosRB
+
+			-af transText "left" 30
+			-af transText "right" 10
+			-ac transText "top" 5 sep1
+
+			-af xyzTransText "left" 80
+			-af xyzTransText "right" 10
+			-ac xyzTransText "top" 5 transText
+
+			-af negTransFFG "left" 5
+			-ac negTransFFG "top" 0 xyzTransText
+
+			-af posTransFFG "left" 5
+			-ac posTransFFG "top" 5 negTransFFG
+
+			-ap fieldsHelpButton "left" 0 90
+			-aoc fieldsHelpButton "top" 15 negTransFFG
+			-af fieldsHelpButton "right" 10
+
+			-af randTransX "left" 60
+			-ac randTransX "top" 5 posTransFFG
+
+			-ac randTransY "left" 10 randTransX
+			-ac randTransY "top" 5 posTransFFG
+
+			-ac randTransZ "left" 10 randTransY
+			-ac randTransZ "top" 5 posTransFFG
+
+			-af sep2 "left" 0
+			-af sep2 "right" 0
+			-ac sep2 "top" 5 randTransX
+
+			-af rotText "left" 50
+			-af rotText "right" 10
+			-ac rotText "top" 5 sep2
+
+			-af xyzRotsText "left" 80
+			-af xyzRotsText "right" 10
+			-ac xyzRotsText "top" 5 rotText
+
+			-af negRotsFFG "left" 5
+			-ac negRotsFFG "top" 0 xyzRotsText
+
+			-af posRotsFFG "left" 5
+			-ac posRotsFFG "top" 5 negRotsFFG
+
+			-af randRotsX "left" 60
+			-ac randRotsX "top" 5 posRotsFFG
+
+			-ac randRotsY "left" 10 randRotsX
+			-ac randRotsY "top" 5 posRotsFFG
+
+			-ac randRotsZ "left" 10 randRotsY
+			-ac randRotsZ "top" 5 posRotsFFG
+
+			-af sep3 "left" 0
+			-af sep3 "right" 0
+			-ac sep3 "top" 5 randRotsX
+
+			-af scaleText "left" 55
+			-af scaleText "right" 10
+			-ac scaleText "top" 5 sep3
+
+			-af xyzScaleText "left" 80
+			-af xyzScaleText "right" 10
+			-ac xyzScaleText "top" 5 scaleText
+
+			-af negScaleFFG "left" 5
+			-ac negScaleFFG "top" 0 xyzScaleText
+
+			-af posScaleFFG "left" 5
+			-ac posScaleFFG "top" 5 negScaleFFG
+
+			-af randScaleX "left" 60
+			-ac randScaleX "top" 5 posScaleFFG
+
+			-ac randScaleY "left" 10 randScaleX
+			-ac randScaleY "top" 5 posScaleFFG
+
+			-ac randScaleZ "left" 10 randScaleY
+			-ac randScaleZ "top" 5 posScaleFFG
+
+			-af sep4 "left" 0
+			-af sep4 "right" 0
+			-ac sep4 "top" 5 randScaleX
+
+			-af randAllButton "left" 5
+			-af randAllButton "right" 5
+			-ac randAllButton "top" 5 sep4
+			randMainForm;
+	showWindow dgRandomiserUI;
+
+}
+/// END Editing the form Layout...
+////////////////////////////////////////////
+
+// procedure for changind the text's depending what radio button
+// is selected...
+
+global proc changeText()
+{
+	string $currentRadio = `radioCollection -q -sl randRadioCol`;
+	if ($currentRadio == "absPosRB")
+	{
+		floatFieldGrp -e -l "Min Value" negTransFFG;
+		floatFieldGrp -e -l "Max Value" posTransFFG;
+
+		floatFieldGrp -e -l "Min Value" negRotsFFG;
+		floatFieldGrp -e -l "Max Value" posRotsFFG;
+
+		floatFieldGrp -e -l "Min Value" negScaleFFG;
+		floatFieldGrp -e -l "Max Value" posScaleFFG;
+	}
+	else if ($currentRadio == "relPosRB")
+	{
+		floatFieldGrp -e -l "Negative" negTransFFG;
+		floatFieldGrp -e -l "Positive" posTransFFG;
+
+		floatFieldGrp -e -l "Negative" negRotsFFG;
+		floatFieldGrp -e -l "Positive" posRotsFFG;
+
+		floatFieldGrp -e -l "Negative" negScaleFFG;
+		floatFieldGrp -e -l "Positive" posScaleFFG;
+	}
+}
+
+//////////////////////////////////////////////////////////
+/// The procedure for randomising by a single attribute
+
+global proc randSingle (string $attribute, string $fieldMinGrp, string $fieldMaxGrp, string $valField)
+{
+///defining procedures and gettings the values from the min\max values from the fields
+/// Each button is sending different values to feed the procedure with the appropriate
+/// names...
+
+	float $negValues;
+	float $posValues;
+	string $radioButtonCol = `radioCollection -q -sl randRadioCol`;
+	float $randResult;
+	float $currentPosition;
+	string $selectedObj[] = `ls -sl`;
+
+// looping through all selected objects
+	if (! size ($selectedObj))
+		error "Please select at least one object";
+
+	for ($obj=0; $obj <size ($selectedObj); $obj++)
+	{
+		$negValues = `floatFieldGrp -q $valField $fieldMinGrp`;
+		$posValues = `floatFieldGrp -q $valField $fieldMaxGrp`;
+		$randResult = rand ($negValues, $posValues);
+
+// and randomising depending on which radioButton is selected...
+
+		if ($radioButtonCol == "absPosRB")
+		{
+			setAttr ($selectedObj[$obj] + $attribute) $randResult;
+		}
+		else if ($radioButtonCol == "relPosRB")
+		{
+			$currentPosition = `getAttr ($selectedObj[$obj] + $attribute)`;
+			setAttr ($selectedObj[$obj] + $attribute) ($currentPosition + $randResult);
+		}
+	}
+}
+
+// Procedure for randomising all Attributes...
+
+global proc randAll()
+{
+//// storing the values from the fieldGrp's in a float variables
+
+	float $transMin[] = `floatFieldGrp -q -value negTransFFG`;
+	float $transMax[] = `floatFieldGrp -q -value posTransFFG`;
+
+	float $rotsMin[] = `floatFieldGrp -q -value negRotsFFG`;
+	float $rotsMax[] = `floatFieldGrp -q -value posRotsFFG`;
+
+	float $scaleMin[] = `floatFieldGrp -q -value negScaleFFG`;
+	float $scaleMax[] = `floatFieldGrp -q -value posScaleFFG`;
+
+	string $currentRadioButton = `radioCollection -q -sl randRadioCol`;
+	string $selectedObj[] = `ls -sl`;
+
+	if (! size ($selectedObj))
+		error "Please select at least one object";
+
+	for ($i = 0; $i < size ($selectedObj); $i++)
+	{
+//////// randomising the values...
+
+		vector $randTranslates = <<rand ($transMin[0], $transMax[0]), rand ($transMin[1], $transMax[1]), rand ($transMin[2], $transMax[2])>>;
+		vector $randRotates = <<rand ($rotsMin[0], $rotsMax[0]), rand ($rotsMin[1], $rotsMax[1]), rand ($rotsMin[2], $rotsMax[2])>>;
+		vector $randScales = <<rand ($scaleMin[0], $scaleMax[0]), rand ($scaleMin[1], $scaleMax[1]), rand ($scaleMin[2], $scaleMax[2])>>;
+
+/////// randomising the objects depending on the radioButton's
+		if ($currentRadioButton == "relPosRB")
+		{
+		//// store the current positions
+			vector $currentTranslates = `getAttr ($selectedObj[0] + ".translate")`;
+			vector $currentRotates = `getAttr ($selectedObj[0] + ".rotate")`;
+			vector $currentScale = `getAttr ($selectedObj[0] + ".scale")`;
+
+
+			setAttr ($selectedObj[$i] + ".translate") ($currentTranslates.x + $randTranslates.x) ($currentTranslates.y + $randTranslates.y) ($currentTranslates.z + $randTranslates.z);
+			setAttr ($selectedObj[$i] + ".rotate") ($currentRotates.x + $randRotates.x) ($currentRotates.y + $randRotates.y) ($currentRotates.z + $randRotates.z);
+			setAttr ($selectedObj[$i] + ".scale") ($currentScale.x + $randScales.x) ($currentScale.y + $randScales.y) ($currentScale.z + $randScales.z);
+		}
+		else if ($currentRadioButton == "absPosRB")
+		{
+			setAttr ($selectedObj[$i] + ".translate") ($randTranslates.x) ($randTranslates.y) ($randTranslates.z);
+			setAttr ($selectedObj[$i] + ".rotate") ($randRotates.x) ($randRotates.y) ($randRotates.z);
+			setAttr ($selectedObj[$i] + ".scale") ($randScales.x) ($randScales.y) ($randScales.z);
+		}
+	}
+}
+
+// procedure for resetting the fields from the menu "Edit"
+
+global proc resetFields (string $fieldMin, string $fieldMax, float $minReset, float $maxReset)
+{
+	floatFieldGrp -e -v $minReset $minReset $minReset $minReset $fieldMin;
+	floatFieldGrp -e -v $maxReset $maxReset $maxReset $maxReset $fieldMax;
+}
+
+// proc for resetting
+
+global proc resetAllFields()
+{
+	floatFieldGrp -e -v 0 0 0 0 negTransFFG;
+	floatFieldGrp -e -v 0 0 0 0 posTransFFG;
+
+	floatFieldGrp -e -v 0 0 0 0 negRotsFFG;
+	floatFieldGrp -e -v 0 0 0 0 posRotsFFG;
+
+	floatFieldGrp -e -v 0 0 0 0 negScaleFFG;
+	floatFieldGrp -e -v 0 0 0 0 posScaleFFG;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//*************** HELP UI's *******************
+
+/// help for the radioCollections...
+
+global proc radioColHelp()
+{
+		if (`window -exists radioColHelpUI`)
+		deleteUI radioColHelpUI;
+
+	window -t "Radio button's help"
+		-wh 420 235
+		-s 0
+		radioColHelpUI;
+
+	columnLayout -adj 1 helpColumn;
+		scrollField -wordWrap true
+			-h 205
+			-editable 0
+			-text ("You can choose what type of randomisation you need." +
+					"\nIf you select: \n \"Randomise based on absolute positions\" \nThe objects will be randomised from \"0\" (scales from \"1\")" +
+					" If you select the \"Relative\" one the objects will be randomised starting from their current positions...\n" +
+					"\n\nFor example if you have sphere that is at 5 \"translateX\" and the randomised result is \"2\",  if you choose \"Absolute\"" +
+					" The object will be moved to \"2\". \nWith the \"Relative\" the same object will be moved to \"7\"." );
+	showWindow radioColHelpUI;
+}
+
+/// Help for the float field Groups...
+
+global proc FFGHelp()
+{
+		if (`window -exists FFGHelpUI`)
+		deleteUI FFGHelpUI;
+
+	window -t "Float Field's help"
+		-wh 420 235
+		-s 0
+		FFGHelpUI;
+
+	columnLayout -adj 1 helpColumn;
+		scrollField -wordWrap true
+			-h 205
+			-editable 0
+			-text ("If you choose the Absolute Radio Button you can type min and max value like 0 and 5." +
+			" But if you choose the Relative Radio Button it's recommendet that you type negative and positive values," +
+			" because the script is adding the randomised value to the current and you may get UNPREDICTABLE results if you" +
+			" use positive for both values." +
+			"\n" + "For example if you want to randomise (Relatively) value between 0 and 10, then simply type -5 for negative and 5 for positive." +
+			"\n\n" +
+			"IF You don't want to use the scale's when you hit the \"RANDOMISE ALL\"" +
+			"Then set them as follow:\n\n" +
+			"For Relative Randomisation set both Positive and Negative scales to 0 0 0.\n\n" +
+			"For Absolute Randomisation set both Min and Max scales to 1 1 1");
+
+	showWindow FFGHelpUI;
+}
+
+/// Help window
+
+global proc helpWindow()
+{
+		if (`window -exists helpUI`)
+		deleteUI helpUI;
+
+	window -t "Help"
+		-wh 420 235
+		-s 0
+		helpUI;
+
+	columnLayout -adj 1 helpColumn;
+		scrollField -wordWrap true
+			-h 205
+			-editable 0
+			-text ("With this script you can randomise selected object by a custom added values in the fields.\n" +
+			"You can choose between \"Absolute\" and \"Relative\" randomisation.\n" +
+			"For randomising single attribute use the buttons that are below every field group, for randomising" +
+			" all values use the button that is at the bottom of the UI \"RANDOMISE ALL\".\n" +
+			"For additional HELP (especially for the SCALE's values) press the \"?\" button's that are located at the right side of the UI.");
+
+	showWindow helpUI;
+}
+
+/// about window
+
+global proc aboutWindow()
+{
+		if (`window -exists aboutUI`)
+		deleteUI aboutUI;
+
+	window -t "About"
+		-wh 220	170
+		-s 0
+		aboutUI;
+
+	columnLayout -adj 1 helpColumn;
+
+		text -l "\ndgRandomiser  version 1.0";
+		text -l "\n\n\n Author:       Denislav Georgiev" -align "left";
+		text -l "\n Web:          www.denisg.com" -align "left";
+		text -l " E-mail:        denis@denisg.com" -align "left";
+
+	showWindow aboutUI;
+}

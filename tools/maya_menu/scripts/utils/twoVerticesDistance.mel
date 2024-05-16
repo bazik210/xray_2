@@ -1,0 +1,7 @@
+global proc float twoVerticesDistance(string $vertex1, string $vertex2)
+{
+float $v1[] = `pointPosition $vertex1`;
+float $v2[] = `pointPosition $vertex2`;
+float $distance = sqrt(pow(($v1[0] - $v2[0]), 2) + pow(($v1[1] - $v2[1]), 2) + pow(($v1[2] - $v2[2]), 2));
+return $distance;
+}

@@ -1,0 +1,46 @@
+global proc BindPose()
+{
+if (sizeSel() == 0)
+	{
+	EnableAll;
+	warning "now all ik-handles and constraints ENABLED";
+	}
+else
+{
+int $autoKeyOnAtEnd = 0;
+if (`autoKeyframe -q -st`)
+	{
+	autoKeyframe -st 0;
+	$autoKeyOnAtEnd = 1;
+	}
+$sel = sel();
+string $influences[];
+if (`objectType (sel1())` != "joint")
+	$influences = `skinCluster -q -inf (skinClusterFind(sel1()))`;
+else
+	$influences = sel();
+string $skinArray[] = `connectionInfo -dfs ($influences[0] + ".worldMatrix")`;
+$skinCluster = attribute_to_node($skinArray[0]);
+if ($skinCluster == "")
+	warning "can't found skinCluster";
+$influences = `skinCluster -q -inf $skinCluster`;
+string $bindPose[] = `dagPose -q -bp $influences[0]`;
+
+if (`size $bindPose` == 0)
+	warning "No bind pose founded.";
+else
+	{
+	DisableAll;
+	dagPose -r -g -bp $influences[0];
+	if ($autoKeyOnAtEnd)
+		autoKeyframe -st 1;
+	if (keysPressed() == "Ctrl")
+		warning "bind pose reached and ALL ik's, constraints and expressions DISABLED";
+	else
+		{
+		EnableAll;
+		print "bind pose reached";
+		}
+	}
+}
+}

@@ -1,0 +1,3 @@
+global proc importMeasureBody(){
+	file -import -type "mayaBinary" -ra true -namespace "measure_body" -options "v=0"  -pr -loadReferenceDepth "all" "X:/resources/sources/scenes/test/measure_body.mb";
+}

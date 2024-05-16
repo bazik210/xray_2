@@ -1,0 +1,12 @@
+global proc string[] hardEdges(string $items[])
+{
+$edges = convertPoly($items, "te");
+string $hardEdges[] = {};
+for ($edge in $edges)
+  {
+  if (edgeHardness($edge))
+    $hardEdges[`size $hardEdges`] = $edge;
+  }
+$hardEdges = stringArrayRemove (borderEdges(`ls -o $items`), $hardEdges);
+return $hardEdges;
+}

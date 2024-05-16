@@ -1,0 +1,1 @@
+global proc string[] borderEdges(string $items[]){$edges = conv($items, "e");string $borderEdges[] = {};string $edge;for ($edge in $edges)	{	if (`size (conv({$edge}, "f"))` < 2)		$borderEdges[`size $borderEdges`] = $edge;	}return $borderEdges;}

@@ -1,0 +1,1 @@
+global proc string timeSimple(string $action){if ($action == "start")	{	global float $gTime;	$gTime = `timerX`;	return "0";	}else if ($action == "end")	{	global float $gTime;	string $time = `timerX -startTime $gTime`;	return $time;	}else	return 0;}

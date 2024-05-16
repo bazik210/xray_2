@@ -1,0 +1,39 @@
+//******************************************************************************
+// SCRIPT NAME: toggleXrayOnSelected.mel
+// DESCRIPTION: Will toggle on/off XRayShade mode.
+//
+// USAGE: Add a new command in the Hotkey Editor.
+// Type "toggleXrayOnSelected" and assign a hotkey.
+//******************************************************************************
+
+
+global proc toggleXrayOnSelected()
+{
+  string $TXray_list[]  = `ls -sl`;
+  int $TXray_i;
+
+  if (`size ($TXray_list)` == 0)
+  {
+    warning "select at least 1 object";
+  }
+  else
+  {
+    for ($TXray_i=0;$TXray_i<size($TXray_list);$TXray_i++)
+    {
+      string $TXray_shape[] = `pickWalk -d down $TXray_list[$TXray_i]`;
+
+      if (`nodeType $TXray_shape[0]` == "mesh" || `nodeType $TXray_shape[0]` == "nurbsSurface")
+      {
+        int $TXray_disp[] = `displaySurface -q -xRay $TXray_list[$TXray_i]`;
+        if ($TXray_disp[0] == 0)
+          displaySurface -xRay 1 $TXray_list[$TXray_i];
+        else
+          displaySurface -xRay 0 $TXray_list[$TXray_i];
+      }
+
+    }
+    select -r $TXray_list;
+  }
+}
+
+//******************************************************************************

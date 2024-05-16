@@ -1,0 +1,1 @@
+global proc multiBool()	{	string $multiBol[] = `ls -sl`;		int $i;		for ($i=1; $i < size($multiBol); ++$i)	   		{			string $startBol[] = `ls -sl`;			polyBoolOp -op 1 -ch 0 -n polyBollean1 $startBol[0] $multiBol[$i];	        	string $startBol[] = `ls -sl`;	    	}	delete $multiBol;	}

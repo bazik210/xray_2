@@ -1,0 +1,38 @@
+global proc correctTreesShapeName()
+{
+        string $CSN_liste[] = `ls -l -g`;
+        string $CSN_objects;
+        for ($CSN_objects in $CSN_liste)
+        {
+                string $CSN_intermedAttr = $CSN_objects + ".intermediateObject";
+                int $CSN_intermedAttrValue = `getAttr $CSN_intermedAttr`;
+                if ($CSN_intermedAttrValue == 0)
+                {
+                        string $CSN_transform[] = `pickWalk -d up $CSN_objects`;
+                        string $CSN_transformShort = `DBC_simplifyLongName($CSN_transform[0])`;
+                        string $CSN_objectNewName = "trees";
+                        rename $CSN_objects $CSN_objectNewName;
+                }
+                else
+                        print ($CSN_objects + " is a ghost shape - skipped \n");
+        }
+        print ("SHAPE NAME : All Shapes renamed according to their transform \n");
+}
+
+proc string DBC_simplifyLongName(string $UN_longName)
+{
+        string        $UN_tokenArray[];
+        tokenize $UN_longName "|" $UN_tokenArray;
+        if( size($UN_tokenArray) == 0 )
+                return $UN_longName;
+        return $UN_tokenArray[size($UN_tokenArray)-1];
+}
+
+global proc string SR_simplifyLongName(string $SLN_longName)
+{
+	string	$SLN_tokenArray[];
+	tokenize $SLN_longName "|" $SLN_tokenArray;
+	if( size($SLN_tokenArray) == 0 )
+		return $SLN_longName;
+	return $SLN_tokenArray[size($SLN_tokenArray)-1];
+}

@@ -1,0 +1,86 @@
+////////////////////////////////////////////////////////////////////////////////
+global proc splitObjectsByHardEdges()
+////////////////////////////////////////////////////////////////////////////////
+{
+$objects = `ls -sl`;
+string $object;
+int $counter = 0;
+int $counterObjects = 0;
+for ($object in $objects)
+  {
+for (;;)
+  {
+  $faces = convertPoly ({$object}, "tf");
+  $hardEdges = hardEdges({$object});
+  select $faces[0];
+  $sizeSel = 0;
+  print "\nnow grow";
+
+  for (;;)
+    {
+    ConvertSelectionToEdges;
+    select -d $hardEdges;
+    ConvertSelectionToFaces;
+    print ("\ngrow " + rand(0,1));
+    if ($sizeSel == sizeSel())
+      break;
+    else
+      $sizeSel = sizeSel();
+    }
+  if (sizeSel() == `size $faces`)
+    break;
+  else
+    {
+    $counter++;
+    print ("\ndetach " + $counter + " piece. Object " + $counterObjects + " from " + `size $objects`);
+    actionFaces(0,0);
+    }
+  }
+$counterObjects++;
+print "\nobject done";
+  }
+select $object;
+}
+
+
+global proc actionFaces(int $dup, int $combine)
+{
+$fStartTime = `timerX`;
+//$dup = 0;
+$facesObject = `ls -sl -fl`;
+$shape = `ls -sl -o`;
+$object = `listRelatives -p $shape[0]`;
+$duplicate = `duplicate $object`;
+
+if (!$dup)
+	delete $facesObject;
+
+rename $object[0] ($object[0] + "tmp");
+rename $duplicate[0] $object[0];
+select $facesObject;
+InvertSelection;
+delete;
+rename $object[0] $duplicate[0];
+rename ($object[0] + "tmp") $object[0];
+select $duplicate;
+CenterPivot;
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+DeleteHistory;
+$fTotalTime = `timerX -startTime $fStartTime`;
+print ("Total Duplicate Time: "+$fTotalTime+"\n");
+
+
+if ($combine)
+	{
+	select $object $duplicate;
+	$sizeAllFaces = `size (convertPoly($object, "tf"))`;
+	polyPerformAction polyUnite o 0;
+	$newObject = `ls -sl -o`;
+	$sizeAllFacesNewObject = `size (convertPoly($newObject, "tf"))`;
+	CenterPivot;
+	DeleteHistory;
+	makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+	select ($newObject[0] + ".f[" + $sizeAllFaces + ":" + ($sizeAllFacesNewObject - 1) + "]");
+	doMenuComponentSelection($newObject[0], "facet");
+	}
+}

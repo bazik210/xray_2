@@ -1,0 +1,136 @@
+//==============================================================================
+//Name:
+//  resetPivotToLocal.mel
+//==============================================================================
+//Purpose:
+//  resetPivotToLocal
+//==============================================================================
+//Usage:
+//  1. Save the resetPivotToLocal.mel to your scripts directory.
+//  2. Start Maya. In the command line type resetPivotToLocal(); - run script.
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+
+
+//resetPivotToLocal();
+// ewerybodys mel toolbox ::   resetPivotToLocal.mel //
+// ------------------------------------------ //
+// mel.goodsoul.de      ewerybody@goodsoul.de //
+//
+// mar-04  eric    created
+// oct-04  eric    minor bugfix
+// jun-05  eric    fixed hierarchy stuff
+// jul-05  eric    added reordering
+//
+// Restores the "real" pivot position without the Local Pivot
+// offset wich occurs if you freeze transform, or move the pivot.
+// Works in hierarchies and even with animated objects!
+// Quite important when doing export to realtime 3D Engines.
+//
+// credits to:
+//        * Crow from highend3D
+//  * Naughty (I been so naughty to take the best out
+//                  of your unfreeze ;)
+//
+
+global proc resetPivotToLocal ()
+{
+        string $sel[] = `ls -sl -l -transforms`;
+        for ($x in $sel)
+        {
+                string $shortName = `match "[^|]*$" $x`;
+                int $position = 1;
+                float $localPivot[3] = `xform -q -rp $x`;
+                if ($localPivot[0] != 0 || $localPivot[1] != 0 || $localPivot[2] != 0)
+                {
+                        print ("resetPivot: pivot of " + $shortName + " is dirty ! Offset: " + ((floor ($localPivot[0] * 10000)) / 10000) + " " + ((floor ($localPivot[1] * 10000)) / 10000) + " " + ((floor ($localPivot[2] * 10000)) / 10000) + " !\n");
+                        //cut potentiel translation keys and
+                        //take result for animation-check
+                        int $animCheck = `cutKey -at "tx" -at "ty" -at "tz" $x`;
+                        float $animPos[3];
+                        if ($animCheck) //take values of animated translation
+                                $animPos = `getAttr ($x + ".translate")`;
+
+                        // check if the object is child of another
+                        string $path[] = `listRelatives -p -f $x`;
+                        string $newName[]; $newName[0] = $x;
+                        if ($path[0] != "")
+                        {
+                                // position in hierarchy determination
+                                string $siblings[] = `listRelatives -f -c -type transform $path[0]`;
+                            for ($sibling in $siblings) {
+                                if ($sibling != $x) {   // search for $x in $siblings
+                                    $position++;        // increase for each obj that isn't $x
+                                } else break;           // stop if found $x
+                            };
+                                $newName = `parent -w $x`;  // now parent to world
+                        }
+
+                        // check if the object has children itself
+                        string $children[] = `listRelatives -f -c $newName`;
+                        string $shapes[] = `listRelatives -f -c -s $newName`;
+                        $children = `stringArrayRemove $shapes $children`;
+                        string $newChildren[];
+                        if (`size($children)`)
+                                $newChildren = `parent -w $children`;
+
+                        //##########################
+                        //STANDART ZeroOffsetPart>>>
+                        //remove translation values by freeze translation only
+                        makeIdentity -apply true -t 1 -r 0 -s 0 $newName;
+                        //move to zero
+                        move -rpr 0 0 0 $newName;
+
+                        //get invertet position and correct it
+                        float $tX = `getAttr ($newName[0] + ".translateX")`*(-1);
+                        float $tY = `getAttr ($newName[0] + ".translateY")`*(-1);
+                        float $tZ = `getAttr ($newName[0] + ".translateZ")`*(-1);
+
+                        //freeze translation again
+                        makeIdentity -apply true -t 1 -r 0 -s 0 $newName;
+
+                        //return object to its actual position
+                        setAttr ($newName[0] + ".translateX") $tX;
+                        setAttr ($newName[0] + ".translateY") $tY;
+                        setAttr ($newName[0] + ".translateZ") $tZ;
+                        //<<<<STANDART ZeroOffsetPart
+                        //##########################
+
+                        // put the object back in its hierarchy
+                        if ($path[0] != "")
+                        {
+                                $newName = `parent $newName[0] $path`;
+                                rename $newName[0] $shortName;
+
+                                // reorder to its original position
+                                reorder -front $x;
+                            string $pathShapes[] = `listRelatives -s $path[0]`;
+                                if (size($pathShapes)) reorder -r ($position) $x;
+                                else reorder -r ($position-1) $x;
+                        }
+
+                        // put the children back under the object
+                        if (`size($children)`)
+                                parent $newChildren $x;
+
+                        if ( $animCheck != 0 )
+                        {
+                                //reinsert translation curve as it has been taken
+                                pasteKey $x;
+
+                                //move every translationcurve by the difference value
+                                keyframe -e -iub true -r -o over -vc ($tX-$animPos[0] ) ($x+".translateX");
+                                keyframe -e -iub true -r -o over -vc ($tY-$animPos[1] ) ($x+".translateY");
+                                keyframe -e -iub true -r -o over -vc ($tZ-$animPos[2] ) ($x+".translateZ");
+                        }
+                        // sometimes there is a very tiny restvalue
+                        // forcing local pivot to 0 0 0
+                        xform -rp 0 0 0 $x;
+                        xform -sp 0 0 0 $x;
+                }
+                else
+                        print ("resetPivot: pivot of "+$shortName+" not dirty! Skipped!\n");
+        }
+        select -r $sel;
+};

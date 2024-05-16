@@ -1,0 +1,58 @@
+//==============================================================================
+//Name:
+//  planarMappingAdvance.mel
+//==============================================================================
+//Purpose:
+//planarMappingAdvance; 					//Planar Mapping, with face ratio.
+//planarMappingAdvance; with press "Ctrl" 	//Camera Align Planar Mapping, with face ratio.
+//==============================================================================
+//Usage:
+//  1. Save the planarMappingAdvance.mel to your scripts directory.
+//  2. Start Maya. In the command line type planarMappingAdvance();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc planarMappingAdvance()
+{
+////////////////////////////////////////////////////////////////////////////////
+//keysPressed == "Ctrl"
+////////////////////////////////////////////////////////////////////////////////
+
+if (keysPressed() == "Ctrl")
+{
+string $faces[] = `ls -sl -fl`;
+$width = 500;
+$height = 500;
+ConvertSelectionToFaces;
+$sel = `ls -sl -fl`;
+$projections = `polyProjection -ch 1 -type Planar -ibd on -icx 0.5 -icy 0.5 -ra 0 -isu 1 -isv 1 -kir  -md c`;
+
+for ($proj in $projections)
+	{
+	setAttr ($proj + ".projectionWidth") $width;
+	setAttr ($proj + ".projectionHeight") $height;
+	select -r $sel;
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
+//keysPressed == "None"
+////////////////////////////////////////////////////////////////////////////////
+
+else
+{
+string $faces[] = `ls -sl -fl`;
+$width = 500;
+$height = 500;
+ConvertSelectionToFaces;
+$sel = `ls -sl -fl`;
+$projections = `polyProjection -ch 1 -type Planar -ibd on -icx 0.5 -icy 0.5 -ra 0 -isu 1 -isv 1 -kir  -md b`;
+
+for ($proj in $projections)
+	{
+	setAttr ($proj + ".projectionWidth") $width;
+	setAttr ($proj + ".projectionHeight") $height;
+	select -r $sel;
+	}
+}
+}

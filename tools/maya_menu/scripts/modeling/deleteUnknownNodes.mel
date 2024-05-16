@@ -1,0 +1,1 @@
+global proc deleteUnknownNodes (){string $node;string $nodes[] = `ls -type "unknownDag" -type "unknown"`;int $z;for ($node in $nodes){if (`objExists $node`) {print ("Bad Nodes = "+$node+"\n");delete $node;$z++;}}if ($z > 0){print ("Delete bad Nodes N = "+$z+"\n");}}

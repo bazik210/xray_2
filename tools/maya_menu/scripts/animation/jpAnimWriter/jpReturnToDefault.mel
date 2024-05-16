@@ -1,0 +1,31 @@
+////////////////////////
+//Return Selected Objects to Default Position
+////////////////////////
+global proc jpReturnToDefault()
+{
+string $zeroObjs[] = `ls -sl`;
+for ($thisObj in $zeroObjs)
+{
+	string $zeroAttrs[] = {"translateX", "translateY", "translate Z",
+				"rotateX", "rotateY", "rotateZ"};
+	string $oneAttrs[] = {"scaleX", "scaleY", "scaleZ"};
+	string $udAttr[] = `listAttr -ud $thisObj`;
+
+	for ($attr in $zeroAttrs)
+	{
+		catch(`setAttr ($thisObj + "." + $attr) 0`);
+	}//end for
+	for ($attr in $oneAttrs)
+	{
+		catch(`setAttr ($thisObj + "." + $attr) 1`);
+	}//end for
+	if (`size($udAttr)` > 0)
+	{
+		for ($attr in $udAttr)
+		{
+			float $default[] = `attributeQuery -n $thisObj -ld $attr`;
+			catch(`setAttr ($thisObj + "." + $attr) $default[0]`);
+		}//end for
+	}//end if
+}//end for
+}  //end proc jpReturnToDefault

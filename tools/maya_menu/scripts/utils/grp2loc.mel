@@ -1,0 +1,13 @@
+global proc grp2loc(){
+$all = `ls -sl`;
+for($a in $all)
+{
+    string $subTree[] = `listRelatives -c $a`;
+    print $subTree;
+    $loc = `spaceLocator -p 0 0 0`;
+    for($sub in$subTree)  parent ($a+"|"+$sub) $loc;
+    delete $a;
+    rename $loc $a;
+}
+
+}

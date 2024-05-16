@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@echo do xbox iso
+@set xbox_binaries=&quot;D:\Hudson\jobs\Stalker_2-Polling\workspace\trunk\binaries\Xbox 360&quot;
+@rmdir /S /Q .\layout\resources
+@del /Q .\layout\*
+@del /Q .\iso\*
+@set errorlevel=0
+@svn export &quot;http://profile/svn/stksoc/trunk v2.0/resources&quot; .\layout\resources
+@copy %xbox_binaries%\stalker2-xbox360-gold.exe .\layout\stalker2-xbox360-gold.exe
+@copy %xbox_binaries%\stalker2-xbox360-gold.xdb .\layout\stalker2-xbox360-gold.xdb
+@copy %xbox_binaries%\stalker2-xbox360.xex .\layout\default.xex
+@copy .\NxeArt .\layout\NxeArt
+set PATH=%XEDK%\bin\win32;%PATH%;
+set INCLUDE=%XEDK%\include\win32;%XEDK%\include\xbox;%XEDK%\include\xbox\sys;%INCLUDE%
+set LIB=%XEDK%\lib\win32;%XEDK%\lib\xbox;%LIB%
+set _NT_SYMBOL_PATH=SRV*%XEDK%\bin\xbox\symsrv;%_NT_SYMBOL_PATH%
+&quot;C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32\XDiscBld.exe&quot; .\game_disk.xgd .\iso\stalker2-xbox.iso
+
+:end</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.tasks.ArtifactArchiver>
+      <artifacts>iso\stalker2-xbox.iso</artifacts>
+      <latestOnly>false</latestOnly>
+    </hudson.tasks.ArtifactArchiver>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.locksandlatches.LockWrapper>
+      <locks>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Build_Publish_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Poll_Build_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+      </locks>
+    </hudson.plugins.locksandlatches.LockWrapper>
+  </buildWrappers>
+</project>

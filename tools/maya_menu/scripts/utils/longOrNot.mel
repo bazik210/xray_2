@@ -1,0 +1,13 @@
+global proc int longOrNot(string $object)
+{
+//$object = "pCube1|pCubeShape1";
+//$object = "pCubeShape2";
+if (!`objExists $object`)
+	return 0;
+string $short = longToShort($object);
+string $paths[] = `ls -ap $short`;
+if (`size $paths` > 1)
+	return 1;
+else
+	return 0;
+}

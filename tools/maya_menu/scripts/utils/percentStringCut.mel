@@ -1,0 +1,23 @@
+global proc string[] percentStringCut(string $string[], float $perc)
+{
+if ($perc < 0 || $perc > 100)
+	print "\nwrong paramert \"percent\" for procedure \"percentStringCut\"";
+//string $string[] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
+//float $perc = 30;
+string $stringCutted[] = {};
+int $sizeTake = `size $string` / 100.0 * $perc;
+string $single;
+
+int $count = 0;
+for (;;)
+	{
+	int $nomer = rand(0,`size $string` - 1);
+	$single = $string[$nomer];
+	$stringCutted[`size $stringCutted`] = $single;
+	$string = stringArrayRemove({$single}, $string);
+	$count++;
+	if ($count >= $sizeTake)
+		break;
+	}
+return $stringCutted;
+}

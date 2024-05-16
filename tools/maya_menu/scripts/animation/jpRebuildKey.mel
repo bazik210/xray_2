@@ -1,0 +1,17 @@
+/////////////////////////////
+//Rebuild a key from an Elegant saved animation
+/////////////////////////////
+global proc jpRebuildKey(string $obj, string $attr, float $keyTime, float $keyValue, string $inTanType, string $outTanType, float $inWeight, float $outWeight, float $inAngle, float $outAngle, int $weightedTangents, int $lockTangents)
+{
+	select -cl;
+	select $obj;
+	setKeyframe -v $keyValue -t $keyTime -at $attr;
+	keyTangent -t $keyTime -at $attr -l $lockTangents;
+	keyTangent -t $keyTime -at $attr -wt $weightedTangents;
+	keyTangent -t $keyTime -at $attr -itt $inTanType;
+	keyTangent -t $keyTime -at $attr -ott $outTanType;
+	keyTangent -t $keyTime -at $attr -ia $inAngle; 
+	keyTangent -t $keyTime -at $attr -oa $outAngle;
+	keyTangent -t $keyTime -at $attr -iw $inWeight;
+	keyTangent -t $keyTime -at $attr -ow $outWeight;
+}//end proc jpRebuildKey

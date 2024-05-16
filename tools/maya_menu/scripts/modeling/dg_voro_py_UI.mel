@@ -1,0 +1,129 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: dg_Voro_Py
+''    Author: davegreenwood 
+''    Last Updated: Jun 28, 2009
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/poly_tools/3130.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+
+global proc dg_voro_py_UI()
+{
+
+
+if(`window -exists voroWinUI`)
+		deleteUI voroWinUI;
+if( `windowPref -exists voroWinUI` )
+		windowPref -r voroWinUI;
+
+window -w 300 -h 400 -t "Voronoi Shatter" 
+		-titleBar 1 -mnb 1 -mxb 1 -mb 1 
+		-tlb 0 -sizeable 1 voroWinUI;
+
+		columnLayout -cat "left" 25  -w 300 -h 300   col1 ;
+
+		separator -w 250 -h 10 -hr 1 -st "single";
+
+		text -w 250 -h 20 -vis 1 
+		-label "Voronoi Shatter"
+		-align "center" -font "boldLabelFont" ;
+
+		text -w 250 -h 50 -vis 1 
+		-label "first select an object, \n then a group of locators, \n adjust crack width and colour."
+		-align "center" -font "fixedWidthFont" ;
+/*
+		separator -w 250 -h 10 -hr 1 -st "single";
+		checkBox -w 250 -h 50 -l "cubeRad method: faster if over 50 points"
+		-v 1 -align "center" method;
+*/
+		separator -w 300 -h 10 -hr 1 -st "none";
+
+
+			floatSliderGrp
+				-w 250 -h 40
+				-label " Width:"
+				-field true
+				-value 0.005
+				-minValue 0.0
+				-maxValue 0.5
+				-sliderStep 0.001
+				-cw3 50 50 100 
+				BV_width;				
+				
+
+			colorSliderGrp 
+				-w 250 -h 40
+				-label "Colour:" 
+				-rgb 0.3 0.6 0.7 
+				-cw3 50 55 160
+				BV_col;
+				
+					
+				button    -w 250 -h 30 -label "Voronoi Shatter" -command "doVoroPy";
+
+
+		separator -w 300 -h 10 -hr 1 -st "none";
+		separator -w 250 -h 10 -hr 1 -st "single";
+		separator -w 300 -h 10 -hr 1 -st "none";
+		
+		
+				button    -w 250 -h 30 -label "Particles to Locators" -command "doPartLoc";
+
+
+		separator -w 300 -h 10 -hr 1 -st "none";
+		separator -w 250 -h 10 -hr 1 -st "single";
+		separator -w 300 -h 10 -hr 1 -st "none";
+		
+		
+				button    -w 250 -h 30 -label "Constrained Particles to Locators" -command "doConstPartLoc";
+		
+		
+		
+
+
+showWindow voroWinUI;
+
+}	
+
+global proc doVoroPy ()
+
+	{ // breaks up an obj using the voro proc
+	
+	python("import dg_voroPy as v");
+	python("reload(v)");
+	
+	// variables
+	vector $matCol = `colorSliderGrp -q -rgb BV_col`;
+	float $crack = `floatSliderGrp -q -value BV_width`;
+	
+	float $r = $matCol.x;
+	float $g = $matCol.y;
+	float $b = $matCol.z;
+	
+	python( "v.doVoro(" + $crack +", (" + $r + "," + $g + "," + $b + "))");
+	
+	}//end proc
+
+
+global proc doPartLoc (){
+
+	python("import dg_voroPy as v");
+	python("reload(v)");
+	python("v.doParToLoc()");
+
+}
+
+global proc doConstPartLoc (){
+
+	python("import dg_voroPy as v");
+	python("reload(v)");
+	python("v.doConstParToLoc()");
+
+}
+

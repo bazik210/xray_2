@@ -1,0 +1,128 @@
+global proc clipping()
+{
+float $nearNow = `getAttr ((currCamShape()) + ".nearClipPlane")`;
+float $farNow = `getAttr ((currCamShape()) + ".farClipPlane")`;
+
+float $camPos[] = `xform -q -ws -t (currCam())`;
+float $dist = `getAttr ((currCamShape())+ ".centerOfInterest")`;
+
+float $farClip = $dist * 16.502465;
+float $nearClip = $farClip / 10000;
+
+if ($nearClip < 0.001)
+	$nearClip = 0.001;
+if ($farClip < 0.001)
+	$farClip = 0.001;
+
+if (`objExists ((currCam()) + "ClippingExpression.output[0]")`)
+	{
+	print "expression found, you can delete it from window \"clipping\"";
+	clippingWindow();
+	button -e -label "DELETE expression" -c deleteExpression -w 145 clippingExpressionButton;
+	}
+else
+{
+setAttr ((currCamShape()) + ".nearClipPlane") $nearClip;
+setAttr ((currCamShape()) + ".farClipPlane") $farClip;
+
+if ($nearNow == $nearClip && $farNow == $farClip)
+	clippingWindow();
+
+if (`window -exists clipping`)
+	{
+	floatFieldGrp -e -v1 $nearClip slider;
+	floatFieldGrp -e -v2 $farClip slider;
+	}
+warning ("Clipping changed!  Near is " + $nearClip + ".  Far is " + $farClip + ".        default is 0.1 and 1000.");
+}
+}
+
+
+
+
+global proc clippingWindow()
+{
+$near = `getAttr ((currCamShape()) + ".nearClipPlane")`;
+$far = `getAttr ((currCamShape()) + ".farClipPlane")`;
+
+string $wind = "clipping";
+if (`window -exists $wind`)
+	deleteUI $wind;
+window $wind;
+	columnLayout;
+	floatFieldGrp
+		-dc clippingDragChangeCommand
+		-cc clippingDragChangeCommand
+		-v1 $near -v2 $far -pre 3 -nf 2 -cw 1 72 -cw 2 73 slider;
+	button -label "fit once" -c clipping -w 145;
+	button -label "fit always (create expression)" -c clippingExpression -w 145 clippingExpressionButton;
+	button -label "default clipping" -c clippingDefault -w 145;
+window -e -w 155 -h 117 $wind;
+showWindow;
+}
+
+
+global proc clippingDragChangeCommand()
+{
+if (`floatFieldGrp -q -v1 slider` >= 0.001)
+	setAttr (currCamShape() + ".nearClipPlane") `floatFieldGrp -q -v1 slider`;
+if (`floatFieldGrp -q -v2 slider` >= 0.001)
+	setAttr (currCamShape() + ".farClipPlane") `floatFieldGrp -q -v2 slider`;
+
+if (`floatFieldGrp -q -v1 slider` < 0.001)
+	floatFieldGrp -e -v1 0.001 slider;
+if (`floatFieldGrp -q -v2 slider` < 0.001)
+	floatFieldGrp -e -v2 0.001 slider;
+}
+
+
+
+global proc clippingDefault()
+{
+setAttr (currCamShape() + ".nearClipPlane") 0.1;
+setAttr (currCamShape() + ".farClipPlane") 3000;
+//floatFieldGrp -e -v1 0.1 slider;
+//floatFieldGrp -e -v2 1000 slider;
+print "Clipping set to default. Near 0.1, far 3000.";
+}
+
+
+
+global proc clippingExpression()
+{
+$cam = currCam();
+$camShape = currCamShape();
+string $text = "";
+$text += "$dist = " + $camShape + ".centerOfInterest;\n";
+$text += "$farClip = $dist * 16.502465;\n";
+$text += "$nearClip = $farClip / 10000;\n";
+$text += "if ($nearClip < 0.001) $nearClip = 0.001;\n";
+$text += "if ($farClip < 0.001) $farClip = 0.001;\n";
+$text += $camShape + ".nearClipPlane = $nearClip;\n";
+$text += $camShape + ".farClipPlane = $farClip;\n";
+expression -s $text -name ($cam + "ClippingExpression");
+//button -e -label "DELETE expression" -c deleteExpression -w 145 clippingExpressionButton;
+}
+
+
+global proc deleteExpression()
+{
+$cam = currCam();
+delete ($cam + "ClippingExpression");
+//button -e -label "fit always (create expression)" -c clippingExpression -w 145 clippingExpressionButton;
+}
+
+global proc string currCamShape()
+{
+string $camera = `getPanel -wf`;
+$camera = `modelPanel -q -camera $camera`;
+$shapes = `listRelatives -s $camera`;
+return $shapes[0];
+}
+
+global proc string currCam()
+{
+string $camera = `getPanel -wf`;
+$camera = `modelPanel -q -camera $camera`;
+return $camera;
+}

@@ -1,0 +1,273 @@
+global proc uvsShellsRotate()
+{
+timerstart;
+string $selection[] = `ls -sl -fl`;
+
+string $uvsSelected[] = {};
+if (`size $selection` == 0 && (size (`ls -hl`)) > 0)
+	$uvsSelected = conv(`ls -hl`, "u");
+else
+	$uvsSelected = conv($selection, "u");
+
+string $uvsToCheckAll[] = $uvsSelected;
+int $count = 0;
+for (;;)
+{
+//EACH SHELLL
+
+vector $vectors[] = {};
+select $uvsToCheckAll[0];
+polySelectBorderShell 0;
+$uvsToCheckAll = stringArrayRemove(`ls -sl -fl`, $uvsToCheckAll);
+string $uvs[] = stringIntersect(`ls -sl -fl`, $uvsSelected);
+string $uvsToCheck[] = $uvs;
+for (;;)
+	{
+	string $uvCurr = $uvsToCheck[0];
+	string $uvsNear[] = stringIntersect($uvsToCheck, stringArrayRemove({$uvCurr}, stringIntersect(conv (conv({$uvCurr}, "e"), "u"), conv (conv({$uvCurr}, "f"), "u"))));
+	if (`size $uvsNear` == 0)
+		$uvsNear = stringArrayRemove({$uvCurr}, stringIntersect(conv(conv({$uvCurr}, "f"), "u"), conv(conv({$uvCurr}, "e"), "u")));
+	$uvsToCheck = stringArrayRemove({$uvCurr}, $uvsToCheck);
+	string $uv;
+	for ($uv in $uvsNear)
+		$vectors[`size $vectors`] = twoUvsVector($uvCurr, $uv);
+	if (`size $uvsToCheck` == 0)
+		break;
+	}
+//size $vectors;
+//print $vectors;
+//NOW WE KNOW VECTORS
+
+int $setsCounts[] = {};
+vector $setsVectors[] = {};
+for (;;)
+	{
+	vector $vectorsNew[] = {};
+	int $vectorNumber = 1;
+	vector $currVector = $vectors[0];
+	$setsVectors[`size $setsVectors`] = $vectors[0];
+	$setsCounts[`size $setsVectors` - 1] = 1;
+	for (;;)
+		{
+		vector $anotherVector = $vectors[$vectorNumber];
+		float $angle = angleD($currVector, $anotherVector);
+		if ($angle < 0.01 ||	($angle > 89.99 && $angle < 90.01) ||	($angle > 179.99 && $angle < 180.01))
+			$setsCounts[`size $setsVectors` - 1] += 1;
+		else
+			$vectorsNew[`size $vectorsNew`] = $anotherVector;
+		$vectorNumber++;
+		if ($vectorNumber >= `size $vectors`)
+			break;
+		}
+	if (`size $vectorsNew` == 0)
+		break;
+	else
+		$vectors = $vectorsNew;
+	}
+//print $setsVectors
+//print $setsCounts
+
+int $best = -1;
+int $bestValue = 0;
+int $thisCount;
+int $countThisCount = 0;
+for ($thisCount in $setsCounts)
+	{
+//$thisCount = $setsCounts[0];
+	if ($thisCount > $bestValue)
+		{
+		$bestValue = $thisCount;
+		$best = $countThisCount;
+		}
+	$countThisCount++;
+	}
+//print $best
+//print $bestValue
+
+vector $vectorMain = $setsVectors[$best];
+$vectorMain = `unit $vectorMain`;
+
+float $angle;
+float $angle1 = angle2d($vectorMain, <<1,0>>);
+float $angle2 = angle2d($vectorMain, <<0,1>>);
+float $angle3 = angle2d($vectorMain, <<-1,0>>);
+float $angle4 = angle2d($vectorMain, <<0,-1>>);
+
+if (`abs($angle1)` <= 45)
+	$angle = $angle1;
+else if (`abs($angle2)` <= 45)
+	$angle = $angle2;
+else if (`abs($angle3)` <= 45)
+	$angle = $angle3;
+else if (`abs($angle4)` <= 45)
+	$angle = $angle4;
+
+float $pos[] = uvsShellBBpos($uvs);
+polyEditUV -pu $pos[0] -pv $pos[1] -a $angle;
+
+$count++;
+//print ("\nshell " + $count);
+if (`size $uvsToCheckAll` == 0)
+	break;
+if ($count > 1000)
+	{
+	warning "LOOP";
+	break;
+	}
+//END OF EACH SHELL
+}
+select $selection;
+print ($count + " shells. Time: " + timerquery());
+}
+
+
+
+
+
+
+
+//UTILS
+
+
+global proc timerstart()
+{
+global float $GstartTime;
+float $GstartTime = `timerX`;
+//hideUvEditor begin;
+}
+
+global proc float timerquery()
+{
+global float $GstartTime;
+$totalTime = `timerX -startTime $GstartTime`;
+//hideUvEditor "";
+return $totalTime;
+}
+
+global proc string[] conv(string $itemsForConv[], string $mode)
+{
+$itemsForConv = `ls -fl $itemsForConv`;
+
+string $converted[] = {};
+if ($mode == "v")
+	$converted = `polyListComponentConversion -tv $itemsForConv`;
+else if ($mode == "e")
+	$converted = `polyListComponentConversion -te $itemsForConv`;
+else if ($mode == "f")
+	$converted = `polyListComponentConversion -tf $itemsForConv`;
+else if ($mode == "u")
+	$converted = `polyListComponentConversion -tuv $itemsForConv`;
+else if ($mode == "vf")
+	$converted = `polyListComponentConversion -tvf $itemsForConv`;
+
+else if ($mode == "vi")
+	$converted = `polyListComponentConversion -tv -in $itemsForConv`;
+else if ($mode == "ei")
+	$converted = `polyListComponentConversion -te -in $itemsForConv`;
+else if ($mode == "fi")
+	$converted = `polyListComponentConversion -tf -in $itemsForConv`;
+else if ($mode == "ui")
+	$converted = `polyListComponentConversion -tuv -in $itemsForConv`;
+else if ($mode == "vfi")
+	$converted = `polyListComponentConversion -tvf -in $itemsForConv`;
+else
+	print "wrong argument";
+$converted = `ls -fl $converted`;
+return $converted;
+}
+
+global proc string[] stringIntersect(string $string1[], string $string2[])
+{
+/*
+$string1 = {"1", "2", "3"};
+$string2 = {"2", "3", "4"};
+*/
+string $string1no[] = stringArrayRemove($string2, $string1);
+string $string2no[] = stringArrayRemove($string1, $string2);
+
+string $string1yes[] = stringArrayRemove($string1no, $string1);
+//string $string2yes[] = stringArrayRemove($string2no, $string2);
+
+return $string1yes;
+}
+
+global proc vector twoUvsVector(string $uv1, string $uv2)
+{
+return (twoPointsVector(pointPositionUV($uv1), pointPositionUV($uv2)));
+}
+
+global proc vector twoPointsVector (float $_1v[], float $_2v[])
+{
+vector $vector = <<$_1v[0] - $_2v[0], $_1v[1] - $_2v[1], $_1v[2] - $_2v[2]>>;
+return $vector;
+}
+
+global proc float[] pointPositionUV(string $uv)
+{
+float $pos[] = `polyEditUV -q -uValue -vValue $uv`;
+return $pos;
+}
+
+global proc float angle2d(vector $vector1, vector $vector2)
+{
+$angle = rad_to_deg(`angle $vector1 $vector2`);
+$rotVector = `rot $vector1 <<0,0,1>> (deg_to_rad($angle * 1))`;
+$angleEq = rad_to_deg(`angle $vector2 $rotVector`);
+if ($angleEq > 0.0001)
+	$angle *= -1;
+return $angle;
+}
+
+global proc float angleD (vector $v1, vector $v2)
+{
+$angle = rad_to_deg(`angle $v1 $v2`);
+return $angle;
+}
+
+global proc float[] uvsShellBBpos(string $uvs[])
+{
+//$uvs = `ls -sl -fl`;
+float $us[] = {};
+float $vs[] = {};
+float $pos[] = {};
+for ($uv in $uvs)
+	{
+//$uv = $uvs[0];
+	$pos = pointPositionUV($uv);
+	$us[`size $us`] = $pos[0];
+	$vs[`size $vs`] = $pos[1];
+	}
+float $uPos = (maxOf($us) + minOf($us)) / 2;
+float $vPos = (maxOf($vs) + minOf($vs)) / 2;
+return {$uPos, $vPos};
+}
+
+global proc float maxOf(float $nums[])
+{
+//float $nums[] = {1.0,2.0,3.0,4.0,5.0};
+float $max = max($nums[0], $nums[1]);
+if (`size $nums` == 1)
+	return $nums[0];
+
+for ($num in $nums)
+	{
+	if ($num > $max)
+		$max = $num;
+	}
+return $max;
+}
+
+global proc float minOf(float $nums[])
+{
+//float $nums[] = {1.0,2.0,3.0,4.0,5.0};
+if (`size $nums` == 1)
+	return $nums[0];
+float $min = min($nums[0], $nums[1]);
+
+for ($num in $nums)
+	{
+	if ($num < $min)
+		$min = $num;
+	}
+return $min;
+}

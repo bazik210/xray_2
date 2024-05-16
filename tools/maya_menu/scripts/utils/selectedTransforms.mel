@@ -1,0 +1,19 @@
+global proc string[] selectedTransforms()
+{
+string $objects[] = selObjs();
+string $transforms[];
+string $object;
+for ($object in $objects)
+	{
+//$object = $objects[0];
+	if (`objectType $object` == "mesh")
+		{
+		string $transf[] = `listRelatives -p $object`;
+		if (`size $transf` > 0)
+			$transforms[`size $transforms`] = $transf[0];
+		}
+	else
+		$transforms[`size $transforms`] = $object;
+	}
+return $transforms;
+}

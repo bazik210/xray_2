@@ -1,0 +1,72 @@
+//James Parks
+//05-14-2005
+
+//save and recall settings procedures for Animation Writer
+
+
+global proc jpSaveAnimWriterSettings()
+{
+	//acquire settings
+	int $noTangents = `menuItem -q -rb bruteForce`;
+	int $tangents = `menuItem -q -rb elegant`;
+	int $longNodeNames = `menuItem -q -rb longNodeNames`;
+	int $shortNodeNames = `menuItem -q -rb shortNodeNames`;
+	int $windows = `menuItem -q -rb windows`;
+	int $mac = `menuItem -q -rb mac`;
+	int $linux = `menuItem -q -rb linux`;
+	int $irix = `menuItem -q -rb irix`;
+	int $overwrite = `menuItem -q -cb overwrite`;
+	int $refReTarget = `menuItem -q -cb refReTarget`;
+	int $listAlpha = `menuItem -q -rb listAlpha`;
+	int $listCreation = `menuItem -q -rb listCreation`;
+
+	optionVar 
+		-iv "jpAwTangents" $tangents 
+		-iv "jpAwNoTangents" $noTangents 
+		-iv "jpAwLongNodeNames" $longNodeNames 
+		-iv "jpAwShortNodeNames" $shortNodeNames 
+		-iv "jpAwWindows" $windows 
+		-iv "jpAwMac" $mac 
+		-iv "jpAwLinux" $linux 
+		-iv "jpAwIrix" $irix 
+		-iv "jpAwOverwrite" $overwrite 
+		-iv "jpAwRefReTarget" $refReTarget 
+		-iv "jpAwListAlpha" $listAlpha 
+		-iv "jpAwListCreation" $listCreation
+		;
+
+	print ("\nSettingsSaved");
+
+}//end proc jpSaveAnimWriterSettings
+
+global proc jpRecallAnimWriterSettings()
+{
+	int $tangents = `optionVar -q "jpAwTangents"`;
+	int $noTangents = `optionVar -q "jpAwNoTangents"`;
+	int $longNodeNames = `optionVar -q "jpAwLongNodeNames"`;
+	int $shortNodeNames = `optionVar -q "jpAwShortNodeNames"`;
+	int $windows = `optionVar -q "jpAwWindows"`;
+	int $mac = `optionVar -q "jpAwMac"`;
+	int $linux = `optionVar -q "jpAwLinux"`;
+	int $irix = `optionVar -q "jpAwIrix"`;
+	int $overwrite = `optionVar -q "jpAwOverwrite"`;
+	int $refReTarget = `optionVar -q "jpAwRefReTarget"`;
+	int $listAlpha = `optionVar -q "jpAwListAlpha"`;
+	int $listCreation = `optionVar -q "jpAwListCreation"`;
+
+
+	menuItem -e -rb $noTangents bruteForce;
+	menuItem -e -rb $tangents elegant;
+	menuItem -e -rb $longNodeNames longNodeNames;
+	menuItem -e -rb $shortNodeNames shortNodeNames; 
+	menuItem -e -rb $windows windows;
+	menuItem -e -rb $mac mac;
+	menuItem -e -rb $linux linux;
+	menuItem -e -rb $irix irix;
+	menuItem -e -cb $overwrite overwrite;
+	menuItem -e -cb $refReTarget refReTarget;
+	menuItem -e -rb $listAlpha listAlpha;
+	menuItem -e -rb $listCreation listCreation;
+
+	print ("\nSettings Restored");
+}//end proc jpRecallAnimWriterSettings

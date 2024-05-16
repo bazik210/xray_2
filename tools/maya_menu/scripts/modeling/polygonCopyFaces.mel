@@ -1,0 +1,23 @@
+global proc polygonCopyFaces()
+{
+$fStartTime = `timerX`;
+ConvertSelectionToFaces;
+string $rootSelectFaces[] = `ls -sl`;
+SelectToggleMode;
+string $RootObj[] = `ls -sl`;
+duplicate;
+string $NextObj[] = `ls -sl`;
+string $FaceNameString = stringArrayToString($rootSelectFaces , " ");
+string $bufferP[];
+tokenize $FaceNameString ". " $bufferP;
+string $bufferP[] = stringArrayRemove($RootObj, $bufferP);
+string $NextFaceNameString = stringArrayToString($bufferP , " ");
+string $NextFaceNameString = substituteAllString($NextFaceNameString, "f",($NextObj[0]+".f"));
+tokenize $NextFaceNameString " " $bufferP;
+select $bufferP;
+InvertSelection;
+doDelete;
+select $NextObj;
+$fTotalTime = `timerX -startTime $fStartTime`;
+print ("Total Duplicate Time: "+$fTotalTime+"\n");
+}

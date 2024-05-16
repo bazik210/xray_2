@@ -1,0 +1,122 @@
+//==============================================================================
+//Name:
+//  RenameFileExtension.mel
+//==============================================================================
+//Purpose:
+//  Rename File Extension.
+//==============================================================================
+//Usage:
+//  1. Save the RenameFileExtension.mel to your scripts directory.
+//  2. Start Maya. In the command line type RenameFileExtension();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+proc string extractFileName(string $path)
+    {
+      string $tokens[];
+      int $numTokens = `tokenize $path "/" $tokens`;
+            return $tokens[$numTokens-1];
+    }
+
+proc string extractExtension(string $extractedFilename)
+    {
+      string $tokens[];
+      int $numTokens = `tokenize $extractedFilename "." $tokens`;
+      return $tokens[$numTokens -1];
+    }
+
+proc string cutExtension(string $fileName)
+    {
+           string $tokens[];
+     string $noExtension ="";
+           string $buffer = "";
+
+            int $numTokens = `tokenize $fileName "." $tokens`;
+
+             for ($i=$numTokens-2;$i>=0;$i--)
+                {
+                    $noExtension = ($tokens[$i] + "." + $buffer);
+        $buffer = $noExtension;
+                 }
+
+              return $noExtension;
+     }
+
+proc string returnDir(string $path)
+    {
+            string $tempFilePath = "";
+            string $buffer = "";
+      string $tokens[];
+
+      int $numTokens = `tokenize $path "/" $tokens`;
+
+       for ($i=$numTokens-2;$i>=0;$i--)
+                {
+                    $tempFilePath = ($tokens[$i] + "/" + $buffer);
+        $buffer = $tempFilePath;
+                 }
+
+            return $tempFilePath;
+    }
+
+global proc renameExtension () {
+$textureNodes = `ls -typ file`;
+$progressMax = size($textureNodes);
+if($progressMax != 0)
+{
+progressBar -edit -beginProgress -isInterruptable true -status "Calculation ..." -maxValue $progressMax mainProgressBar;
+print ($progressMax+"\n");
+for ($node in $textureNodes)
+        {
+string $fullFileName = `getAttr($node+".fileTextureName")`;
+string $fileName = extractFileName($fullFileName);
+string $extension = extractExtension($fileName);
+string $fileDir = returnDir($fullFileName);
+string $cutFilename = cutExtension($fileName);
+string $newExtension = `radioCollection -q -sl selectedExtension`;
+string $newFileName = $fileDir+$cutFilename+$newExtension;
+print ($newFileName+"\n");
+setAttr -type "string" ( $node + ".fileTextureName") $newFileName;
+progressBar -edit -step 1 mainProgressBar;
+                       }
+progressBar -edit -endProgress mainProgressBar;
+}
+
+}
+
+global proc RenameFileExtension () {
+global int $progressMax = 10;
+if ((`window -ex RenameFileWindow`) == true) deleteUI RenameFileWindow;
+window -t "RenameFileExtension" -s true -mnb true -mxb true -mb true -w 120 -h 200  RenameFileWindow;
+columnLayout;
+
+ frameLayout -label "Extension";
+      columnLayout;
+        text -l "---- select extension ----";
+      radioCollection selectedExtension;
+      radioButton -label "dds" dds;
+      radioButton -label "tga" tga;
+      radioButton -label "jpg" jpg;
+      radioButton -label "bmp" bmp;
+      radioButton -label "gif" gif;
+      radioButton -label "iff" iff;
+      radioButton -label "rla" rla;
+      radioButton -label "sgi" sgi;
+      radioButton -label "pic" pic;
+      radioButton -label "tif" tif;
+        radioButton -label "bot" bot;
+        radioButton -label "map" map;
+      setParent ..; setParent ..;
+radioCollection -edit -select dds selectedExtension;
+columnLayout -rs 3;
+progressBar -width 120 -height 10 mainProgressBar;
+rowColumnLayout -numberOfRows 1;
+button -l "Rename" -w 58 -h 30 -c "renameExtension()";
+button -l "Undo" -w 58 -h 30 -c "undo";
+window -e -w 120 -h 300  RenameFileWindow;
+showWindow;
+
+}
+
+
+

@@ -1,0 +1,24 @@
+global proc extrude_Face_Or_Edge()
+{
+if (whatIsSel() == "f" || whatIsSel() == "o")
+	{
+	performPolyChipOff 0 2;
+	$sel = `ls -sl -fl`;
+	string $edges[];
+	for ($item in $sel)
+		{
+		if (whatIsIt($item) == "e")
+			$edges[`size $edges`] = $item;
+		}
+	select -d $edges;
+	}
+else if (whatIsSel() == "e")
+	{
+	performPolyChipOff 0 4;
+	$selComp = `ls -sl -fl`;
+	PolySelectConvert 1;
+	isolateAction 2;
+	select $selComp;
+	}
+}
+

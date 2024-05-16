@@ -1,0 +1,178 @@
+global proc scaleUVs()
+{
+        string $sel[] = `ls -sl`;
+    float $U = `floatField -q -value Uscale`;
+    float $V = `floatField -q -value Vscale`;
+
+        PolySelectConvert 4;
+
+        polyEditUV -pu 0.0 -pv 0.0 -su $U -sv $V ;
+        select $sel;
+}
+
+global proc ScaleUVs_sq()
+{
+        string $sel[] = `ls -sl`;
+
+        PolySelectConvert 4;
+
+        global float $Sqscales ;
+        polyEditUV -pu 0.0 -pv 0.0 -su $Sqscales -sv $Sqscales ;
+        select $sel;
+}
+
+
+global proc MoveU()
+{
+global float $Umoves;
+polyEditUV -u $Umoves -v 0;
+}
+
+
+global proc MoveV()
+{
+global float $Vmoves;
+polyEditUV -u 0 -v $Vmoves;
+}
+
+
+global proc MoveU2()
+{
+float $U = `floatField -q -value Umove`;
+polyEditUV -u $U -v 0;
+}
+
+
+global proc MoveV2()
+{
+float $V = `floatField -q -value Vmove`;
+polyEditUV -u 0 -v $V;
+}
+
+
+global proc rotateUVs()
+{
+global float $Rotates;
+string $selection[] = `ls -sl`; ConvertSelectionToUVs; polyRotateUVs $Rotates ;select -replace $selection;
+select $selection;
+}
+
+global proc rotateUVs2()
+{
+float $R = -`floatField -q -value Rt`;
+string $selection[] = `ls -sl`; ConvertSelectionToUVs; polyRotateUVs $R ;select -replace $selection;
+select $selection;
+}
+
+global proc scaleUV()
+{
+string $myWindow = "scaleUV";
+string $myLayout = "scaleUVLayout";
+
+if (`window -ex $myWindow`)
+        deleteUI $myWindow;
+
+window $myWindow;
+
+frameLayout -l "";
+        columnLayout mainLayout;
+        rowColumnLayout -nc 10 -cw 1 15 -cw 2 35 -cw 3 35 -cw 4 35 -cw 5 35 -cw 6 35 -cw 7 35 -cw 8 35  -cw 9 35 -cw 10 35;
+
+                        global float $Sqscales;
+
+                        text -l "U2";
+                        button -w 15 -l "0.1" -bgc 0.68 0.74 0.81 -c "$Sqscales = 0.1; ScaleUVs_sq;";
+                        button -w 15 -l "0.5" -bgc 0.68 0.74 0.81 -c "$Sqscales = 0.5; ScaleUVs_sq;";
+                        button -w 15 -l "0.8" -bgc 0.70 0.72 0.81 -c "$Sqscales = 0.8; ScaleUVs_sq;";
+                        button -w 15 -l "0.99" -bgc 0.72 0.70 0.81 -c "$Sqscales = 0.99; ScaleUVs_sq;"; 
+                        button -w 15 -l "1.01" -bgc 0.74 0.70 0.81 -c "$Sqscales = 1.01; ScaleUVs_sq;"; 
+                        button -w 15 -l "1.25" -bgc 0.76 0.68 0.81 -c "$Sqscales = 1.25; ScaleUVs_sq;";
+                        button -w 15 -l "1.6" -bgc 0.78 0.64 0.81 -c "$Sqscales = 1.6; ScaleUVs_sq;";
+                        button -w 15 -l "2" -bgc 0.80 0.62 0.81 -c "$Sqscales = 2; ScaleUVs_sq;";
+                        button -w 15 -l "10" -bgc 0.80 0.62 0.81 -c "$Sqscales = 10; ScaleUVs_sq;";
+
+                        setParent mainLayout;
+
+        separator -w 342 -h 6 -style "in";
+
+
+        rowColumnLayout -nc 9 -cw 1 15 -cw 2 35 -cw 3 35 -cw 4 35 -cw 5 35 -cw 6 35 -cw 7 35 -cw 8 35  -cw 9 71;
+
+                        float $Uscales = 1;
+                        float $Vscales = 1;
+
+                        text -l " U";
+                        floatField -pre 2 -value $Uscales Uscale;
+                        button -w 15 -l "0.25" -bgc 0.68 0.74 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.25 Uscale;";
+                        button -w 15 -l "0.5" -bgc 0.70 0.72 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.50 Uscale;";
+                        button -w 15 -l "1" -bgc 0.72 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value 1.00 Uscale;";
+                        button -w 15 -l "1.25" -bgc 0.74 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value 1.25 Uscale;";
+                        button -w 15 -l "2" -bgc 0.76 0.68 0.81 -c "floatField -edit -w 100 -pre 2 -value 2.00 Uscale;";
+                        button -w 15 -l "4" -bgc 0.78 0.64 0.81 -c "floatField -edit -w 100 -pre 2 -value 4.00 Uscale;";
+     			button -w 15 -bgc 0.62 0.67 0.73 -l "Scale UV" -c "scaleUVs";
+
+                        text -l " V";
+                        floatField -pre 2 -value $Vscales Vscale;
+                        button -w 15 -l "0.25" -bgc 0.68 0.74 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.25 Vscale;";
+                        button -w 15 -l "0.5" -bgc 0.70 0.72 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.50 Vscale;";
+                        button -w 15 -l "1" -bgc 0.72 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value 1.00 Vscale;";
+                        button -w 15 -l "1.25" -bgc 0.74 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value 1.25 Vscale;";
+                        button -w 15 -l "2" -bgc 0.76 0.68 0.81 -c "floatField -edit -w 100 -pre 2 -value 2.00 Vscale;";
+                        button -w 15 -l "4" -bgc 0.78 0.64 0.81 -c "floatField -edit -w 100 -pre 2 -value 4.00 Vscale;";
+     			button -w 15 -bgc 0.62 0.67 0.73 -l "" -c "scaleUVs";
+
+
+
+                        setParent mainLayout;
+
+        separator -w 342 -h 6 -style "in";
+
+                        global float $Rotates = 0;
+
+        rowColumnLayout -nc 9 -cw 1 50 -cw 2 35 -cw 3 35 -cw 4 35 -cw 5 35 -cw 6 35 -cw 7 35 -cw 8 35  -cw 9 35;
+                        button -w 15 -l "Rotate" -bgc 0.68 0.74 0.81 -c "rotateUVs2";
+                        floatField -pre 2 -value $Rotates Rt;
+                        button -w 15 -l "-15" -bgc 0.70 0.72 0.81 -c "floatField -edit -w 100 -pre 2 -value -15 Rt; $Rotates = 15; rotateUVs";
+                        button -w 15 -l "-45" -bgc 0.72 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -45 Rt; $Rotates = 45; rotateUVs";
+                        button -w 15 -l "-90" -bgc 0.74 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -90 Rt; $Rotates = 90; rotateUVs";
+                        button -w 15 -l "180" -bgc 0.76 0.68 0.81 -c "floatField -edit -w 100 -pre 2 -value 180 Rt; $Rotates = 180; rotateUVs";
+                        button -w 15 -l "90" -bgc 0.78 0.64 0.81 -c "floatField -edit -w 100 -pre 2 -value 90 Rt; $Rotates = -90; rotateUVs";
+                        button -w 15 -l "45" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 45 Rt; $Rotates = -45; rotateUVs";
+                        button -w 15 -l "15" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 15 Rt; $Rotates = -15; rotateUVs";
+
+
+                        setParent mainLayout;
+
+      separator -w 342 -h 6 -style "in";
+
+
+                        global float $Umoves = 0;
+                        global float $Vmoves = 0;
+
+      rowColumnLayout -nc 9 -cw 1 50 -cw 2 35 -cw 3 35 -cw 4 35 -cw 5 35 -cw 6 35 -cw 7 35 -cw 8 35  -cw 9 35;
+                        button -w 15 -l "U Move" -bgc 0.68 0.74 0.81 -c "MoveU2";
+                        floatField -pre 2 -value $Umoves Umove;
+                        button -w 15 -l "-4" -bgc 0.70 0.72 0.81 -c "floatField -edit -w 100 -pre 2 -value -4 Umove; $Umoves = -4; MoveU";
+                        button -w 15 -l "-1" -bgc 0.72 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -1 Umove; $Umoves = -1; MoveU"; 
+                        button -w 15 -l "-0.5" -bgc 0.74 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -0.5 Umove; $Umoves = -0.5; MoveU";
+                        button -w 15 -l "0.25" -bgc 0.76 0.68 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.25 Umove; $Umoves = 0.25; MoveU";
+                        button -w 15 -l "0.5" -bgc 0.78 0.64 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.5 Umove; $Umoves = 0.5; MoveU";
+                        button -w 15 -l "1" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 1 Umove; $Umoves = 1; MoveU";
+                        button -w 15 -l "4" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 4 Umove; $Umoves = 4; MoveU";
+
+                        button -w 15 -l "V Move" -bgc 0.68 0.74 0.81 -c "MoveV2";
+                        floatField -pre 2 -value $Vmoves Vmove;
+                        button -w 15 -l "-4" -bgc 0.70 0.72 0.81 -c "floatField -edit -w 100 -pre 2 -value -4 Vmove; $Vmoves = -4; MoveV";
+                        button -w 15 -l "-1" -bgc 0.72 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -1 Vmove; $Vmoves = -1; MoveV";
+                        button -w 15 -l "-0.5" -bgc 0.74 0.70 0.81 -c "floatField -edit -w 100 -pre 2 -value -0.5 Vmove; $Vmoves = -0.5; MoveV";
+                        button -w 15 -l "0.25" -bgc 0.76 0.68 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.25 Vmove; $Vmoves = 0.25; MoveV";
+                        button -w 15 -l "0.5" -bgc 0.78 0.64 0.81 -c "floatField -edit -w 100 -pre 2 -value 0.5 Vmove; $Vmoves = 0.5; MoveV";
+                        button -w 15 -l "1" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 1 Vmove; $Vmoves = 1; MoveV";
+                        button -w 15 -l "4" -bgc 0.80 0.62 0.81 -c "floatField -edit -w 100 -pre 2 -value 4 Vmove; $Vmoves = 4; MoveV";
+
+                        setParent mainLayout;
+
+
+      window -tlb true -title "scaleUV" -s 0 -e -wh 342 200 $myWindow;
+showWindow $myWindow;
+}

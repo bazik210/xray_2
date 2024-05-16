@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>Notes for jpAnimWriter v1.3</title>
+</head>
+
+<body background=images/grad3.jpg>
+
+<table width=800>
+<tr>
+<td width=50>
+<td colspan=2>
+<h2>Notes for Animation Writer v1.3</h2>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+
+<h3>Things to do</h3>
+<ul>
+<li>Implement the Blend Poses functions.
+<li>Add more pasting options for animations.
+<li>Maybe add animation retargeting functionality.
+<li>Add Mac and *nix folder manipulation. Need access <br>
+	&nbsp&nbsp&nbsp to a Mac and Linux/Irix box for this.
+</ul>
+
+<h3>Revision History</h3>
+<pre>
+v1.3 -- added reference retargeting for animation.
+		This required modifiying the .ANIM format
+v1.2.2 -- added a save/restore settings feature.
+v1.2.1 -- added some file overwrite protection (you can turn it off
+		in the settings menu) at the request of a user 
+v1.2 -- added "Paste Curves at Current Values" option box
+		under animation options. It works now.
+	added subFolders functionality. 
+	added some file error-checking.
+	added some Operating System checking. Might be needed in the 
+		future for OS specific commands.
+	changed "elegant/brute force" switch to "Tangents/No Tangents"
+
+v1.1 -- added add/replace option for selections
+	implemented "elegant" animation save method which can 
+	save tangency information.
+	began to prep for subFolder implementation. Still some
+	bugs to work out.
+
+v1.0 -- first release of jpAnimWriter into the wild. 
+	Lets see what happens.
+
+v0.048 -- finally got the recursion working properly.
+	attempted to implement a switch for Brute Force 
+	method versus Elegant method. This is going to have 
+	to wait for the next version.
+
+v0.043 -- added version number as a global variable.
+	made the old file name show up in the "New Name" field 
+		in the rename file window.
+
+v0.042 -- added the refresh button for the anim range fields.
+	added the menu commands for the help menu.
+
+v0.041 -- attempted to add the curves/keys option function. 
+	doesn't work yet.
+
+v0.04 -- added paste curve toggle to the controls only enabled in 
+	animation mode.
+
+v0.038 -- finally got the .ANIM writing function working right.
+	added the clean directories function. with confirm dialog.
+	added the delete all files function. with confirm dialog.
+	changed the delete file function to a renaming function.
+	removed the saveError function.
+
+v0.037 -- added the rename file function.
+	added the popup name function.
+	added the project bar.
+
+v0.036 -- added the makeDirectories function.
+	messing around with the .ANIM writing function.
+
+v0.035 -- added the "Return to Defaults" button.
+
+v0.034 -- added the menus to the main Animation Writer window. 
+	added the time and value finding core to the .ANIM writing
+		function. Still doesn't work properly though.
+	added the popup menu.
+	added the delete file function.
+
+v0.033 -- added comments to the files that jpAnimWriter writes
+	made the saveError function into a window.
+
+v0.032 -- added the file writing shell of the .ANIM writing function.
+	removed the matrix of channels.
+
+v0.031 -- added the write .SEL function. 
+	added a matrix of which channels to write out.
+
+v0.03 -- added the apply files function.
+
+v0.02 -- Just a little shell of a program. 
+	A GUI, the choice function, and the .POSE writing function 
+		are all that works. 
+	The file structure commands are in place but it doesn't 
+		create folders.
+	
+v0.0 -- at this point it's actually jpPoseWriter which is never 
+		finished
+
+</pre>
+</tr>
+</table>
+
+</body>
+</html>

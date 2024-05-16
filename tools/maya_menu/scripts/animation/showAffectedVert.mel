@@ -1,0 +1,174 @@
+//Keegan
+//Show Affected Verticies
+//showAffectedVert
+//none
+//showAffectedVert
+//rigging
+/*
+
+Author: David Keegan (eyelink@sbcglobal.net)
+Copyright (C) 2004 David Keegan
+www.keegan3d.com
+
+Version: 1.0
+
+Last Updated:(12-27-2004)
+
+Function: Displays affected vertices for selected joint.
+
+Install 
+	1. Move showAffectedVert.mel to your Maya scripts directory.
+	2. Launch Maya.
+	3. Type "showAffectedVert" into Maya's command line.
+	
+	To be used with the Keegan Installer move keeganShelf to 
+	your icons directory.
+	
+All code and icons created by David Keegan.
+Use and/or modify at your own risk.
+Code and/or icons may not be distributed, in part or in whole, 
+with out consent from David Keegan.
+*/
+
+global proc showAffectedVert()
+{
+if(!`optionVar -ex "displayAffectedVert"`)
+	optionVar -stringValue "displayAffectedVert" radioSelect;
+
+string $radio = `optionVar -q "displayAffectedVert"`;
+	
+if(`window -q -ex showAffedtedUI`)	
+	deleteUI showAffedtedUI;
+
+window -t "Show Affected Vertices" showAffedtedUI;
+string $baseForm = `formLayout`;
+	string $topForm = `frameLayout "Options"`;
+		radioCollection displayOptins;
+			columnLayout;
+				radioButton -l "Selected affected vertices" radioSelect;
+				radioButton -l "Display weight" radioAnn;
+				radioButton -l "Select vertices and display weight" radioAnnSel;
+				
+				radioButton -edit -sl $radio;
+				
+setParent $baseForm;
+	string $buttForm = `columnLayout -adj 1`;
+		button -l "Display Affected Vertices" -c "displayWeightedVerts";
+		button -l "Delete Annotations" -en 0 removeAnnButt;
+		button -l "Close" -c "deleteUI showAffedtedUI";
+
+formLayout
+	-edit
+	
+	-af $topForm top 0
+	-af $topForm bottom 66
+	-af $topForm left 0 
+	-af $topForm right 0
+	
+	-ac $buttForm top 0 $topForm
+	-af $buttForm bottom 0
+	-af $buttForm left 0 
+	-af $buttForm right 0
+	
+$baseForm;
+
+window -edit -wh 246 166 showAffedtedUI;
+showWindow showAffedtedUI;
+}
+
+global proc displayWeightedVerts()
+{
+string $display = `radioCollection -q -sl displayOptins`;
+string $affectedVert[];
+float $affectedValue[];
+
+string $sel[] = `ls -sl -type "joint"`;
+if(`size($sel)` == 0 || `size($sel)` > 1)
+	error "Select one joint";
+
+string $connections[] = `listConnections -type skinCluster $sel[0]`;
+if(`size($connections)` == 0)
+	error "Joint is not connected to a skin cluster";
+
+int $amount = 0;
+
+progressWindow
+	-t "Show Affected Verticies..."
+	-pr $amount
+	-st "Finding Affected Vertices:"
+	-ii 1
+	;
+
+for($skinCluster in `stringArrayRemoveDuplicates ($connections)`)
+	{
+		string $skinClusterSet;
+		string $treeConnections[] = `listConnections -d 1 -s 0 -p 0 -c 0 $skinCluster`;
+		for($eachBranch in $treeConnections)
+			{
+				string $node = `nodeType $eachBranch`;
+				if($node == "objectSet")
+					{
+						$skinClusterSet = $eachBranch;
+						break;
+					}
+			}
+			
+		if(`size($skinClusterSet)` == 0)
+			error -sl 1 "An error has occurred";
+		
+		string $obj[] = `listConnections -d 1 -s 0 -p 0 -c 0 $skinClusterSet`;
+
+		int $vertexNum[] = `polyEvaluate -v $obj[0]`;
+		
+		for($i=0; $i<$vertexNum[0]; $i++)
+			{
+				if(`progressWindow -q -ic`)
+					break;
+	
+				$amount += 1;
+		
+				progressWindow -edit -max $vertexNum[0] -pr $amount -st ("Finding affected vertices for: " + $sel[0]);
+		
+				float $weights[] = `skinPercent -q -v $skinCluster ($obj[0] + ".vtx[" + $i + "]")`;
+				string $influences[] = `skinPercent -q -t $skinCluster ($obj[0] + ".vtx[" + $i + "]")`;
+				
+				for($fi=0; $fi<`size($influences)`; $fi++)
+					{
+						if(($influences[$fi] == $sel[0]) && ($weights[$fi])>0)
+							{
+								$affectedVert[size($affectedVert)] = ($obj[0] + ".vtx[" + $i + "]");
+								$affectedValue[size($affectedValue)] = $weights[$fi];
+								break;
+							}
+					}
+			}
+	}
+progressWindow -ep;
+
+if($display == "radioAnn" || $display == "radioAnnSel")
+	{
+		select -cl;
+		string $group = `group -em -n ("Annotations_" + $sel[0])`;
+		for($ai=0; $ai<`size($affectedVert)`; $ai++)
+			{
+				float $pos[] = `pointPosition -w $affectedVert[$ai]`;
+				string $loc[] = `spaceLocator`;
+					setAttr ($loc[0] + ".t") $pos[0] $pos[1] $pos[2];
+					setAttr ($loc[0] + ".v") 0;
+				select -r $loc;
+				$annotationNode = `annotate -tx $affectedValue[$ai] -p $pos[0] $pos[1] $pos[2]`;
+				string $annTrans[] = `listRelatives -p $annotationNode`;
+				parent $annTrans[0] $group;
+				parent $loc[0] $group;
+			}
+		if($display == "radioAnnSel")
+			select -r $affectedVert;
+		
+		button -edit -en 1 -c ("delete " + $group + ";button -edit -en 0 removeAnnButt") removeAnnButt; 
+	}
+	
+if($display == "radioSelect")
+			select -r $affectedVert;
+
+optionVar -stringValue "displayAffectedVert" $display;
+}

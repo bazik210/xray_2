@@ -1,0 +1,56 @@
+<html>
+<head>
+<title>File Structure for jpAnimWriter v1.2.2</title>
+</head>
+
+<body background=images/grad3.jpg>
+
+<table width=800>
+<tr>
+<td width=50>
+<td colspan=2>
+<h2>File Structure for jpAnimWriter v1.2.2</h2>
+</tr>
+<tr>
+<td width=50>
+<td width=100>
+<td>
+
+For Animation Writer to work properly it needs to have certain folders in certain places. These folders
+are called SELS, POSES, and ANIMS. It is in these folders that Animation Writer will store Selection Sets, 
+Poses, and Animation Sequences. These folders should reside inside of a project directory. Animation 
+Writer has a menu function under Writer->Create Folders to automatically create these folders 
+in a project directory if they do not already exist. You need only create these files once per project.<p>
+
+
+When you create a subFolder, AnimWriter makes a folder of the specified name (suffixed with "_Folder") in each 
+of the SELS, POSES, and ANIMS folders in which to store files created while that subFolder is the active folder. 
+You can rename these folders without any problem. They'll show up with their new names the next time the 
+AnimWriter window is refreshed.<p>
+
+Basically what you wind up with looks something like this:
+<pre>
+|-Project
+     |-SELS
+        |-example1_Folder
+        |-example2_Folder
+     |-POSES
+        |-example1_Folder
+        |-example2_Folder
+     |-ANIMS
+        |-example1_Folder
+        |-example2_Folder
+</pre>
+
+
+With the addition of the add/replace feature for stored selections in v1.1 the format of the .SEL file has 
+changed slightly. Previously saved .SEL files will not work with the add feature. They will only replace the entire 
+selection list. To fix this simply recreate all of your stored selections with v1.1 or later of jpAnimWriter. 
+You can do this by double clicking the selection name, right clicking and selecting "Name--->", and then 
+overwriting the existing file in the new format with "Write New File".
+
+</tr>
+</table>
+
+</body>
+</html>

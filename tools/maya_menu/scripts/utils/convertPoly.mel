@@ -1,0 +1,20 @@
+global proc string[] convertPoly(string $itemsForConv[], string $mode)
+{
+$itemsForConv = `ls -fl $itemsForConv`;
+
+string $converted[] = {};
+if ($mode == "tuv")
+	$converted = `polyListComponentConversion -tuv $itemsForConv`;
+else if ($mode == "tv")
+	$converted = `polyListComponentConversion -tv $itemsForConv`;
+else if ($mode == "te")
+	$converted = `polyListComponentConversion -te $itemsForConv`;
+else if ($mode == "tf")
+	$converted = `polyListComponentConversion -tf $itemsForConv`;
+else if ($mode == "tvf")
+	$converted = `polyListComponentConversion -tvf $itemsForConv`;
+else
+	print "wrong argument";
+$converted = `ls -fl $converted`;
+return $converted;
+}

@@ -1,0 +1,253 @@
+//==============================================================================
+//Name:
+//  GetComponentShader.mel
+//==============================================================================
+//Purpose:
+//if keysPressed == "" 					 	// - select the shader assigned to the active poly face in the MultiLister
+//if keysPressed == "Ctrl" 		 		 	// - select the shader assigned to the active poly face
+//if keysPressed == "Alt" 		 		 	// - assign shader selected in multilister
+//==============================================================================
+
+global proc GetComponentShaderAdvanced()
+{
+  string $keys = keysPressed();
+  if ($keys == "")
+  {
+     selectFacetSG();//print "MultiLister";
+  }
+  if ($keys == "Ctrl")
+  {
+     GetComponentShader();//print "Not MultiLister";
+  }
+  if ($keys == "Alt")
+  {
+ 	 AssignComponentShader();
+  }
+}
+
+proc string rootNode( string $object )
+{
+	string $buffer[];
+	tokenize $object "." $buffer;
+	return $buffer[0];
+}
+
+global proc string[] cleanArray( string $array[] )
+// Sorts an array then gets rid of duplicate items.
+{
+	string $sorted[] = `sort $array`;
+	clear $array;
+	string $last = "";
+	int $numArray = 0;
+
+	for ( $s in $sorted )
+	{
+		if ( ( $s != "" ) && ( $s != $last ) )
+			$array[$numArray++] = $s;
+		$last = $s;
+	}
+
+	return $array;
+}
+
+global proc highlightInML( string $SG[] )
+{
+	// Get the MultiLister panel.  There _should_ be only one
+	// of these.
+	string $scriptPanels[] = `getPanel -scriptType "multiListerPanel"`;
+
+	// Just in case...
+	if ( size( $scriptPanels ) > 1 )
+	{
+		warning ( "More than one active multiListerPanel!" );
+	}
+
+	string $nameRoot = $scriptPanels[0];
+
+	// Get the control for the panel.
+	// Append the Panel name to get the "topLayout"
+	string $control = `scriptedPanel -q -control $nameRoot`;
+
+	// If no control is present, MultiLister is not open
+	if ( "" != $control )
+	{
+		string $topLayout = $control + "|" + $nameRoot;
+
+		// And finally, the active MultiLister
+		$theLister = `findActiveLister $topLayout $nameRoot`;
+
+		if ( `listerEditor -exists $theLister` )
+		{
+			// Code unabashedly copy and paste from 'buildMultiListerEditMenu.mel'
+
+			int $inSelectMode = `listerEditor -q -inSelectMode $theLister`;
+
+			if($inSelectMode == 0)
+			{
+				listerEditor -e -clearHighlight $theLister;
+				string $command;
+				for ( $s in $SG )
+				{
+					$command += ( " -hl " + $s );
+				}
+				evalEcho ( "listerEditor -e" + $command + " " + $theLister );
+			}
+			else
+			{
+				select -add $SG;
+			}
+		}
+	}
+	else
+	{
+		error ( "Could not select Shading Group -- Please open the MultiLister" );
+	}
+}
+
+proc string getFacetSG( string $facet )
+// Input (string) - facet component to query (e.g. "pSphere1.f[0]")
+// Result (string) - Shading Group shading facet (e.g. "lambert2SG")
+{
+	string $facetSG = "";
+
+	// Get array of all Shading Groups
+	string $shadingGroups[] = `ls -type shadingEngine`;
+
+	for ( $shadingGroup in $shadingGroups )
+	{
+		// If this facet is a member of the shading set for this
+		// Shading Group, tag this as the facet's shader
+		if ( `sets -isMember $shadingGroup $facet` )
+		{
+			$facetSG = $shadingGroup;
+			break;
+		}
+	}
+
+	return $facetSG;
+}
+
+proc string getSGFile( string $SG )
+{
+	string $SGFile = "";
+
+	if ( `connectionInfo -isDestination ( $SG + ".surfaceShader" )` )
+	{
+		string $material = rootNode( `connectionInfo -sfd ( $SG + ".surfaceShader" )` );
+
+		if ( `connectionInfo -isDestination ( $material + ".color" )` )
+		{
+			string $color = rootNode( `connectionInfo -sfd ( $material + ".color" )` );
+			if ( `objectType -isType "file" $color` )
+				$SGFile = $color;
+		}
+	}
+
+	return $SGFile;
+}
+
+global proc selectFacetSG()
+{
+/*	string $facetSG[];
+	int $numFacetSG = 0;
+
+	string $facets[] = `filterExpand -ex true -sm 34`;
+
+	for ( $facet in $facets )
+	{
+		string $SG = getFacetSG( $facet );
+		if ( "" != $SG )
+		{
+			$facetSG[$numFacetSG++] = $SG;
+		}
+		string $file = getSGFile( $SG );
+		if ( "" != $file )
+			$facetSG[$numFacetSG++] = $file;
+
+	}
+
+	highlightInML( cleanArray($facetSG) );*/
+hyperShadePanelGraphCommand("hyperShadePanel1", "graphMaterials");
+}
+
+global proc GetComponentShader(){
+
+        string $comps[] = `ls -selection -flatten`;
+        if (`size($comps)` > 0){
+
+                // find the shape node
+                string $shape[] = `listRelatives -parent $comps[0]`;
+
+                // find the shading engine
+                string $connections[] = `listConnections -source false -type
+                        "shadingEngine" $shape[0]`;
+
+                // there may be more than one shading group connected to the
+                // geometry so find the exact one
+                $connections = `stringArrayRemoveDuplicates $connections`;
+                string $shadingGroup;
+
+                for ($connection in $connections){
+                        int $result = `sets -isMember $connection`;
+                        if ($result == 1) {$shadingGroup = $connection;}
+                }
+
+                // if no shading group has been found, the components must not be
+                // mapped - this means the shape is mapped
+                if ($shadingGroup == ""){
+                        for ($connection in $connections){
+                                int $result = `sets -isMember $connection $shape[0]`;
+                                if ($result == 1) {$shadingGroup = $connection;}
+                        }
+                }
+
+                if ($shadingGroup != ""){
+                        // find the shader connected to the shading group
+                        string $shaderConnection = `connectionInfo -sourceFromDestination
+                                ($shadingGroup + ".surfaceShader")`;
+                        string $shader[];
+                        tokenize $shaderConnection "." $shader;
+
+                        // select and show the shader
+                        select -replace $shader[0];
+                        showEditor $shader[0];
+                }
+
+        } else {
+                error ("No component selected: Select a component to see its " +
+                        "material attributes.");
+        }
+}
+
+
+global proc AssignComponentShader()
+{
+	// Get the MultiLister panel.  There _should_ be only one
+	// of these.
+
+	string $scriptPanels[] = `getPanel -scriptType "multiListerPanel"`;
+
+	// Just in case...
+	if ( size( $scriptPanels ) > 1 )
+	{
+		warning ( "More than one active multiListerPanel!" );
+	}
+
+	string $nameRoot = $scriptPanels[0];
+
+	// Get the control for the panel.
+	// Append the Panel name to get the "topLayout"
+	string $control = `scriptedPanel -q -control $nameRoot`;
+
+	// If no control is present, MultiLister is not open
+	if ( "" != $control )
+	{
+		string $topLayout = $control + "|" + $nameRoot;
+		multiListerEditMenuSetCallbacks $topLayout `buildMultiListerEditMenu multiListerPanel1EditMenu $nameRoot`$nameRoot;
+		multiListerEditMenuCmd $topLayout "multiListerPanel1Assign" $nameRoot;
+	}
+	else
+	{
+		error ( "Could not select Shading Group -- Please open the MultiLister" );
+	}
+}

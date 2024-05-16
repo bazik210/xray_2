@@ -1,0 +1,181 @@
+global proc string skinFile(string $mode)
+{
+if ($mode == "save")
+{
+timerstart;
+progressBegin "skin saving...";
+string $path = `internalVar -ups` + "skinData.txt";
+string $shape = stringSingle(`listRelatives -f`);
+string $skinCluster = skinClusterFind($shape);
+string $influences[] = `skinCluster -q -inf $skinCluster`;
+if (`size (stringToStringArray(stringArrayToString($influences, ""), "|"))` > 1)
+	return "influences has long names, skin not saved";
+int $sizeVerts = intSingle(`polyEvaluate -v`) - 1;
+int $sizeInf = `size $influences`;
+string $inf;
+for ($inf in $influences)
+	{
+//$inf = $influences[0];
+	global string $gInf;
+	$gInf = $inf;
+	eval ("global int $gRigidVerts" + $inf + "[];" +
+		"global string $gInf;" +
+		"$gRigidVerts" + $gInf + " = {};");
+	}
+string $info = "";
+string $infoTmp = "";
+int $count = 0;
+float $values[] = {};
+string $joints[] = {};
+int $countRealLines = 0;
+for (; $count <= $sizeVerts; $count++)
+	{
+	$joints = `skinPercent -ib 0.00001 -q -t $skinCluster ($shape + ".vtx[" + $count + "]")`;
+	$values = `skinPercent -ib 0.00001 -q -v $skinCluster ($shape + ".vtx[" + $count + "]")`;
+	global int $gCount;
+	$gCount = $count;
+	if (`size $values` == 1)
+		{
+		global string $gInf;
+		$gInf = $joints[0];
+		eval ("global string $gInf;" +
+			"global int $gRigidVerts" + $gInf + "[];" +
+			"global int $gCount;" +
+			"$gRigidVerts" + $joints[0] + "[`size $gRigidVerts" + $joints[0] + "`] = $gCount;");
+		}
+	else
+		{
+		$infoTmp += $count + "\n";
+		$infoTmp += stringArrayToString($joints, " ") + "\n";
+		$infoTmp += stringArrayToString(floatArrayToStringArray($values), " ") + "\n";
+		if ($count % 100 == 0)
+			{
+			$info += $infoTmp;
+			$infoTmp = "";
+			}
+		$countRealLines++;
+		}
+	if (progressEsc())
+		return 0;
+	if ($count % 100 == 0)
+		{
+		progressValue (intToFloat($count) / $sizeVerts * 100);
+		progressText ($count + "/ " + $sizeVerts + " vertices.");
+		}
+	}
+$info += $infoTmp;
+
+progressValue 0;
+progressText ("rigids...");
+string $infoRigid = "";
+int $rigidVerts[];
+for ($inf in $influences)
+	{
+//$inf = $influences[1];
+	global int $gRigidVerts[];
+	$gRigidVerts = $rigidVerts;
+	global string $gInf;
+	$gInf = $inf;
+	eval ("global int $gRigidVerts" + $inf + "[];" +
+		"global int $gRigidVerts[];" +
+		"global string $gInf;" +
+		"$gRigidVerts = $gRigidVerts" + $gInf);
+	$rigidVerts = $gRigidVerts;
+	if (`size $rigidVerts` > 0)
+		{
+		string $rigidVertsUnion[] = vertNumbersUnion($rigidVerts);
+		//size $rigidVertsUnion
+		$infoRigid += stringArrayToString($rigidVertsUnion, " ") + "\n";
+		$infoRigid += $inf + "\n";
+		$infoRigid += "1\n";
+		$countRealLines++;
+		}
+	}
+progressText ("completing...");
+string $text;
+$text = stringArrayToString ($influences, " ") + "\n" + $countRealLines + "\n" + $infoRigid + $info;
+fileWrite ($text, $path);
+print "\n";
+progressEnd();
+if (keysPressed() == "Ctrl")
+	doDetachSkin "2" { "1","1" };
+return ("skinSaved, time:" + (timerquery()));
+}
+
+
+
+
+else if ($mode == "load")
+{
+timerstart;
+string $path = `internalVar -ups` + "skinData.txt";
+string $object = sel1();
+string $skinCluster = skinClusterFind(sel1());
+$fileId= `fopen $path "r"`;
+string $line = `fgetline $fileId`;
+string $influences[] = stringToStringArray($line, " \n");
+string $notExists[] = {};
+string $inf;
+for ($inf in $influences)
+	if(!`objExists $inf`)
+		$notExists[`size $notExists`] = $inf;
+if (`size $notExists` > 0)
+	return ("skin not loaded, joints not exists: " + stringArrayToString($notExists, " "));
+int $sizeLines = `fgetline $fileId`;
+if ($skinCluster == "")
+	{
+	select $object $influences;
+	$skinCluster = stringSingle(`newSkinCluster "-tsb -omi 1 -dr 20"`);
+	}
+progressBegin "skin loading...";
+
+skinPercent -pruneWeights 100 -normalize off $skinCluster $object;
+
+string $vertices[];
+string $joints[];
+float $weights[];
+string $text;
+int $countLines = 0;
+for (;;)
+	{
+	$line = `fgetline $fileId`;
+	if (`size $line` == 0)
+		break;
+	string $numbers[] = stringToStringArray($line, " \n");
+	$vertices = getNamesOfComponentsCompound($numbers, "v", $object);
+	$line = `fgetline $fileId`;
+	$joints = stringToStringArray($line, " \n");
+	$line = `fgetline $fileId`;
+	$weights = stringArrayToFloatArray(stringToStringArray($line, " \n"));
+	$text = "";
+	$text += "skinPercent ";
+	string $joint;
+	int $count = 0;
+	for ($joint in $joints)
+		{
+		//$joint = $joints[0];
+		$text += "-tv " + $joint + " " + $weights[$count] + " ";
+		$count++;
+		}
+	$text += $skinCluster + " " + stringArrayToString($vertices, " ");
+	eval $text;
+//	print $text;
+	$countLines++;
+	if ($countLines % 10 == 0)
+		{
+		progressValue (intToFloat($countLines) / $sizeLines * 100);
+		progressText  ($countLines + "/ " + $sizeLines + " lines.");
+		print ("\n" + $countLines);
+		}
+	if (progressEsc())
+		return 0;
+	}
+fclose $fileId;
+select $object;
+print "\n";
+print (timerquery());
+progressEnd();
+return ("skinLoaded, time:" + (timerquery()));
+}
+return 0;
+}

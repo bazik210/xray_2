@@ -1,0 +1,30 @@
+global proc float[] edgeTexelsLimited(string $edge, string $uvsOnly[])
+{
+//$edge = sel1();
+//$uvsOnly = sel();
+$uvs = conv({$edge}, "u");
+//select $uvs;
+$uvs = stringIntersect($uvsOnly, $uvs);
+$verts = conv({$edge}, "v");
+$distV = twoVerticesDistance($verts[0], $verts[1]);
+
+float $texels[] = {};
+string $faces[] = conv({$edge}, "f");
+string $facesOnl[] = conv($uvsOnly, "f");
+$faces = stringIntersect($facesOnl, $faces);
+
+string $face;
+for ($face in $faces)
+	{
+//$face = $faces[0];
+	$uvsFace = conv({$face}, "u");
+	$pair = stringIntersect($uvsFace, $uvs);
+	$distUv = twoUVsDistance($pair[0], $pair[1]);
+	$tex = $distV / $distUv;
+	$texels[`size $texels`] = $tex;
+	if (`size $uvs` == 2)
+		break;
+	}
+//print $texels;
+return $texels;
+}

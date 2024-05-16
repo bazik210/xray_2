@@ -1,0 +1,1 @@
+global proc moveUvsAbs(string $uvs[], float $pos[]){//$uvs = `ls -sl -fl`;//$pos = {0.0,0.0};$posOfShell = uvsShellBBpos($uvs);$pos[0] -= $posOfShell[0];$pos[1] -= $posOfShell[1];polyEditUV -u $pos[0] -v $pos[1] $uvs;}

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.tasks.Mailer_-DescriptorImpl>
+  <hudsonUrl>http://buildstation.gsc-game.kiev.ua/</hudsonUrl>
+  <adminAddress>mailnull@gsc-game.kiev.ua</adminAddress>
+  <smtpHost>smtp.gsc-game.kiev.ua</smtpHost>
+  <useSsl>false</useSsl>
+</hudson.tasks.Mailer_-DescriptorImpl>

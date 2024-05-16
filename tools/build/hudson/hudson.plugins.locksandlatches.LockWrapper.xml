@@ -1,0 +1,17 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.locksandlatches.LockWrapper_-DescriptorImpl>
+  <locks>
+    <hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+      <name>Poll_Build_Lock</name>
+    </hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+    <hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+      <name>Build_Publish_Lock</name>
+    </hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+    <hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+      <name>PostCommitHook_Lock</name>
+    </hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+    <hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+      <name>Hudson_Restart_Lock</name>
+    </hudson.plugins.locksandlatches.LockWrapper_-LockConfig>
+  </locks>
+</hudson.plugins.locksandlatches.LockWrapper_-DescriptorImpl>

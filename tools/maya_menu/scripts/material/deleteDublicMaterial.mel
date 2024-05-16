@@ -1,0 +1,129 @@
+//==============================================================================
+//Name:
+//  deleteDublicMaterial.mel
+//==============================================================================
+//Purpose:
+//  delete dublicate material.
+//==============================================================================
+//Usage:
+//  1. Save the deleteDublicMaterial.mel to your scripts directory.
+//  2. Start Maya. In the command line type deleteDublicMaterial();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+global proc deleteDublicMaterial()
+{
+string $allTex[];
+string $allSG[];
+$allTex = `ls -tex`;
+$allSG = `ls -typ shadingEngine`;
+
+for ($i = 0; $i < size($allSG); $i++)
+{
+  string $currMatA[];
+  string $listAttrNodeA[];
+  string $currFileTexA[];
+  string $currFileNameA;
+
+  $currMatA = `listConnections -source true -destination false ($allSG[$i]+".surfaceShader")`;
+
+  if (size($currMatA) == 0) continue;
+  string $listAttrNodeA[] = `listAttr -m -sa -v $currMatA`;
+  $currFileTexA = `listConnections -source true -destination false $currMatA[0]`;
+  if (size($currFileTexA) == 0) continue;
+  $currFileNameA = `getAttr ($currFileTexA[0]+".fileTextureName")`;
+
+  for ($j = $i+1; $j < size($allSG); $j++)
+  {
+    string $currMatB[];
+    string $currFileTexB[];
+    string $currFileNameB;
+
+    $currMatB = `listConnections -source true -destination false ($allSG[$j]+".surfaceShader")`;
+
+    if (size($currMatB) == 0) continue;
+    string $listAttrNodeB[] = `listAttr -m -sa -v $currMatB`;
+    $currFileTexB = `listConnections -source true -destination false $currMatB[0]`;
+    if (size($currFileTexB) == 0) continue;
+    $currFileNameB = `getAttr ($currFileTexB[0]+".fileTextureName")`;
+
+    int $mark = 1; // совпали
+    if(`size($listAttrNodeA)` == `size($listAttrNodeB)`)
+    {
+       int $countOK=`size($listAttrNodeA)`;
+       for ($k=0; $k<$countOK; $k++)
+       {
+       float $comparatorA = `getAttr ($currMatA[0]+"."+$listAttrNodeA[$k] )`;
+          float $comparatorB = `getAttr ($currMatB[0]+"."+$listAttrNodeB[$k] )`;
+          if ($comparatorA != $comparatorB)
+          {
+          $mark = 0; // не совпали
+          break;
+       }
+       }
+     }
+     if (tolower($currFileNameA) != tolower($currFileNameB)) $mark = 0;
+     if ($mark)
+     {
+       hyperShade -objects $allSG[$j];
+       sets -e -forceElement $allSG[$i];
+
+       print($currMatB[0] + " == " + $currMatA[0] + "\n");
+       print($allSG[$j] + " >> transfer >> " + $allSG[$i]+"\n");
+
+       print("----------\n");
+     }
+    }
+    }
+{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+}
+
+
+
+
+
+
+
+
+/*
+global proc deleteDublicMaterial()
+{
+string $allTex[];
+string $allSG[];
+$allTex = `ls -tex`;
+$allSG = `ls -typ shadingEngine`;
+
+for ($i = 0; $i < size($allSG); $i++) {
+  string $currMat[];
+  string $currFileTex[];
+  string $currFileName;
+
+  $currMat = `listConnections -source true -destination false ($allSG[$i]+".surfaceShader")`;
+  if (size($currMat) == 0) continue;
+  $currFileTex = `listConnections -source true -destination false $currMat[0]`;
+  if (size($currFileTex) == 0) continue;
+  $currFileName = `getAttr ($currFileTex[0]+".fileTextureName")`;
+
+  for ($j = $i+1; $j < size($allSG); $j++) {
+   string $currMat1[];
+   string $currFileTex1[];
+   string $currFileName1;
+
+   $currMat1 = `listConnections -source true -destination false ($allSG[$j]+".surfaceShader")`;
+   if (size($currMat1) == 0) continue;
+   $currFileTex1 = `listConnections -source true -destination false $currMat1[0]`;
+   if (size($currFileTex1) == 0) continue;
+   $currFileName1 = `getAttr ($currFileTex1[0]+".fileTextureName")`;
+
+if (tolower($currFileName1) == tolower($currFileName)) {
+    hyperShade -objects $allSG[$j];
+    sets -e -forceElement $allSG[$i];
+
+        print($currFileName1 + " == " + $currFileName + "\n");
+        print($allSG[$j] + " >> transfer >> " + $allSG[$i]+"\n");
+
+        print("----------\n");
+   }
+}
+  }
+}
+*/

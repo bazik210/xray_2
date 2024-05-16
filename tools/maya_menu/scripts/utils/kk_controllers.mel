@@ -1,0 +1,1772 @@
+/////////////////////////////
+// karim kashefy (kk)      //
+// karim_kashefy@yahoo.com //
+// kk_controllers v:1.7    //
+/////////////////////////////
+
+
+
+global proc kk_controllers ()
+
+{
+	if (`window -exists mc`)
+	deleteUI -window mc;
+
+// making GUI ................................................................................................................................................................................................
+
+string $window = `window -title "kk_Controllers"  -rtf 1  -s 1  mc`;
+	string $mco = `columnLayout -adjustableColumn true `;
+		frameLayout -label " Color" -borderStyle "etchedIn";
+			columnLayout -adjustableColumn true -columnAttach "left" 10  -rowSpacing 10;
+				colorIndexSliderGrp -minValue 1 -maxValue 31 -value 16 -columnWidth 1 25 -columnWidth 2 140  -dc h_off  -cc h_on cis01 ;
+
+setParent $mco;
+
+	frameLayout -label " Lock & Hide" -borderStyle "etchedIn"   -h 210 ;
+		string $lh_c = `columnLayout -adjustableColumn 1  `;
+		separator -h 10 -style "none";
+		button -c "get" -label "Get from selected";
+		button -c "lockhide" -label "Apply to selected";
+		separator -h 5 -style "none";
+		string $mc = `rowLayout -nc 3 -columnWidth3 62 62 62 `;
+
+		frameLayout -borderStyle "etchedIn" -h 110 -w 60 -label "";
+			string $mf = `formLayout`;
+
+		checkBox  -label "T" -onc "ont" -ofc "oft"    t;
+		checkBox  -label "X" -cc "lockhide" tx;
+		checkBox  -label "Y" -cc "lockhide" ty;
+		checkBox  -label "Z" -cc "lockhide" tz;
+		picture -image "kk_icons/x.XPM" px;
+              picture -image "kk_icons/y.XPM" py;
+              picture -image "kk_icons/z.XPM" pz;
+
+	formLayout -e
+		-attachForm t "left" 5
+
+		-attachForm tx "top" 30
+		-attachForm tx "left" 17
+
+		-attachForm ty "top" 45
+		-attachForm ty "left" 17
+
+		-attachForm tz "top" 60
+		-attachForm tz "left" 17
+
+		-attachForm px "top" 32
+		-attachForm px "left" 10
+
+		-attachForm py "top" 47
+		-attachForm py "left" 10
+
+		-attachForm pz "top" 62
+		-attachForm pz "left" 10
+
+		$mf;
+
+
+
+
+setParent $mc;
+
+		frameLayout -borderStyle "etchedIn" -h 110 -w 60 -label "";
+			string $mf = `formLayout`;
+
+		checkBox  -onc "onr" -ofc "ofr" -label " R "  r;
+		checkBox  -label "X" -cc "lockhide" rx;
+		checkBox  -label "Y" -cc "lockhide" ry;
+		checkBox  -label "Z" -cc "lockhide" rz;
+		picture -image "x.XPM" px;
+        picture -image "y.XPM" py;
+        picture -image "z.XPM" pz;
+	formLayout -e
+		-attachForm r "left" 5
+
+		-attachForm rx "top" 30
+		-attachForm rx "left" 17
+
+		-attachForm ry "top" 45
+		-attachForm ry "left" 17
+
+		-attachForm rz "top" 60
+		-attachForm rz "left" 17
+
+		-attachForm px "top" 32
+		-attachForm px "left" 10
+
+		-attachForm py "top" 47
+		-attachForm py "left" 10
+
+		-attachForm pz "top" 62
+		-attachForm pz "left" 10
+
+		$mf;
+
+setParent $mc;
+
+		frameLayout -borderStyle "etchedIn" -h 110 -w 60 -label "" ;
+			string $mf = `formLayout`;
+
+		checkBox  -onc "ons" -ofc "ofs" -label " S "  s;
+		checkBox  -label "X" -cc "lockhide" sx;
+		checkBox  -label "Y" -cc "lockhide" sy;
+		checkBox  -label "Z" -cc "lockhide" sz;
+		picture -image "x.XPM" px;
+        	picture -image "y.XPM" py;
+        	picture -image "z.XPM" pz;
+	formLayout -e
+		-attachForm s "left" 5
+
+		-attachForm sx "top" 30
+		-attachForm sx "left" 17
+
+		-attachForm sy "top" 45
+		-attachForm sy "left" 17
+
+		-attachForm sz "top" 60
+		-attachForm sz "left" 17
+
+		-attachForm px "top" 32
+		-attachForm px "left" 10
+
+		-attachForm py "top" 47
+		-attachForm py "left" 10
+
+		-attachForm pz "top" 62
+		-attachForm pz "left" 10
+
+		$mf;
+
+setParent $lh_c;
+
+		separator -style "none";
+		checkBox -label "Visibility" -align "left"  -cc "lockhide" v;
+		separator -style "none";
+
+setParent $mco;
+
+frameLayout -label " Mirror" -borderStyle "etchedIn";
+	columnLayout;
+		separator -style "none";
+		rowLayout -nc 4 -columnWidth4 60 40 40 40;
+			checkBox -label "Copy" cb01;
+			button -label "   X   " -c mirrorX;
+			button -label "   Y   " -c mirrorY;
+			button -label "   Z   " -c mirrorZ;
+	setParent..;
+		separator -style "none";
+
+
+
+
+setParent $mco;
+
+
+
+    frameLayout -h 140 -label "" -borderStyle "etchedIn";
+
+		scrollLayout -cr 1   ;
+			gridLayout -numberOfColumns 4 -cellWidthHeight 40 40 ;
+
+
+
+
+
+				symbolButton -image "kk_icons/b01.XPM"    -c b01   b01;
+				symbolButton -image "kk_icons/b02.XPM"    -c b02   b02;
+				symbolButton -image "kk_icons/b03.XPM"    -c b03   b03;
+				symbolButton -image "kk_icons/b04.XPM"    -c b04   b04;
+				symbolButton -image "kk_icons/b05.XPM"    -c b05   b05;
+				symbolButton -image "kk_icons/b06.XPM"    -c b06   b06;
+				symbolButton -image "kk_icons/b07.XPM"    -c b07   b07;
+				symbolButton -image "kk_icons/b08.XPM"    -c b08   b08;
+				symbolButton -image "kk_icons/b09.XPM"    -c b09   b09;
+				symbolButton -image "kk_icons/b10.XPM"    -c b10   b10;
+				symbolButton -image "kk_icons/b11.XPM"    -c b11   b11;
+				symbolButton -image "kk_icons/b12.XPM"    -c b12   b12;
+				symbolButton -image "kk_icons/b13.XPM"    -c b13   b13;
+				symbolButton -image "kk_icons/b14.XPM"    -c b14   b14;
+				symbolButton -image "kk_icons/b15.XPM"    -c b15   b15;
+				symbolButton -image "kk_icons/b16.XPM"    -c b16   b16;
+				symbolButton -image "kk_icons/b17.XPM"    -c b17   b17;
+				symbolButton -image "kk_icons/b18.XPM"    -c b18   b18;
+				symbolButton -image "kk_icons/b19.XPM"    -c b19   b19;
+				symbolButton -image "kk_icons/b20.XPM"    -c b20   b20;
+				symbolButton -image "kk_icons/b21.XPM"    -c b21   b21;
+				symbolButton -image "kk_icons/b22.XPM"    -c b22   b22;
+				symbolButton -image "kk_icons/b23.XPM"    -c b23   b23;
+				symbolButton -image "kk_icons/b24.XPM"    -c b24   b24;
+				symbolButton -image "kk_icons/b25.XPM"    -c b25   b25;
+				symbolButton -image "kk_icons/b26.XPM"    -c b26   b26;
+				symbolButton -image "kk_icons/b27.XPM"    -c b27   b27;
+				symbolButton -image "kk_icons/b28.XPM"    -c b28   b28;
+
+setParent $mco;
+
+
+
+                		columnLayout -adjustableColumn true  ;
+					button -h 30   -label "Slider Maker" -c make ;
+					button -h 30   -label " Combine Shapes "   -c combine;
+					button -h 30   -label "Freeze Transformations"    -c freeze  ft;
+					textField -visible 0 text01;
+
+
+
+
+showWindow mc;
+
+
+	// end of GUI ..........................................................................................................................................................................................................
+
+	// Procedure for "making controllers" ....................................................................................................................................................................
+
+	//buttons ....................................................................................................................................
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+//snap
+
+global proc snap() 	{
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			
+			string $text = `textField -q -text text01`;
+	
+	if ($text == "")
+			{
+			sphere;
+			}
+			else
+			{
+			sphere;
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}	
+			}
+
+// get
+
+global proc get ()
+{
+
+string $sele [] = `ls -sl`;
+string $gtx = `getAttr -lock $sele.tx`;
+string $gty = `getAttr -lock $sele.ty`;
+string $gtz = `getAttr -lock $sele.tz`;
+
+string $grx = `getAttr -lock $sele.rx`;
+string $gry = `getAttr -lock $sele.ry`;
+string $grz = `getAttr -lock $sele.rz`;
+
+string $gsx = `getAttr -lock $sele.sx`;
+string $gsy = `getAttr -lock $sele.sy`;
+string $gsz = `getAttr -lock $sele.sz`;
+
+string $gv =  `getAttr -lock $sele.visibility`;
+
+
+if ($gtx == 1)
+{
+checkBox -e -value 1 tx;
+}
+else
+{
+checkBox -e -value 0 tx;
+}
+
+
+if ($gty == 1)
+{
+checkBox -e -value 1 ty;
+}
+else
+{
+checkBox -e -value 0 ty;
+}
+
+
+if ($gtz == 1)
+{
+checkBox -e -value 1 tz;
+}
+else
+{
+checkBox -e -value 0 tz;
+}
+
+if ($grx == 1)
+{
+checkBox -e -value 1 rx;
+}
+else
+{
+checkBox -e -value 0 rx;
+}
+
+if ($gry == 1)
+{
+checkBox -e -value 1 ry;
+}
+else
+{
+checkBox -e -value 0 ry;
+}
+
+if ($grz == 1)
+{
+checkBox -e -value 1 rz;
+}
+else
+{
+checkBox -e -value 0 rz;
+}
+
+if ($gsx == 1)
+{
+checkBox -e -value 1 sx;
+}
+else
+{
+checkBox -e -value 0 sx;
+}
+
+if ($gsy == 1)
+{
+checkBox -e -value 1 sy;
+}
+else
+{
+checkBox -e -value 0 sy;
+}
+
+if ($gsz == 1)
+{
+checkBox -e -value 1 sz;
+}
+else
+{
+checkBox -e -value 0 sz;
+}
+
+if ($gv == 1)
+{
+checkBox -e -value 1 v;
+}
+else
+{
+checkBox -e -value 0 v;
+}
+edit_t;
+edit_r;
+edit_s;
+}
+
+
+
+
+//t
+global proc ont ()
+	{
+	checkBox -e -value 1 tx;
+       checkBox -e -value 1 ty;
+       checkBox -e -value 1 tz;
+	lockhide;
+	}
+global proc oft ()
+	{
+	checkBox -e -value 0 tx;
+       checkBox -e -value 0 ty;
+       checkBox -e -value 0 tz;
+	lockhide;
+        }
+///////////////////////////////////////////
+//r
+global proc onr ()
+	{
+	checkBox -e -value 1 rx;
+       checkBox -e -value 1 ry;
+       checkBox -e -value 1 rz;
+	lockhide;
+	}
+global proc ofr ()
+	{
+	checkBox -e -value 0 rx;
+       checkBox -e -value 0 ry;
+       checkBox -e -value 0 rz;
+	lockhide;
+       }
+///////////////////////////////////////////
+//s
+
+global proc ons ()
+	{
+	checkBox -e -value 1 sx;
+       checkBox -e -value 1 sy;
+       checkBox -e -value 1 sz;
+	lockhide;
+	}
+global proc ofs ()
+	{
+	checkBox -e -value 0 sx;
+       checkBox -e -value 0 sy;
+       checkBox -e -value 0 sz;
+	lockhide;
+       }
+
+
+/////////////////////////////////////////////
+
+// edit lockhide
+
+
+global proc edit_t()
+{
+int $tx = `checkBox -q -value tx`;
+int $ty = `checkBox -q -value ty`;
+int $tz = `checkBox -q -value tz`;
+
+if ($tx + $ty + $tz == 3)
+{
+checkBox -e -value 1 t;
+}
+else
+{
+if ($tx + $ty + $tz == 0)
+{
+checkBox -e -value 0 t;
+}
+}
+}
+
+
+global proc edit_r()
+{
+int $rx = `checkBox -q -value rx`;
+int $ry = `checkBox -q -value ry`;
+int $rz = `checkBox -q -value rz`;
+
+if ($rx + $ry + $rz == 3)
+{
+checkBox -e -value 1 r;
+}
+else
+{
+if ($rx + $ry + $rz == 0)
+{
+checkBox -e -value 0 r;
+}
+}
+}
+
+
+global proc edit_s()
+{
+int $sx = `checkBox -q -value sx`;
+int $sy = `checkBox -q -value sy`;
+int $sz = `checkBox -q -value sz`;
+
+if ($sx + $sy + $sz == 3)
+{
+checkBox -e -value 1 s;
+}
+else
+{
+if ($sx + $sy + $sz == 0)
+{
+checkBox -e -value 0 s;
+}
+}
+}
+
+
+	global proc shp01 ()
+			{
+			curve -d 1 -p -1 1 1 -p -1 1 -1 -p 1 1 -1 -p 1 1 1 -p -1 1 1 -p -1 -1 1 -p -1 -1 -1 -p -1 1 -1 -p -1 1 1 -p -1 -1 1 -p 1 -1 1 -p 1 1 1 -p 1 1 -1 -p 1 -1 -1 -p 1 -1 1 -p 1 -1 -1 -p -1 -1 -1 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16;
+			}
+	global proc b01 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp01;
+			}
+
+			else
+			{
+			shp01;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}	
+			
+		set;
+		lockhide;
+		}
+
+
+	global proc shp02 ()
+			{
+			curve -d 1 -p 2.57253 0 0 -p 3.235575 0 -0.738488 -p 2.552484 0 -0.738488 -p 2 0 -0.105773 -p -2.457426 0 -0.102784 -p -2 0 -1 -p -4 0 0 -p -2 0 1 -p -2.457426 0 0.0956313 -p 2 0 0.0956313 -p 2.552484 0 0.738488 -p 3.235575 0 0.738488 -p 2.57253 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 ;
+			}
+	global proc b02 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp02;
+			}
+
+			else
+			{
+			shp02;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}	
+			
+		set;
+		lockhide;
+		}
+
+
+	global proc shp03 ()
+			{
+			curve -d 1 -p -2.12132 0 2.12132 -p -2.427589 0 1.760219 -p -2.671383 0 1.358164 -p -2.852888 0 0.917653 -p -2.959949 0 0.479631-p -2.999992 0 0.00653153 -p -2.964176 0 -0.453565 -p -2.839141 0 -0.959046-p -2.671717 0 -1.357504 -p -2.4336 0 -1.751819 -p -2.130993 0 -2.111601-p -1.792857 0 -2.403811 -p -1.387964 0 -2.656114 -p -0.942438 0 -2.844735 -p -0.465425 0 -2.962282 -p 0.00840032 0 -2.999988 -p 0.454939 0 -2.963959 -p 0.941699 0 -2.844981 -p 1.349441 0 -2.675776 -p 1.757329 0 -2.429662 -p 2.128882 0 -2.11373 -p 2.411311 0 -1.782662 -p 2.661389 0 -1.377759 -p 2.847929 0 -0.932812 -p 2.960853 0 -0.474177 -p 2.999999 0 0.00169319 -p 2.964737 0 0.449986 -p 2.852196 0 0.919787 -p 2.675184 0 1.35062 -p 2.431628 0 1.754581 -p 2.124565 0 2.11807 -p 1.773918 0 2.417691 -p 1.372686 0 2.663993 -p 0.923801 0 2.850887 -p 0.409006 0 2.970854 -p 0 0 3 -p 0.620223 0.592945 3 -p -1 0 3 -p 0.620223 -0.592945 3 -p 0 0 3 -p 0.620223 0 2.407055 -p -1 0 3 -p 0.620223 0 3.592945 -p 0 0 3 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 ;
+			}
+	global proc b03 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp03;
+			}
+
+			else
+			{
+			shp03;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}	
+			
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp04 ()
+			{
+			curve -d 1 -p -3.686735 0 1.930981 -p -3.925376 0.23864 0.305307 -p -3.448095 0.23864 0.305307 -p -3.686735 0 1.930981 -p -3.448095 0.23864 0.305307 -p -3.448095 -0.23864 0.305307 -p -3.686735 0 1.930981 -p -3.448095 -0.23864 0.305307 -p -3.925376 -0.23864 0.305307 -p -3.686735 0 1.930981 -p -3.925376 0.23864 0.305307 -p -3.925376 -0.23864 0.305307 -p -3.686735 0 1.930981 -p -3.686735 0 0 -p -3.594301 0 -0.820376 -p -3.321634 0 -1.599615 -p -2.882406 0 -2.298642 -p -2.298642 0 -2.882406 -p -1.599615 0 -3.321634 -p -0.820376 0 -3.594301 -p 0 0 -3.686735 -p 1.930981 0 -3.686735 -p 0.305307 0.23864 -3.448095 -p 0.305307 0.23864 -3.925376 -p 1.930981 0 -3.686735 -p 0.305307 0.23864 -3.925376 -p 0.305307 -0.23864 -3.925376 -p 1.930981 0 -3.686735 -p 0.305307 -0.23864 -3.448095 -p 0.305307 -0.23864 -3.925376 -p 0.305307 -0.23864 -3.448095 -p 0.305307 0.23864 -3.448095 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 ;
+			}
+	global proc b04 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp04;
+			}
+
+			else
+			{
+			shp04;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+	
+	global proc shp05 ()
+			{
+			curve -d 1 -p -5.38171 -0.5 -0.5 -p -5.38171 -0.5 0.5 -p -5.38171 0.5 0.5 -p -5.38171 0.5 -0.5 -p -5.38171 -0.5 -0.5 -p -7.007384 0 0 -p -5.38171 -0.5 0.5 -p -5.38171 0.5 0.5 -p -7.007384 0 0 -p -5.38171 0.5 -0.5 -p -7.007384 0 0 -p 0 0 0 -p 7.007384 0 0 -p 5.38171 0.5 0.5 -p 5.38171 0.5 -0.5 -p 7.007384 0 0 -p 5.38171 0.5 -0.5 -p 5.38171 -0.5 -0.5 -p 7.007384 0 0 -p 5.38171 -0.5 -0.5 -p 5.38171 -0.5 0.5 -p 7.007384 0 0 -p 5.38171 -0.5 0.5 -p 5.38171 0.5 0.5 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 ;
+			}
+	global proc b05 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp05;
+			}
+
+			else
+			{
+			shp05;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp06 ()
+			{
+			curve -d 1 -p 0 0 2 -p 0 0 1.001092 -p 0 0.383101 0.924889 -p 0 0.707879 0.707879 -p 0 0.924889 0.383101 -p 0 1.001092 0 -p 0 2 0 -p 0 1.001092 0 -p 0 0.924889 -0.383101 -p 0 0.707879 -0.707879 -p 0 0.383101 -0.924889 -p 0 0 -1.001092 -p 0 0 -2 -p 0 0 -1.001092 -p 0 -0.383101 -0.924889 -p 0 -0.707879 -0.707879 -p 0 -0.924889 -0.383101 -p 0 -1.001092 0 -p 0 -2 0 -p 0 -1.001092 0 -p 0 -0.924889 0.383101 -p 0 -0.707879 0.707879 -p 0 -0.383101 0.924889 -p 0 0 1.001092 -p -0.383101 0 0.924889 -p -0.707879 0 0.707879 -p -0.924889 0 0.383101 -p -1.001092 0 0 -p -2 0 0 -p -1.001092 0 0 -p -0.924889 0 -0.383101 -p -0.707879 0 -0.707879 -p -0.383101 0 -0.924889 -p 0 0 -1.001092 -p 0.383101 0 -0.924889 -p 0.707879 0 -0.707879 -p 0.924889 0 -0.383101 -p 1.001092 0 0 -p 2 0 0 -p 1.001092 0 0 -p 0.924889 0.383101 0 -p 0.707879 0.707879 0 -p 0.383101 0.924889 0 -p 0 1.001092 0 -p -0.383101 0.924889 0 -p -0.707879 0.707879 0 -p -0.924889 0.383101 0 -p -1.001092 0 0 -p -0.924889 -0.383101 0 -p -0.707879 -0.707879 0 -p -0.383101 -0.924889 0 -p 0 -1.001092 0 -p 0.383101 -0.924889 0 -p 0.707879 -0.707879 0 -p 0.924889 -0.383101 0 -p 1.001092 0 0 -p 0.924889 0 0.383101 -p 0.707879 0 0.707879 -p 0.383101 0 0.924889 -p 0 0 1.001092 -p 0 0 0 -p 0 0 -1.001092 -p 0 0 0 -p 1.001092 0 0 -p 0 0 0 -p -1.001092 0 0 -p 0 0 0 -p 0 -1.001092 0 -p 0 0 0 -p 0 1.001092 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 ;
+			}
+	global proc b06 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp06;
+			}
+
+			else
+			{
+			shp06;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp07 ()
+			{
+			curve -d 1 -p -2 0 0 -p 1 0 1 -p 1 0 -1 -p -2 0 0 -p 1 1 0 -p 1 0 0 -p 1 -1 0 -p -2 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 ;
+			}
+	global proc b07 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp07;
+			}
+
+			else
+			{
+			shp07;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp08 ()
+			{
+			curve -d 1 -p 0.934487 1.275837 2.01658e-008 -p 0.932697 1.247176 -0.35686 -p 0.920752 1.172835 -0.686003 -p 0.891476 1.068829 -0.978435 -p 0.840076 0.946678 -1.231929 -p 0.763591 0.814991 -1.445766 -p 0.661715 0.681111 -1.621424 -p 0.537155 0.551427 -1.765671 -p 0.387617 0.433133 -1.880322 -p 0.209586 0.33878 -1.961541 -p 0 0.297363 -1.993747 -p -0.209586 0.33878 -1.961541 -p -0.387617 0.433133 -1.880322 -p -0.537155 0.551427 -1.765671 -p -0.661715 0.681111 -1.621424 -p -0.763591 0.814991 -1.445766 -p -0.840076 0.946678 -1.231929 -p -0.891476 1.068829 -0.978435 -p -0.920752 1.172835 -0.686003 -p -0.932697 1.247176 -0.35686 -p -0.934487 1.275837 2.01658e-008 -p -0.917572 1.470617 0 -p -0.856971 1.657129 0 -p -0.758916 1.826965 0 -p -0.627692 1.972704 0 -p -0.469036 2.087974 0 -p -0.28988 2.167739 0 -p -0.0980551 2.208513 0 -p 0.0980551 2.208513 0 -p 0.28988 2.167739 0 -p 0.469036 2.087974 0 -p 0.627692 1.972704 0 -p 0.758916 1.826965 0 -p 0.856971 1.657129 0 -p 0.917572 1.470617 0 -p 0.934487 1.275837 2.01658e-008 -p 0.932697 1.247176 0.35686 -p 0.920752 1.172834 0.686003 -p 0.891476 1.06883 0.978435 -p 0.840076 0.946678 1.23193 -p 0.763591 0.814992 1.445765 -p 0.661715 0.68111 1.621426 -p 0.537155 0.55143 1.765669 -p 0.387617 0.433127 1.880326 -p 0.209586 0.338788 1.961536 -p 0 0.297318 1.993775 -p -0.209586 0.338788 1.961536 -p -0.387617 0.433127 1.880326 -p -0.537155 0.55143 1.765669 -p -0.661715 0.68111 1.621426 -p -0.763591 0.814992 1.445765 -p -0.840076 0.946678 1.23193 -p -0.891476 1.06883 0.978435 -p -0.920752 1.172834 0.686003 -p -0.932697 1.247176 0.35686 -p -0.934487 1.275837 2.01658e-008 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 ;
+			}
+	global proc b08 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp08;
+			}
+
+			else
+			{
+			shp08;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp09 ()
+			{
+			curve -d 1 -p -5 0 0 -p -3 0 -2 -p -3 0 -1 -p 3 0 -1 -p 3 0 -2 -p 5 0 0 -p 3 0 2 -p 3 0 1 -p -3 0 1 -p -3 0 2 -p -5 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 ;
+			}
+	global proc b09 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp09;
+			}
+
+			else
+			{
+			shp09;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp10 ()
+			{
+			curve -d 1 -p -1.34734 1.079737 0 -p -1.44224 1.524319 0 -p -1.664328 2.405765 0 -p -1.950005 3.338975 0 -p -2.026185 3.76749 0 -p -2.00714 4.157914 0 -p -1.911915 4.481681 0 -p -1.711941 4.719745 0 -p -1.454742 4.823697 0 -p -1.178678 4.748313 0 -p -0.978704 4.605474 0 -p -0.762282 4.305811 0 -p -0.625918 3.874188 0 -p -0.582821 3.418809 0 -p -0.537404 2.504382 0 -p -0.497941 2.074195 0 -p -0.435919 1.853457 0 -p -0.27968 1.671979 0 -p -0.112152 1.748709 0 -p 0.0181145 1.93818 0 -p 0.0631399 2.393048 0 -p 0.0309841 3.299414 0 -p 0.00884164 4.206964 0 -p 0.118751 4.647229 0 -p 0.259227 4.910196 0 -p 0.516336 5.11017 0 -p 0.783868 5.183232 0 -p 0.982941 5.11017 0 -p 1.161548 4.946641 0 -p 1.268618 4.757835 0 -p 1.339346 4.534125 0 -p 1.366566 4.080178 0 -p 1.18691 3.188703 0 -p 0.962236 2.303209 0 -p 0.871335 1.872813 0 -p 0.887716 1.643961 0 -p 0.972904 1.454826 0 -p 1.173392 1.520168 0 -p 1.333545 1.689809 0 -p 1.703036 2.510079 0 -p 1.804024 2.951195 0 -p 1.993722 3.363069 0 -p 2.163738 3.596084 0 -p 2.439892 3.719877 0 -p 2.746698 3.70583 0 -p 2.887452 3.538949 0 -p 2.961806 3.310347 0 -p 2.923079 2.868041 0 -p 2.734645 2.450959 0 -p 2.319855 1.644199 0 -p 2.098659 0.763906 0 -p 1.924326 -0.588646 0 -p 1.675939 -1.460628 0 -p 1.433159 -1.843999 0 -p 1.10277 -2.155313 0 -p 0.711811 -2.38603 0 -p 0.281957 -2.532393 0 -p -0.168824 -2.585124 0 -p -0.618393 -2.524033 0 -p -1.03629 -2.347311 0 -p -1.40311 -2.079606 0 -p -1.992964 -1.390367 0 -p -2.408387 -0.583148 0 -p -2.561783 -0.156678 0 -p -2.789956 0.234865 0 -p -3.166494 0.485898 0 -p -3.566608 0.701746 0 -p -3.872971 1.032209 0 -p -3.987831 1.272581 0 -p -4.025921 1.539213 0 -p -3.968786 1.748709 0 -p -3.806902 1.958205 0 -p -3.521226 2.043908 0 -p -3.273639 2.034385 0 -p -3.023745 1.975496 0 -p -2.644437 1.72963 0 -p -2.324835 1.399893 0 -p -2.049032 1.049876 0 -p -1.873824 0.844066 0 -p -1.689234 0.796519 0 -p -1.473877 0.901202 0 -p -1.34734 1.079737 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 ;
+			}
+	global proc b10 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp10;
+			}
+
+			else
+			{
+			shp10;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp11 ()
+			{
+			curve -d 1 -p 0.365446 0 -1.737246 -p 0 0 -1.979341 -p -0.365446 0 -1.737246 -p 0 0 -3.272918 -p 0.365446 0 -1.737246 -p 0 0 -1.979341 -p 0 0.365446 -1.737246 -p 0 0 -3.272918 -p 0 -0.365446 -1.737246 -p 0 0 -1.979341 -p 0 0 0 -p 0 0 1.979341 -p -0.365446 0 1.737246 -p 0 0 3.272918 -p 0.365446 0 1.737246 -p 0 0 1.979341 -p 0 -0.365446 1.737246 -p 0 0 3.272918 -p 0 0.365446 1.737246 -p 0 0 1.979341 -p 0 0 0 -p 1.979341 0 0 -p 1.737246 0 0.365446 -p 3.272918 0 0 -p 1.737246 0 -0.365446 -p 1.979341 0 0 -p 1.737246 0.365446 0 -p 3.272918 0 0 -p 1.737246 -0.365446 0 -p 1.979341 0 0 -p 0 0 0 -p -1.979341 0 0 -p -1.737246 0 0.365446 -p -3.272918 0 0 -p -1.737246 0 -0.365446 -p -1.979341 0 0 -p -1.737246 0.365446 0 -p -3.272918 0 0 -p -1.737246 -0.365446 0 -p -1.979341 0 0 -p 0 0 0 -p 0 1.979341 0 -p -0.365446 1.737246 0 -p 0 3.272918 0 -p 0.365446 1.737246 0 -p 0 1.979341 0 -p 0 1.737246 0.365446 -p 0 3.272918 0 -p 0 1.737246 -0.365446 -p 0 1.979341 0 -p 0 0 0 -p 0 -1.979341 0 -p -0.365446 -1.737246 0 -p 0 -3.272918 0 -p 0.365446 -1.737246 0 -p 0 -1.979341 0 -p 0 -1.737246 -0.365446 -p 0 -3.272918 0 -p 0 -1.737246 0.365446 -p 0 -1.979341 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 ;
+			}
+	global proc b11 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp11;
+			}
+
+			else
+			{
+			shp11;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp12 ()
+			{
+			curve -d 1 -p 0 1 0 -p 0 0.92388 0.382683 -p 0 0.707107 0.707107 -p 0 0.382683 0.92388 -p 0 0 1 -p 0 -0.382683 0.92388 -p 0 -0.707107 0.707107 -p 0 -0.92388 0.382683 -p 0 -1 0 -p 0 -0.92388 -0.382683 -p 0 -0.707107 -0.707107 -p 0 -0.382683 -0.92388 -p 0 0 -1 -p 0 0.382683 -0.92388 -p 0 0.707107 -0.707107 -p 0 0.92388 -0.382683 -p 0 1 0 -p 0.382683 0.92388 0 -p 0.707107 0.707107 0 -p 0.92388 0.382683 0 -p 1 0 0 -p 0.92388 -0.382683 0 -p 0.707107 -0.707107 0 -p 0.382683 -0.92388 0 -p 0 -1 0 -p -0.382683 -0.92388 0 -p -0.707107 -0.707107 0 -p -0.92388 -0.382683 0 -p -1 0 0 -p -0.92388 0.382683 0 -p -0.707107 0.707107 0 -p -0.382683 0.92388 0 -p 0 1 0 -p 0 0.92388 -0.382683 -p 0 0.707107 -0.707107 -p 0 0.382683 -0.92388 -p 0 0 -1 -p -0.382683 0 -0.92388 -p -0.707107 0 -0.707107 -p -0.92388 0 -0.382683 -p -1 0 0 -p -0.92388 0 0.382683 -p -0.707107 0 0.707107 -p -0.382683 0 0.92388 -p 0 0 1 -p 0.382683 0 0.92388 -p 0.707107 0 0.707107 -p 0.92388 0 0.382683 -p 1 0 0 -p 0.92388 0 -0.382683 -p 0.707107 0 -0.707107 -p 0.382683 0 -0.92388 -p 0 0 -1 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 ;
+			}
+	global proc b12 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp12;
+			}
+
+			else
+			{
+			shp12;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp13 ()
+			{
+			curve -d 1 -p -5 0 0 -p -3 0 -2 -p -3 0 -1 -p -1 0 -1 -p -1 0 -3 -p -2 0 -3 -p 0 0 -5 -p 2 0 -3 -p 1 0 -3 -p 1 0 -1 -p 3 0 -1 -p 3 0 -2 -p 5 0 0 -p 3 0 2 -p 3 0 1 -p 1 0 1 -p 1 0 3 -p 2 0 3 -p 0 0 5 -p -2 0 3 -p -1 0 3 -p -1 0 1 -p -3 0 1 -p -3 0 2 -p -5 0 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 ;
+			}
+	global proc b13 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp13;
+			}
+
+			else
+			{
+			shp13;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp14 ()
+			{
+			curve -d 1 -p -6.283766 0 9.1204e-010 -p -6.203579 0 -0.982165 -p -5.969952 0 -1.939507 -p -5.592832 0 -2.849955 -p -5.081088 0 -3.692098 -p -4.443293 0 -4.443293 -p -3.692098 0 -5.081088 -p -2.849955 0 -5.592832 -p -1.939507 0 -5.969952 -p -0.982165 0 -6.20358 -p 0 0 -6.283764 -p 0 0.982162 -6.20358 -p 0 1.939508 -5.969952 -p 0 2.849954 -5.592832 -p 0 3.692098 -5.081088 -p 0 4.443293 -4.443293 -p 0 5.081089 -3.692098 -p 0 5.592832 -2.849955 -p 0 5.969952 -1.939507 -p 0 6.203579 -0.982165 -p 0 6.283766 0 -p 0 6.203579 0.982165 -p 0 5.969952 1.939507 -p 0 5.592832 2.849955 -p 0 5.081089 3.692098 -p 0 4.443293 4.443293 -p 0 3.692098 5.081088 -p 0 2.849954 5.592832 -p 0 1.939508 5.969952 -p 0 0.982162 6.20358 -p 0 0 6.283766 -p -0.982165 0 6.203579 -p -1.939507 0 5.969952 -p -2.849955 0 5.592832 -p -3.692098 0 5.081088 -p -4.443293 0 4.443293 -p -5.081088 0 3.692098 -p -5.592832 0 2.849955 -p -5.969952 0 1.939507 -p -6.203579 0 0.982165 -p -6.283766 0 9.1204e-010 -p -6.20358 0.982162 0 -p -5.969952 1.939508 0 -p -5.592832 2.849954 0 -p -5.081088 3.692098 0 -p -4.443293 4.443293 0 -p -3.692098 5.081089 0 -p -2.849955 5.592832 0 -p -1.939507 5.969952 0 -p -0.982165 6.203579 0 -p 0 6.283766 0 -p 0.982165 6.203579 0 -p 1.939507 5.969952 0 -p 2.849955 5.592832 0 -p 3.692098 5.081089 0 -p 4.443293 4.443293 0 -p 5.081088 3.692098 0 -p 5.592832 2.849954 0 -p 5.969952 1.939508 0 -p 6.20358 0.982162 0 -p 6.283766 0 9.12045e-010 -p 6.203579 0 0.982165 -p 5.969952 0 1.939507 -p 5.592832 0 2.849955 -p 5.081088 0 3.692098 -p 4.443293 0 4.443293 -p 3.692098 0 5.081088 -p 2.849955 0 5.592832 -p 1.939507 0 5.969952 -p 0.982165 0 6.203579 -p 0 0 6.283766 -p 0.982165 0 6.203579 -p 1.939507 0 5.969952 -p 2.849955 0 5.592832 -p 3.692098 0 5.081088 -p 4.443293 0 4.443293 -p 5.081088 0 3.692098 -p 5.592832 0 2.849955 -p 5.969952 0 1.939507 -p 6.203579 0 0.982165 -p 6.283766 0 9.12045e-010 -p 6.203579 0 -0.982165 -p 5.969952 0 -1.939507 -p 5.592832 0 -2.849955 -p 5.081088 0 -3.692098 -p 4.443293 0 -4.443293 -p 3.692098 0 -5.081088 -p 2.849955 0 -5.592832 -p 1.939507 0 -5.969952 -p 0.982165 0 -6.20358 -p 0 0 -6.283764 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 -k 70 -k 71 -k 72 -k 73 -k 74 -k 75 -k 76 -k 77 -k 78 -k 79 -k 80 -k 81 -k 82 -k 83 -k 84 -k 85 -k 86 -k 87 -k 88 -k 89 -k 90 ;
+			}
+	global proc b14 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp14;
+			}
+
+			else
+			{
+			shp14;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp15 ()
+			{
+			curve -d 1 -p 0 1.195249 0.555115 -p 0 1.180393 0.832049 -p 0 1.133567 1.105407 -p 0 1.048732 1.369346 -p 0 0.917923 1.613767 -p 0 0.738447 1.825003 -p 0 0.520555 1.996316 -p 0 0.271934 2.118642 -p -1.67422e-006 0 2.182925 -p -0.13416 0 2.16342 -p -0.266779 0 2.095529 -p -0.395472 0 1.99807 -p -0.518993 0 1.858632 -p -0.636496 0 1.679268 -p -0.737632 0 1.452024 -p -0.819474 0 1.166445 -p -0.846144 0 0.821387 -p -0.824602 0 0.556128 -p -0.749206 0 0.167213 -p -0.673656 0 -0.127237 -p -0.597808 0 -0.419587 -p -0.545054 0 -0.746104 -p -0.544891 0 -1.097217 -p -0.571904 0 -1.448294 -p -0.512279 0 -1.753435 -p -0.393271 0 -1.92306 -p -0.266839 0 -2.035747 -p -0.133965 0 -2.097731 -p 0 0 -2.120128 -p 0.133965 0 -2.097731 -p 0.266839 0 -2.035747 -p 0.393271 0 -1.92306 -p 0.512279 0 -1.753435 -p 0.571904 0 -1.448294 -p 0.544891 0 -1.097217 -p 0.545054 0 -0.746104 -p 0.597807 0 -0.419586 -p 0.673656 0 -0.127237 -p 0.749207 0 0.167214 -p 0.824602 0 0.556128 -p 0.793719 0.309015 0.555115 -p 0.711605 0.597122 0.555115 -p 0.58157 0.845165 0.555115 -p 0.410881 1.034146 0.555115 -p 0.212644 1.153473 0.555115 -p 0 1.195249 0.555115 -p -0.212644 1.153473 0.555115 -p -0.410881 1.034146 0.555115 -p -0.58157 0.845165 0.555115 -p -0.711605 0.597122 0.555115 -p -0.793719 0.309015 0.555115 -p -0.822457 0 0.555115 -p -0.846144 0 0.821387 -p -0.819474 0 1.166445 -p -0.737632 0 1.452024 -p -0.636496 0 1.679268 -p -0.518993 0 1.858632 -p -0.395472 0 1.99807 -p -0.266779 0 2.095529 -p -0.13416 0 2.16342 -p -1.67422e-006 0 2.182925 -p 0.134293 0 2.163449 -p 0.266596 0 2.09545 -p 0.395504 0 1.9981 -p 0.519008 0 1.858641 -p 0.636486 0 1.679267 -p 0.737631 0 1.452029 -p 0.819474 0 1.166447 -p 0.846144 0 0.82139 -p 0.824602 0 0.556128 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 -k 57 -k 58 -k 59 -k 60 -k 61 -k 62 -k 63 -k 64 -k 65 -k 66 -k 67 -k 68 -k 69 ;
+			}
+	global proc b15 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp15;
+			}
+
+			else
+			{
+			shp15;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp16 ()
+			{
+			curve -d 1 -p -2.513058 -0.000789387 0 -p -2.465186 0.0739742 0 -p -2.152997 0.192227 0 -p -1.82693 0.391554 0 -p -1.507944 0.627928 0 -p -1.184955 0.849308 0 -p -0.832559 1.021739 0 -p -0.449719 1.138051 0 -p 0 1.191496 0 -p 0.247442 1.154017 0 -p 0.47812 1.058465 0 -p 0.676741 0.90715 0 -p 0.828056 0.70853 0 -p 0.923606 0.477852 0 -p 0.957056 0.230409 0 -p 0.923606 -0.0170326 0 -p 0.828056 -0.247711 0 -p 0.676741 -0.446331 0 -p 0.47812 -0.597647 0 -p 0.247442 -0.693197 0 -p 0 -0.726646 0 -p -0.247442 -0.693197 0 -p -0.47812 -0.597647 0 -p -0.676741 -0.446331 0 -p -0.828056 -0.247711 0 -p -0.923606 -0.0170326 0 -p -0.957056 0.230409 0 -p -0.923606 0.477852 0 -p -0.828056 0.70853 0 -p -0.676741 0.90715 0 -p -0.47812 1.058465 0 -p -0.247442 1.154017 0 -p 0 1.191496 0 -p 0.452245 1.134262 0 -p 0.845189 1.004057 0 -p 1.195059 0.840467 0 -p 1.491525 0.656977 0 -p 1.77641 0.45723 0 -p 2.093635 0.264219 0 -p 2.452556 0.0891304 0 -p 2.511637 0.000631505 0 -p 2.458871 -0.0840784 0 -p 2.123947 -0.242747 0 -p 1.802933 -0.447126 0 -p 1.496577 -0.655714 0 -p 1.195059 -0.840467 0 -p 0.845189 -1.004057 0 -p 0.452245 -1.134263 0 -p 0 -1.191489 0 -p -0.452245 -1.134263 0 -p -0.845189 -1.004057 0 -p -1.200111 -0.834152 0 -p -1.520575 -0.622876 0 -p -1.821878 -0.40671 0 -p -2.122684 -0.220013 0 -p -2.457608 -0.0802893 0 -p -2.513058 -0.000789387 0 -k 0 -k 1 -k 2 -k 3 -k 4 -k 5 -k 6 -k 7 -k 8 -k 9 -k 10 -k 11 -k 12 -k 13 -k 14 -k 15 -k 16 -k 17 -k 18 -k 19 -k 20 -k 21 -k 22 -k 23 -k 24 -k 25 -k 26 -k 27 -k 28 -k 29 -k 30 -k 31 -k 32 -k 33 -k 34 -k 35 -k 36 -k 37 -k 38 -k 39 -k 40 -k 41 -k 42 -k 43 -k 44 -k 45 -k 46 -k 47 -k 48 -k 49 -k 50 -k 51 -k 52 -k 53 -k 54 -k 55 -k 56 ;
+			}
+	global proc b16 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp16;
+			}
+
+			else
+			{
+			shp16;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp17 ()
+			{
+			curve -d 1 -p 0 8.70951 -8.113749 -p 1.637134 8.441733 -6.501093 -p 3.274268 7.878044 -4.966615 -p 4.911403 7.038203 -3.564106 -p 3.274268 7.038203 -3.564106 -p 1.637134 7.038203 -3.564106 -p 1.637134 5.951649 -2.342727 -p 1.637134 4.65647 -1.345292 -p 1.637134 3.198066 -0.606765 -p 1.627559 1.637134 -0.153032 -p 3.198066 1.637134 -0.606765 -p 4.65647 1.637134 -1.345292 -p 5.951649 1.637134 -2.342727 -p 7.038203 1.637134 -3.564106 -p 7.038203 3.274268 -3.564106 -p 7.038203 4.911403 -3.564106 -p 7.878044 3.274268 -4.966615 -p 8.441733 1.637134 -6.501093 -p 8.70951 0 -8.113749 -p 8.441733 -1.637134 -6.501093 -p 7.878044 -3.274268 -4.966615 -p 7.038203 -4.911403 -3.564106 -p 7.038203 -3.274268 -3.564106 -p 7.038203 -1.637134 -3.564106 -p 5.951649 -1.637134 -2.342727 -p 4.65647 -1.637134 -1.345292 -p 3.198066 -1.637134 -0.606765 -p 1.627559 -1.637134 -0.153032 -p 1.637134 -3.198066 -0.606765 -p 1.637134 -4.65647 -1.345292 -p 1.637134 -5.951649 -2.342727 -p 1.637134 -7.038203 -3.564106 -p 3.274268 -7.038203 -3.564106 -p 4.911403 -7.038203 -3.564106 -p 3.274268 -7.878044 -4.966615 -p 1.637134 -8.441733 -6.501093 -p 0 -8.70951 -8.113749 -p -1.637134 -8.441733 -6.501093 -p -3.274268 -7.878044 -4.966615 -p -4.911403 -7.038203 -3.564106 -p -3.274268 -7.038203 -3.564106 -p -1.637134 -7.038203 -3.564106 -p -1.637134 -5.951649 -2.342727 -p -1.637134 -4.65647 -1.345292 -p -1.637134 -3.198066 -0.606765 -p -1.627559 -1.637134 -0.153032 -p -3.198066 -1.637134 -0.606765 -p -4.65647 -1.637134 -1.345292 -p -5.951649 -1.637134 -2.342727 -p -7.038203 -1.637134 -3.564106 -p -7.038203 -3.274268 -3.564106 -p -7.038203 -4.911403 -3.564106 -p -7.878044 -3.274268 -4.966615 -p -8.441733 -1.637134 -6.501093 -p -8.70951 0 -8.113749 -p -8.441733 1.637134 -6.501093 -p -7.878044 3.274268 -4.966615 -p -7.038203 4.911403 -3.564106 -p -7.038203 3.274268 -3.564106 -p -7.038203 1.637134 -3.564106 -p -5.951649 1.637134 -2.342727 -p -4.65647 1.637134 -1.345292 -p -3.198066 1.637134 -0.606765 -p -1.637134 1.627559 -0.153032 -p -1.637134 3.198066 -0.606765 -p -1.637134 4.65647 -1.345292 -p -1.637134 5.951649 -2.342727 -p -1.637134 7.038203 -3.564106 -p -3.274268 7.038203 -3.564106 -p -4.911403 7.038203 -3.564106 -p -3.274268 7.878044 -4.966615 -p -1.637134 8.441733 -6.501093 -p 0 8.70951 -8.113749 -k 0 -k 2.313563 -k 4.627126 -k 6.940689 -k 8.577823 -k 10.214958 -k 11.849695 -k 13.484432 -k 15.119169 -k 16.744737 -k 18.379474 -k 20.014211 -k 21.648949 -k 23.283686 -k 24.92082 -k 26.557954 -k 28.871517 -k 31.18508 -k 33.498643 -k 35.812206 -k 38.12577 -k 40.439333 -k 42.076467 -k 43.713601 -k 45.348338 -k 46.983075 -k 48.617812 -k 50.25255 -k 51.878118 -k 53.512855 -k 55.147592 -k 56.782329 -k 58.419463 -k 60.056598 -k 62.370161 -k 64.683724 -k 66.997287 -k 69.31085 -k 71.624413 -k 73.937976 -k 75.57511 -k 77.212244 -k 78.846982 -k 80.481719 -k 82.116456 -k 83.742024 -k 85.376761 -k 87.011498 -k 88.646235 -k 90.280972 -k 91.918107 -k 93.555241 -k 95.868804 -k 98.182367 -k 100.49593 -k 102.809493 -k 105.123056 -k 107.436619 -k 109.073754 -k 110.710888 -k 112.345625 -k 113.980362 -k 115.615099 -k 117.240667 -k 118.875404 -k 120.510142 -k 122.144879 -k 123.779616 -k 125.41675 -k 127.053884 -k 129.367447 -k 131.68101 -k 133.994574 ;
+			}
+	global proc b17 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp17;
+			}
+
+			else
+			{
+			shp17;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp18 ()
+			{
+			curve -d 1 -p 0 0 0 -p -9.99923 0 -2.2236e-005 -p -9.22886 0 3.822731 -p -7.070523 0 7.070516 -p -3.822719 0 9.228864 -p 0 0 9.999226 -p 0 0 0 -p 0 0 9.999226 -p 3.822719 0 9.228864 -p 7.070523 0 7.070516 -p 9.22886 0 3.822731 -p 9.99923 0 -2.2236e-005 -p 0 0 0 -p 9.99923 0 -2.2236e-005 -p 9.22886 0 -3.822678 -p 7.070523 0 -7.070596 -p 3.822719 0 -9.228749 -p 0 0 -10 -p 0 0 0 -p 0 0 -10 -p -3.822719 0 -9.228749 -p -7.070523 0 -7.070596 -p -9.22886 0 -3.822678 -p -9.99923 0 -2.2236e-005 -p 0 0 0 -p 0 20 0 -p 0 20 4 -p 0 28 0 -p 0 20 -4 -p 0 20 0 -p 4 20 0 -p 0 28 0 -p -4 20 0 -p 0 20 4 -p 4 20 0 -p 0 20 -4 -p -4 20 0 -p 0 20 0 -k 0 -k 9.99923 -k 13.898834 -k 17.798388 -k 21.697965 -k 25.597534 -k 35.59676 -k 45.595986 -k 49.495555 -k 53.395131 -k 57.294686 -k 61.19429 -k 71.19352 -k 81.192749 -k 85.092258 -k 88.991923 -k 92.891392 -k 96.791136 -k 106.791136 -k 116.791136 -k 120.690881 -k 124.59035 -k 128.490015 -k 132.389524 -k 142.388753 -k 162.388753 -k 166.388753 -k 175.333025 -k 184.277297 -k 188.277297 -k 192.277297 -k 201.221569 -k 210.165841 -k 215.822695 -k 221.479549 -k 227.136403 -k 232.793258 -k 236.793258 ;
+			}
+	global proc b18 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp18;
+			}
+
+			else
+			{
+			shp18;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp19 ()
+			{
+			curve -d 1 -p -0.501812 -8.720681 0 -p 0.545838 -8.720681 0 -p 0.545838 -7.387514 0 -p 2.260467 -7.387514 0 -p 2.260467 -5.716921 0 -p 0.545838 -5.716921 0 -p 0.545838 -5.565796 0 -p 2.260467 -5.565796 0 -p 2.260467 -3.895204 0 -p 0.545838 -3.895204 0 -p 0.537417 4.927337 0 -p 1.592993 5.037761 0 -p 2.352876 5.285438 0 -p 2.963694 5.794448 0 -p 3.277409 6.527621 0 -p 3.358018 7.32238 0 -p 3.277409 8.117117 0 -p 2.963694 8.850319 0 -p 2.352876 9.359281 0 -p 1.592993 9.607047 0 -p 0.800517 9.71732 0 -p 0 9.745124 0 -p 0 8.812327 0 -p 0.570106 8.795228 0 -p 1.134486 8.727412 0 -p 1.675653 8.57504 0 -p 2.110661 8.262036 0 -p 2.33408 7.811128 0 -p 2.391488 7.322378 0 -p 2.33408 6.833614 0 -p 2.110661 6.382724 0 -p 1.675653 6.069691 0 -p 1.134486 5.917373 0 -p 0.570106 5.849464 0 -p 0 5.832846 0 -p -0.570106 5.849464 0 -p -1.134486 5.917373 0 -p -1.675653 6.069691 0 -p -2.110661 6.382724 0 -p -2.33408 6.833614 0 -p -2.391488 7.322378 0 -p -2.33408 7.811128 0 -p -2.110661 8.262036 0 -p -1.675653 8.57504 0 -p -1.134486 8.727412 0 -p -0.570106 8.795228 0 -p 0 8.812327 0 -p 0 9.745124 0 -p -0.800517 9.71732 0 -p -1.592993 9.607047 0 -p -2.352876 9.359281 0 -p -2.963694 8.850319 0 -p -3.277409 8.117117 0 -p -3.358018 7.32238 0 -p -3.277409 6.527621 0 -p -2.963694 5.794448 0 -p -2.352876 5.285438 0 -p -1.592993 5.037761 0 -p -0.49919 4.927337 0 -p -0.501812 -8.720681 0 -k 0 -k 1.04765 -k 2.380817 -k 4.095446 -k 5.766038 -k 7.480667 -k 7.631793 -k 9.346421 -k 11.017014 -k 12.731643 -k 21.554187 -k 22.615522 -k 23.41475 -k 24.209854 -k 25.007325 -k 25.806161 -k 26.604975 -k 27.402473 -k 28.197547 -k 28.996802 -k 29.796914 -k 30.597913 -k 31.53071 -k 32.101072 -k 32.669511 -k 33.231721 -k 33.767635 -k 34.270858 -k 34.762969 -k 35.255093 -k 35.7583 -k 36.294231 -k 36.856426 -k 37.424877 -k 37.995225 -k 38.565573 -k 39.134023 -k 39.696218 -k 40.232149 -k 40.735357 -k 41.22748 -k 41.719591 -k 42.222815 -k 42.758728 -k 43.320938 -k 43.889377 -k 44.45974 -k 45.392536 -k 46.193535 -k 46.993647 -k 47.792903 -k 48.587976 -k 49.385474 -k 50.184288 -k 50.983124 -k 51.780595 -k 52.575699 -k 53.374927 -k 54.474289 -k 68.122307 ;
+			}
+	global proc b19 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp19;
+			}
+
+			else
+			{
+			shp19;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp20 ()
+			{
+			curve -d 1 -p 0 24 0 -p -4 24 0 -p 0 32 0 -p 4 24 0 -p 0 24 0 -p 0 4 0 -p 1.034188 3.860232 0 -p 1.998312 3.460872 0 -p 2.828448 2.82845 0 -p 3.460875 1.998311 0 -p 3.860228 1.034189 0 -p 4.00003 -2.3063e-007 0 -p 3.860228 -1.034188 0 -p 3.460875 -1.998312 0 -p 2.828448 -2.828448 0 -p 1.998312 -3.460875 0 -p 1.034188 -3.860228 0 -p 0 -4.00003 0 -p -1.034188 -3.860228 0 -p -1.998312 -3.460875 0 -p -2.828448 -2.828448 0 -p -3.460875 -1.998312 0 -p -3.860228 -1.034188 0 -p -4.00003 -2.3063e-007 0 -p -3.860228 1.034189 0 -p -3.460875 1.998311 0 -p -2.828448 2.82845 0 -p -1.998312 3.460872 0 -p -1.034188 3.860232 0 -p 0 4 0 -k 0 -k 4 -k 12.944272 -k 21.888544 -k 25.888544 -k 45.888544 -k 46.932134 -k 47.975696 -k 49.019289 -k 50.062886 -k 51.106444 -k 52.150039 -k 53.193634 -k 54.237194 -k 55.280789 -k 56.324384 -k 57.367943 -k 58.411538 -k 59.455133 -k 60.498693 -k 61.542288 -k 62.585882 -k 63.629442 -k 64.673037 -k 65.716632 -k 66.760191 -k 67.803787 -k 68.84738 -k 69.890942 -k 70.934532 ;
+			}
+	global proc b20 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp20;
+			}
+
+			else
+			{
+			shp20;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp21 ()
+			{
+			curve -d 1 -p 0 10.112068 0 -p -0.373493 10.162557 0 -p -0.721682 10.306782 0 -p -1.021482 10.53518 0 -p -1.24988 10.83498 0 -p -1.394105 11.183169 0 -p -1.444594 11.556662 0 -p -1.394105 11.930155 0 -p -1.24988 12.278343 0 -p -1.021482 12.578144 0 -p -0.721682 12.806541 0 -p -0.373493 12.950768 0 -p 0 13.001244 0 -p 0.373493 12.950768 0 -p 0.721682 12.806541 0 -p 1.021482 12.578144 0 -p 1.24988 12.278343 0 -p 1.394105 11.930155 0 -p 1.444594 11.556662 0 -p 1.394105 11.183169 0 -p 1.24988 10.83498 0 -p 1.021482 10.53518 0 -p 0.721682 10.306782 0 -p 0.373493 10.162557 0 -p 0 10.112068 0 -p 0 0 0 -k 0 -k 0.37689 -k 0.753767 -k 1.130657 -k 1.507546 -k 1.884423 -k 2.261313 -k 2.638203 -k 3.01508 -k 3.39197 -k 3.768859 -k 4.145737 -k 4.522625 -k 4.899513 -k 5.276391 -k 5.65328 -k 6.030171 -k 6.407047 -k 6.783937 -k 7.160827 -k 7.537704 -k 7.914594 -k 8.291484 -k 8.668361 -k 9.045251 -k 19.157319 ;
+			}
+	global proc b21 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp21;
+			}
+
+			else
+			{
+			shp21;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp22 ()
+			{
+			curve -d 1 -p 0 11.09967 0 -p -0.374605 10.136967 0 -p -0.217575 11.158284 0 -p -1.024621 10.510461 0 -p -0.376794 11.317503 0 -p -1.398115 11.160478 0 -p -0.435408 11.535078 0 -p -1.398115 11.909687 0 -p -0.376794 11.752654 0 -p -1.024621 12.559704 0 -p -0.217575 11.911872 0 -p -0.374605 12.9332 0 -p 0 11.970484 0 -p 0.374605 12.9332 0 -p 0.217575 11.911872 0 -p 1.024621 12.559704 0 -p 0.376794 11.752654 0 -p 1.398115 11.909687 0 -p 0.435408 11.535078 0 -p 1.398115 11.160478 0 -p 0.376794 11.317503 0 -p 1.024621 10.510461 0 -p 0.217575 11.158284 0 -p 0.374605 10.136967 0 -p 0 11.09967 0 -p 0 0 0 -k 0 -k 1.033018 -k 2.066337 -k 3.101227 -k 4.136117 -k 5.169438 -k 6.202459 -k 7.235482 -k 8.268805 -k 9.303701 -k 10.338596 -k 11.371925 -k 12.404955 -k 13.437986 -k 14.471315 -k 15.50621 -k 16.541106 -k 17.574429 -k 18.607452 -k 19.640472 -k 20.673794 -k 21.708684 -k 22.743574 -k 23.776892 -k 24.809911 -k 35.909581 ;
+			}
+	global proc b22 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp22;
+			}
+
+			else
+			{
+			shp22;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp23 ()
+			{
+			curve -d 1 -p -1.6 -6.4 0 -p -1.6 -1.6 0 -p -6.4 -1.6 0 -p -6.4 1.6 0 -p -1.6 1.6 0 -p -1.6 6.4 0 -p 1.6 6.4 0 -p 1.6 1.6 0 -p 6.4 1.6 0 -p 6.4 -1.6 0 -p 1.6 -1.6 0 -p 1.6 -6.4 0 -p -1.6 -6.4 0 -k 0 -k 4.8 -k 9.6 -k 12.8 -k 17.6 -k 22.4 -k 25.6 -k 30.4 -k 35.2 -k 38.4 -k 43.2 -k 48 -k 51.2 ;
+			}
+	global proc b23 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp23;
+			}
+
+			else
+			{
+			shp23;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp24 ()
+			{
+		curve -d 1 -p 2 0 2 -p -2 0 2 -p -2 0 -2 -p 2 0 -2 -p 2 0 2 -p 0 8 0 -p -2 0 2 -p -2 0 -2 -p 0 8 0 -p 2 0 -2 -p 2 0 2 -p 0 8 0 -p -2 0 2 -k 0 -k 4 -k 8 -k 12 -k 16 -k 24.485281 -k 32.970563 -k 36.970563 -k 45.455844 -k 53.941125 -k 57.941125 -k 66.426407 -k 74.911688 ;
+			}
+	global proc b24 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp24;
+			}
+
+			else
+			{
+			shp24;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp25 ()
+			{
+		curve -d 1 -p 0.705532 22.577041 1.222018 -p -0.705533 22.577041 1.222018 -p 0 27.750632 0 -p 0.705532 22.577041 1.222018 -p 1.411065 22.577041 0 -p 0 27.750632 0 -p 1.411065 22.577041 0 -p 0.705533 22.577041 -1.222018 -p 0 27.750632 0 -p 0.705533 22.577041 -1.222018 -p -0.705532 22.577041 -1.222019 -p 0 27.750632 0 -p -0.705532 22.577041 -1.222019 -p -1.411065 22.577041 -2.24148e-007 -p 0 27.750632 0 -p -1.411065 22.577041 -2.24148e-007 -p -0.705533 22.577041 1.222018 -p 0 27.750632 0 -p 0 0 0 -p 0 0 27.750632 -p -1.222018 0.705533 22.577041 -p 0 1.411065 22.577041 -p 0 0 27.750632 -p 1.222018 0.705532 22.577041 -p 0 1.411065 22.577041 -p 1.222018 0.705532 22.577041 -p 1.222018 -0.705533 22.577041 -p 0 0 27.750632 -p 1.222018 -0.705533 22.577041 -p -2.24148e-007 -1.411065 22.577041 -p 0 0 27.750632 -p -2.24148e-007 -1.411065 22.577041 -p -1.222019 -0.705532 22.577041 -p 0 0 27.750632 -p -1.222019 -0.705532 22.577041 -p -1.222018 0.705533 22.577041 -p 0 0 27.750632 -p 0 0 5.64426 -p 0 5.64426 5.64426 -p 0 5.64426 0 -p 5.64426 5.64426 0 -p 5.64426 0 0 -p 0 0 0 -p 0 0 5.64426 -p 5.64426 0 5.64426 -p 5.64426 0 0 -p 27.750632 0 0 -p 22.577041 1.411065 0 -p 22.577041 0.705532 -1.222018 -p 27.750632 0 0 -p 22.577041 0.705532 -1.222018 -p 22.577041 -0.705533 -1.222018 -p 27.750632 0 0 -p 22.577041 -1.411065 2.24148e-007 -p 22.577041 -0.705533 -1.222018 -p 22.577041 -1.411065 2.24148e-007 -p 22.577041 -0.705532 1.222019 -p 27.750632 0 0 -p 22.577041 -0.705532 1.222019 -p 22.577041 0.705533 1.222018 -p 22.577041 1.411065 0 -p 27.750632 0 0 -p 22.577041 0.705533 1.222018 -k 0 -k 1.411065 -k 6.773634 -k 12.136203 -k 13.547268 -k 18.909838 -k 24.272407 -k 25.683471 -k 31.046041 -k 36.40861 -k 37.819675 -k 43.182244 -k 48.544813 -k 49.955878 -k 55.318448 -k 60.681017 -k 62.092082 -k 67.454651 -k 95.205283 -k 122.955915 -k 128.318484 -k 129.729549 -k 135.092118 -k 140.454687 -k 141.865752 -k 143.276817 -k 144.687883 -k 150.050452 -k 155.413021 -k 156.824086 -k 162.186655 -k 167.549224 -k 168.96029 -k 174.322859 -k 179.685428 -k 181.096493 -k 186.459062 -k 208.565434 -k 214.209694 -k 219.853955 -k 225.498215 -k 231.142475 -k 236.786735 -k 242.430996 -k 248.075256 -k 253.719516 -k 275.825888 -k 281.188457 -k 282.599522 -k 287.962091 -k 293.32466 -k 294.735726 -k 300.098295 -k 305.460864 -k 306.871929 -k 308.282994 -k 309.69406 -k 315.056629 -k 320.419198 -k 321.830263 -k 323.241328 -k 328.603897 -k 333.966466 ;
+			}
+	global proc b25 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp25;
+			}
+
+			else
+			{
+			shp25;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp26 ()
+			{
+		curve -d 1 -p 0 4.525483 4.525483 -p -0.8 4.525483 4.525483 -p 0 6.22254 6.22254 -p 0.8 4.525483 4.525483 -p 0 4.525483 4.525483 -p 0 0 0 -p 3.2 3.2 4.525483 -p 2.634315 3.765685 4.525483 -p 4.4 4.4 6.22254 -p 3.765685 2.634315 4.525483 -p 3.2 3.2 4.525483 -p 0 0 0 -p 4.525483 0 4.525483 -p 4.525483 0.8 4.525483 -p 6.22254 0 6.22254 -p 4.525483 -0.8 4.525483 -p 4.525483 0 4.525483 -p 0 0 0 -p 3.2 -3.2 4.525483 -p 3.765685 -2.634315 4.525483 -p 4.4 -4.4 6.22254 -p 2.634315 -3.765685 4.525483 -p 3.2 -3.2 4.525483 -p 0 0 0 -p 0 -4.525483 4.525483 -p 0.8 -4.525483 4.525483 -p 0 -6.22254 6.22254 -p -0.8 -4.525483 4.525483 -p 0 -4.525483 4.525483 -p 0 0 0 -p -3.2 -3.2 4.525483 -p -2.634315 -3.765685 4.525483 -p -4.4 -4.4 6.22254 -p -3.765685 -2.634315 4.525483 -p -3.2 -3.2 4.525483 -p 0 0 0 -p -4.525483 0 4.525483 -p -4.525483 -0.8 4.525483 -p -6.22254 0 6.22254 -p -4.525483 0.8 4.525483 -p -4.525483 0 4.525483 -p 0 0 0 -p -3.2 3.2 4.525483 -p -3.765685 2.634315 4.525483 -p -4.4 4.4 6.22254 -p -2.634315 3.765685 4.525483 -p -3.2 3.2 4.525483 -p 0 0 0 -p 0 0 12.090965 -p 0 1.511371 12.090965 -p 0 0 16.625077 -p 0 -1.511371 12.090965 -p 0 0 12.090965 -p -1.511371 0 12.090965 -p 0 1.511371 12.090965 -p 1.511371 0 12.090965 -p 0 -1.511371 12.090965 -p -1.511371 0 12.090965 -p 0 0 16.625077 -p 1.511371 0 12.090965 -p 0 0 12.090965 -k 0 -k 0.8 -k 3.329822 -k 5.859644 -k 6.659644 -k 13.059644 -k 19.459644 -k 20.259644 -k 22.789466 -k 25.319289 -k 26.119289 -k 32.519289 -k 38.919289 -k 39.719289 -k 42.249111 -k 44.778933 -k 45.578933 -k 51.978933 -k 58.378933 -k 59.178933 -k 61.708755 -k 64.238577 -k 65.038577 -k 71.438577 -k 77.838577 -k 78.638577 -k 81.168399 -k 83.698221 -k 84.498221 -k 90.898221 -k 97.298221 -k 98.098221 -k 100.628043 -k 103.157866 -k 103.957866 -k 110.357866 -k 116.757866 -k 117.557866 -k 120.087688 -k 122.61751 -k 123.41751 -k 129.81751 -k 136.21751 -k 137.01751 -k 139.547332 -k 142.077154 -k 142.877154 -k 149.277154 -k 161.368119 -k 162.87949 -k 167.658864 -k 172.438237 -k 173.949608 -k 175.460979 -k 177.59838 -k 179.73578 -k 181.873181 -k 184.010582 -k 188.789956 -k 193.56933 -k 195.0807 ;
+			}
+	global proc b26 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp26;
+			}
+
+			else
+			{
+			shp26;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+	global proc shp27 ()
+			{
+		curve -d 1 -p 0 0 -6 -p 0 0 -8 -p 2.06834 0 -7.720474 -p 3.996656 0 -6.921725 -p 5.656898 0 -5.656901 -p 6.921731 0 -3.996654 -p 7.720465 0 -2.068341 -p 8.000062 0 5.15532e-007 -p 7.720465 0 2.06834 -p 6.921731 0 3.996656 -p 5.656898 0 5.656898 -p 3.996656 0 6.921731 -p 2.06834 0 7.720465 -p 0 0 8.000062 -p -2.06834 0 7.720465 -p -3.996656 0 6.921731 -p -5.656898 0 5.656898 -p -6.921731 0 3.996656 -p -7.720465 0 2.06834 -p -8.000062 0 5.15532e-007 -p -10.117476 0 0 -p -6.959211 0 -6.31653 -p -3.800946 0 0 -p -6.000046 0 3.86931e-007 -p -5.790349 0 1.551256 -p -5.191298 0 2.997491 -p -4.242674 0 4.242673 -p -2.997491 0 5.191298 -p -1.551256 0 5.790349 -p 0 0 6.000046 -p 1.551256 0 5.790349 -p 2.997491 0 5.191298 -p 4.242674 0 4.242673 -p 5.191298 0 2.997491 -p 5.790349 0 1.551256 -p 6.000046 0 3.86931e-007 -p 5.790349 0 -1.551257 -p 5.191298 0 -2.99749 -p 4.242674 0 -4.242676 -p 2.997491 0 -5.191294 -p 1.551256 0 -5.790355 -p 0 0 -6 -k 0 -k 2 -k 4.087143 -k 6.174343 -k 8.261489 -k 10.348646 -k 12.435838 -k 14.522991 -k 16.610143 -k 18.697338 -k 20.78449 -k 22.871642 -k 24.958836 -k 27.045989 -k 29.133141 -k 31.220335 -k 33.307488 -k 35.394639 -k 37.481834 -k 39.568986 -k 41.6864 -k 48.748496 -k 55.810591 -k 58.009692 -k 59.575056 -k 61.140451 -k 62.705816 -k 64.271181 -k 65.836575 -k 67.40194 -k 68.967305 -k 70.532699 -k 72.098064 -k 73.663429 -k 75.228823 -k 76.794188 -k 78.359554 -k 79.924946 -k 81.490314 -k 83.055675 -k 84.621073 -k 86.186431 ;
+			}
+	global proc b27 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp27;
+			}
+
+			else
+			{
+			shp27;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+
+
+
+
+	global proc shp28 ()
+			{
+		curve -d 1 -p 6.000046 0 3.86931e-007 -p 5.790349 0 -1.551257 -p 5.191298 0 -2.99749 -p 4.242674 0 -4.242676 -p 2.997491 0 -5.191294 -p 1.551256 0 -5.790355 -p 0 0 -6 -p 0 6 -6 -p 1.551256 6 -5.790355 -p 2.997491 6 -5.191294 -p 4.242674 6 -4.242676 -p 5.191298 6 -2.99749 -p 5.790349 6 -1.551257 -p 6.000046 6 3.86931e-007 -p 6.000046 0 3.86931e-007 -p 5.790349 0 1.551256 -p 5.191298 0 2.997491 -p 4.242674 0 4.242673 -p 2.997491 0 5.191298 -p 1.551256 0 5.790349 -p 0 0 6.000046 -p -1.551256 0 5.790349 -p -2.997491 0 5.191298 -p -4.242674 0 4.242673 -p -5.191298 0 2.997491 -p -5.790349 0 1.551256 -p -6.000046 0 3.86931e-007 -p -6.000046 6 3.86931e-007 -p -5.790349 6 -1.551257 -p -5.191298 6 -2.99749 -p -4.242674 6 -4.242676 -p -2.997491 6 -5.191294 -p -1.551256 6 -5.790355 -p 0 6 -6 -p 0 0 -6 -p -1.551256 0 -5.790355 -p -2.997491 0 -5.191294 -p -4.242674 0 -4.242676 -p -5.191298 0 -2.99749 -p -5.790349 0 -1.551257 -p -6.000046 0 3.86931e-007 -p -6.000046 6 3.86931e-007 -p -5.790349 6 1.551256 -p -5.191298 6 2.997491 -p -4.242674 6 4.242673 -p -2.997491 6 5.191298 -p -1.551256 6 5.790349 -p 0 6 6.000046 -p 0 0 6.000046 -p 0 6 6.000046 -p 1.551256 6 5.790349 -p 2.997491 6 5.191298 -p 4.242674 6 4.242673 -p 5.191298 6 2.997491 -p 5.790349 6 1.551256 -p 6.000046 6 3.86931e-007 -k 0 -k 1.565366 -k 3.130758 -k 4.696126 -k 6.261487 -k 7.826885 -k 9.392244 -k 15.392244 -k 16.957602 -k 18.523 -k 20.088361 -k 21.653729 -k 23.219121 -k 24.784487 -k 30.784487 -k 32.349852 -k 33.915246 -k 35.480611 -k 37.045976 -k 38.61137 -k 40.176735 -k 41.7421 -k 43.307494 -k 44.872859 -k 46.438224 -k 48.003618 -k 49.568983 -k 55.568983 -k 57.134349 -k 58.699741 -k 60.265109 -k 61.83047 -k 63.395868 -k 64.961226 -k 70.961226 -k 72.526584 -k 74.091982 -k 75.657343 -k 77.222712 -k 78.788104 -k 80.35347 -k 86.35347 -k 87.918834 -k 89.484229 -k 91.049594 -k 92.614959 -k 94.180353 -k 95.745718 -k 101.745718 -k 107.745718 -k 109.311083 -k 110.876477 -k 112.441842 -k 114.007207 -k 115.572601 -k 117.137966 ;
+			}
+	global proc b28 ()
+		{
+
+			string $sel_1[] = `ls -sl`;
+			textField -e -text $sel_1 text01;
+			string $text = `textField -q -text text01`;
+			
+		if ($text == "")
+
+			{
+			shp28;
+			}
+
+			else
+			{
+			shp28;			
+			string $sel_2[] = `ls -sl`;
+			string $cons [] = `parentConstraint $sel_1 $sel_2`;
+			delete $cons;
+			}
+
+		set;
+		lockhide;
+		}
+// get and set color ....................................................................................................................................................................................................
+	global proc  h_off ()
+	{
+	string $panel = `getPanel  -withFocus`;
+		modelEditor -e -sel 0 -manipulators 0 $panel;
+		set;
+	}
+	global proc  h_on ()
+	{
+	string $panel = `getPanel  -withFocus`;
+		modelEditor -e -sel 1 -manipulators 1 $panel;
+	}
+
+	global proc set ()
+		{
+		$color = `colorIndexSliderGrp -q -value cis01`;
+		string $sl [] = `ls -sl`;
+		string $obj ;
+
+		for ($obj in $sl)
+		{
+		setAttr ($obj+".overrideEnabled") 1;
+		setAttr ($obj+".overrideColor") ($color -1);
+		}
+
+		}
+// Mirror ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+global proc mirrorX()
+{
+string $copy = `checkBox -q -value cb01`;
+	get;
+	mirrorunlock;
+if ($copy == 1)
+	{
+	duplicate;
+	}
+
+	group -n "controllers_mirror_grp";
+		xform -os -piv 0 0 0;
+
+	scale -1 1 1 ;
+	
+		ungroup controllers_mirror_grp;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+lockhide;
+}
+
+global proc mirrorY()
+{
+string $copy = `checkBox -q -value cb01`;
+	get;
+	mirrorunlock;
+if ($copy == 1)
+	{
+	duplicate;
+	}
+
+	group -n "controllers_mirror_grp";
+		xform -os -piv 0 0 0;
+
+	scale 1 -1 1 ;
+	
+		ungroup controllers_mirror_grp;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+lockhide;
+}
+
+global proc mirrorZ()
+{
+string $copy = `checkBox -q -value cb01`;
+	get;
+	mirrorunlock;
+if ($copy == 1)
+	{
+	duplicate;
+	}
+
+	group -n "controllers_mirror_grp";
+		xform -os -piv 0 0 0;
+
+	scale 1 1 -1 ;
+	
+		ungroup controllers_mirror_grp;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+lockhide;
+}
+
+
+global proc mirrorunlock ()
+
+{
+string $sel[] = `ls -sl`; 
+for ($obj in $sel)
+
+setAttr -keyable true  -lock false ($obj +".tx");
+setAttr -keyable true  -lock false ($obj +".ty");
+setAttr -keyable true  -lock false ($obj +".tz");
+
+setAttr -keyable true  -lock false ($obj +".rx");
+setAttr -keyable true  -lock false ($obj +".ry");
+setAttr -keyable true  -lock false ($obj +".rz");
+
+setAttr -keyable true  -lock false ($obj +".sx");
+setAttr -keyable true  -lock false ($obj +".sy");
+setAttr -keyable true  -lock false ($obj +".sz");
+
+}
+
+
+// lock and hide ..........................................................................................................................................................................................................
+
+global proc lockhide ()
+
+{
+string $tx = `checkBox -q -value tx`;
+string $ty = `checkBox -q -value ty`;
+string $tz = `checkBox -q -value tz`;
+
+string $rx = `checkBox -q -value rx`;
+string $ry = `checkBox -q -value ry`;
+string $rz = `checkBox -q -value rz`;
+
+string $sx = `checkBox -q -value sx`;
+string $sy = `checkBox -q -value sy`;
+string $sz = `checkBox -q -value sz`;
+
+string $v = `checkBox -q  -value v`;
+
+string $sel [] = `ls -sl`;
+string $obj;
+
+if ($tx == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".tx");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".tx");
+}
+}
+
+if ($ty == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".ty");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".ty");
+}
+}
+
+if ($tz == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".tz");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".tz");
+}
+}
+
+
+if ($rx == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".rx");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".rx");
+}
+}
+
+if ($ry == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".ry");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".ry");
+}
+}
+
+
+if ($rz == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".rz");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".rz");
+}
+}
+
+
+if ($sx == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".sx");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".sx");
+}
+}
+
+
+if ($sy == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".sy");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".sy");
+}
+}
+
+
+if ($sz == 1)
+{
+
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".sz");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".sz");
+}
+}
+
+
+
+if ($v == 1)
+
+{
+for ($obj in $sel)
+{
+setAttr -keyable false  -lock true ($obj +".v");
+}
+}
+else
+{
+for ($obj in $sel)
+{
+setAttr -keyable true  -lock false ($obj +".v");
+}
+edit_t;
+edit_r;
+edit_s;
+
+}
+
+
+
+
+
+}
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------
+// freeze transformations
+
+
+global proc freeze ()
+{
+get;
+string $selfr [] =`ls  -sl`;
+string $freeze;
+for ($freeze in $selfr)
+{
+setAttr -lock false ($freeze +".tx");
+setAttr -lock false ($freeze +".ty");
+setAttr -lock false ($freeze +".tz");
+setAttr -lock false ($freeze +".rx");
+setAttr -lock false ($freeze +".ry");
+setAttr -lock false ($freeze +".rz");
+setAttr -lock false ($freeze +".sx");
+setAttr -lock false ($freeze +".sy");
+setAttr -lock false ($freeze +".sz");
+setAttr -lock false ($freeze +".v");
+}
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+lockhide;
+}
+
+// slidr maker
+
+
+global proc make()
+{
+	if (`window -exists sm`)
+	deleteUI -window sm;
+
+window -title "slider maker" -rtf 1  sm;
+columnLayout -adjustableColumn true sm;
+frameLayout -w 180 -label " Border" -borderStyle "etchedIn" Border;
+
+columnLayout -adjustableColumn true;
+separator -h 10  -style "none";
+intSliderGrp -field true -label "Height"  -value 5  -maxValue 10 -fieldMaxValue 100 -columnWidth3 50 30 50 -adjustableColumn 3 height;
+intSliderGrp -field true -label "Width "  -value 5  -maxValue 10 -fieldMaxValue 100 -columnWidth3 50 30 50 -adjustableColumn 3 width;
+
+setParent..;
+setParent..;
+separator -h 5  -style "none";
+frameLayout -w 180  -label " Handle" -borderStyle "etchedIn" Handle;
+columnLayout -adjustableColumn true;
+separator -h 10  -style "none";
+floatSliderGrp -field true -label "Size" -value 1 -maxValue 10 -fieldMaxValue 100 -columnWidth3 50 30 50 -adjustableColumn 3 size;
+setParent..;
+setParent..;
+separator -h 5  -style "none";
+button -label "Make Slider "  -h 30  -c s ;
+
+showWindow sm;
+}
+
+global proc s ()
+{
+string $h = `intSliderGrp -q -value height`;
+string $w = `intSliderGrp -q -value width`;
+int $fh = $h;
+int $fw = $w;
+string $bor = `curve -d 1 -p -1 1 0 -p 1 1 0 -p 1 -1 0 -p -1 -1 0 -p -1 1 0 -k 0 -k 8 -k 16 -k 24 -k 32`  ;
+
+
+
+scale $fw $fh 0;
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+		setAttr ($bor+".overrideEnabled") 1;
+		setAttr ($bor+".overrideColor") 6;
+string $size = `floatSliderGrp -q -value size`;
+circle -c 0 0 0 -nr 0 0 1 -sw 360 -r $size -d 3 -ut 0 -tol 0.01 -s 8 -ch 1  ;
+
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+		setAttr  ".overrideEnabled" 1;
+		setAttr ".overrideColor" 17;
+
+delete -ch;
+
+string $selbor [] = `ls -sl`;
+for ($objbor in $selbor)
+{
+if ($fw == 0  )
+{
+setAttr -lock true -keyable false ($objbor+".tx");
+}
+if ($fh == 0  )
+{
+setAttr -lock true -keyable false ($objbor+".ty");
+}
+setAttr -lock true -keyable false ($objbor+".tz");
+setAttr -lock true -keyable false ($objbor+".rx");
+setAttr -lock true -keyable false ($objbor+".ry");
+setAttr -lock true -keyable false ($objbor+".rz");
+setAttr -lock true -keyable false ($objbor+".sx");
+setAttr -lock true -keyable false ($objbor+".sy");
+setAttr -lock true -keyable false ($objbor+".sz");
+setAttr -lock true -keyable false ($objbor+".v");
+parent $selbor $bor;
+transformLimits -tx (-($fw)) $fw -etx 1 1 $objbor;
+transformLimits -ty (-($fh)) $fh -ety 1 1 $objbor;
+select -cl  ;
+}
+}
+
+// combine
+
+global proc combine ()
+{
+string $sl[] = `ls -sl`;
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+delete -ch;
+string $sh []= `listRelatives -s $sl[0]`;
+parent -add -shape $sh $sl[1];
+delete $sl[0];
+
+}
+
+kk_controllers;

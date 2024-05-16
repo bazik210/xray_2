@@ -1,0 +1,1 @@
+global proc WeldSmartPress(){timerstart;//if (whatIsSel() == "v" && sizeSel() == 1)//	hideUvEditor begin;}

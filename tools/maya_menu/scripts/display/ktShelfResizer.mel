@@ -1,0 +1,142 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: ktShelfResizer
+''    Author: butcherhell 
+''    Last Updated: Apr 11, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/interface_display/1305.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+/*
+Author:kursat Turkay (aka butCherHeLL)
+e-mail:kursatturkay@hotmail.com
+
+description:   
+   
+        This code is adds two extra menu items to the shelf's popup that 
+        forces to increase or decrease rows of shelf.
+        
+        once you setup the row,it saves this setting and size will stay at next start  
+        
+        if you are using toggledblShelf:
+        its strongly recommened to remove it.use this instead.
+        
+warning:
+      Coder wont be responsible on any of project or any damaging issues.
+      Use at your own risc
+      But you can send requests to enhance or bug fixing reportings.
+      
+notes:
+   I tested that code should work any of maya version 7 and after.
+   Did not check for earlier.but it should work for earlier
+
+special thanks:
+  Credits goes to Gürkan for the opinion 
+
+
+usage :put the following line to userSetup.mel
+            
+            source ktSelfResizer.mel  
+            
+            
+updates
+
+version 1.0 updates on 10.04.2007
+first version
+
+version 0.0 updates on 00.00.0000
+
+* --------------
+* --------------
+
+
+*/
+
+$ktMainShelf= $gShelfForm;
+string $ktBuffer[];
+int $ktNumTokens = `tokenize $ktMainShelf "|" $ktBuffer`;
+$ktMainShelf=$ktBuffer[$ktNumTokens-2];
+
+$DeepInside=`layout -q -childArray $ktMainShelf`;
+$DeepInside=`layout -q -childArray $DeepInside[1]`;
+$DeepInside=`layout -q -childArray $DeepInside[0]`;
+
+string $ktTabLayout=$DeepInside[1];
+
+$DeepInside=`layout -q -childArray $DeepInside[0]`;
+
+$TargetObjects=`layout -q -childArray $DeepInside[0]`;
+string $AiconTextButton=$TargetObjects[0];
+string $AiconTextStaticLabel=$TargetObjects[2];
+
+$ApopITSL=`iconTextStaticLabel -q -pma $AiconTextStaticLabel`;
+
+global int $ktShelfRow;
+
+global int $ktCurrentShelfRow=1;
+
+
+global proc ktSizeShelf(int $Delta)
+{
+  print ("Delta="+$Delta+"\n");
+  global string $AiconTextButton;//redeclared
+  global int $ktIsTabVisible;//redeclared
+  global string $ktTabLayout;
+  global int $ktShelfRow;
+ global int $ktCurrentShelfRow;
+ 
+  int $ktIsTabVisible=`tabLayout -q -tv $ktTabLayout`;
+    
+  $ktShelfRow=$ktCurrentShelfRow+$Delta;
+  $ktCurrentShelfRow=$ktCurrentShelfRow+$Delta;
+  
+  
+  if (($ktShelfRow<1)||($ktShelfRow>7)) $ktShelfRow=1;
+
+
+$iNewSize=($ktIsTabVisible==1)?
+($ktCurrentShelfRow-1)*(34)+42:
+($ktCurrentShelfRow-1)*(34)+17;
+
+                     
+iconTextButton -e -h $iNewSize $AiconTextButton;
+optionVar -iv "ktOVShelfRow" $ktShelfRow;
+print ("$ktShelfRow="+$ktShelfRow+"\n");
+
+toggleShelfTabs;toggleShelfTabs;
+
+};
+
+
+
+menuItem  -l "Increase Shelf Size" -parent $ApopITSL[0]
+-c "ktSizeShelf(1)" incSizeShelf_MIa;
+
+menuItem  -l "Decrease Shelf Size" -parent $ApopITSL[0]
+-c "ktSizeShelf(-1)" decSizeShelf_MIa;
+
+
+if (`optionVar -exists "ktOVShelfRow"`)
+        {
+		    $ktShelfRow =`optionVar -q "ktOVShelfRow"`;
+             
+             if($ktShelfRow>1)
+             for($i=1;$i<$ktShelfRow;$i++)
+             {
+             print ("$i="+$i+"\n");
+             print ("$ktShelfRow="+$ktShelfRow+"\n");
+             evalDeferred("ktSizeShelf(1)");
+             
+             }      
+        }
+        else
+        {
+         optionVar -iv "ktOVShelfRow" $ktCurrentShelfRow;
+        }
+        
+    

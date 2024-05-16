@@ -1,0 +1,15 @@
+$sel = `ls -sl -fl`;
+
+global string $selWas[];
+global int $angle;
+if (`size $selWas` == `size $sel` && $sel[0] == $selWas[0])
+	$angle += 5;
+else
+	$angle = 50;
+
+global int $angle;
+contignuousEdgesFlow($angle);
+
+global string $selWas[];
+$selWas = `ls -sl -fl`;
+print ("angle " + $angle);

@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>hg_node</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>encoded_hg_url</name>
+          <description></description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@set designers_repository=http://filesophia/xr2-dsgn/
+@set programmers_repository=http://filesophia/xr2-prog/
+
+@set hg_url=%encoded_hg_url:@=\%
+
+@echo incoming hg_node: %hg_node%
+@echo incoming hg_url: %hg_url%
+
+@if /I &quot;%hg_url%&quot;==&quot;%designers_repository%&quot; @(
+  @echo hook is called from designers repository - ignoring..
+  @goto:eof
+)
+
+@setLocal EnableDelayedExpansion
+
+@rem ---------------------- batch file settings
+
+@set curl_path=..\..\..\curl
+@set path_to_work_dir=.
+@set post_commit_helper=%path_to_work_dir%\post_commit_helper
+@set timestamp=..\..\..\timestamp.exe
+@set build_wait_time=600
+@set max_build_wait_time=3600
+@set hudson_url=http://BuildStation.gsc-game.kiev.ua
+@set hudson_user=buildstation
+@set hudson_password=buildpass
+
+@rem ---------------------- check wether looked project commited and wether only_xray_sources_commited
+
+@rem hg log -R &quot;%hg_url%&quot; -v -r %hg_node% --template &quot;{files}\n&quot; &gt; %path_to_work_dir%\temp_hg_changes
+@rem hg log -R &quot;%programmers_repository%&quot; -v -r %hg_node% --template &quot;{files}\n&quot; &gt; %path_to_work_dir%\temp_hg_changes
+@rem @set only_build_is_commited=1
+@rem @echo HG FILES CHANGED
+@rem @for /f &quot;tokens=* delims= &quot; %%a in (%path_to_work_dir%\temp_hg_changes) do @ (
+@rem 	@set sub_string_string=%%a
+@rem         @echo !sub_string_string!
+@rem 	@set sub_string_search=build/
+@rem 	@call :function_sub_string
+@rem 	@if !sub_string_result!==0 @set only_build_is_commited=0
+@rem )
+@rem 
+@rem if !only_build_is_commited!==1 @(
+@rem   @echo only build was commited, not doing anything
+@rem   @goto:eof
+@rem )
+
+@rem ---------------------- update last commit times and check if immediate build is needed
+
+@%timestamp% &gt; %path_to_work_dir%\temp_timestamp
+@set /p current_time= &lt; %path_to_work_dir%\temp_timestamp
+@set project_build_delay=%build_wait_time%
+
+@set new_first_commit_in_chain=!current_time!
+@set new_last_commit_in_chain=!current_time!
+
+@if exist !post_commit_helper! (
+
+@	for /f &quot;tokens=* delims= &quot; %%a in (!post_commit_helper!) do @(
+@		set /a N+=1
+@		set v!N!=%%a
+	)
+	
+@	set first_commit_in_chain=!v1!
+@	set last_commit_in_chain=!v2!
+
+@     echo first_commit_in_chain=!first_commit_in_chain!
+@     echo last_commit_in_chain=!last_commit_in_chain!
+	
+@	set /a delta_from_first_commit= !current_time! - !first_commit_in_chain!
+@	set /a delta_from_last_commit= !current_time! - !last_commit_in_chain!
+
+	if !delta_from_last_commit! lss !build_wait_time! (
+		if !delta_from_first_commit! gtr !max_build_wait_time! ( 
+			set project_build_delay=0
+		) else (	
+		 	set new_first_commit_in_chain=!first_commit_in_chain!
+		)
+	)	
+)
+
+
+@rem creating a newline variable (the two blank lines are required!)
+@set NLM=^
+
+
+@set NL=^^^%NLM%%NLM%^%NLM%%NLM%
+
+@rem ---------------------- schedule hudson build 
+
+set build_project=Stalker_2-Polling
+
+@echo inititing a build of %build_project%
+
+@echo json={&quot;parameter&quot;^%%3A+[{&quot;name&quot;^%%3A+&quot;hg_node&quot;^%%2C+&quot;value&quot;^%%3A+&quot;%hg_node%&quot;}^%%2C+{&quot;name&quot;^%%3A+&quot;hg_url&quot;^%%2C+&quot;value&quot;^%%3A+&quot;%hg_url%&quot;}]^%%2C+&quot;&quot;^%%3A+[&quot;&quot;^%%2C+&quot;&quot;]} &gt; temp_post_data
+
+@rem @%curl_path%\curl.exe -s -S -c %temp_cookies% -G -d j_username=%hudson_user% -d j_password=%hudson_password% %hudson_url%/j_acegi_security_check
+@rem @%curl_path%\curl.exe -s -S -b %temp_cookies% -d @temp_post_data %hudson_url%/job/%build_project%/build
+	
+%curl_path%\curl.exe -s -S -c temp_cookies -G -d j_username=%hudson_user% -d j_password=%hudson_password% %hudson_url%/j_acegi_security_check
+
+%curl_path%\curl.exe -s -S -b temp_cookies -d @temp_post_data %hudson_url%/job/%build_project%/build?delay=!project_build_delay!sec
+
+@rem -d delay=!project_build_delay!sec
+@rem %curl_path%\curl.exe -s -S -b temp_cookies -G -d @temp_post_data %hudson_url%/job/%build_project%/build
+
+
+@del !post_commit_helper!
+@echo !new_first_commit_in_chain!%NL%!new_last_commit_in_chain! &gt; %post_commit_helper%
+
+@goto:eof
+
+
+
+@rem          function_sub_string  (set sub_string_string, sub_string_search)
+@rem          await result in sub_string_result
+:function_sub_string
+@set sub_string_result=0
+@set string_length_string=!sub_string_search!
+@call :function_string_length
+@set sub_string_search_length=!string_length_result!
+
+@set string_length_string=!sub_string_string!
+@call :function_string_length
+@set sub_string_string_length=!string_length_result!
+
+@for /L %%i in (0, 1, !sub_string_string_length!) do @(
+ @if /I &quot;!sub_string_string:~%%i,%sub_string_search_length%!&quot; == &quot;!sub_string_search!&quot; @set sub_string_result=1)
+
+@goto:eof
+
+
+@rem          function_string_length (set string_length_string)
+@rem          await result in string_length_result
+:function_string_length
+@set string_length_helper=!string_length_string!
+@set string_length_result=0
+:loop
+@if defined string_length_helper @ (@set string_length_helper=!string_length_helper:~1!&amp;@set /A string_length_result += 1&amp;@goto loop)
+@goto:eof
+
+
+:label_failed
+@set errorlevel=1
+</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

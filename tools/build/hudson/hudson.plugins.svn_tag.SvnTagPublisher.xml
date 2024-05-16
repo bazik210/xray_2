@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.plugins.svn__tag.SvnTagPublisher_-SvnTagDescriptorImpl>
+  <defaultTagBaseURL>http://subversion_host/project/tags/last-successful/${env[&apos;JOB_NAME&apos;]}</defaultTagBaseURL>
+  <tagComment>Tagged by Hudson svn-tag plugin. Build:${env[&apos;BUILD_TAG&apos;]}.</tagComment>
+</hudson.plugins.svn__tag.SvnTagPublisher_-SvnTagDescriptorImpl>

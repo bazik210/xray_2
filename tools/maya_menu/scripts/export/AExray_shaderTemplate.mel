@@ -1,0 +1,803 @@
+global string $AExray_shader_material_select_form_tree_material;
+global string $AExray_shader_material_select_form_tree_view;
+
+global proc AExray_shader_material_selectForm()
+{
+    global string $AExray_shader_material_select_form_tree_view;
+
+    if(`window -q -exists "xray_shader_material_select_form"`)    
+        deleteUI "xray_shader_material_select_form";
+    
+    string $window = `window -title "Select Material" -widthHeight 300 500 xray_shader_material_select_form`;
+    string $layout = `formLayout`;
+    
+    string $control = `textScrollList -parent $layout`; 
+    $AExray_shader_material_select_form_tree_view = $control;
+    string $acceptButton = `button -command "AExray_shader_material_select_formOK" "OK"`;
+    
+    formLayout -e
+        -attachForm      $acceptButton "left" 2
+        -attachForm      $acceptButton "right" 2
+        -attachForm      $acceptButton "bottom" 2
+        -attachForm      $control "top" 2
+        -attachForm      $control "left" 2
+        -attachControl   $control "bottom" 2 $acceptButton
+        -attachForm      $control "right" 2
+        $layout;
+
+    textScrollList -e -doubleClickCommand "AExray_shader_material_select_formOK" $control;        
+    xray_shader_material -fill_tree_view $control;
+        
+}
+
+global proc AExray_shader_material_select_formOK()
+{
+    global string $AExray_shader_material_last_node_used;
+    global string $AExray_shader_material_select_form_tree_view;
+    global string $AExray_shader_material_select_form_tree_material;
+
+    string $attributeName = $AExray_shader_material_last_node_used + ".xray_render_material";
+    string $treeView  = $AExray_shader_material_select_form_tree_view;
+    
+    string $item;
+
+    string $items[] = `textScrollList -q -selectItem $treeView`;
+    if( size( $items ) != 0 )
+    {
+        $item = $items[0];
+        //
+        // Отправить запрос на команду
+        //
+        setAttr $attributeName -type "string" $item;
+        
+        string $sCmd = "xray_shader_material -select \"" + $item + "\" " + $AExray_shader_material_last_node_used;
+        print($sCmd+"\n");
+        evalDeferred $sCmd;
+    }
+    evalDeferred("deleteUI \"xray_shader_material_select_form\"");
+}
+
+global proc AExray_shader_materialCallback()
+{
+    AExray_shader_material_selectForm();           
+}
+
+////////////////////////////////////////////////////////////////
+//                     MATERIAL FIELD                         //
+////////////////////////////////////////////////////////////////
+
+global proc AExray_shader_materialNew (string $fileAttribute)
+{
+    global string $AExray_shader_material_last_node_used;
+    $AExray_shader_material_last_node_used = `match "^[^.]*" $fileAttribute`;
+        
+	setUITemplate -pst attributeEditorTemplate;
+	rowLayout -nc 3 textureNameLayout;
+		text -label "Material" ;
+		textField -editable false materialNameField;
+		symbolButton -image "navButtonBrowse.png" -command "AExray_shader_materialCallback" browser;
+		setParent ..;
+	setUITemplate -ppt;
+
+    AExray_shader_materialReplace $fileAttribute;
+}
+
+global proc AExray_shader_materialReplace (string $fileAttribute)
+{
+    global string $AExray_shader_material_last_node_used;
+    $AExray_shader_material_last_node_used = `match "^[^.]*" $fileAttribute`;
+
+    string $material_name = `getAttr $fileAttribute`;
+    print( "\nMaterial: "+$material_name+"\n" );
+    if( $material_name == "no_material" )
+    {
+        setAttr $fileAttribute -type "string" "default.material";
+        xray_shader_material -select "default.material" $AExray_shader_material_last_node_used;
+    }
+ 
+	connectControl -fileName materialNameField $fileAttribute;
+    textField -e -editable false materialNameField;
+    setUITemplate -pst attributeEditorTemplate;
+}
+
+////////////////////////////////////////////////////////////////////
+//                     DESCRIPTION FIELD                          //
+////////////////////////////////////////////////////////////////////
+
+global proc AExray_shader_descriptionNew (string $fileAttribute)
+{
+    global string $AExray_shader_material_last_node_used;
+    $AExray_shader_material_last_node_used = `match "^[^.]*" $fileAttribute`;
+        
+	setUITemplate -pst attributeEditorTemplate;
+	rowLayout -nc 3 textureNameLayout;
+		text -label "Description" ;
+		textField -editable false desriptionField;
+		setParent ..;
+	setUITemplate -ppt;
+
+    AExray_shader_descriptionReplace $fileAttribute;
+}
+
+global proc AExray_shader_descriptionReplace (string $fileAttribute)
+{
+    global string $AExray_shader_material_last_node_used;
+    $AExray_shader_material_last_node_used = `match "^[^.]*" $fileAttribute`;
+	connectControl desriptionField $fileAttribute;
+	textField -e -editable false desriptionField;
+}
+
+
+////////////////////////////////////////////////////////////////
+//                     Refresh FIELD                          //
+////////////////////////////////////////////////////////////////
+
+global proc AExray_shader_refreshNew (string $fileAttribute)
+{
+
+    setUITemplate -pst attributeEditorTemplate;
+	rowLayout -nc 2 textureNameLayout;
+		text -label "";
+		button -l "Refresh" materialRefreshButton;
+		setParent ..;
+	setUITemplate -ppt;
+
+    AExray_shader_refreshReplace $fileAttribute;
+}
+
+global proc AExray_shader_refreshReplace (string $fileAttribute)
+{
+    string $node_name   = `match "^[^.]*" $fileAttribute`;
+	string $sCmd = "AExray_shader_refreshDoIt " + $node_name;
+    button -e -c $sCmd materialRefreshButton;
+}
+
+global proc AExray_shader_refreshDoIt (string $node_name)
+{
+    string $cmd = "getAttr " + $node_name + ".xray_render_material";
+    string $material = eval($cmd); 
+    print($material);
+  	xray_shader_material -select $material $node_name;
+}
+
+////////////////////////////////////////////////////////////////////
+//                                                                //
+////////////////////////////////////////////////////////////////////
+//          Procedure xray shader param layout                    //
+////////////////////////////////////////////////////////////////////
+//                                                                //
+////////////////////////////////////////////////////////////////////
+
+global proc int check_attributes_matching(string $first_set[], string $second_set[])
+{
+    string $first_string;
+    string $second_string;
+    
+    for ( $first_string in $first_set )
+    {
+        $first_string = `substitute "...." $first_string ""`;
+
+        for ( $second_string in $second_set )
+        {
+            $second_string = `substitute "...." $second_string ""`;
+            if( $first_string == $second_string )
+                return 1;
+        }
+    }
+    return 0;
+}
+
+global proc AExray_shader_paramLayout( string $plug )
+{
+    string $attr_name    = "";
+    string $node         = `match "^[^.]*" $plug`;
+
+    // Delete old controls.
+    string $sLayoutRel = "xray_shader_attribute_layout";
+    string $sLayoutAbs = `setParent -q` + "|" + $sLayoutRel;
+    if ( `layout -exists $sLayoutAbs` )
+        deleteUI $sLayoutAbs;
+
+    // Create a column layout to hold the new controls.
+    setUITemplate -pst attributeEditorTemplate;
+    columnLayout -adj 1
+                 -visible 0
+                 $sLayoutRel;    
+
+    string $sCmd = "xray_shader_material -has_match_attributes " + $node;
+    int $has_match_attributes = eval($sCmd);
+
+    string $parent_layout = $sLayoutRel;    
+
+    string $sCmd = "xray_shader_material -color_attribute_name "+$node;
+    string $color_attribute_name = eval($sCmd);
+    if( $color_attribute_name == "" )
+        textField -text "There is No Diffuse Texture" -editable false;
+
+    string $shader_stages[] = `xray_shader_material -stages_list $node`;
+    int $stages_count = size($shader_stages);
+    int $i = 0;
+    for(; $i < $stages_count; ++$i )
+    {
+        $attr_name = $shader_stages[$i];
+
+        print("Stage: "+$attr_name+"\n");
+
+        // Get names and descriptions of the uniform shader variables 
+        // that are declared by the CgFX effect.  Create their UI.
+        string $sCmd = "xray_shader_material -effect_attribute_list \"" + $attr_name + "\" " + $node;
+        string $effectParamDescriptions[] = eval($sCmd);
+        
+        string $sCmd = "xray_shader_material -attribute_list \"" + $attr_name + "\" " + $node;
+        string $stageParamDescriptions[] = eval($sCmd);
+
+        print("Effect parameters:\n");
+        print($effectParamDescriptions);
+
+        print("Stage parameters:\n");
+        print($stageParamDescriptions);
+
+        if( size( $effectParamDescriptions ) == 0 && size( $stageParamDescriptions ) == 0 )
+            continue;
+
+        if( $has_match_attributes == 1 )
+        {
+            frameLayout -label $attr_name -borderStyle "in" -collapse false;
+                columnLayout $parent_layout;
+        }
+
+        string $params[];
+        int $has_match_attributes_in_stage = 0;
+        if( $has_match_attributes == 1 )
+            $has_match_attributes_in_stage = check_attributes_matching($effectParamDescriptions, $stageParamDescriptions);
+           
+        if( size( $effectParamDescriptions ) != 0 )
+        {
+            if( $has_match_attributes_in_stage == 1 )
+            {
+                frameLayout -label "effect" -borderStyle "in" -collapse false;
+                    columnLayout $parent_layout;
+            }
+               
+            for ( $paramDescription in $effectParamDescriptions )
+            {
+                $numTokens = `tokenize $paramDescription "|" $params`;
+                string $plug = $node + "." + $params[0];
+       
+                if ( catch( AExray_shader_paramControl( $plug, $params ) ) )
+                    setParent $parent_layout;
+            } 
+            
+             if($has_match_attributes_in_stage == 1)
+             {
+                     setParent ..;
+                 setParent ..;
+             }    
+        }
+        
+
+        for ( $paramDescription in $stageParamDescriptions )
+        {
+            // $paramDescription has the form
+            //      "attrName|type|description(UI Name)|read_write"
+            $numTokens = `tokenize $paramDescription "|" $params`;
+            string $plug = $node + "." + $params[0];
+   
+            if ( catch( AExray_shader_paramControl( $plug, $params ) ) )
+                setParent $parent_layout;
+                
+
+        }
+
+        if($has_match_attributes == 1)
+        {
+                setParent ..;
+            setParent ..;
+        }        
+    }
+
+ // Clean up and make the layout visible.
+    setParent ..;
+    setUITemplate -ppt;
+
+    layout -e -visible 1 $sLayoutRel;    
+   
+}            
+
+// Build UI for one of the dynamic parameters of the shader.
+//   Returns the control or layout name, or "".
+global proc string AExray_shader_paramControl( string $plug, string $param[] )
+{
+    string $type = $param[1];
+    string $uiName = $param[2];
+    if( $uiName == " " || $uiName == "")
+		$uiName = $param[0];
+
+    // Create controls depending on xray_shader parameter type.
+    switch ( $type )
+    {
+        case "bool":    return AExray_shader_BoolLayout( $plug, $uiName, $param );    
+        case "int":     return AExray_shader_IntLayout( $plug, $uiName, $param );     
+        case "float":   return AExray_shader_FloatLayout( $plug, $uiName, $param );   
+        case "string":  return AExray_shader_StringLayout( $plug, $uiName, $param );  
+        case "float2":  return AExray_shader_Vector2Layout( $plug, $uiName, $param ); 
+        case "float3":  return AExray_shader_Vector3Layout( $plug, $uiName, $param ); 
+        case "float4":  return AExray_shader_Vector4Layout( $plug, $uiName, $param ); 
+        case "color":   return AExray_shader_Color3Layout( $plug, $uiName, $param );   
+        case "color4":  return AExray_shader_Color4Layout( $plug, $uiName, $param );   
+        case "matrix":  return AExray_shader_MatrixLayout( $plug, $uiName, $param );  
+        case "time":
+        case "other":
+        case "unknown": return AExray_shader_SuppressLayout( $plug, $uiName, $param );
+        default:        break;
+    }
+
+    // ObjectDir / WorldDir / ViewDir / ProjectionDir / ScreenDir
+    // ObjectPos / WorldPos / ViewPos / ProjectionPos / ScreenPos
+    if ( `match "Dir$" $type` != "" ||
+         `match "Pos$" $type` != "" )
+        return AExray_shader_DirectionLayout( $plug, $uiName, $param );
+
+    // Color1DTexture / Color2DTexture / Color3DTexture /
+    // Color2DRectTexture / NormalTexture / BumpTexture /
+    // CubeTexture / EnvTexture / NormalizationTexture
+    if ( `match "texture$" $type` != "" )
+        return AExray_shader_TextureLayout( $plug, $uiName, $param );
+
+    // WorldMatrix / ViewMatrix / ProjectionMatrix / WorldViewMatrix /
+    // WorldViewProjectionMatrix
+    //     ... hide them because these matrices are built internally 
+    if ( `match "matrix$" $type` != "" )
+        return AExray_shader_SuppressLayout( $plug, $uiName, $param );
+
+    // Unrecognized type
+    return AExray_shader_UnimplementedLayout( $plug, $uiName, $param );
+}    
+
+// ============================================================================
+// ================ Layout Procedures for xray_shader Parameters ==============
+// ============================================================================
+// Each of these procedures takes 2 arguments:
+//	$plug  = "node.attr" 
+//	$param = a string array containing the parameter name and description:
+//		[0] = attribute name
+//		[1] = xray_shader parameter type 
+//		[2] = UI Name
+//		[3] = default_value
+//		[...] = extra attributes
+// ============================================================================
+
+//
+// Layout a boolean attribute (code borrowed from AEnewBooleanGroup.mel)
+//
+global proc string AExray_shader_BoolLayout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl = `formLayout`;
+    checkBoxGrp -ncb 1
+                -ann $param[0]
+                valueFld;
+    checkBoxGrp -e -l1 $uiName valueFld;
+    formLayout -e
+	    -af valueFld top 0
+	    -af valueFld left 0
+	    -af valueFld right 0
+	    -af valueFld bottom 0
+	    $createdControl;
+    connectControl -in 2 valueFld $plug;
+    if( $param[3] == "read_only" )
+   		checkBoxGrp -e -editable false valueFld;
+    setParent ..;
+    return $createdControl;
+}
+
+// Layout an integer attribute (code borrowed from AEnewInt.mel)
+//
+global proc string AExray_shader_IntLayout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl = `attrFieldSliderGrp 
+                               -l $uiName
+                               -ann $param[0]
+                               -hideMapButton 1
+                               -attribute $plug`;
+                               
+    if( $param[3] == "read_only" )
+   		attrFieldSliderGrp -e -editable false $createdControl;
+   		
+    return $createdControl;
+}
+
+// Layout a float attribute (code borrowed from AEnewFloat.mel)
+//
+global proc string AExray_shader_FloatLayout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl =  `attrFieldSliderGrp -l $uiName
+                               -ann $param[0]
+                               -hideMapButton 1
+                               -attribute $plug`;
+
+    if( $param[3] == "read_only" )
+   		attrFieldSliderGrp -e -enable false $createdControl;
+   		
+    return $createdControl;                               
+}
+
+// Layout a string attribute (code borrowed from AEnewString.mel)
+//
+global proc string AExray_shader_StringLayout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl = `textFieldGrp -l $uiName -ann $param[0]`;
+    connectControl -index 2 $createdControl $plug;
+
+    if( $param[3] == "read_only" )
+   		textFieldGrp -e -editable false $createdControl;
+
+    return $createdControl;
+}
+
+// Layout a vector2 attribute
+//
+global proc string AExray_shader_Vector2Layout( string $plug, string $uiName, string $param[] )
+{
+    string $cName = "Vec2";
+    string $createdControl;
+    $createdControl = `columnLayout -adj true`;
+    floatFieldGrp -l $uiName
+                  -ann $param[0]
+                  -numberOfFields 2
+                  -cw3 132 100 100
+                  $cName;
+	connectControl -index 2 $cName ($plug+"X");
+	connectControl -index 3 $cName ($plug+"Y");
+    setParent ..;
+    return $createdControl;
+}
+
+// Layout a vector3 attribute
+//
+global proc string AExray_shader_Vector3Layout( string $plug, string $uiName, string $param[] )
+{
+    string $cName = "Vec3";
+    string $createdControl;
+    $createdControl = `columnLayout -adj true`;
+    floatFieldGrp -l $uiName
+                  -ann $param[0]
+                  -numberOfFields 3
+                  -cw4 132 67 66 67
+                  $cName;
+	connectControl -index 2 $cName ($plug+"X");
+	connectControl -index 3 $cName ($plug+"Y");
+	connectControl -index 4 $cName ($plug+"Z");
+    setParent ..;
+    return $createdControl;
+}
+
+// Layout a vector4 attribute
+//
+global proc string AExray_shader_Vector4Layout( string $plug, string $uiName, string $param[] )
+{
+    string $cName = "Vec4";
+    string $createdControl;
+    $createdControl = `columnLayout -adj true`;
+    floatFieldGrp -l $uiName
+                  -ann $param[0]
+                  -numberOfFields 4
+                  -cw5 132 50 50 50 50
+                  $cName;
+	connectControl -index 2 $cName ($plug+"X");
+	connectControl -index 3 $cName ($plug+"Y");
+	connectControl -index 4 $cName ($plug+"Z");
+	connectControl -index 5 $cName ($plug+"W");
+    setParent ..;
+    return $createdControl;
+}
+
+// Layout a direction or position vector attribute
+//
+global proc string AExray_shader_DirectionLayout( string $plug, string $uiName, string $param[] )
+{
+    global int $gAExray_shader_iLayout;      // IN: AE template instance id
+
+    // Create the control.
+    //   We pass the attribute name to our callback procedures by
+    //   embedding it in the control name.
+    string $sAttrName   = `substitute "^[^.]*\\." $plug ""`;
+    string $sArg        = $gAExray_shader_iLayout + " " + $sAttrName;
+    string $sControlRel = "cgfxDirection_" + $sAttrName;
+    string $sControlAbs = 
+        `textFieldGrp -l $uiName
+                      -cc ( "AExray_shader_DirectionText " + $sArg + " \"#1\"" )
+                      -ann ( $param[0] + " (RMB to connect/disconnect)" )
+                      $sControlRel`;
+
+    // Create popup menu.
+    string $s = `popupMenu -postMenuCommand ( "AExray_shader_DirectionPopup " + $sArg )
+                           dirPopup`;
+
+    // Set the text of the control.
+    evalDeferred ( "AExray_shader_DirectionUpdate " + $sArg );
+
+    return $sControlAbs;
+}                                      // AExray_shader_DirectionLayout
+
+// Layout a color3 attribute (code borrowed from AEnewColor.mel)
+//
+global proc string AExray_shader_Color3Layout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl = `attrColorSliderGrp -l $uiName
+                               -ann $param[0]
+                               -showButton 0
+                               -attribute $plug`;
+
+     if( $param[3] == "read_only" )
+   		attrColorSliderGrp -e -editable false $createdControl;
+    
+    return $createdControl;
+}                                      // AEcgfxColor3Layout
+
+// Layout a color4 attribute 
+//
+global proc string AExray_shader_Color4Layout( string $plug, string $uiName, string $param[] )
+{
+    string $createdControl = `columnLayout -adj true`;
+    attrColorSliderGrp -l $uiName
+                       -ann ( $param[0] + "(rgb)" )
+                       -showButton 0
+                       -attribute $plug;
+
+    // We just know that the 4th element will be in ($plug + "Alpha");
+    attrFieldSliderGrp -l "(alpha)"
+                       -ann ( $param[0] + "(a)" )
+                       -hideMapButton 1
+                       -attribute ( $plug + "Alpha" );
+
+    separator -style none;
+    setParent ..;
+    return $createdControl;
+}                                      // AEcgfxColor4Layout
+
+// Layout a matrix attribute
+global proc string AExray_shader_MatrixLayout( string $plug, string $uiName, string $param[] )
+{
+    // TODO: Allow user to connect another node's matrix output
+    //       to our shader's matrix input.
+    return "";
+}                                      // AExray_shader_MatrixLayout
+
+// Layout a texture attribute
+global proc string AExray_shader_TextureLayout( string $plug, string $uiName, string $param[] )
+{	
+    string $attrType = `getAttr -type $plug`;
+    if( $attrType == "float3" )
+    {
+		// Textures are specified as file texture nodes
+		return `attrNavigationControlGrp -l $uiName 
+										-ann $param[0] 
+										-attribute $plug`;
+	}
+	else
+	{
+		// Textures are specified as filename string attributes 
+		string $node_name   = `match "^[^.]*" $plug`;
+		string $sAttrName   = `substitute "^[^.]*\\." $plug ""`;
+		string $sControlRel = "cgfxFile_" + $sAttrName;
+		string $sControlAbs = `rowLayout -nc 3 $sControlRel`;
+
+		string $sDesc = $param[0] + " " + interToUI( $param[1] );
+		AExray_shader_fileNameControls( $node_name,       // node name 
+		                            $sAttrName,           // attribute name
+									$uiName,              // label
+									$sDesc,               // annotation
+									"dds" ,               // file classification
+                                    "/textures" );	      // project directory
+		connectControl -fileName tfFileName $plug;
+
+        string $sCmd = "xray_shader_material -color_attribute_name "+$node_name;
+        string $color_attribute_name = eval($sCmd);
+    
+        // Text field
+        if($color_attribute_name == $sAttrName || $param[3] == "read_only")
+        {
+    		textField -e -editable false tfFileName;
+    		if( `symbolButton -q -exists "tfSelectButton"` )
+                symbolButton -e -enable false tfSelectButton;
+    	}
+		
+		setParent ..;
+		return $sControlAbs;
+	}
+}                                      // AExray_shader_TextureLayout
+
+// Layout an attribute that is not to be displayed.
+global proc string AExray_shader_SuppressLayout( string $plug, string $uiName, string $param[] )
+{
+    return "";
+}                                      // AExray_shader_SuppressLayout
+
+// Layout an attribute of a type for which UI support has not yet been implemented.
+global proc string AExray_shader_UnimplementedLayout( string $plug, string $uiName, string $param[] )
+{
+    return `text -l $uiName
+                 -enable 0
+                 -ann $param[1]`;
+}     
+
+////////////////////////////////////////////////////////////////////////
+//                       File browser controls                        //
+////////////////////////////////////////////////////////////////////////
+
+// Create controls for a file name attribute. 
+global proc AExray_shader_fileNameControls( string $node_name,
+                                           string $sAttrName,
+                                           string $sLabel,
+                                           string $sAnnotation,
+                                           string $sFileClassification,
+                                           string $projectDir )
+{
+    // Label
+    text -l $sLabel -ann $sAnnotation;
+
+    string $sCmd = "xray_shader_material -color_attribute_name "+$node_name;
+    string $color_attribute_name = eval($sCmd);
+
+    // Text field
+    if($color_attribute_name == $sAttrName)
+    {
+        textField -ann $sAnnotation tfFileName;
+        text -l "Color" -ann $sAnnotation;
+    }
+    else
+    {
+        textField -ann $sAnnotation tfFileName;
+    
+        // Button to invoke file browser dialog
+        string $sArgs = $node_name +
+                        " " + $sAttrName +
+                        " " + $sFileClassification +
+                        " \"" + $projectDir + "\" ";
+        symbolButton -image "navButtonBrowse.png" 
+                     -c ( "AExray_shader_fileBrowser " + $sArgs )
+                     -ann $sAnnotation tfSelectButton;
+    }
+}                                      // AExray_shader_fileNameLayout
+
+
+// Callback on button click to invoke file browser dialog.
+global proc AExray_shader_fileBrowser( string $sNodeName,
+                                      string $sAttrName,
+                                      string $sFileClassification,
+                                      string $projectDir )
+{
+    // Determine initial directory for file browser.
+    string $sWorkspace = `workspace -q -fn`;
+    setWorkingDirectory $sWorkspace $sFileClassification "CgFX";
+
+    // Start in current file's directory if possible. 
+    string $sOldDir = `getAttr ( $sNodeName + "." + $sAttrName )`;
+    $sOldDir = `match ".*/" $sOldDir`; 
+    
+    // If there isn't a current directory, use the project dir 
+    if( $sOldDir == "")
+		$sOldDir = $sWorkspace + $projectDir;
+		
+    if ( $sOldDir != "" &&
+         $sOldDir != `workspace -q -dir` &&
+         `file -q -ex $sOldDir` &&
+         !catch( `workspace -dir $sOldDir` ) )
+    {
+        retainWorkingDirectory( $sOldDir );
+        setWorkingDirectory $sWorkspace $sFileClassification "CgFX";
+    }
+
+    // Set up args for callback.
+    //   In addition to the args we provide, the fileBrowser will 
+    //   append two more: the chosen file name, and file type.
+    string $sArgs = $sNodeName + " " + $sAttrName;
+
+    // Invoke the file browser dialog.
+    fileBrowser( "AExray_shader_fileChoice " + $sArgs, "Open", "", 0 );
+}                                      // AExray_shader_fileBrowser
+
+
+// Callback when user clicks the "Open" button in the file browser
+//   dialog, or changes the text in the file name text field.
+global proc AExray_shader_fileChoice( string $sNodeName,
+                                     string $sAttrName,
+                                     string $sFile,
+                                     string $sFileType )
+{
+    // Save the current working directory so the file browser will
+    // start here next time.
+    string $currentDir = `workspace -q -dir`;
+    retainWorkingDirectory( $currentDir );
+
+    // Load shader or set attribute.
+    if ( $sAttrName == "shader" )
+        AExray_shader_shaderLoad( $sNodeName, $sFile );
+    else
+    {
+        string $sCmd = "setAttr -type \"string\" " +
+                        $sNodeName + "." + $sAttrName +
+                        " \"" + $sFile + "\"";
+        evalDeferred $sCmd;
+    }
+}                                      // AExray_shader_fileChoice
+
+////////////////////////////////////////////////////////////////////////
+//                   Hide Extra Attributes Panel                      //
+////////////////////////////////////////////////////////////////////////
+
+global proc AExray_shader_suppressExtraNew()
+{
+    string $sExtraParent = `setParent ..`;
+    string $sa[] = `layout -q -ca $sExtraParent`;
+    string $sExtra;
+    // Bug 261197: label string may be localized, look up the localized value 
+    // Beware, the resource format or id could change some day. 
+    string $extraLabel = `uiRes("s_TPStemplateStrings.rExtraAttributes")`;
+    for ( $sExtra in $sa )
+    {
+        if ( `objectTypeUI -isType frameLayout $sExtra` &&
+             `frameLayout -q -l $sExtra` == $extraLabel )
+        {
+            frameLayout -e -manage 0 $sExtra;
+            break;
+        }
+    }
+}                                      // AEcgfxShader_suppressExtraNew
+
+global proc AExray_shader_suppressExtraReplace()
+{
+}
+
+////////////////////////////////////////////////////////////////////////
+//                         The Main Template                          //
+////////////////////////////////////////////////////////////////////////
+
+global proc AExray_shaderTemplate ( string $nodeName )
+{
+	AEswatchDisplay $nodeName;
+	editorTemplate -beginScrollLayout;
+		editorTemplate -beginLayout "GSC XRay Shader Common" -collapse 0;
+			editorTemplate -addControl "color";
+			editorTemplate -addControl "transparency";
+			editorTemplate -addControl "double_sided";
+		editorTemplate -endLayout;
+
+        string $layput_name;        
+
+        editorTemplate -beginLayout "XRay Material" -collapse false;        
+            editorTemplate -callCustom
+     		        "AExray_shader_materialNew" 
+					"AExray_shader_materialReplace" 
+					"xray_render_material";
+            editorTemplate -callCustom
+     		        "AExray_shader_descriptionNew" 
+					"AExray_shader_descriptionReplace"
+					"description";
+			editorTemplate -callCustom
+     		        "AExray_shader_refreshNew" 
+					"AExray_shader_refreshReplace" 
+					"xray_render_material";
+		editorTemplate -endLayout;
+        
+        editorTemplate -beginLayout "XRay Material Parameters" -collapse false;
+            editorTemplate -callCustom
+                   AExray_shader_paramLayout
+                   AExray_shader_paramLayout
+                   "";
+        editorTemplate -endLayout;
+
+		AEdependNodeTemplate $nodeName;
+	
+    	 // Hide "Extra Attributes" UI for dynamic attributes.
+        editorTemplate -addExtraControls;   
+        editorTemplate -callCustom AExray_shader_suppressExtraNew
+                                   AExray_shader_suppressExtraReplace;
+        string $attr, $attrs[];
+        $attrs = eval( "listAttr -ud " + $nodeName );
+        for ( $attr in $attrs ) 
+            editorTemplate -suppress $attr;
+
+    	
+	    editorTemplate -endScrollLayout;
+};

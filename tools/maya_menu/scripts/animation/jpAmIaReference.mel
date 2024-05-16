@@ -1,0 +1,80 @@
+//James Parks  060205
+//jpAmIaReference.mel
+
+//This script determines whether a selected object is referenced from a file.
+//Then it goes and finds whether it was referenced with namespaces or with prefixes.
+//If referenced with namespaces the namespace is returned.
+//If referenced with prefixes the prefix is then found and returned.
+
+
+global proc string jpAmIaReference(string $selected)
+{
+if($selected == "")
+	return "0";
+
+int $refTest = catchQuiet(`reference -q -f`);
+if ($refTest == 0)
+{
+	///////////////////
+	//Find the filename
+	///////////////////
+	string $refFile = `reference -q -f`;
+	string $tokRefFile[];
+	tokenize $refFile "/" $tokRefFile;
+
+	//////////////////////
+	//Is it a namespace? Tokenize for ":" in the namespace
+	//////////////////////
+	string $refNodes[] = `reference -f $refFile -q -n`;
+	string $tokNameSpace[];
+	int $NS_tokens = `tokenize $refNodes[0] ":" $tokNameSpace`;
+	
+	///////////////////
+	//Find the Prefix by comparing the first and last node names starting from the front
+	///////////////////
+	string $prefix = "";
+	int $firstNodeSize = `size($refNodes[0])`;
+
+	for($i=1; $i <= $firstNodeSize; $i++)
+	{
+		int $refSize = `size($refNodes)`;
+		string $subStringOne = `substring $refNodes[0] 1 $i`;
+		//string $subStringTwo = `substring $refNodes[2] 1 $i`;
+		string $subStringTwo = `substring $refNodes[($refSize - 1)] 1 $i`;
+		print ($subStringOne + " || " + $subStringTwo + "\n");
+
+		if($subStringOne == $subStringTwo)
+			$prefix = `substring $refNodes[0] 1 $i`;
+
+
+		//int $isSamePrefix = `strcmp $subStringOne $subStringTwo`;
+		//if($isSamePrefix != 0)
+		//{
+		//	$prefix = `substring $refNodes[0] 1 ($i-4)`;
+		//}//end if
+	}//end for
+
+	//Return the appropriate response
+
+	if ($NS_tokens >  1)
+	{
+		print ("I am a reference. My name space is " + $tokNameSpace[0]);
+		return ($tokNameSpace[0] + ":");
+	}//end if
+	else if ($prefix != "")
+	{
+		print ("I am a reference. My prefix is " + $prefix);
+		return $prefix;
+	}//end if
+	else
+	{
+		print "I am _NOT_ a reference";
+		return "0";
+	}//end else
+}//end if
+else
+{
+	print "I am _NOT_ a reference";
+	return "0";
+}//end else
+}//end proc jpAmIaReference

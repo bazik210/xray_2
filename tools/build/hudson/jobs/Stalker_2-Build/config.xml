@@ -1,0 +1,516 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<matrix-project>
+  <actions/>
+  <description></description>
+  <logRotator>
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>32</numToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <axes>
+    <axis>
+      <name>BuildCompiler</name>
+      <values>
+        <string>MSVC</string>
+      </values>
+    </axis>
+    <axis>
+      <name>BuildConfiguration</name>
+      <values>
+        <string>Debug(static)</string>
+        <string>Debug</string>
+        <string>Release(static)</string>
+        <string>Release</string>
+        <string>Master_Gold</string>
+      </values>
+    </axis>
+    <axis>
+      <name>BuildPlatform</name>
+      <values>
+        <string>Win32</string>
+        <string>x64</string>
+        <string>Xbox_360</string>
+        <string>PS3_SNC</string>
+      </values>
+    </axis>
+  </axes>
+  <combinationFilter>BuildCompiler==&quot;MSVC&quot; &amp;&amp; ( BuildPlatform==&quot;Win32&quot; || BuildPlatform==&quot;x64&quot; || (BuildPlatform==&quot;Xbox_360&quot; &amp;&amp; (BuildConfiguration==&quot;Debug(static)&quot; || BuildConfiguration==&quot;Release(static)&quot; || BuildConfiguration==&quot;Master_Gold&quot;)) || (BuildPlatform==&quot;PS3_SNC&quot; &amp;&amp; (BuildConfiguration==&quot;Debug(static)&quot; || BuildConfiguration==&quot;Release(static)&quot; || BuildConfiguration==&quot;Master_Gold&quot;)) )</combinationFilter>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@SETLOCAL   ENABLEDELAYEDEXPANSION
+
+@rem    -----------------         format args       -----------------
+
+@set configuration_arg=%BuildConfiguration:_= %
+@set configuration_arg=%configuration_arg:-=,%
+@set platform_arg=%BuildPlatform:_= %
+
+@rem     ---------        make static_part and debug part -----------------                 
+@set sub_string_string=%configuration_arg%
+@set sub_string_search=debug
+@call :function_sub_string
+
+@set debug_part=
+@if &quot;%sub_string_result%&quot;==&quot;1&quot; @set debug_part=-debug
+
+@set sub_string_string=%configuration_arg%
+@set sub_string_search=static
+@call :function_sub_string
+
+@set static_part=-dynamic
+@if &quot;%sub_string_result%&quot;==&quot;1&quot; @set static_part=-static
+
+@if &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @(
+   @set static_part=
+)
+@if &quot;%platform_arg%&quot;==&quot;PS3 SNC&quot; @(
+   @set static_part=
+)
+
+@if &quot;%configuration_arg%&quot;==&quot;Master Gold&quot; @(
+   @set static_part=-gold
+)
+
+@set build_maya=0
+@rem     ------------ make project_name and binary_name ------------
+
+@set compiler_path=&quot;%vs90comntools%\..\ide\devenv.com&quot;
+
+@if &quot;%platform_arg%&quot;==&quot;Win32&quot; @(
+   @set project_name=stalker2 - PC - Windows
+   @set run_tests=1
+   @set platform_in_binary_name=win32
+   @set ext_name=exe
+
+   @if &quot;%configuration_arg%&quot;==&quot;Release&quot; @(
+     @set build_maya=1
+   )
+)
+
+@if &quot;%platform_arg%&quot;==&quot;x64&quot; @(
+   @set project_name=stalker2 - PC - Windows
+   @set run_tests=1
+   @set platform_in_binary_name=win64
+   @set ext_name=exe
+
+   @if &quot;%configuration_arg%&quot;==&quot;Release&quot; @(
+     @set build_maya=1
+   )
+)
+
+@if &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @(
+   @set project_name=stalker2 - Xbox 360
+   @set run_tests=0
+   @set platform_in_binary_name=xbox360
+   @set ext_name=xex
+)
+
+@if &quot;%platform_arg%&quot;==&quot;PS3 SNC&quot; @(
+   @set compiler_path=&quot;%SN_COMMON_PATH%\VSI\bin\vsibuild.exe&quot;
+   @set project_name=stalker2 - PS3
+   @set run_tests=0
+   @set platform_in_binary_name=ps3-snc
+   @set ext_name=ppu.self
+)
+
+@rem     -----------------         binary name        -----------------                 
+
+@set binary_name=stalker2-%platform_in_binary_name%%static_part%%debug_part%.%ext_name%
+
+@rem     -----------------         compile binary         -----------------                 
+
+@set build_action=Build
+@if defined rebuild set build_action=Rebuild
+
+@set platform_in_path=%platform_arg%
+@if &quot;%platform_arg%&quot;==&quot;PS3 SNC&quot; @(
+  @set platform_in_path=PS3
+)
+
+@set trunk_path=%hudson_home%\jobs\Stalker_2-Polling\workspace
+
+@set path_to_exe=%trunk_path%\binaries\!platform_in_path!
+
+@del &quot;!path_to_exe!\!binary_name!&quot;
+
+!compiler_path! &quot;%trunk_path%\sources\xray v2.0.sln&quot; /%build_action% &quot;%configuration_arg%|%platform_arg%&quot; /project &quot;%project_name%&quot;
+@if not &quot;!errorlevel!&quot;==&quot;0&quot; @(
+  @goto:eof
+)
+
+@if &quot;!build_maya!&quot;==&quot;1&quot; @(
+  !compiler_path! &quot;%trunk_path%\sources\xray v2.0.sln&quot; /Rebuild &quot;%configuration_arg%|%platform_arg%&quot; /project &quot;maya&quot;
+)
+
+@if not &quot;!errorlevel!&quot;==&quot;0&quot; @(
+  @goto:eof
+)
+
+@rem     -----------------   check if exe is built -----------------                 
+
+@if not exist &quot;!path_to_exe!\!binary_name!&quot; @(
+@echo Error, binary is not built: &quot;!path_to_exe!\!binary_name!&quot;
+@set errorlevel=1
+@goto:eof
+)
+
+@rem     -----------------         finger print         -----------------                 
+
+@set do_finger_print=1
+
+@if &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @(
+   @set do_finger_print=0
+)
+
+@if &quot;%platform_arg%&quot;==&quot;PS3 SNC&quot; @(
+   @set do_finger_print=0
+)
+
+@set dll_binary_name=
+
+@if &quot;%do_finger_print%&quot;==&quot;1&quot; @(
+
+   @echo starting finger-print:
+   @set dll_arg=
+
+   @if &quot;%static_part%&quot;==&quot;-dynamic&quot; @(
+      @set dll_binary_name=xray_engine_pc%debug_part%.dll
+      @set dll_arg=;%path_to_exe%\!dll_binary_name!
+   )
+
+   @echo file=!path_to_exe!\!binary_name!!dll_arg!
+   @echo write=Build %Build_Number% %Build_Id%
+
+   @set file_with_fingerprint=D:\Hudson\file_with_fingerprint.txt
+   @del &quot;!file_with_fingerprint!&quot;
+   @echo Fingerprint_Build_Number=%Build_Number% &gt; !file_with_fingerprint!
+
+   @echo executing command: &quot;%hudson_home%\finger_printer\xray_finger_printer.exe&quot; -file=&quot;!path_to_exe!\!binary_name!!dll_arg!&quot; -write=&quot;Build %Build_Number% %Build_Id%&quot;
+
+   &quot;%hudson_home%\finger_printer\xray_finger_printer.exe&quot; -file=&quot;!path_to_exe!\!binary_name!!dll_arg!&quot; -write=&quot;Build %Build_Number% %Build_Id%&quot; -max_resources_size=0 -no_warning_on_page_file_size
+ 
+  @if not &quot;!errorlevel!&quot;==&quot;0&quot; @(
+      @goto:eof
+  )
+)
+
+@rem     -----------------         protection         -----------------                 
+
+@if defined do_protection @(
+
+   @set do_protection=1
+
+   @if &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @(
+      @set do_protection=0
+   )
+
+   @if &quot;!do_protection!&quot;==&quot;1&quot; @(
+      @echo protecting binaries:
+ 
+      @if not &quot;!dll_binary_name!&quot;==&quot;&quot; @(
+         @&quot;%hudson_home%\upx\upx.exe&quot; -1 &quot;%path_to_exe%\!dll_binary_name!&quot;
+      )
+
+      @&quot;%hudson_home%\upx\upx.exe&quot; -1 &quot;!path_to_exe!\!binary_name!&quot;
+   )
+
+)
+
+@rem     -----------------         run tests         -----------------                 
+
+@if &quot;%run_tests%&quot;==&quot;0&quot; @goto:label_tests_end
+
+@if &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @(
+
+  @set xbox_test_failed=0
+
+  @echo running tests in normal mode:
+  @set function_run_tests_on_xbox_args=-run_tests_and_exit -terminate_on_timeout=600
+  @call :function_run_tests_on_xbox
+
+  @echo running tests with -core_affinity=1
+  @set function_run_tests_on_xbox_args=-run_tests_and_exit -core_affinity=1 -terminate_on_timeout=600
+  @call :function_run_tests_on_xbox
+
+  @echo running tests with -debug_single_thread:
+  @set function_run_tests_on_xbox_args=-run_tests_and_exit -debug_single_thread -terminate_on_timeout=600
+  @call :function_run_tests_on_xbox
+
+  @if not &quot;!xbox_test_failed!&quot; == &quot;0&quot; @(
+  @set errorlevel=1
+  @echo xbox tests failed
+  @goto :eof
+  )
+
+) else @(
+  @pushd !cd!
+  @cd /d !path_to_exe!
+
+  @echo running tests in normal mode:
+  @&quot;!cd!\!binary_name!&quot; -run_tests_and_exit -no_warning_on_page_file_size
+  @if not &quot;!errorlevel!&quot;==&quot;0&quot; @( @set tests_errorlevel=!errorlevel! )
+
+  @echo running tests with -core_affinity=1
+  @&quot;!cd!\!binary_name!&quot; -run_tests_and_exit -core_affinity=1 -no_warning_on_page_file_size
+  @if not &quot;!errorlevel!&quot;==&quot;0&quot; @( @set tests_errorlevel=!errorlevel! )
+
+@rem   @echo running tests with -debug_single_thread:
+@rem   @&quot;!cd!\!binary_name!&quot; -run_tests_and_exit -debug_single_thread -no_warning_on_page_file_size
+@rem   @if not &quot;!errorlevel!&quot;==&quot;0&quot; @( @set tests_errorlevel=!errorlevel! )
+
+  @popd
+)
+
+@if not &quot;!tests_failed!&quot;==&quot;&quot; @( 
+  @echo tests_failed with code !tests_errorlevel!
+) else @(
+  @echo tests succeeded
+)
+
+:label_tests_end
+
+@rem     -----------------         running editor test         -----------------                 
+
+@if &quot;%static_part%&quot;==&quot;-dynamic&quot; @(
+
+  @for %%e in (1 2) do @(
+
+  @pushd !cd!
+  @cd /d !path_to_exe!
+
+  @if &quot;%%e&quot;==&quot;1&quot; @( 
+     @rmdir /S /Q &quot;!cd!\..\..\resources\platforms&quot;
+  )
+
+  @del wpf_controls.dll
+  @echo testing editor...
+  &quot;!cd!\!binary_name!&quot; -no_splash_screen -editor -world=build_station_test_project -terminate_on_timeout=1200 -no_warning_on_page_file_size -suppress_debug_window_on_crash
+  @set editor_test_error=!errorlevel!
+  @echo editor_test_error=!editor_test_error!
+
+  @if &quot;!editor_test_error!&quot;==&quot;0&quot; @( @echo PROJECT LOADED SUCCESSFULLY  )
+  @if &quot;!editor_test_error!&quot;==&quot;100&quot; @( 	@echo PROJECT COULDN&apos;T BE LOADED OR FOUND  )
+  @if &quot;!editor_test_error!&quot;==&quot;101&quot; @( 	@echo NOT ALL OBJECTS WERE LOADED  )
+  @if &quot;!editor_test_error!&quot;==&quot;100000&quot; @( @echo APPLICATION WAS TERMINATED )
+  @if &quot;!editor_test_error!&quot;==&quot;100100&quot; @( @echo PROJECT COULDN&apos;T BE LOADED, APPLICATION WAS TERMINATED BY TIMEOUT )
+  @if &quot;!editor_test_error!&quot;==&quot;100101&quot; @( @echo NOT ALL OBJECTS WERE LOADED, APPLICATION WAS TERMINATED BY TIMEOUT )
+
+  @if not &quot;!editor_test_error!&quot;==&quot;0&quot; @( exit /B %editor_test_error% )
+  @popd
+
+  )
+)
+
+@rem     -----------------         burn_iso         -----------------                 
+
+@if defined burn_iso @(
+
+@if not &quot;%platform_arg%&quot;==&quot;Xbox 360&quot; @goto:eof
+@if not &quot;%configuration_arg%&quot;==&quot;Master Gold&quot; @goto:eof
+
+@set curl_path=d:\hudson\curl
+@set path_to_work_dir=.
+@set post_commit_helper=%path_to_work_dir%\post_commit_helper
+@set hudson_url=http://BuildStation.gsc-game.kiev.ua
+@set hudson_user=buildstation
+@set hudson_password=buildpass
+
+@echo calling burn_iso project
+
+!curl_path!\curl.exe -s -S -c temp_cookies -G -d j_username=!hudson_user! -d j_password=!hudson_password! !hudson_url!/j_acegi_security_check
+!curl_path!\curl.exe -s -S -b temp_cookies -G !hudson_url!/job/Stalker_2-Burn_XBox_ISO_Impl/build
+)
+
+@goto:eof
+
+
+@rem     -----------------         functions         -----------------
+
+@rem          function_run_tests_on_xbox  (set function_run_tests_on_xbox_args)
+:function_run_tests_on_xbox
+
+  @echo -------------------------------------------
+  @set xbox_debug_client_utility=&quot;%hudson_home%\xbox_debug_client\xbox_debug_client.exe&quot;
+  @set sleep_utility=&quot;%hudson_home%\sleep\sleep.exe&quot;
+
+  @set xbox_stations=x-dev boxer
+  @set image_dir=devkit:\xray v2.0
+  @set src_xex=!path_to_exe!\!binary_name!
+  @set dest_xex=%image_dir%\!binary_name!
+  @set src_xdb=!path_to_exe!\stalker2-xbox360%static_part%%debug_part%.xdb
+  @set dest_xdb=%image_dir%\stalker2-xbox360%static_part%%debug_part%.xdb
+  @set src_exe=!path_to_exe!\stalker2-xbox360%static_part%%debug_part%.exe
+  @set dest_exe=%image_dir%\stalker2-xbox360%static_part%%debug_part%.exe
+  @set src_test_resources=%trunk_path%\resources\test
+  @set dest_test_resources=%image_dir%\resources\test
+
+  @set error_log_src=%image_dir%\stalker2.log
+  @set error_log_dest=stalker2.log
+  @set exit_code_src=%image_dir%\stalker2.exit_code
+  @set exit_code_dest=stalker2.exit_code
+
+  @set path_to_xdk=&quot;C:\Program Files (x86)\Microsoft Xbox 360 SDK\bin\win32&quot;
+
+  @for %%i in (%xbox_stations%) do @(
+    @echo trying to lock machine: %%i
+    @%path_to_xdk%\xbmanage.exe /lock /x %%i
+
+    @if &quot;!errorlevel!&quot;==&quot;0&quot; @(
+      @set ready_xbox=%%i
+      @goto :run_tests_xbox
+    ) else @(
+      @echo failed to lock machine %%i
+    )
+  )
+
+  @echo no xbox stations found for testing
+  @goto:eof
+
+  :run_tests_xbox
+  @set /a xbox_test_failed+=1
+
+  @echo found xbox for testing: %ready_xbox%
+  @%path_to_xdk%\xbreboot.exe /x %ready_xbox%
+  @if not &quot;!errorlevel!&quot;==&quot;0&quot; @(
+      @goto:unlock_xbox
+  )
+
+  @%path_to_xdk%\xbdel.exe /x %ready_xbox% &quot;%error_log_src%&quot;
+  @%path_to_xdk%\xbdel.exe /x %ready_xbox% &quot;%exit_code_src%&quot;
+  @del /Q &quot;%error_log_dest%&quot;
+  @del /Q &quot;%exit_code_dest%&quot;
+  @%path_to_xdk%\xbdel.exe /x %ready_xbox% &quot;%image_dir%\*.*&quot;
+@rem  @%path_to_xdk%\xbcp.exe /q /y /x %ready_xbox% &quot;%src_xdb%&quot; &quot;%dest_xdb%&quot;
+@rem  @%path_to_xdk%\xbcp.exe /q /y /x %ready_xbox% &quot;%src_exe%&quot; &quot;%dest_exe%&quot;
+
+  @%path_to_xdk%\xbcp.exe /q /y /x %ready_xbox% &quot;%src_xex%&quot; &quot;%dest_xex%&quot;
+
+  @%path_to_xdk%\xbcp.exe /q /y /r /x %ready_xbox% &quot;%src_test_resources%&quot; &quot;%dest_test_resources%&quot;
+
+  @pushd !cd!
+  @cd /d !path_to_xdk!
+
+  %xbox_debug_client_utility% -i=&quot;%dest_xex%&quot; -work_dir=&quot;%image_dir%&quot; -x=%ready_xbox% -c=&quot;!function_run_tests_on_xbox_args! -force_xbox_log -log_verbosity=warning&quot; -w=360
+
+  @popd
+  @if not &quot;!errorlevel!&quot;==&quot;0&quot; @(
+      @goto:unlock_xbox
+  )
+
+  @call :unlock_xbox  
+  @%sleep_utility% -time=5000
+  @%path_to_xdk%\xbcp /q /y /x %ready_xbox% &quot;%exit_code_src%&quot; &quot;%exit_code_dest%&quot;
+  @%path_to_xdk%\xbcp /q /y /x %ready_xbox% &quot;%error_log_src%&quot; &quot;%error_log_dest%&quot;
+  @type &quot;%error_log_dest%&quot;
+
+  @set /p exit_code= &lt; &quot;%exit_code_dest%&quot;
+  @echo exit_code=%exit_code%
+
+  @if &quot;!exit_code!&quot;==&quot;0&quot; @(
+    @set /a xbox_test_failed-=1
+  )
+
+@goto:eof
+:unlock_xbox
+  @%sleep_utility% -time=5000
+  @%path_to_xdk%\xbreboot.exe /x %ready_xbox%
+  @%sleep_utility% -time=10000
+  @%path_to_xdk%\xbmanage.exe /unlock /x %ready_xbox%
+@goto:eof
+
+
+@rem          function_sub_string  (set sub_string_string, sub_string_search)
+@rem          await result in sub_string_result
+:function_sub_string
+@set sub_string_result=0
+@set string_length_string=!sub_string_search!
+@call :function_string_length
+@set sub_string_search_length=!string_length_result!
+
+@set string_length_string=!sub_string_string!
+@call :function_string_length
+@set sub_string_string_length=!string_length_result!
+
+@for /L %%i in (0, 1, !sub_string_string_length!) do @(
+ @if /I &quot;!sub_string_string:~%%i,%sub_string_search_length%!&quot; == &quot;!sub_string_search!&quot; @set sub_string_result=1)
+
+@goto:eof
+
+@rem          function_string_length (set string_length_string)
+@rem          await result in string_length_result
+:function_string_length
+@set string_length_helper=!string_length_string!
+@set string_length_result=0
+:loop
+@if defined string_length_helper @ (@set string_length_helper=!string_length_helper:~1!&amp;@set /A string_length_result += 1&amp;@goto loop)
+@goto:eof</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.tasks.BuildTrigger>
+      <childProjects>Stalker_2-Publish-Helper</childProjects>
+      <threshold>
+        <name>SUCCESS</name>
+        <ordinal>0</ordinal>
+        <color>BLUE</color>
+      </threshold>
+    </hudson.tasks.BuildTrigger>
+    <hudson.plugins.emailext.ExtendedEmailPublisher>
+      <recipientList>dummy@gsc-game.kiev.ua</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>iassenev@gsc-game.kiev.ua ironnick@gsc-game.kiev.ua peacemaker@gsc-game.kiev.ua andy@gsc-game.kiev.ua lain@gsc-game.kiev.ua dimetcm@gsc-game.kiev.ua plecha@gsc-game.kiev.ua jes@gsc-game.kiev.ua rocksteady@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>dummy@gsc-game.kiev.ua bes@gsc-game.kiev.ua iassenev@gsc-game.kiev.ua ironnick@gsc-game.kiev.ua peacemaker@gsc-game.kiev.ua andy@gsc-game.kiev.ua lain@gsc-game.kiev.ua dimetcm@gsc-game.kiev.ua plecha@gsc-game.kiev.ua jes@gsc-game.kiev.ua rocksteady@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+      </configuredTriggers>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT&#xd;
+&#xd;
+Full log can be viewed by:&#xd;
+$BUILD_URL/console&#xd;
+Build log (last 250 lines):&#xd;
+$BUILD_LOG</defaultContent>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.locksandlatches.LockWrapper>
+      <locks>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Poll_Build_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Build_Publish_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>PostCommitHook_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+      </locks>
+    </hudson.plugins.locksandlatches.LockWrapper>
+  </buildWrappers>
+  <runSequentially>true</runSequentially>
+</matrix-project>

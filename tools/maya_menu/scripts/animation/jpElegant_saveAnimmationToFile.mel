@@ -1,0 +1,240 @@
+//James Parks
+//08-09-2004
+
+//Elegant save animation to file procedure for jpAnimWriter
+
+global proc jpElegant_saveAnimmationToFile(string $name, float $min, float $max, int $saveType, string $selected[], string $keyableAttrs[])
+{
+//stored as
+//obj#attr#time#value#inTangentType#outTangentType#inWeight#outWeight#inAngle#outAngle#weightedTangents#lockTangents
+//0    1    2     3          4           5             6         7       8      9            10              11
+// Sample:  6   187.7153882 clamped    clamped         1         1  80.33105156 80.33105156   0               1 //
+
+	global string $aWriterVerNum;
+	string $name = strip(`textFieldGrp -q -tx nameGrp`);
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	float $earliestTime = $min;
+	string $safeFileCommand;
+
+	int $reCreateKeyableAttrs = 0;
+
+	int $numOfAnimObjs = `size($selected)`;
+	if (`size($selected)` <= 0)
+		error "Nothing is currently selected. No file created, or action taken.";
+
+	//initialize the progress bars
+	global string $gMainProgressBar;
+	int $progress = 0;
+	int $curNumObj = 1;
+	progressWindow
+		-title "Writing Curves" 
+		-progress $progress 
+		-status "Writing: "
+		-min 0 
+		-max 100;
+	progressBar 
+		-edit
+		-beginProgress
+		-status "Writing Curves" 
+		-min 0 
+		-max 100
+		$gMainProgressBar;
+
+	//loop through all the selected objects getting information on the keyframes
+	for($obj in $selected)
+	{
+		$strippedObj = jpHandleReference_write($obj);
+
+
+		$safeFileCommand = ($safeFileCommand + "\n//Keys for " + $strippedObj + "\n$object = \"" + $strippedObj + "\";\n");
+		$safeFileCommand = ($safeFileCommand + "$object = jpHandleReference_read($object);\n\n");
+
+		if($keyableAttrs[0] == "" || $reCreateKeyableAttrs == 1)
+		{
+			$keyableAttrs = `listAttr -r -w -k -u -v -m -s $obj`;
+			$reCreateKeyableAttrs = 1;
+		}//end if
+	
+		float $startKeyValue[];
+		for($attr in $keyableAttrs)
+		{
+			if(!`attributeExists $attr $obj`)
+				continue;
+			selectKey -clear;
+			int $numOfKeys = `selectKey -add -k -t ($min + ":" + $max) ($obj + "." + $attr)`;
+			int $keyIndices[] = `keyframe -q -sl -iv`;
+			print $keyIndices;
+
+			if(`size($keyIndices)` > 0)
+			{
+				$startKeyValue = `keyframe -in $keyIndices[0] -q -vc ($obj + "." + $attr)`;
+				//what to do if you want to save curves instead of just keys
+				//make a key at the beginning and end of the range
+				if($saveType == 2)
+				{
+					float $startClipValue = `getAttr -t $min ($obj + "." + $attr)`;
+					float $endClipValue = `getAttr -t $max ($obj + "." + $attr)`;
+
+					$safeFileCommand = ($safeFileCommand + "//Start holding key for " + $obj + "." + $attr + " \n");
+					$safeFileCommand = ($safeFileCommand + "float $startValue = " + $startKeyValue[0] + ";\n");
+					$safeFileCommand = ($safeFileCommand + "float $placeValue = (`getAttr -t $cTime ($object + \"." + $attr + "\")` - $startValue);\n");
+					$safeFileCommand = ($safeFileCommand + "if(!`checkBoxGrp -q -v1 tvOffsets`) $placeValue = 0;\n\n");
+					$safeFileCommand = ($safeFileCommand + "jpRebuildKey($object, \"");
+					$safeFileCommand = ($safeFileCommand + $attr + "\", (");
+					$safeFileCommand = ($safeFileCommand + $min + "+ $placeTime), (" + $startClipValue + " + $placeValue), \"clamped\", \"clamped\", 1, 1, 0, 0, 0, 1);\n\n" );
+
+					$safeFileCommand = ($safeFileCommand + "//End holding key for " + $obj + "." + $attr + " \n"); 
+					$safeFileCommand = ($safeFileCommand + "float $startValue = " + $startKeyValue[0] + ";\n");
+					$safeFileCommand = ($safeFileCommand + "float $placeValue = (`getAttr -t $cTime ($object + \"." + $attr + "\")` - $startValue);\n");
+					$safeFileCommand = ($safeFileCommand + "if(!`checkBoxGrp -q -v1 tvOffsets`) $placeValue = 0;\n\n");
+					$safeFileCommand = ($safeFileCommand + "jpRebuildKey($object, \"");
+					$safeFileCommand = ($safeFileCommand + $attr + "\", (");
+					$safeFileCommand = ($safeFileCommand + $max + "+ $placeTime), (" + $endClipValue + " + $placeValue), \"clamped\", \"clamped\", 1, 1, 0, 0, 0, 1);\n\n");
+
+					$startKeyValue[0] = $startClipValue;
+				}//end if
+
+				$safeFileCommand = ($safeFileCommand + "float $startValue = " + $startKeyValue[0] + ";\n");
+				$safeFileCommand = ($safeFileCommand + "float $placeValue = (`getAttr -t $cTime ($object + \"." + $attr + "\")` - $startValue);\n");
+				$safeFileCommand = ($safeFileCommand + "if(!`checkBoxGrp -q -v1 tvOffsets`) $placeValue = 0;\n\n");
+				
+				//Loop through the keys in each attribute
+				for($key in $keyIndices)
+				{
+					string $keyInfo[] = jpGetInfoOnAKey($obj, $attr, $key);
+					print $keyInfo;
+					print "\n";
+
+					if(int($keyInfo[0]) < $earliestTime)
+						$earliestTime = $keyInfo[0];
+
+					$safeFileCommand = ($safeFileCommand + "jpRebuildKey($object, \"");	//procedure and object name
+					$safeFileCommand = ($safeFileCommand + $attr + "\", (");			//attribute
+					$safeFileCommand = ($safeFileCommand + $keyInfo[0] + " + $placeTime), (");	//time
+					$safeFileCommand = ($safeFileCommand + $keyInfo[1] + " + $placeValue), \"");	//value
+					$safeFileCommand = ($safeFileCommand + $keyInfo[2] + "\", \"");			//inTangentType
+					$safeFileCommand = ($safeFileCommand + $keyInfo[3] + "\", ");			//outTangentType
+					$safeFileCommand = ($safeFileCommand + $keyInfo[4] + ", ");			//inWeight
+					$safeFileCommand = ($safeFileCommand + $keyInfo[5] + ", ");			//outWeight
+					$safeFileCommand = ($safeFileCommand + $keyInfo[6] + ", ");			//inAngle
+					$safeFileCommand = ($safeFileCommand + $keyInfo[7] + ", ");			//outAngle
+					$safeFileCommand = ($safeFileCommand + $keyInfo[8] + ", ");			//weightedTangents
+					$safeFileCommand = ($safeFileCommand + $keyInfo[9] + ");\n");			//lockTangents
+				}//end for: keys
+			}//end if
+			$safeFileCommand = ($safeFileCommand + "\n");
+		}//end for: attributes
+
+		//progress the progress bars
+		selectKey -clear;
+		$progress = `linstep 0 $numOfAnimObjs $curNumObj` * 100;
+		progressWindow 
+			-edit
+			-progress $progress
+			-status ("Writing: " + $obj);
+		progressBar 
+			-edit
+			-progress $progress 
+			-status ("Writing: " + $obj)
+			$gMainProgressBar;
+		$curNumObj = $curNumObj + 1;
+	}//end for: objects
+	$safeFileCommand = $safeFileCommand + "\n}//end proc jpWriteAnim\n\njpWriteAnim();";
+
+	$safeFileCommand = ("float $placeTime = $cTime - $startTime;\n" + $safeFileCommand);
+	$safeFileCommand = ("float $startTime = " + $earliestTime + ";\n" + $safeFileCommand);
+	$safeFileCommand = ("float $cTime = `currentTime -q`;\n" + $safeFileCommand);
+	$safeFileCommand = ("global proc jpWriteAnim()\n{\n" + $safeFileCommand);
+	$safeFileCommand = ("//Elegant Saved Animation\n\n" + $safeFileCommand);
+	$safeFileCommand = ("//James Parks\n//This anim script generated by jpAnimWriter v" + $aWriterVerNum + "\n" + $safeFileCommand);
+
+	string $animsFolder = (`workspace -q -fn` + "\/data\/ANIMS\/" + $currentFolder + "/");
+	string $animFileName = ($name + ".ANIM");
+	string $thisAnimFile = ($animsFolder + $animFileName);
+
+	
+		if(`menuItem -q -cb overwrite` == 1)
+		{
+			//check if the file exists already and if the user wants to overwrite it
+			//then write the file and check again to make sure it exists
+			if(`filetest -r $thisAnimFile`)
+			{
+				int $pass = jpPasswordCheck();
+
+				if($pass == 1)
+				{
+					string $confirm = `confirmDialog 
+						-t "Overwrite File?" 
+						-ma "center" 
+						-m "This file already exists. Overwrite?" 
+						-b "Yes"
+						-b "No"
+						-db "No"`
+						;
+
+					if($confirm == "Yes")
+					{
+						$curAnimFile = `fopen $thisAnimFile "w+"`;
+						fprint $curAnimFile $safeFileCommand;
+						fclose $curAnimFile;
+
+						progressWindow -endProgress;
+						progressBar -edit -endProgress $gMainProgressBar;
+
+						if(`filetest -r $thisAnimFile`)
+						{
+							print ("\nAnimation saved to: " + $thisAnimFile);
+						}//end if: file was written
+						else
+						{
+							warning "An error has occured while saving your file. Perhaps it's a permissions problem?";
+						}//end else: file was written
+					}//end if: confirm overwrite
+				}//end if
+				else
+				{
+					warning "Password Failed";
+				}//end else: password check
+			}//end if: file already exists
+			else
+			{
+				$curAnimFile = `fopen $thisAnimFile "w+"`;
+				fprint $curAnimFile $safeFileCommand;
+				fclose $curAnimFile;
+
+				progressWindow -endProgress;
+				progressBar -edit -endProgress $gMainProgressBar;
+
+				if(`filetest -r $thisAnimFile`)
+				{
+					print ("\nAnimation saved to: " + $thisAnimFile);
+				}//end if: file was written
+				else
+				{
+					warning "An error has occured while saving your file. Perhaps it's a permissions problem?";
+				}//end else: file was written
+			}//end else
+		}//end if: overwrite switch
+		else
+		{
+			$curAnimFile = `fopen $thisAnimFile "w+"`;
+			fprint $curAnimFile $safeFileCommand;
+			fclose $curAnimFile;
+
+			progressWindow -endProgress;
+			progressBar -edit -endProgress $gMainProgressBar;
+
+			if(`filetest -r $thisAnimFile`)
+			{
+				print ("\nAnimation saved to: " + $thisAnimFile);
+			}//end if: file was written
+			else
+			{
+				warning "An error has occured while saving your file. Perhaps it's a permissions problem?";
+			}//end else: filw was written
+		}//end else: overwrite switch
+	
+
+	jpPopulateFileList();
+}//end proc Elegant_saveAnimationToFile

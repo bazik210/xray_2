@@ -1,0 +1,107 @@
+global proc RenameDuplicateNodes()
+{
+	int $makeSet = 0;
+	int $autoRename = 1;
+
+	ReportDuplicateNodes_DoIt($makeSet,$autoRename);
+}
+
+proc ReportDuplicateNodes_DoIt (int $makeSet, int $autoRename)
+{
+	string $dup, $dupList[] = ReportDuplicateNodes_FindDuplicates(), $newName, $nameOnly;
+	int $attempt, $depth=0, $maxDepth=0, $depths[];
+	int $i, $j;
+
+	if (($makeSet==1) && ($dupList[0]!=""))
+		sets -n ("Renaming_Set_" + size($dupList) + "_Items") $dupList;
+
+	if($autoRename==1)
+	{
+		$attempt=0;
+		if($dupList[0]!="")
+		{
+
+			for($i=0; $i<`size($dupList)`; $i++)
+			{
+				$dup = $dupList[$i];
+				$depth = ReportDuplicateNodes_GetDepth($dup);
+				$depths[$i]=$depth;
+				if($depth>$maxDepth) $maxDepth=$depth;
+			}
+
+			print ($maxDepth + "\n");
+
+			for($i=$maxDepth; $i>=0; $i--)
+			{
+				print($i + "\n");
+				for ($j=0; $j<`size($dupList)`; $j++)
+				{
+					$dup = $dupList[$j];
+					if($depths[$j]==$i)
+					{
+						if(`referenceQuery -inr $dup`==0)
+						{
+							$nameOnly=ReportDuplicateNodes_StripPath($dup);
+							$newName = $nameOnly + $attempt + "_Renamed";
+
+							while(`objExists $newName`==true)
+							{
+								$attempt++;
+								$newName=$nameOnly + $attempt;
+							}
+						}
+						rename $dup $newName;
+					}
+				}
+			}
+		}
+	}
+
+
+	if($autoRename==1)
+	{
+		$dupList = ReportDuplicateNodes_FindDuplicates();
+
+		if(`size($dupList)`>0)
+			ReportDuplicateNodes_DoIt($makeSet,$autoRename);
+	}
+}
+
+proc string[] ReportDuplicateNodes_FindDuplicates()
+{
+	int $numDups=0, $iDup=0, $d;
+//	string $dups[], $objs[] = `ls -r true`, $obj;
+	string $dups[], $objs[] = `ls -sl`, $obj;
+ls -sl -type transform
+help -doc setAttr
+ls -showType
+help setAttr;
+
+	for($obj in $objs)
+	{
+		$d = (ReportDuplicateNodes_GetDepth($obj) + "\n");
+
+		if($d>0)
+		{
+			$dups[$numDups++]=$obj;
+		}
+	}
+	return $dups;
+}
+
+proc string ReportDuplicateNodes_StripPath(string $object)
+{
+	int $items;
+	string $buffer[];
+
+	$items = `tokenize $object "|" $buffer`;
+	$object=$buffer[$items-1];
+
+	return $object;
+}
+
+proc int ReportDuplicateNodes_GetDepth(string $object)
+{
+	string $buffer[];
+	return (`tokenize $object "|" $buffer`-1);
+}

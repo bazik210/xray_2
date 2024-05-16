@@ -1,0 +1,29 @@
+global proc select_HardEdges()
+{
+//print "fHardEdgeSel;\n";
+
+//fSelectObjBorder;
+string $fDeSelect[] = `ls -sl -fl`;
+
+
+string $fStartSelect[] = `ls -sl -fl -o`;
+select $fStartSelect;
+ConvertSelectionToEdges;
+
+string $fSelectEdge[] = `ls -sl -fl`;
+string $fForEdge;
+select -cl;
+
+for ($fForEdge in $fSelectEdge)
+{
+string $HardTest[] = `polyInfo -ev $fForEdge`;
+if (endString (`strip  $HardTest[0]`,4) == "Hard")
+ {
+ select -add $fForEdge;
+ }
+}
+
+select -d $fDeSelect;
+
+hilite -r $fStartSelect;
+}

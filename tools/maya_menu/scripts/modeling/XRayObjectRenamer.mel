@@ -1,0 +1,18 @@
+global proc XRayObjectRenamer()
+{
+string $XRayObject_liste[] = `ls -sl`;
+string $XRayObject_objects;
+string $XRayObject_objectNewName = "v0";
+string $XRayObject_objectNewName2 = "lod0";
+
+	for ($XRayObject_objects in $XRayObject_liste)
+		{
+		group;
+		rename "group1" $XRayObject_objectNewName;
+        group;
+		rename "group1" $XRayObject_objectNewName2;
+        group;
+		rename "group1" $XRayObject_objects;
+		}
+	print ("SHAPE NAME : All Shapes renamed according to their transform \n");
+}

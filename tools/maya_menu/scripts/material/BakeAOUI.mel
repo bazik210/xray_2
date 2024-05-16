@@ -1,0 +1,837 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: BakeAO
+''    Author:  
+''    Last Updated: Sep 14, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/rendering/mental_ray/4399.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+/////////////////////////////////////////////////////////
+//Name:BakeAO.mel                                      //
+//Author: Pere Balsach                                 //
+//Date: 12th of July 2007                              //
+//Description: Bake ambient occlusion pass (Mental ray)//
+//Version: 2                                           //
+//                                                     //
+//New features: New method to bake Ambient Occlusion   //
+//Now you can use Ctrl_Occlusion shader to bake        //
+/////////////////////////////////////////////////////////
+
+BakeAOUI();
+
+global proc BakeAOUI()
+{
+    if (`window -ex bakeAO_tools`==1) {deleteUI bakeAO_tools;}
+		//removes window preferences
+		//windowPref -remove bakeAO_tools;
+		
+  	window -t "Bake AO Tools v 2.0" -tlb 1 -wh 455 178 bakeAO_tools;
+
+		columnLayout OutputLayout;
+		{
+		    frameLayout -l "Output File: " -w 445 -h 40 ;
+		    {
+  		         rowColumnLayout -numberOfRows 2 -rh 1 25 -rh 2 20;
+		         {
+				textFieldButtonGrp -cc "showNewPath" -bc "pb_getFileNamePath" -label "Destination: " -text "" -buttonLabel "Browse..." pathFieldGrp;
+		         }
+	                 setParent..;
+                    }
+                    setParent..;
+
+	         }
+	         setParent..;
+	         
+	        
+                //////////////////////////bookmarks section////////////////////////////////
+
+                columnLayout booksLayout;
+                {
+                   frameLayout -l "Bookmarks" -w 445 -h 20 -collapsable  true -collapse  true -preExpandCommand  "expandWin(1)" -preCollapseCommand  "collapseWin(1)";
+                   {
+                        rowColumnLayout -numberOfRows 4 -rh 1 20 -rh 2 60 -rh 3 20 -rh 4 20;
+                        {
+                            button -w 440 -l "Add Path to the List" -c "AddPaths";
+			    textScrollList -w 240 -h 180 -dcc "loadPath" pathList;
+                            button -bgc 1 1 1 -l "Save Paths" -c "savePaths";
+                            button -bgc 1 1 1 -l "Remove Selected Path" -c "removePath";
+                        }
+                        setParent..;
+                   }
+                   setParent..;
+                 }
+                 setParent..;
+                 
+                //////////////////////////Extended Occlusion section////////////////////////////////
+
+                columnLayout lightAO_Layout;
+                {
+                   frameLayout -l "Extended Occlusion (ctrl_occlusion)" -w 445 -h 20 -collapsable  true -collapse  true -preExpandCommand  "expandWin(2)" -preCollapseCommand  "collapseWin(2)";
+                   {
+                        rowColumnLayout -numberOfRows 4 -rh 1 20 -rh 2 80 -rh 3 80 -rh 4 80;
+                        {
+                            checkBoxGrp -v1 0 -l "Use ctrl_occlusion shader" -cc "enableExtendOcc" checkExtendOcc;
+
+                            //////////Sampling settings////////////////////////////
+                            frameLayout -mw 5 -bv 1 -bs "in" -l "Sampling" -w 245 -h 5 -collapsable  false -collapse  false;
+                            {
+                                rowColumnLayout -numberOfRows 2 -rh 1 20 -rh 2 20;
+                                {
+                                    floatSliderGrp -en 0 -l "num Samples:" -minValue 0 -maxValue 256 -value 32 -field true sampleSliderGrp;
+                                    floatSliderGrp -en 0 -l "spread angle:" -minValue 0 -maxValue 180 -value 88 -field true angleSliderGrp;
+                                }
+                                setParent..;
+                            }
+                            setParent..;
+
+                            //////////occlusion settings////////////////////////////
+                            frameLayout -bv 1 -bs "in" -l "Occlusion" -w 445 -h 5 -collapsable  false -collapse  false;
+                            {
+                                rowColumnLayout -numberOfRows 2 -rh 1 20 -rh 2 20;
+                                {
+                                    floatSliderGrp -en 0 -l "near clip:" -minValue 0.01 -maxValue 5 -value 0.01 -field true nearClipSlider;
+                                    floatSliderGrp -en 0 -l "far clip:" -minValue 0 -maxValue 100 -value 80 -field true farClipSlider;
+                                }
+                                setParent..;
+                            }
+                            setParent..;
+
+                            //////////Ray Direction settings////////////////////////////
+                             frameLayout -bv 1 -bs "in" -l "Ray Direction" -w 445 -h 20 -collapsable  false -collapse  false;
+                             {
+                                rowColumnLayout -numberOfRows 4 -rh 1 20 -rh 2 20 -rh 3 20 -rh 4 20;
+                                {
+                                    floatSliderGrp -en 0 -l "dir blend:" -minValue 0.0 -maxValue 1.0 -value 0.8 -field true dirBlendedSlider;
+                                    separator;
+
+                                    rowColumnLayout -numberOfColumns 3 -cw 1 125 -cw 2 168 -cw 3 125;
+                                    {
+                                                    button -w 5 -en 0 -al "center" -l "Add Selected Light" -c "addLightExtendOcc" addlightButton;
+                                                    text -font "smallFixedWidthFont" -al "center" -l "No Light Added" textLightOcc;
+                                                    button -w 5 -en 0 -al "center" -l "Remove Occlusion Light" -c "remLightExtendOcc" remlightButton;
+                                    }
+                                }
+                                setParent..;
+                             }
+                             setParent..;
+                            //////////////////////////////////////////////////////////
+
+                         }
+                         setParent..;
+                   }
+                   setParent..;
+                 }
+                 setParent..;
+
+
+                 //////////////////////////Occlusoin Options section////////////////////////////////
+
+	         columnLayout MR_optionsLayout;
+	         {
+		     frameLayout -l "Bake Options (mib_amb_occlusion): " -w 445 -h 20 -collapsable true -collapse  true -preExpandCommand "expandWin(3)" -preCollapseCommand  "collapseWin(3)";
+		     {
+			rowColumnLayout -numberOfRows 4 -rh 1 30 -rh 2 30 -rh 3 30 -rh 4 30;
+			{
+                         textFieldGrp -ann "Number of expanded pixels" -l "Seams Size :" -tx "2" -cw 1 90 -cw 2 30 textFieldSeams;
+                         textFieldGrp -ann "Quality of the AO map" -l "Samples : " -tx "16" -cw 1 90 -cw 2 30 textSamples;
+                         textFieldGrp -ann "x10 of the scene size for interiors" -l "Max Dist. : " -tx "0" -cw 1 90 -cw 2 30 textMaxDist;
+                         textFieldGrp -l "UvSet Name" -tx "map1" -cw 1 180 -cw 1 90 -cw 2 60 textFieldBakeName;
+			}setParent..;
+		     }
+		     setParent..;
+	         }
+                 setParent..;
+
+                 //////////////////////////Resolution section////////////////////////////////
+
+	         columnLayout ResLayout;
+	         {
+		     frameLayout -l "Resolution: " -w 445 -h 50;
+		     {
+  			rowColumnLayout -numberOfColumns 6 -columnWidth 1 73 -columnWidth 2 73 -columnWidth 3 73 -columnWidth 4 73 -columnWidth 5 73 -columnWidth 6 73;
+			{
+                                button -en 0 -l "128" -c ("main_BakeProcess(128)") button1;
+                                button -en 0 -l "256" -c ("main_BakeProcess(256)") button2;
+                                button -en 0 -l "512" -c ("main_BakeProcess(512)") button3;
+                                button -en 0 -l "1024" -c ("main_BakeProcess(1024)") button4;
+                                button -en 0 -l "2048" -c ("main_BakeProcess(2048)") button5;
+                                button -en 0 -l "4096" -c ("main_BakeProcess(4096)") button6;
+			}
+			setParent..;
+		     }
+		     setParent..;
+	        }
+	        setParent..;
+
+                ////////////////////////////////////////////////////////////////////////////
+
+   window -edit -widthHeight 455 178 bakeAO_tools;
+   showWindow bakeAO_tools;
+  
+  readPathsFromFile();
+  loadMentalRay();
+  
+}
+
+global proc remLightExtendOcc()
+{
+    string $pb_light=`text -q -l textLightOcc`;
+    disconnectAttr ($pb_light + ".message") extendOcc_Shader.light[0];
+    text -e -l "No Lights" textLightOcc;
+
+}
+
+global proc createLightConection()
+{
+       string $pb_light[] =`textScrollList -q -si addlightsScrollList`;
+
+       connectAttr -f ($pb_light[0] + ".message") extendOcc_Shader.light[0];
+       text -e -l $pb_light[0] textLightOcc;
+
+       deleteUI bakeAO_lights;
+}
+
+global proc addLightExtendOcc()
+{
+
+  string $pb_light[] =`ls -sl`;
+  int $i;
+  string $pb_allLights[]=`ls -lights`;
+  int $numLights =`size($pb_allLights)`;
+
+  if (`window -ex bakeAO_lights`==1) {deleteUI bakeAO_lights;}
+  window -title "Bake AO" -widthHeight 200 220 bakeAO_lights;
+
+  columnLayout;
+  {
+	frameLayout -l "Select a Light :" -w 198 -h 200;
+	textScrollList -dcc "createLightConection" addlightsScrollList;
+  }
+  setParent ..;
+
+  for ($i=0; $i<$numLights; $i++){
+      textScrollList -e -append $pb_allLights[$i] addlightsScrollList;
+  }
+
+  showWindow bakeAO_lights;
+
+  $pb_light[0] = ($pb_light[0] + "Shape1");
+
+  ///// Extended Occlusion properties and UI info /////////////////////////
+  setAttr "extendOcc_Shader.lightEnable" 1;
+
+  float $dirBlend = `floatSliderGrp -q -value dirBlendedSlider`;
+  setAttr "extendOcc_Shader.dBlend" $dirBlend;
+  button -e -en 1 remlightButton;
+  ////////////////////////////////////////////////////////////////////////
+}
+
+global proc enableExtendOcc()
+{
+
+   int $extendState = `checkBoxGrp -q -v1 checkExtendOcc`;
+
+   if ($extendState == 0){
+      floatSliderGrp -e -en 0 sampleSliderGrp;
+      floatSliderGrp -e -en 0 angleSliderGrp;
+      floatSliderGrp -e -en 0 nearClipSlider;
+      floatSliderGrp -e -en 0 farClipSlider;
+      floatSliderGrp -e -en 0 dirBlendedSlider;
+      button -e - en 0 addlightButton;
+
+      select -r extendOcc_Shader;
+      delete;
+      //select -r $pb_select[0];
+   }
+   else{
+
+      ////////////////looks  if Ctrl_Occlusion shader is installed ////////////
+      string $installShader = `createNode ctrl_occlusion -n "extendOcc_Shader"`;
+
+
+      if ($installShader != "extendOcc_Shader"){
+       confirmDialog -m "Can't find Ctrl_Occlusion Shader Installed";
+       
+       select -r "extendOcc_Shader";
+       delete;
+      }
+      //////////////////////////////////////////////
+      else{
+           floatSliderGrp -e -en 1 sampleSliderGrp;
+           floatSliderGrp -e -en 1 angleSliderGrp;
+           floatSliderGrp -e -en 1 nearClipSlider;
+           floatSliderGrp -e -en 1 farClipSlider;
+           floatSliderGrp -e -en 1 dirBlendedSlider;
+           button -e - en 1 addlightButton;
+           setAttr "extendOcc_Shader.lightEnable" 1;
+      }
+   }
+
+}
+
+global proc expandWin(int $val)
+{
+  if ($val==1){
+    int $h_win =`window -q -h bakeAO_tools`;
+    //confirmDialog -m $h_win;
+    $h_win = $h_win + 120;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+  if ($val==2){
+    int $h_win =`window -q -h bakeAO_tools`;
+    //confirmDialog -m $h_win;
+    $h_win = $h_win + 260;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+  if ($val==3){
+    int $h_win =`window -q -h bakeAO_tools`;
+    //confirmDialog -m $h_win;
+    $h_win = $h_win + 120;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+}
+global proc collapseWin(int $val)
+{
+  if ($val==1){
+    int $h_win = `window -q -h bakeAO_tools`;
+    $h_win = $h_win - 120;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+  if ($val==2){
+    int $h_win = `window -q -h bakeAO_tools`;
+    $h_win = $h_win - 260;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+  if ($val==3){
+    int $h_win = `window -q -h bakeAO_tools`;
+    $h_win = $h_win - 120;
+    window -e -wh 455 $h_win bakeAO_tools;
+  }
+
+}
+
+
+//OPENS FHECK WITH THE BAKED IMAGE
+global proc ShowImage()
+{
+  string $pb_filePath = `textFieldGrp -q -tx pathFieldGrp`;
+  $pb_filePath = $pb_filePath + "\\BakedAO.tga";
+  string $pb_openFile = `confirmDialog -title "Bake AO Tool" -button "Yes" 
+         -button "No" -defaultButton "Yes" -cancelButton "No"
+         -dismissString "No" -ma "center" -m "File Baked OK \nView Baked file?"`;
+
+  if ($pb_openFile == "Yes"){
+    fcheck  $pb_filePath;
+  }
+
+}
+
+global proc savePaths()
+{
+     int $i;
+     //Creates the text File
+     $pb_FileName = ( `internalVar -userAppDir` + "BakeAO_Paths.txt" );
+     
+     //Gets all the elements on the List
+     string $NewpathLine[] = `textScrollList -q -allItems pathList`;
+     
+     //Enter if there are no items on the list
+     if ((`textScrollList -q -ni pathList`) == 0){
+     	sysFile -del $pb_FileName;
+     }
+    else{
+	     //delete the file before write the data
+	     sysFile -del $pb_FileName;
+
+	     //Opens the file for read
+	     $fileId=`fopen $pb_FileName "w"`;
+			 //confirmDialog -m (`textScrollList -q -ni pathList`);
+	     
+	     for ($i=0; $i<(`textScrollList -q -ni pathList`) ; $i++){
+	     		if ($i==((`textScrollList -q -ni pathList`)-1)){
+	     			fprint $fileId $NewpathLine[$i];
+	     		}
+	     		else{
+	     			fprint $fileId ($NewpathLine[$i] + "\n");
+	     		}
+	     	}
+	     //borrar el ultim \n
+	     
+	     fclose $fileId;
+	     print ("+++ Saved +++ \n");
+	  }
+}
+
+global proc readPathsFromFile()
+{
+      int $i;
+      string $pathLine;
+      
+      //construct the full path to a file
+      $FileName = (`internalVar -userAppDir` + "BakeAO_Paths.txt" );
+      //open the file for reading
+      int $fileId=`fopen $FileName "r"`;
+      
+      //gets the first line and load the line in the ScrollList
+			string $FileTextLine = `fgetline $fileId`;
+			$FileTextLine = `substitute "\n" $FileTextLine ""`;
+			//adds the line into the list
+			textScrollList -e -append $FileTextLine pathList;
+			
+      while (  size( $FileTextLine ) > 0 )
+      {
+      		//gets one line form the text file
+          $FileTextLine = `fgetline $fileId`;
+          //remove the \n from the end of the line
+          $FileTextLine = `substitute "\n" $FileTextLine ""`;
+          textScrollList -e -append $FileTextLine pathList;
+      }
+      //close the file
+      fclose $fileId;
+}
+
+global proc loadPath()
+{
+     string $path[] = `textScrollList -q -selectItem pathList`;
+     textFieldButtonGrp -e -tx $path[0] pathFieldGrp;
+     
+     //enables the resolution buttons
+
+       button -en 1 -e button1;
+       button -en 1 -e button2;
+       button -en 1 -e button3;
+       button -en 1 -e button4;
+       button -en 1 -e button5;
+       button -en 1 -e button6;
+
+}
+
+global proc removePath()
+{
+   //gets the selected item on the ScrollList
+   string $selpath[] = `textScrollList -q -selectItem pathList`;
+   //remove the path form the ScrollList
+   textScrollList -e -removeItem  $selpath pathList;
+}
+
+global proc AddPaths()
+{
+     string $userPath =`textFieldButtonGrp -q -tx pathFieldGrp`;
+     string $listPathsList[] = `textScrollList -q -allItems pathList`;
+
+     if ($userPath != ""){
+          textScrollList -e -append $userPath pathList;
+     }
+     
+     //save paths to the text file
+     $pb_FileName = ( `internalVar -userAppDir` + "BakeAO_Paths.txt" );
+     $fileId=`fopen $pb_FileName "w"`;
+
+     for ($i=0; $i<(size($listPathsList)); $i++){
+          fwrite $fileId $listPathsList[$i];
+
+     }
+     fclose $fileId;
+}
+
+global proc int setUVSetonMeshes()
+{
+	string $sel_objects[]=`ls -sl`;
+	int $i, $e, $valid=0;
+	string $userUVSet = `textFieldGrp -q -tx textFieldBakeName`;
+	string $uvSets[];
+
+
+	for ($i=0; $i<(size($sel_objects)); $i++)
+	{
+		select -r $sel_objects[$i];
+		//check if the uvset is valid
+		$uvSets = `polyUVSet -q -allUVSets`;
+		for ($e=0; $e<(size($uvSets)); $e++)
+		{
+			if ($uvSets[$e] == $userUVSet) { $valid=1;}
+		}
+		if ($valid == 1){
+			polyUVSet -currentUVSet -uvSet $userUVSet;
+			//confirmDialog -m (" ++ UVset " + $userUVSet + " active +++ \n");
+		}
+	}
+
+
+	//returns the origianl selection
+	//select -r $sel_objects[0];
+        select -cl;
+        for ($i=0; $i<(size($sel_objects)); $i++)
+        {
+          select -tgl $sel_objects[$i];
+        }
+        return $valid;
+
+}
+
+
+global proc main_BakeProcess(int $pb_texSize)
+{
+       string $pb_sel[]=`ls -sl`;
+       int $pb_numObjs = `size($pb_sel)`, $i, $val;
+
+	//sets the uvSet of the textField to bake
+	$val=setUVSetonMeshes();
+
+	if ($val == 0 && $pb_numObjs > 0)
+	{ 
+		confirmDialog -title " Bake AO Tool " -m "I can't find the uvSet Name, please insert a valid uvSet";
+	}
+	else{
+	       //duplicates and combiens if there's more than 1 mesh selected
+                if ($pb_numObjs>1)
+       	           {
+                       duplicate -rr -n BakeMesh;
+         	       polyUnite -n BakeMesh_Ready;
+         	       //Hides the original meshes
+         	       for ($i=0; $i<$pb_numObjs; $i++)
+             		   {
+  	          	   select -r $pb_sel[$i] ;
+  	          	   setAttr ($pb_sel[$i]+".visibility") 0;
+             		   }
+
+             		   select -r BakeMesh_Ready;
+       	      	        BakeAO($pb_texSize);
+
+             		select -r BakeMesh_Ready;
+             		doDelete;
+
+             		//Show the original meshes
+             		for ($i=0; $i<$pb_numObjs; $i++)
+             		{
+  	       		select -r $pb_sel[$i] ;
+  	       		setAttr ($pb_sel[$i]+".visibility") 1;
+	             }
+
+       	           //Delete all the Bake crap
+                   select -r "BakeMesh*";
+                   doDelete;
+       	           }
+	       else
+       	           {
+         		BakeAO($pb_texSize);
+       	           }
+	}
+}
+
+global proc BakeAO(int $pb_textureSize)
+{
+       string $Obj[] = `ls -sl`;
+       int $numObjs = `size($Obj)`;
+       int $pb_rez, $i;
+       string $AO_BakeSet, $AccOutPath;
+       string $currentMat[], $pb_shaderExists[];
+       int $pb_toomanyObjs=1;
+       
+       if ($numObjs>1)
+       {
+         $pb_toomanyObjs=0;
+         //confirmDialog -m "More than 1 Object selected";
+       }
+       //baking process for both occlusions
+
+       int $extendOcc = `checkBoxGrp -q -v1 checkExtendOcc`;
+
+       //$extendOcc == 0 Mental Ray Occlusion /////// $extendOcc == 1 Ctrl_Occlusion /////
+       if ($extendOcc == 0)
+       {
+           if ($numObjs>0 && $pb_toomanyObjs==1){
+               //creates AO node and conects the node to a lambert shader
+               //and asigns this shader to the selection
+               string $currentSG = `getSGsFromObj`;
+               
+               //Assigns the surface Shader to the geometry
+               shadingNode -asShader surfaceShader -n "AO_Shader";
+               hyperShade -assign "AO_Shader";
+    
+               //Creates the Ambient Occlusion Node and conects the node to the outColor of the SurfaceShader
+               mrCreateCustomNode -asTexture "" mib_amb_occlusion;
+               connectAttr -force mib_amb_occlusion1.outValue AO_Shader.outColor;
+               
+    
+    	       //sets the AO samples
+               int $pb_numSamples = `textFieldGrp  -q -tx textSamples`;
+               setAttr "mib_amb_occlusion1.samples" $pb_numSamples;
+
+
+
+               //sets the Max distance for the scene to speed up the baking process
+               int $pb_MaxDist =`textFieldGrp -q -tx textMaxDist`;
+               setAttr "mib_amb_occlusion1.max_distance" $pb_MaxDist;
+
+               select -r $Obj[$i];
+    	       sets -e -forceElement AO_ShaderSG;
+    
+               $AO_BakeSet = `createNode "textureBakeSet" -n "ao_bakeset"`;
+    
+               $pb_rez = $pb_textureSize;
+               $AccOutPath = `textFieldButtonGrp -q -text pathFieldGrp`;
+               $AccOutPath = $AccOutPath + "\\BakedAO";
+    
+    	   //text -e -label($AccOutPath) infoText;
+    
+               //Options for the Baking Ambient Occlusion
+               //ColorMode = 3 = render Occlusion
+               //colorMode = 0 (Light and Color)
+               setAttr ($AO_BakeSet + ".colorMode") 0;
+               setAttr ($AO_BakeSet + ".xResolution") $pb_rez;
+               setAttr ($AO_BakeSet + ".yResolution") $pb_rez;
+               setAttr -type "string" ($AO_BakeSet + ".prefix") $AccOutPath;
+               setAttr ($AO_BakeSet + ".bakeToOneMap") 1;
+    	       int $pb_seamSize =`textFieldGrp -q -tx textFieldSeams`;
+               setAttr ($AO_BakeSet + ".fillTextureSeams") $pb_seamSize;
+               setAttr "ao_bakeset.samples" 4;
+    
+    	   //number 6 = .TGA  1=.TIF  3=.JPG
+               setAttr ($AO_BakeSet + ".fileFormat") 6;
+    
+               convertLightmap -bo $AO_BakeSet -shadows -file "AmbienOcclusion_" AO_ShaderSG $Obj;
+    
+               //assigns the orioginal SG to the Obj's
+               select -cl;
+               select -r $Obj[$i];
+               hyperShade -assign $currentSG;
+    
+               //deletes all the AO stuff/////
+               select -r AO_Shader ;
+               doDelete;
+               select -r mib_amb_occlusion1 ;
+               doDelete;
+               select -r -ne ao_bakeset ;
+               doDelete;
+               deleteAO_SGs();
+
+               //opens fheck with the inmage
+               ShowImage();
+
+            }
+            else{
+              confirmDialog -b "OK" -t "Bake AO Tool" -m "select one Mesh at least";
+            }
+       }
+       else
+       {
+         // Ctrl_Occlusion Bake Process //
+         if ($numObjs>0 && $pb_toomanyObjs==1){
+               //creates AO node and conects the node to a lambert shader
+               //and asigns this shader to the selection
+               string $currentSG = `getSGsFromObj`;
+               
+               //Assigns the surface Shader to the geometry
+               hyperShade -assign "extendOcc_Shader";
+
+               //Creates the Ambient Occlusion Node and conects the node to the outColor of the SurfaceShader
+               //mrCreateCustomNode -asTexture "" mib_amb_occlusion;
+               //connectAttr -force mib_amb_occlusion1.outValue AO_Shader.outColor;
+
+
+    	       //sets the samples
+               int $pb_numSamples = `floatSliderGrp -q -value sampleSliderGrp`;
+               setAttr "extendOcc_Shader.nSamples" $pb_numSamples;
+
+               int $pb_nearClip =`floatSliderGrp -q -v nearClipSlider`;
+               setAttr "extendOcc_Shader.minFalloff" $pb_nearClip;
+
+               int $pb_farClip =`floatSliderGrp -q -v farClipSlider`;
+               setAttr "extendOcc_Shader.maxFalloff" $pb_farClip;
+
+               //sets the spread angle
+               int $pb_MaxDist =`floatSliderGrp -q -value angleSliderGrp`;
+               setAttr "extendOcc_Shader.angle" $pb_MaxDist;
+
+               float $pb_dirBlend = `floatSliderGrp -q -value dirBlendedSlider`;
+               setAttr "extendOcc_Shader.dBlend" $pb_dirBlend;
+
+               select -r $Obj[$i];
+    	       sets -e -forceElement extendOcc_ShaderSG;
+    
+               $AO_BakeSet = `createNode "textureBakeSet" -n "ao_bakeset"`;
+    
+               $pb_rez = $pb_textureSize;
+               $AccOutPath = `textFieldButtonGrp -q -text pathFieldGrp`;
+               $AccOutPath = $AccOutPath + "\\BakedAO";
+
+               //Options for the Baking Ambient Occlusion
+               //ColorMode = 3 = render Occlusion
+               //colorMode = 0 (Light and Color)
+               setAttr ($AO_BakeSet + ".colorMode") 0;
+               setAttr ($AO_BakeSet + ".xResolution") $pb_rez;
+               setAttr ($AO_BakeSet + ".yResolution") $pb_rez;
+               setAttr -type "string" ($AO_BakeSet + ".prefix") $AccOutPath;
+               setAttr ($AO_BakeSet + ".bakeToOneMap") 1;
+    	       
+               int $pb_seamSize =`textFieldGrp -q -tx textFieldSeams`;
+               setAttr ($AO_BakeSet + ".fillTextureSeams") $pb_seamSize;
+               setAttr "ao_bakeset.samples" 4;
+
+    	       //number 6 = .TGA  1=.TIF  3=.JPG
+               setAttr ($AO_BakeSet + ".fileFormat") 6;
+    
+               convertLightmap -bo $AO_BakeSet -shadows -file "AmbienOcclusion_" extendOcc_ShaderSG $Obj;
+    
+               //assigns the orioginal SG to the Obj's
+               select -cl;
+               select -r $Obj[$i];
+               hyperShade -assign $currentSG;
+    
+               //deletes all the AO stuff/////
+               select -r -ne "extendOcc_ShaderSG*";
+               doDelete;
+               select -r -ne ao_bakeset ;
+               doDelete;
+               
+               select -r extendOcc_Shader;
+               doDelete;
+
+               checkBoxGrp -e -v1 0 checkExtendOcc;
+               floatSliderGrp -e -en 0 sampleSliderGrp;
+               floatSliderGrp -e -en 0 angleSliderGrp;
+               floatSliderGrp -e -en 0 nearClipSlider;
+               floatSliderGrp -e -en 0 farClipSlider;
+               floatSliderGrp -e -en 0 dirBlendedSlider;
+               button -e - en 0 addlightButton;
+               button -e - en 0 remlightButton;
+               text -e -l "No Lights" textLightOcc;
+
+               //opens fheck with the inmage
+               ShowImage();
+            }
+            else{
+              confirmDialog -b "OK" -t "Bake AO Tool" -m "select one Mesh at least";
+            }
+       }
+}
+
+global proc string getSGsFromObj()
+{
+      string $objConnections[], $shader[],$connectType[];
+      string $shaderGrpSeeker;
+
+      pickWalk -d down;
+      $objConnections = `listConnections`;
+
+      for ($shaderGrpSeeker in $objConnections)
+          {
+           $connectType= `ls -st $shaderGrpSeeker`;
+
+           if ($connectType[1] == "shadingEngine")
+           {
+             $objConnections[0] = $shaderGrpSeeker;
+             break;
+           }
+          }
+
+      $shader = `listConnections ($objConnections[0] + ".surfaceShader")`;
+      clear $objConnections;
+      return $shader[0];
+
+}
+
+global proc string getSceneWorkspace()
+{
+       string $workingPath = `workspace -q -dir`;
+
+       $workingPath = $workingPath  +"images";
+       return $workingPath;
+}
+
+global proc string nativePath(string $path)
+{
+       string $convertedPath;
+
+       $convertedPath=toNativePath ($path);
+       return $convertedPath;
+}
+
+global proc loadMentalRay()
+{
+    //check to see if plugin is loaded and if not then load it
+    if (`pluginInfo -q -loaded Mayatomr` == 0){
+       confirmDialog -m "MentalRay isn't loaded, now loading MentalRay";
+       $t = `loadPlugin Mayatomr`;
+       $t= `updateRendererUI`;
+       $t=`setAttr defaultRenderGlobals.currentRenderer -type "string" "mentalRay"`;
+	MI_Options();
+    }
+    else{
+       print "+++ MentalRay already loaded, setting as current renderer +++ \n";
+       setAttr defaultRenderGlobals.currentRenderer -type "string" "mentalRay";
+    }
+  }
+
+global proc pb_getFileNamePath()
+{
+	string $pb_returnPath;
+	string $pb_ok;
+	$pb_ok =`fileBrowserDialog
+		-fileType "image"
+		-mode 4
+		-fileCommand "pb_browseForFolderCallback"
+		-actionName "Save"`;
+	showNewPath();
+}
+
+global proc string pb_browseForFolderCallback(string $filename,string $fileType)
+{
+       string $pb_outputPath = $filename;
+       $pb_outputPath =`nativePath($pb_outputPath)`;
+
+       textFieldButtonGrp  -e -tx $pb_outputPath pathFieldGrp ;
+       
+       button -en 1 -e button1;
+       button -en 1 -e button2;
+       button -en 1 -e button3;
+       button -en 1 -e button4;
+       button -en 1 -e button5;
+       button -en 1 -e button6;
+
+       return $pb_outputPath;
+}
+
+global proc deleteAO_SGs()
+{
+     string $allSG[] =`ls -type shadingEngine`;
+     int $numSG=`size($allSG)`;
+     int $i;
+
+     for($i=0;$i<$numSG;$i++)
+      {
+      if ($allSG[$i] == "AO_ShaderSG") 	delete $allSG[$i];
+      if ($allSG[$i] == ("AO_ShaderSG"+ $i))
+	{
+	delete $allSG[$i];
+	print ("+++++Shading Group Deleted+++++++\n");
+	}
+  }
+}
+
+global proc MI_Options()
+{
+  //Performance MR_AO settings
+	setAttr "defaultRenderGlobals.enableDefaultLight" 0;
+	setAttr "miDefaultOptions.rayTracing" 1;
+	setAttr "miDefaultOptions.maxReflectionRays" 0;
+	setAttr "miDefaultOptions.maxRefractionRays" 0;
+	setAttr "miDefaultOptions.maxRayDepth" 0;
+	setAttr "miDefaultOptions.maxShadowRayDepth" 8;
+	setAttr "miDefaultOptions.faces" 0;
+}
+global proc showNewPath()
+{
+	string $pb_destination;
+
+	$pb_destination=`textFieldGrp -q -tx pathFieldGrp`;
+	$pb_destination="Destination Folder:\n" + $pb_destination + "\\BakedAO.tga";
+	//text -e -l($pb_destination) infoText;
+}

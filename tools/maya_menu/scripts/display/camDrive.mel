@@ -1,0 +1,125 @@
+/*
+camDo rotate zleft 0.1
+camDoNot rotate zleft 0.1
+camDrive -
+camDrive 0.1
+//camDo move 0,0,1
+camDo rotate zleft
+camDo rotate zright
+
+camStop -
+*/
+
+/*
+camDo rotate zleft 0.1
+camStop
+*/
+
+//camera can.
+//move - fow back left right up down
+//rotate - up down left right zleft zright
+
+global proc camDrive(float $value)
+{
+scriptJob -e idle evalCommand;
+global int $gCamDriveOn;
+$gCamDriveOn = 1;
+global float $gCamDriveValue;
+$gCamDriveValue = $value;
+}
+
+global proc camDriveToggle()
+{
+global int $gCamDriveOn;
+$gCamDriveOn = !$gCamDriveOn;
+if ($gCamDriveOn == 1)
+	print "camDrive ON";
+else
+	print "camDrive OFF";
+}
+
+global proc camDriveValue(float $value)
+{
+global float $gCamDriveValue;
+$gCamDriveValue = $value;
+}
+
+global proc evalCommand()
+{
+global string $gEvalCommand;
+//print $gEvalCommand;
+global int $gCamDriveOn;
+if ($gCamDriveOn)
+	eval $gEvalCommand;
+}
+//camDo move 0,0,1
+global proc camDo(string $mode, string $direction)
+{
+global string $gEvalCommand;
+//print $gEvalCommand
+//$mode = "move"; $direction = "fow";
+//$mode = "move"; $direction = "back";
+string $array[] = stringToStringArray($gEvalCommand, "\n");
+if (`size $array` < 2 && `size $gEvalCommand` < 33)
+	$gEvalCommand += "cam " + $mode + " " + $direction + ";\n";
+}
+
+global proc camDoNot(string $mode, string $direction)
+{
+global string $gEvalCommand;
+//$mode = "move"; $direction = "fow";
+string $array[] = stringToStringArray($gEvalCommand, "\n");
+string $commandRemove = "cam " + $mode + " " + $direction + ";";
+$array = stringArrayRemove({$commandRemove}, $array);
+string $string = stringArrayToString ($array, "\n");
+$gEvalCommand = $string;
+}
+
+global proc camStop()
+{
+global string $gEvalCommand;
+$gEvalCommand = "";
+}
+
+global proc cam (string $mode, string $direction)
+{
+$cam = currCam();
+
+global float $gCamDriveValue;
+$value = $gCamDriveValue;
+
+if ($mode == "move")
+{
+vector $vector;
+if ($direction == "fow")
+	$vector = rotationToVector($cam, <<0,0,-1>>);
+if ($direction == "back")
+	$vector = rotationToVector($cam, <<0,0,1>>);
+if ($direction == "left")
+	$vector = rotationToVector($cam, <<-1,0,0>>);
+if ($direction == "right")
+	$vector = rotationToVector($cam, <<1,0,0>>);
+if ($direction == "up")
+	$vector = rotationToVector($cam, <<0,1,0>>);
+if ($direction == "down")
+	$vector = rotationToVector($cam, <<0,-1,0>>);
+$vector *= $value;
+move -r ($vector.x) ($vector.y) ($vector.z) $cam;
+}
+else if ($mode == "rotate")
+{
+$value *= 3;
+if ($direction == "up")
+	rotate -r -os $value 0 0 $cam;
+if ($direction == "down")
+	rotate -r -os ($value * -1) 0 0 $cam;
+if ($direction == "left")
+	rotate -r -ws 0 $value 0 $cam;
+if ($direction == "right")
+	rotate -r -ws 0 ($value * -1) 0 $cam;
+if ($direction == "zleft")
+	rotate -r -os 0 0 $value $cam;
+if ($direction == "zright")
+	rotate -r -os 0 0 ($value * -1) $cam;
+}
+}

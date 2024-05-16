@@ -1,0 +1,5 @@
+global proc string attribute_to_node(string $attr)
+{
+string $array[] = stringToStringArray($attr, ".");
+return $array[0];
+}

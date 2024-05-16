@@ -1,0 +1,96 @@
+global proc string jpHandleFailure(string $object)
+{
+	string $foundObj = "";
+
+	//Save initial selection
+	string $initSel[] = `ls -sl`;
+
+	//get short object name
+	string $shortInitObj[];
+	tokenize $object "|" $shortInitObj;
+	int $lastObjName = `size($shortInitObj)`;
+	string $shortObjName = $shortInitObj[$lastObjName-1];
+
+
+/*
+		//check for duplicate Leaf node names
+		string $dupeNames[];
+		int $dupeIterator=0;
+		int $isDupe=0;
+		for($firstObj in $all)
+		{
+			$isDupe = 0;
+			string $shortFirstObj[];
+			tokenize $firstObj "|" $shortFirstObj;
+
+			for($secondObj in $all)
+			{
+				string $shortSecondObj[];
+				tokenize $secondObj "|" $shortSecondObj;
+				if($shortSecondObj[`size($shortSecondObj)`-1] == $shortFirstObj[`size($shortFirstObj)`-1])
+				{
+					$isDupe = $isDupe + 1;
+				}//end if
+			}//end for
+			if($isDupe > 1)
+			{
+				$dupeNames[$dupeIterator] = $firstObj;
+				$dupeIterator++;
+			}//end if
+		}//end for
+
+
+*/
+
+	//If there are no problems then pass through everything
+	if(`objExists $object` == 1)
+	{
+		$foundObj == $object;
+	}
+	//If you can't find the object then get it's short name and compare
+	//it to everything else in the heirarchy. If you get a match change 
+	//the object name 
+	//*!*!*!*!* Duplicate Leaf Nodes will cause problems *!*!*!*!*!*
+	else if(`objExists $object` == 0)
+	{	
+		//Get a list of the heirarchy picked object is in
+		string $new_pwObjs[];
+		string $old_pwObjs[];
+		do
+		{
+			$old_pwObjs[0] = $new_pwObjs[0];
+			$new_pwObjs = `pickWalk -d "up"`;
+		}while($old_pwObjs[0] != $new_pwObjs[0]);
+
+		select -hi $new_pwObjs[0];
+		string $heirarchy[] = `ls -tr -sl`;
+
+		//does the short object name match the short name of anything in the heirarchy
+		for($obj in $heirarchy)
+		{
+			string $shortHeirObj[];
+			tokenize $obj "|" $shortHeirObj;
+			int $lastHeirName = `size($shortHeirObj)`;
+			string $shortHeirName = $shortHeirObj[$lastHeirName-1];
+
+			if($shortObjName == $shortHeirName)
+			{
+				$foundObj = $obj;
+			}//end if
+		}//end for
+	}//end else if
+
+	else if($foundObj == "")
+	{
+		//if all else fails, make a locator with the missing object name
+		string $locator = `spaceLocator`;
+		rename $locator $shortObjName;
+		parent $shortObjName $shortInitObj[$lastObjName-2];
+	}//end else if
+
+
+
+	//restore initial selection
+	select $initSel;
+	return $foundObj;
+)//end proc jpHandleFailure

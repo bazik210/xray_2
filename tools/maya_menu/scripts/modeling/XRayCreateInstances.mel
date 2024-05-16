@@ -1,0 +1,27 @@
+global proc XRayObjectRenamer()
+{
+string $XRayObject_liste[] = `ls -sl`;
+string $XRayObject_objects;
+string $XRayObject_objectNewName = "v0";
+string $XRayObject_objectNewName2 = "lod0";
+
+	for ($XRayObject_objects in $XRayObject_liste)
+		{
+		select -r $XRayObject_objects;
+
+		group;
+		string $XRayObject_group[] = `ls -sl`;
+		rename $XRayObject_group $XRayObject_objectNewName;
+
+        group;
+		string $XRayObject_group[] = `ls -sl`;
+		rename $XRayObject_group $XRayObject_objectNewName2;
+
+        group;
+		string $XRayObject_group[] = `ls -sl`;
+		rename $XRayObject_group $XRayObject_objects;
+
+		string $XRayObject_group[] = `ls -sl`;
+		}
+	print ("SHAPE NAME : All Shapes renamed according to their transform \n");
+}

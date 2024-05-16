@@ -1,0 +1,125 @@
+// procs in this script:
+//
+// pinLinerSetNotes()
+// pinLiner_addScriptCallback()
+// pinLinerNoteUpdate()
+//
+
+// proc to actually set the notes and record them to the note box on in the attribute editor
+global proc pinLinerSetNotes(string $nodeName, string $longAttrName, string $shortAttrName, string $attrType, string $newAttrValue ) {
+	if (!`objExists $nodeName`) {
+		return;
+	}
+
+	if (`attributeQuery -exists -n $nodeName $longAttrName`) {
+		if (!`getAttr -lock ($nodeName + "." + $longAttrName)`) {
+			if (size($newAttrValue) > 0) {
+				// Update the Notes only if it's changed
+				string $currentNotes = `getAttr ($nodeName + "." + $longAttrName)`;
+
+				string $chocolatePenisFarts = `substituteAllString $newAttrValue "\n" "·"`;
+				string $chocolatePenisTits = `substituteAllString $chocolatePenisFarts "\r" "·"`;
+
+				$newAttrValue = $chocolatePenisTits;
+
+				if ($currentNotes != $newAttrValue) {
+					$editCmd = ("setAttr " + "-type \"" + $attrType + "\" " + $nodeName + "." + $longAttrName + " \"" + $newAttrValue + "\"");
+
+					if (catch(eval($editCmd))) {
+//						warning("Could not set attribute: " + $nodeName + "." + $longAttrName);
+					}
+				}
+			} else {
+				string $dynamicAttrs[] = `deleteAttr -q $nodeName`;
+
+				int $i;
+				int $numAttrs = size($dynamicAttrs);
+
+				for ($i = 0; $i < $numAttrs; $i ++) {
+					if ($dynamicAttrs[$i] == $longAttrName ) {
+						if (catch( deleteAttr ($nodeName + "." + $longAttrName))) {
+//							warning("Could not delete the notes attribute. Make sure the Extra Attributes section in the Attribute Editor is closed.");
+						}
+						break;
+					}
+				}
+			}
+		}
+	} else {
+		if (size($newAttrValue) > 0) {
+			if (catch(`addAttr -dt $attrType -ln $longAttrName -sn $shortAttrName $nodeName`)) {
+//				warning ("Could not create dynamic attribute: " + $nodeName + "." + $longAttrName + " (long name), " + $nodeName + "." + $shortAttrName + " (short name) ");
+			} else {
+				$editCmd = ("setAttr " + "-type \"" + $attrType + "\" " + $nodeName + "." + $longAttrName + " \"" + $newAttrValue + "\"");
+
+				if (catch( eval($editCmd))) {
+//					warning ("Could not set attribute: " + $nodeName + "." + $longAttrName);
+				}
+			}
+		}
+	}
+}
+
+// if notes are typed into the pinLiner they will update on every keystroke
+global proc pinLinerNoteUpdate() {
+	string $tArray[] = `ls -sl`;
+	string $noteText = `scrollField -q -text pinLinerNoteField`;
+
+	int $i;
+	for ($i = 0; $i < size($tArray); $i++) {
+		string $sArray[] = `listRelatives -fullPath -shapes`;
+
+		pinLinerSetNotes($tArray[$i], "notes", "nts", "string", $noteText);
+
+		for ($k = 0; $k < size($sArray); $k++) {
+			pinLinerSetNotes($sArray[$k], "notes", "nts", "string", $noteText);
+		}
+	}
+}
+
+// if an object is clicked in the pinLiner, this proc will find it and query the notes associated
+//
+global proc pinLiner_addScriptCallback(string $array[]) {
+	global string $PW_path;
+
+/*
+	$file = `fopen ($PW_path + "scripts/noNotesQuotes.txt") "r"`;
+	$file = "";
+	string $temp = `fgetline $file`;
+	string $quotes[];
+	clear $quotes;
+
+	while (size($temp) > 0 ) {
+		$quotes[size($quotes)] = $temp;
+
+		$temp = `fgetline $file`;
+	}
+
+	int $quote = `rand(size($quotes))`;
+
+	fclose $file;
+*/
+	if (size($array) > 0) {
+		string $getTransNotes;
+		string $tArray[] = `ls -tr $array`;
+
+		if (size($tArray) > 0) {
+			int $noNotes = `attributeQuery -n $tArray[0] -exists notes`;
+
+			if ($noNotes > 0) {
+ 				$getTransNotes = `getAttr ($tArray[0] + ".notes")`;
+
+                string $tempy = `substituteAllString $getTransNotes "·" "\n" `;
+				string $tempy2 = `substituteAllString $tempy "·" "\r" `;
+
+				$getTransNotes = $tempy2;
+			} else {
+				//$getTransNotes = strip($quotes[$quote]);
+			}
+
+			select -r $tArray;
+
+			scrollField -e -tx $getTransNotes pinLinerNoteField;
+		}
+	}
+}

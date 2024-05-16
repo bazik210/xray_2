@@ -1,0 +1,68 @@
+global proc string jpHandleReference_write(string $object)
+{
+	global string $gPrefix;
+
+	string $newObject = $object;
+	string $prefix = `jpAmIaReference($object)`;
+
+	if(!catch ("menuItem -q -cb refReTarget"))
+	{
+		int $refReTarget = `menuItem -q -cb refReTarget`;
+		if($refReTarget != 0)
+		{
+			if($prefix != 0)
+			{
+				$gPrefix = `promptDialog -query -text`;
+				$newObject = jpDeConstObj($object,$gPrefix);
+			}//end if
+			else
+			{
+				$gPrefix = "";
+			}//end else
+		}//end if
+	}//end if
+	else
+	{
+		$gPrefix = "";
+	}//end else
+
+	return $newObject;
+}//end proc jpHandleReference
+
+
+
+global proc string jpDeConstObj(string $object, string $prefix)
+{
+	string $tokObj[];
+	tokenize $object "|" $tokObj;
+
+	int $sizeOfPrefix = `size($prefix)`;
+	string $deConst = "";
+	string $newLevel = "";
+	int $sizeOfLevel;
+	int $startsWithPrefix;
+
+	string $level = $tokObj[0];
+
+	if(`size($tokObj)` > 1)
+	{
+		for($level in $tokObj)
+		{
+			$sizeOfLevel = `size($level)`;
+			$startsWithPrefix = startsWith($level, $prefix);
+			if($startsWithPrefix == 1)
+			{
+				$newLevel = endString($level, ($sizeOfLevel - $sizeOfPrefix));
+				$deConst = ($deConst + "|" + $newLevel);
+			}//end if
+		}//end for
+	}//end if
+	else
+	{
+		$sizeOfObject = `size($object)`;
+		$newObject = endString($object, ($sizeOfObject - $sizeOfPrefix));
+		$deConst = $newObject;
+	}//end else
+
+	return $deConst;
+}//end proc jpReConstObj

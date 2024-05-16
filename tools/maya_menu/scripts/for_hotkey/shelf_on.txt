@@ -1,0 +1,9 @@
+toggleUIComponentVisibility "Shelf";
+toggleUIComponentVisibility "Command Line";
+toggleUIComponentVisibility "Help Line";
+toggleUIComponentVisibility "Status Line";
+toggleUIComponentVisibility "Time Slider";
+toggleUIComponentVisibility "Range Slider";
+window -e -mbv true $gMainWindow;
+
+ToggleBorderEdges;

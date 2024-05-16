@@ -1,0 +1,1 @@
+global proc selectPointsInDistance(float $pos[], float $maxDistance, string $obj){/*float $maxDistance = 0.2;$pos = `pointPosition`;$obj = selObj();*/select $obj;polySelectConstraint -t 1 -m 3 -d 1 -db 0 $maxDistance -dp $pos[0] $pos[1] $pos[2];polySelectConstraint -m 0;}

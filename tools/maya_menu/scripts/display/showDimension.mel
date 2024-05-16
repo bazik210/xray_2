@@ -1,0 +1,322 @@
+ /***********************************************************
+  *
+  *   Program:    showDimension
+  *   Created:    26.11.2003 13:01
+  *   Author:     Vladimir Kazantsev aka BoBaH aka Vovka
+  *              (Firestarter project, level designer). Network name - "Vovka".
+  *   Requested:  own use
+  *   Comments:   shows dimension on selected
+  *   Usage:      showDimension (!int(`showDimension -q`));    -on shelf
+  *
+  *
+  ************************************************************
+  *
+  * History:
+  *
+  * GSC 2003                        vovka@gsc-game.kiev.ua
+  ************************************************************/
+//
+global proc float[] getDimCoord(string $objs[])
+{
+   float $bbFull[],$bbCurrent[];
+
+   for( $obj in $objs )   {
+       //  $obj = match ("[^|]+$" , $obj );
+        if((nodeType($obj) == "transform") || (nodeType($obj) =="mesh" && gmatch ( $obj , "*.*"  )) ){
+        if(size($bbFull)==0) $bbFull = `xform -q -ws -bb $obj`;
+        $bbCurrent = `xform -q -ws -bb $obj`;
+        //min: X , Y , Z
+        $bbFull[0] = $bbFull[0] < $bbCurrent[0] ? $bbFull[0] : $bbCurrent[0];
+        $bbFull[1] = $bbFull[1] < $bbCurrent[1] ? $bbFull[1] : $bbCurrent[1];
+        $bbFull[2] = $bbFull[2] < $bbCurrent[2] ? $bbFull[2] : $bbCurrent[2];
+        //max: X , Y , Z
+        $bbFull[3] = $bbFull[3] > $bbCurrent[3] ? $bbFull[3] : $bbCurrent[3];
+        $bbFull[4] = $bbFull[4] > $bbCurrent[4] ? $bbFull[4] : $bbCurrent[4];
+        $bbFull[5] = $bbFull[5] > $bbCurrent[5] ? $bbFull[5] : $bbCurrent[5];
+        }
+        }
+//        if ( equivalent($bbFull[0],$bbFull[3]) ) $bbFull[3] = $bbFull[0];
+//        if ( equivalent($bbFull[1],$bbFull[4]) ) $bbFull[4] = $bbFull[1];
+//        if ( equivalent($bbFull[2],$bbFull[5]) ) $bbFull[5] = $bbFull[2];
+   return roundToTol($bbFull);
+}
+
+//
+global proc string showDimensionOnSelected(int $d,int $w,int $h)
+{
+    undoInfo -stateWithoutFlush 0;
+
+       string $ts[];
+       //added 28.10.02
+
+//       if (size(`ls -hl`)==1) $ts = `ls -hl`;
+//       else        $ts =  `ls -sl`;
+//       $ts = sl_or_hl();
+       $ts =  `ls -sl`;
+       global string $vovkaDepthDim, $vovkaWidthDim, $vovkaHeightDim, $vovkaDimGroup;
+     $vovkaDepthDim = "vovkaDepthDim";
+     $vovkaWidthDim  = "vovkaWidthDim";
+     $vovkaHeightDim  =  "vovkaHeightDim";
+     $vovkaDimGroup = "vovkaDimGroup";
+
+       string $result;
+       int $newCreations=0;
+       float $bbInfo[];
+       $bbInfo = getDimCoord ($ts);
+
+       ///
+       if (($d || $w || $h) && (!objExists ($vovkaDimGroup)) ) {
+             $vovkaDimGroup = `createNode transform -n "vovkaDimGroup"`;
+                   setAttr ".overrideEnabled" 1;
+          setAttr ".visibility" 1;
+          setAttr -lock true ".visibility";
+          setAttr -k false ".visibility";
+          setAttr -k false ".tx";
+          setAttr -k false ".ty";
+          setAttr -k false ".tz";
+
+          setAttr -k false ".rx";
+          setAttr -k false ".ry";
+          setAttr -k false ".rz";
+
+          setAttr -k false ".sx";
+          setAttr -k false ".sy";
+          setAttr -k false ".sz";
+       }
+       //
+       if ($d) {
+             if(objExists ($vovkaDepthDim) ) {
+                setAttr ($vovkaDepthDim+".startPoint") -type "double3" $bbInfo[0] $bbInfo[1] $bbInfo[5];
+                setAttr ($vovkaDepthDim+".endPoint") -type "double3" $bbInfo[3] $bbInfo[1] $bbInfo[5];
+             }
+             else {
+                $vovkaDepthDim = `createNode transform -n "vovkaDepthDim" -p $vovkaDimGroup`;
+                setAttr ".overrideEnabled" 1;
+                setAttr ".overrideDisplayType" 2;  //Referance (1 for template)
+                createNode distanceDimShape -n "vovkaDepthDimShape" -p $vovkaDepthDim;
+                      setAttr ".startPoint" -type "double3" $bbInfo[0] $bbInfo[1] $bbInfo[5];
+                      setAttr ".endPoint" -type "double3" $bbInfo[3] $bbInfo[1] $bbInfo[5];
+                $newCreations = 1;
+             }
+             $result+=$vovkaDepthDim;
+        }
+        else if(objExists ($vovkaDepthDim) )  {
+                setAttr ($vovkaDepthDim+".startPoint") -type "double3" 0 0 0;
+                setAttr ($vovkaDepthDim+".endPoint") -type "double3" 0 0 0;
+
+             $result+=$vovkaDepthDim+" (hiden)" ;
+        }
+
+
+        ///
+        if ($w) {
+             if(objExists ($vovkaWidthDim) ) {
+                setAttr ($vovkaWidthDim+".startPoint") -type "double3" $bbInfo[3] $bbInfo[1] $bbInfo[2];
+                setAttr ($vovkaWidthDim+".endPoint") -type "double3" $bbInfo[3] $bbInfo[4] $bbInfo[2];
+             }
+             else {
+                   $vovkaWidthDim = `createNode transform -n "vovkaWidthDim"  -p $vovkaDimGroup`;
+                   setAttr ".overrideEnabled" 1;
+                   setAttr ".overrideDisplayType" 2;  //Referance (1 for template)
+                   createNode distanceDimShape -n "vovkaWidthDimShape" -p $vovkaWidthDim;
+                              setAttr ".startPoint" -type "double3" $bbInfo[3] $bbInfo[1] $bbInfo[2];
+                              setAttr ".endPoint" -type "double3" $bbInfo[3] $bbInfo[4] $bbInfo[2];
+                   $newCreations = 1;
+             }
+             $result+=" "+$vovkaWidthDim;
+        }
+        else if(objExists ($vovkaWidthDim) ) {
+                setAttr ($vovkaWidthDim+".startPoint") -type "double3" 0 0 0;
+                setAttr ($vovkaWidthDim+".endPoint") -type "double3" 0 0 0;
+             $result+=" " +$vovkaWidthDim+" (hiden)" ;
+        }
+
+        ///
+        if ($h) {
+             if(objExists ($vovkaHeightDim) ) {
+                setAttr ($vovkaHeightDim+".startPoint") -type "double3" $bbInfo[0] $bbInfo[4] $bbInfo[2];
+                setAttr ($vovkaHeightDim+".endPoint") -type "double3" $bbInfo[0] $bbInfo[4] $bbInfo[5];
+             }
+             else {
+                   $vovkaHeightDim = `createNode transform -n "vovkaHeightDim"  -p $vovkaDimGroup`;
+                   setAttr ".overrideEnabled" 1;
+                   setAttr ".overrideDisplayType" 2;  //Referance (1 for template)
+                   createNode distanceDimShape -n "vovkaHeightDimShape" -p $vovkaHeightDim;
+                                    setAttr ".startPoint" -type "double3" $bbInfo[0] $bbInfo[4] $bbInfo[2];
+                                    setAttr ".endPoint" -type "double3" $bbInfo[0] $bbInfo[4] $bbInfo[5];
+                   $newCreations = 1;
+             }
+             $result+=" "+$vovkaHeightDim;
+        }
+        else if(objExists ($vovkaHeightDim) ) {
+                setAttr ($vovkaHeightDim+".startPoint") -type "double3" 0 0 0;
+                setAttr ($vovkaHeightDim+".endPoint") -type "double3" 0 0 0;
+             $result+=" " +$vovkaHeightDim+" (hiden)" ;
+        }
+
+          if(  $newCreations ) select -r $ts;
+      undoInfo -stateWithoutFlush 1;
+          return $result;
+}
+
+
+
+global proc updateDimOnSelection(int $ld,int $lw,int $lh)
+{
+//  undoInfo -stateWithoutFlush 0;
+
+  global int $showDimSJnumS[];
+  string $cmd,$obj;
+  for($i in $showDimSJnumS)  {
+       if(`scriptJob -exists $i`)  scriptJob -kill $i;
+  }
+  clear($showDimSJnumS);
+  string $objs[] = `ls -sl`;
+  showDimensionOnSelected($ld,$lw,$lh);
+  for($obj in $objs) {
+               if(nodeType($obj) == "transform")
+               {
+                   $cmd = "scriptJob -compressUndo 0 -attributeChange \""+$obj+".matrix\" \"showDimensionOnSelected("+$ld+","+$lw+","+$lh+")\"";
+                   $showDimSJnumS[`size($showDimSJnumS)`] = eval($cmd);
+               }
+               else if( (nodeType($obj) =="mesh" ) && (gmatch ( ""+$obj+"fuck" , "*.*"  ) )       )
+               {
+                   $obj = match("[^\\.]+",$obj);
+                   $cmd = "scriptJob -compressUndo 0 -attributeChange \""+$obj+".outMesh\" \"showDimensionOnSelected("+$ld+","+$lw+","+$lh+")\"";
+                   $showDimSJnumS[`size($showDimSJnumS)`] = eval($cmd);
+               }
+               else if(  (nodeType($obj) =="nurbsSurface" ) && (gmatch ( ""+$obj+"fuck" , "*.*"  ) )       )
+               {
+                   $obj = match("[^\\.]+",$obj);
+                   $cmd = "scriptJob -compressUndo 0 -attributeChange \""+$obj+".worldSpace \" \"showDimensionOnSelected("+$ld+","+$lw+","+$lh+")\"";
+                   $showDimSJnumS[`size($showDimSJnumS)`] = eval($cmd);
+               }
+               else if(  (nodeType($obj) =="subdiv" ) && (gmatch ( ""+$obj+"fuck" , "*.*"  ) )       )
+               {
+                   $obj = match("[^\\.]+",$obj);
+                   $cmd = "scriptJob -compressUndo 0 -attributeChange \""+ $obj +"Shape.worldSubdiv  \" \"showDimensionOnSelected("+$ld+","+$lw+","+$lh+")\"";
+                   $showDimSJnumS[`size($showDimSJnumS)`] = eval($cmd);
+               }
+
+
+  }
+//   undoInfo -stateWithoutFlush 1;
+
+}
+
+
+
+///
+
+
+
+global proc string showDimension(string $arguments)
+{
+
+      global int $showDimSJnum,$showDimSJnumS[];
+      global string $vovkaDepthDim, $vovkaWidthDim, $vovkaHeightDim, $vovkaDimGroup;
+
+      int $ld,$lw,$lh;
+      string $cmd,$result,$tokenizedArguments[];
+
+      tokenizeList ( $arguments , $tokenizedArguments );
+      // Query Mode --------------- \/  \/  \/  \/ ---- Query Mode
+      if( ($tokenizedArguments[0]=="-q") ||($tokenizedArguments[0]=="-quary") )   {
+
+                    if (size($tokenizedArguments) == 1)                 {
+                        $result = "0";
+                        if (objExists ($vovkaDepthDim) && objExists ($vovkaWidthDim) &&  objExists ($vovkaHeightDim) ) $result="1";
+                        return $result;
+                    }
+                    if( $tokenizedArguments[1]=="-a" || $tokenizedArguments[1]=="-all" )
+                         $tokenizedArguments={"-d","-w","-h"};
+
+                    for($str in $tokenizedArguments) {
+                         if ($str=="-d" || $str=="-depth") $result+=$vovkaDepthDim;
+                         if ($str=="-w" || $str=="-width") $result+=" "+$vovkaWidthDim;
+                         if ($str=="-h" || $str=="-height") $result+=" "+$vovkaHeightDim;
+                    }
+                    $result = size($result)==0 ? "0" : $result;
+                    return $result;
+      }
+      // Query Mode ---------------- /\  /\  /\  /\ ---- Query Mode
+
+
+      if($arguments=="1" || $arguments=="on" || $arguments=="true" || $arguments=="-all" || $arguments=="-a" )
+               $tokenizedArguments={"-d","-w","-h"};
+      for($str in $tokenizedArguments) {
+               if ($str=="-d" || $str=="-depth")     $ld =1;
+               if ($str=="-w" || $str=="-width")     $lw =1;
+               if ($str=="-h" || $str=="-height")    $lh =1;
+      }
+
+
+      if ($ld || $lw || $lh) {
+
+          int $userUseLayer;
+           $userUseLayer = `editDisplayLayerGlobals -q -useCurrent` ;
+
+           editDisplayLayerGlobals  -useCurrent 0;
+           if($showDimSJnum > 0)    scriptJob -kill $showDimSJnum;
+           updateDimOnSelection($ld,$lw,$lh);
+           $cmd = "scriptJob -e \"SelectionChanged\" \"updateDimOnSelection("+$ld+","+$lw+","+$lh+")\"";
+           $showDimSJnum = eval ($cmd);
+
+           editDisplayLayerGlobals  -useCurrent $userUseLayer;
+           return $showDimSJnum;
+      }
+      if($arguments == "0" || $arguments=="off" || $arguments=="false" ) {
+           if($showDimSJnum > 0) {
+             scriptJob -kill $showDimSJnum;
+            }
+           $showDimSJnum = 0;
+           for($i in $showDimSJnumS)  scriptJob -kill $i;
+           clear($showDimSJnumS);
+           $result = showDimensionOnSelected(0,0,0);
+           if(objExists($vovkaDimGroup)) delete $vovkaDimGroup;
+           return $result;
+      }
+      if( $arguments == "-t" || $arguments=="-toggle" )         {
+           if(objExists($vovkaDimGroup)) {
+              setAttr ($vovkaDimGroup+".overrideVisibility") (!`getAttr ($vovkaDimGroup+".overrideVisibility")`);
+              return (`getAttr ($vovkaDimGroup+".overrideVisibility")`)+" ";
+           }
+           else {
+           showDimension("on");
+           return "on";
+           }
+      }
+
+
+      error -sl true "Wrong arguments. Check showDimension.mel header for documentation (or readme.txt on //Vovka/public/Maya for GSC users)";
+
+
+}
+
+
+//
+//  description: This procedure rounds floats.
+//
+global proc float[] roundToTol(float $floats[])
+{
+        float $res[];
+        float $fl;
+        float $tol = 0.001;
+        $tol = 1 / $tol ;
+
+        for ( $fl in $floats )
+        {
+                $sign = sign($fl);
+                $fl = abs( $fl );
+                $fl*= 1000;
+                $fl+= 0.5;
+                $fl   = floor($fl);
+                $fl/= 1000;
+                $fl*= $sign;
+                $res[`size($res)`]= $fl;
+
+        }
+
+        return $res;
+
+}

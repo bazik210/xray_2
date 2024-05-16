@@ -1,0 +1,19 @@
+global proc string renameLongName(string $object)
+{
+//$object = "pCube3|pCubeShape1";
+int $long = longOrNot($object);
+string $newName = $object;
+if ($long)
+	{
+	for (;;)
+		{
+		$newName = longToShort($newName) + "_ren";
+		int $longNow = `objExists $newName`;
+		if (!$longNow)
+			break;
+		}
+	rename $object $newName;
+	return ("object " + $object + " renamed to " + $newName);
+	}
+return "name is short";
+}

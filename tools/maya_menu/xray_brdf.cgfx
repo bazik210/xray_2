@@ -1,0 +1,532 @@
+//------------------------------------------------------------------------------
+// Desc   : Generic fake BRDF shader 
+// Author : Cedric Caillaud (http://www.kjapi.com) & Brice Vandemoortele (http://www.mentalwarp.com)
+// Date   : October 2007
+
+
+//------------------------------------------------------------------------------
+//This work is licensed under a  Creative Commons Attribution-Share Alike 3.0 Unported License
+// http://creativecommons.org/licenses/by-sa/3.0/
+//------------------------------------------------------------------------------
+
+string Category		= "Generic";
+string description	= "X-Ray BRDF shader v2.0";
+
+//-----------------------------------------------
+// Matrices
+//-----------------------------------------------
+float4x4 wvpMatrix	: WorldViewProjection;
+float4x4 wvMatrixIT	: worldviewinversetranspose;
+float4x4 wMatrix	: World;
+float4x4 wvMatrix	: Worldviewinverse;
+
+//-----------------------------------------------
+// Light position
+//-----------------------------------------------
+float4 LightPos : Position 
+<
+	string UIName	= "LightPosition";
+	string Object	= "PointLight";
+//	string UIWidget	= "None";
+> = {-54.0f, 50.0f, 100.0f, 1.0f};
+
+//-----------------------------------------------
+// Light color
+//-----------------------------------------------
+float3 LightColor : Diffuse
+<
+	string type		= "color";
+	string UIWidget	= "None";
+> = {1.0, 1.0, 1.0};
+
+////-----------------------------------------------
+//// BRDF Sampler
+////-----------------------------------------------
+//texture BRDF
+//<
+//	string Name = "brdf.tga";
+//	string UIName = "BRDF";
+//	string ResourceType = "2D";
+//>;
+// 
+//sampler2D BRDFSampler = sampler_state
+//{
+//	Texture = <BRDF>;
+//	MinFilter = LINEAR;
+//	MagFilter = LINEAR;
+//	WrapS = ClampToEdge;
+//	WrapT = ClampToEdge;
+//	WrapR = ClampToEdge;
+//};
+
+//half OffsetU
+//<
+//	string UIWidget = "slider";
+//	float UIMin = -1.0;
+//	float UIMax = 1.0;
+//	float UIStep = 0.01;
+//	string UIName = "Constant";
+//> = 0.0;
+//
+//half OffsetV
+//<
+//	string UIWidget = "slider";
+//	float UIMin = -1.0;
+//	float UIMax = 1.0;
+//	float UIStep = 0.01;
+//	string UIName = "Constant";
+//> = 0.0;
+
+//-----------------------------------------------
+// albedo sampler - D
+//-----------------------------------------------
+texture albedo_texture : DiffuseMap
+< 
+	string ResourceName = "Dummy_White.tga"; 
+	string ResourceType = "2D"; 
+	string UIName = "Albedo Map (Diffuse)";
+>;
+sampler2D Albedo = sampler_state 
+{	
+	Texture = <albedo_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+	LODBias = -.5 ;
+};
+//
+////-----------------------------------------------
+//// Alpha Translu sampler - A
+////-----------------------------------------------
+//texture alpha_texture	: AlphaMap
+//< 
+//	string ResourceName = "Dummy_White.tga"; 
+//	string ResourceType = "2D"; 
+//>;
+//sampler2D Alpha = sampler_state 
+//{	
+//	Texture = <alpha_texture>;
+//	MinFilter = LinearMipMapLinear;
+//	MagFilter = Linear;
+//};
+
+////-----------------------------------------------
+//// Fake SSS color
+////-----------------------------------------------
+//half3 SSSColor
+//<
+//	string type		= "color";
+//	string UIName	= "SSSColor";
+//	string UIWidget = "color";
+//> = {0, 0, 0};
+
+//-----------------------------------------------
+// normal sampler - N
+//-----------------------------------------------
+texture normal_texture : NormalMap
+< 
+	string ResourceName = "Dummy_NM.tga";
+	string ResourceType = "2D";
+>;
+sampler2D Normal = sampler_state
+{
+	Texture = <normal_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+	LODBias = -.5 ;
+};
+
+////-----------------------------------------------
+//// Bump Factor
+////-----------------------------------------------
+//half BumpFactor
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 3;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Bump Scale";
+//> = 1.0;
+
+//-----------------------------------------------
+// specular sampler - S
+//-----------------------------------------------
+texture fresnel_texture	: SpecularMap
+<
+	string ResourceName  = "Dummy_White.tga"; 
+	string ResourceType = "2D";
+>;
+sampler2D Fresnel = sampler_state
+{
+	Texture = <fresnel_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+};
+
+////-----------------------------------------------
+//// Specular factor
+////-----------------------------------------------
+//half SpecFactor : SpecularFactor 
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 1.0;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Specular Factor";
+//> = 1.0;
+
+////-----------------------------------------------
+//// Specular Fresnel Power
+////-----------------------------------------------
+//half SpecularFresnelPower
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.01;
+//	float UIMax		= 10;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Specular Fresnel Factor";
+//> = 0;
+
+//-----------------------------------------------
+// specular power sampler - SP
+//-----------------------------------------------
+texture roughness_texture	: SpecularPowerMap
+<
+	string ResourceName	= "Dummy_White.tga"; 
+    string UIName =  "Roughness Texture";
+	string ResourceType = "2D";
+>;
+sampler2D Roughness = sampler_state
+{
+	Texture = <roughness_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+};
+
+texture specular_color_texture	: SpecularPowerMap
+<
+	string ResourceName	= "Dummy_White.tga"; 
+    string UIName =  "Specular Color Map";
+	string ResourceType = "2D";
+>;
+sampler2D SpecularColor = sampler_state
+{
+	Texture = <specular_color_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+};
+
+////-----------------------------------------------
+//// Gloss factor
+////-----------------------------------------------
+//half GlossFactor : GlossinessFactor
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 1.0;
+//	float UIStep	= 0.1;
+//	string UIName	= "Gloss Factor";
+//> = 1.0;
+
+//-----------------------------------------------
+// Env sampler
+//-----------------------------------------------
+texture environment_texture
+<
+	string ResourceName = "Water_MM_01.dds";
+	string ResourceType = "Cube";
+>;
+samplerCUBE Environment = sampler_state
+{
+	Texture = <environment_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+	WrapS = ClampToEdge;
+	WrapT = ClampToEdge;
+	WrapR = ClampToEdge;
+};
+
+//-----------------------------------------------
+// emissive sampler - E
+//-----------------------------------------------
+texture emissive_texture	: EmissiveMap
+<
+	string ResourceName  = "Dummy_Black.tga"; 
+	string ResourceType = "2D";
+>;
+sampler2D Emissive = sampler_state
+{
+	Texture = <emissive_texture>;
+	MinFilter = LinearMipMapLinear;
+	MagFilter = Linear;
+};
+
+//-----------------------------------------------
+//emissive factor
+//-----------------------------------------------
+half emissive_factor
+<
+	string UIWidget = "slider";
+	float UIMin		= 0.0;
+	float UIMax		= 10;
+	float UIStep	= 0.1;
+	string UIName	=  "Emissive Factor";
+> = 0;
+
+//-----------------------------------------------
+//emissive color
+//-----------------------------------------------
+half3 emissive_color
+<
+	string type		= "color";
+	string UIName	= "Emissive Color";
+	string UIWidget = "color";
+> = {1.0, 1.0, 1.0};
+
+////-----------------------------------------------
+//// Fresnel Power
+////-----------------------------------------------
+//half FresnelPower
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.01;
+//	float UIMax		= 10;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Fresnel Factor";
+//> = 1.5;
+
+////-----------------------------------------------
+//// Reflection Blur
+////-----------------------------------------------
+//half ReflectionBlurFactor
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 10;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Reflection Blur Factor";
+//> = 1;
+
+////-----------------------------------------------
+////Ambient Factor
+////-----------------------------------------------
+//half AmbientFactor
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 2;
+//	float UIStep	= 0.1;
+//	string UIName	=  "Ambient Factor";
+//> = 1;
+
+////-----------------------------------------------
+////Ambient Blur
+////-----------------------------------------------
+//half AmbientBlurFactor
+//<
+//	string UIWidget = "slider";
+//	float UIMin		= 0.0;
+//	float UIMax		= 10;
+//	float UIStep	= 1;
+//	string UIName	=  "Ambient Blur Factor";
+//> = 3;
+
+//---------------------------------------------
+// structures 
+//---------------------------------------------
+struct vertex_shader_input {
+	float4 position				: POSITION;
+	half3 normal 				: NORMAL;
+	half4 color					: COLOR0;
+	half2 texture_coordinates	: TEXCOORD0;
+	half3 tangent				: TEXCOORD1;
+	half3 bitangent				: TEXCOORD2;
+};
+
+struct vertex_shader_output {
+	float4 position				: POSITION;
+	half4 color					: COLOR0;
+	half2 texture_coordinates	: TEXCOORD0;
+	half3 light_direction		: TEXCOORD1;
+	half3 eye_direction			: TEXCOORD2;
+	half3 tangent				: TEXCOORD3;
+	half3 bitangent				: TEXCOORD4;
+	half3 normal				: TEXCOORD5;
+};
+
+//---------------------------------------------
+// vertex shader
+//---------------------------------------------
+vertex_shader_output vertex_shader_main( vertex_shader_input input )
+{
+	vertex_shader_output			result;
+
+	half3 tangent					= input.tangent.xyz;
+	half3 normal					= input.normal.xyz;
+	half3 binormal					= input.bitangent.xyz;
+
+	// position, uvs
+	result.position					= mul( wvpMatrix, input.position );
+	result.texture_coordinates.xy	= input.texture_coordinates;
+
+	half3 eye_direction				= normalize(wvMatrixIT[3].xyz - input.position.xyz);
+	result.eye_direction.xyz		= mul(wMatrix, half4(eye_direction.xyz, 0.0)).xyz;
+
+	half3 light_direction			= normalize(LightPos.xyz - input.position.xyz);
+	result.light_direction.xyz		= mul(wMatrix, half4(light_direction.xyz, 0.0)).xyz;
+
+	result.tangent					= mul(wMatrix, half4(tangent, 0)).xyz;
+	result.bitangent				= mul(wMatrix, half4(binormal, 0)).xyz;
+	result.normal					= mul(wMatrix, half4(normal, 0)).xyz;
+
+	result.color					= input.color;
+	return							result;
+}
+
+float square( float x )
+{
+	return x * x;
+}
+
+//---------------------------------------------
+// pixel shader
+//---------------------------------------------
+float4 pixel_shader_main( vertex_shader_output input ) : COLOR
+{
+	float3 albedo			= tex2D( Albedo,	input.texture_coordinates.xy ).rgb;
+	float3 normal			= tex2D( Normal,	input.texture_coordinates.xy ).xyz * 2.0 - 1.0;
+	//normal				= normalize(float3(normal.x * BumpFactor, normal.y * BumpFactor, normal.z));
+	//half specular			= SpecFactor * tex2D(SpecularSampler,input.texture_coordinates.xy).r;
+	//half specularPower	= tex2D(SpecularPowerSampler,input.texture_coordinates.xy).r;
+	//half emissive			= tex2D(Emissive,input.texture_coordinates.xy).r;
+	float3 specular_color	= tex2D( SpecularColor,	input.texture_coordinates.xy ).xyz * 2.0 - 1.0;
+	float surface_roughness	= tex2D( Roughness, input.texture_coordinates.xy ).r;
+	float f0				= tex2D( Fresnel, input.texture_coordinates.xy ).r;
+
+	float3 light_direction	= normalize( input.light_direction );
+	float3 view_direction	= normalize( input.eye_direction );
+
+	float3					surface_normal;
+	surface_normal.xyz		= normal.x * input.tangent;
+	surface_normal.xyz		+= normal.y * input.bitangent;
+	surface_normal.xyz		+= normal.z * input.normal;
+	surface_normal			= normalize(surface_normal);
+
+	float alpha_model_parameter	= 1.f;
+	
+	float2 isotropic_roughness_surface_factor		= max(surface_roughness, (0.01f).xx);
+	float anisotropic_roughness_surface_factor_x	= isotropic_roughness_surface_factor.x;
+	float anisotropic_roughness_surface_factor_y	= isotropic_roughness_surface_factor.y;
+	
+	// we use Schlicks approximation formula
+	// where f0 - is cumulative zero degree material fresnel factor
+	float3 halfway_direction	= normalize(light_direction + view_direction);
+	float view_dot_halfway		= dot( view_direction, halfway_direction );
+	float view_dot_halfway_plus	= max( view_dot_halfway, 0.f );
+	float fresnel_factor		= f0 + (1.f - f0)*pow( 1.f - view_dot_halfway_plus, 5.f );
+
+	float light_dot_normal		= dot( light_direction, surface_normal );
+	float light_dot_normal_plus	= max( light_dot_normal, 0.f );
+	float diffuse_factor		= light_dot_normal_plus;// * ( 1.f - fresnel_factor );
+	
+	// compute normalized distribution functions
+	// Beckmann distribution function in case of isotropic materials
+	float cosine_theta			= dot( surface_normal, halfway_direction );
+	float square_cosine_theta	= square( cosine_theta );
+	float square_sine_theta		= 1.f - square_cosine_theta;
+	float square_tangent_theta	= square_sine_theta/square_cosine_theta;
+	
+	float3 surface_tangent		= input.tangent;
+	float3 half_projection		= normalize(halfway_direction - surface_normal * dot(surface_normal, halfway_direction));
+	float square_cosine_phi		= saturate(square( dot(half_projection, surface_tangent) ));
+	float square_sine_phi		= 1.0f - square_cosine_phi;
+	
+	float distribution_function	=
+		 exp(
+			 -square_tangent_theta
+			 *(
+				 square_cosine_phi / square( anisotropic_roughness_surface_factor_x )
+				 +
+				 square_sine_phi / square( anisotropic_roughness_surface_factor_y )
+			 )
+		 );
+	//float distribution_function	= exp( -square_tangent_theta / square( isotropic_roughness_surface_factor ) );
+	
+	float normalized_distribution_function	=
+		distribution_function /
+		(
+			3.14159267f * anisotropic_roughness_surface_factor_x * anisotropic_roughness_surface_factor_y * square(square_cosine_theta)
+		);
+	
+	float specular_factor			=
+		light_dot_normal > 0.f
+		?
+			light_dot_normal_plus * fresnel_factor * normalized_distribution_function /
+			(
+				4.f * view_dot_halfway_plus *
+				pow(
+					abs(
+						light_dot_normal *
+						dot(view_direction, surface_normal)
+					),
+					alpha_model_parameter
+				)
+			)
+		:
+			0.f;
+	
+	return						float4( albedo * (diffuse_factor * LightColor ) + specular_color * specular_factor * LightColor, 1.f );
+
+	
+	//half NdotE = dot(wNormal.xyz, wEyeDir.xyz);
+	//half LdotN = dot(wNormal.xyz, -wLightDir.xyz);
+
+	//// reflection
+	//half4 wReflect;
+	//wReflect.xyz = 2.0 * NdotE * wNormal.xyz - wEyeDir.xyz;	
+	//wReflect.w = (1.0 - GlossFactor) * specularPower.r * ReflectionBlurFactor;
+	//half3 env = texCUBElod(EnvSampler, wReflect).rgb;
+
+	////Fresnel effect
+	//half fresnel = pow(1.001-saturate(NdotE),FresnelPower);
+	//half specFresnel = pow(1.001-saturate(NdotE),SpecularFresnelPower);
+
+	////BRDF
+	//half2 BRDF_UV = float2(saturate(NdotE+OffsetU), saturate((LdotN + 1) * 0.5) + OffsetV);
+	//half3 BRDF = tex2D(BRDFSampler, BRDF_UV.xy).rgb;
+
+	//// specular
+	//half specPower = specularPower * (50 * GlossFactor + 1);
+	//half3 LdotR = saturate(pow(dot(wLightDir.xyz, wReflect.xyz), specPower)) * LightColor.rgb;
+
+	//// ambient
+	//half3 ambient = AmbientFactor*texCUBElod(EnvSampler,  float4(wNormal.xyz,AmbientBlurFactor)).rgb;
+
+	//// Thin Surface translucence
+	//half3 BdotN = (1-alpha) * saturate(dot(wEyeDir.xyz, -wLightDir.xyz)) * saturate(LdotN) * LightColor.rgb;
+
+	//// albedo
+	//half3 diffuseFull = albedo.rgb * ( ambient.rgb + BRDF.rgb);
+
+	//return float4(input.color.xyz * (lerp(diffuseFull.rgb, env.rgb, specular*fresnel)
+	//+ (specular * LdotR * specFresnel))
+	//+ (BdotN * albedo.xyz * SSSColor)
+	//+ (emissive_factor * emissive * emissive_color) , 1.0);
+}
+
+
+//-------------------------------------------------
+//  techniques 
+//-------------------------------------------------
+technique Generic
+{
+	pass P0
+	{
+		CullFaceEnable=false;
+		DepthTestEnable=true;
+		DepthMask = true;
+		DepthFunc = LEqual;
+
+		VertexProgram   = compile arbvp1 /*vp40 */ vertex_shader_main();
+		FragmentProgram = compile fp40 pixel_shader_main();
+	}
+}

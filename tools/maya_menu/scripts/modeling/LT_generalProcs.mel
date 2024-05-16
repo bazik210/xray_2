@@ -1,0 +1,1117 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_generalProcs.mel
+//
+// Contains general procs used by LT_UI.mel for LayoutToolsUI
+//
+// Author:		Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate  
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_generalProcs()
+{
+	// Force loading of all LayoutTools general procs
+}
+
+
+
+//////////////////////////////////////////////
+//	Misc Procs
+//////////////////////////////////////////////
+
+global proc LT_help()
+{
+
+	//Check to see if working on a Mac
+	//
+	if (`about -mac`)  $macExtraPath = "/Library/Preferences/Autodesk";
+	else  $macExtraPath = "";  // empty
+
+    /*  Legacy docs
+
+	*/
+
+	string $LT_help2011x64 = (`getenv HOME` + $macExtraPath + "/maya/2011-x64/LT_docs/LayoutTools.htm");
+	string $LT_help2011 = (`getenv HOME` +  $macExtraPath + "/maya/2011/LT_docs/LayoutTools.htm");	
+	
+	if (`filetest -r $LT_help2011x64`)
+		{
+		print ("Opening " + $LT_help2011x64 + "\n");
+		showHelp -absolute $LT_help2011x64;
+		}	
+	else if (`filetest -r $LT_help2011`)
+		{
+		print ("Opening " + $LT_help2011 + "\n");
+		showHelp -absolute $LT_help2011;
+		}
+	else
+		{
+		print ($LT_help2011x64 + " does not exist.\n");
+		print ($LT_help2011 + " does not exist.\n");
+		warning ("LT_docs could not be found.");
+		}
+		
+			
+	/* Legacy docs
+	string $LT_help2010x64 = (`getenv HOME` + $macExtraPath + "/maya/2010-x64/LT_docs/LayoutTools.htm");
+	string $LT_help2010 = (`getenv HOME` +  $macExtraPath + "/maya/2010/LT_docs/LayoutTools.htm");	
+	string $LT_help2009x64 = (`getenv HOME` + $macExtraPath + "/maya/2009-x64/LT_docs/LayoutTools.htm");
+	string $LT_help2009 = (`getenv HOME` +  $macExtraPath + "/maya/2009/LT_docs/LayoutTools.htm");		
+	string $LT_help2008x64 = (`getenv HOME` +  $macExtraPath + "/maya/2008-x64/LT_docs/LayoutTools.htm");
+	string $LT_help2008 = (`getenv HOME` +  $macExtraPath + "/maya/2008/LT_docs/LayoutTools.htm");
+	string $LT_help8 = (`getenv HOME` +  $macExtraPath + "/maya/8.0/LT_docs/LayoutTools.htm");
+	string $LT_help7 = (`getenv HOME` +  $macExtraPath + "/maya/7.0/LT_docs/LayoutTools.htm");
+	string $LT_help6_5 = (`getenv HOME` +  $macExtraPath + "/maya/6.5/LT_docs/LayoutTools.htm");
+	string $LT_help6 = (`getenv HOME` +  $macExtraPath + "/maya/6.0/LT_docs/LayoutTools.htm");
+	string $LT_help5 = (`getenv HOME` +  $macExtraPath + "/maya/5.0/LT_docs/LayoutTools.htm");
+	string $LT_help4_5 = (`getenv HOME` +  $macExtraPath + "/maya/4.5/LT_docs/LayoutTools.htm");
+	string $LT_help4 = (`getenv HOME` +  $macExtraPath + "/maya/4.0/LT_docs/LayoutTools.htm");
+	
+	if (`filetest -r $LT_help2010x64`)
+		{
+		print ("Opening " + $LT_help2010x64 + "\n");
+		showHelp -absolute $LT_help2010x64;
+		}	
+	else if (`filetest -r $LT_help2010`)
+		{
+		print ("Opening " + $LT_help2010 + "\n");
+		showHelp -absolute $LT_help2010;
+		}
+	else if (`filetest -r $LT_help2009x64`)
+		{
+		print ("Opening " + $LT_help2009x64 + "\n");
+		showHelp -absolute $LT_help2009x64;
+		}	
+	else if (`filetest -r $LT_help2009`)
+		{
+		print ("Opening " + $LT_help2009 + "\n");
+		showHelp -absolute $LT_help2009;
+		}	
+	else if (`filetest -r $LT_help2008x64`)
+		{
+		print ("Opening " + $LT_help2008x64 + "\n");
+		showHelp -absolute $LT_help2008x64;
+		}	
+	else if (`filetest -r $LT_help2008`)
+		{
+		print ("Opening " + $LT_help2008 + "\n");
+		showHelp -absolute $LT_help2008;
+		}	
+	else if (`filetest -r $LT_help8`)
+		{
+		print ("Opening " + $LT_help8 + "\n");
+		showHelp -absolute $LT_help8;
+		}
+	else if (`filetest -r $LT_help7`)
+		{
+		print ("Opening " + $LT_help7 + "\n");
+		showHelp -absolute $LT_help7;
+		}	
+	else if (`filetest -r $LT_help7`)
+		{
+		print ("Opening " + $LT_help6_5 + "\n");
+		showHelp -absolute $LT_help6_5;
+		}
+	else if (`filetest -r $LT_help6`)
+		{
+		print ("Opening " + $LT_help6 + "\n");
+		showHelp -absolute $LT_help6;
+		}
+	else if (`filetest -r $LT_help5`)
+		{
+		print ("Opening " + $LT_help5 + "\n");
+		showHelp -absolute $LT_help5;
+		}
+	else if (`filetest -r $LT_help4_5`)
+		{
+		print ("Opening " + $LT_help4_5 + "\n");
+		showHelp -absolute $LT_help4_5;
+		}
+	else if (`filetest -r $LT_help4`)
+		{
+		print ("Opening " + $LT_help4 + "\n");
+		showHelp -absolute $LT_help4;
+		}
+	else
+		{
+		print ($LT_help2010x64 + " does not exist.\n");
+		print ($LT_help2010 + " does not exist.\n");
+		print ($LT_help2009x64 + " does not exist.\n");
+		print ($LT_help2009 + " does not exist.\n");
+		print ($LT_help2008x64 + " does not exist.\n");
+		print ($LT_help2008 + " does not exist.\n");
+		print ($LT_help8 + " does not exist.\n");
+		print ($LT_help7 + " does not exist.\n");
+		print ($LT_help6_5 + " does not exist.\n");
+		print ($LT_help6 + " does not exist.\n");
+		print ($LT_help5 + " does not exist.\n");
+		print ($LT_help4_5 + " does not exist.\n");
+		print ($LT_help4 + " does not exist.\n");
+		warning ("LT_docs could not be found.");
+		}
+	*/
+}
+
+
+global proc string LT_swFloatToNiceString(float $swFloat)
+{
+    //Convert long float value to shorter string
+    //
+
+    string $swReturn;
+    string $swPrintData[];
+
+    if (($swFloat < 0.000001) && ( $swFloat > -0.000001)) $swReturn = "0.000000";
+    else
+
+    		{
+        string $swTmp = $swFloat;
+        tokenize $swTmp "." $swPrintData;
+        if (size ($swPrintData) == 2)
+	{
+
+                $swPrintData[1] = $swPrintData[1] + "000";
+                $swReturn = $swPrintData[0] + "." + `substring $swPrintData[1] 1 3`;
+        }
+        else 
+		$swReturn = $swPrintData[0] + ".000";
+    }
+    return $swReturn;
+}
+
+
+global proc float[] LT_getCenter(string $vertices[])
+{
+	//Get center / average of given verts
+	//
+	
+	//Return the center of selected verts
+	//Get center based on average
+	//
+	float $center[];
+	float $tmpLocation[];
+	float $xtotal = 0;
+	float $ytotal = 0;
+	float $ztotal = 0;
+
+	$size = `size $vertices`;
+	//print $size;
+
+	for ($vert in $vertices)
+		{
+		$tmpLocation = `xform -q -ws -t $vert`;
+		$xtotal +=  $tmpLocation[0];
+		$ytotal +=  $tmpLocation[1];
+		$ztotal +=  $tmpLocation[2];
+		}
+
+	$center[0] = ($xtotal / ($size));
+	$center[1] = ($ytotal / ($size));
+	$center[2] = ($ztotal / ($size));
+
+	return $center;
+}
+
+
+
+//////////////////////////////////////////////
+//	File I/O Procs
+//////////////////////////////////////////////
+
+global proc string LT_getProp(string $path, string $name, string $ext)
+{
+	//Import or reference object into current scene
+	//
+	
+	//used to track scriptJob for killing icon render HUDs
+	global int $LT_tmpScriptJobID;
+	global string $gSelect;
+    global string $LT_makeIconResponse = "No";
+
+
+	//get related optionVars
+	string $referenceObject = `optionVar -q LT_reference`;  // 1=reference : 0=import
+	string $shareShadingNetworks = `optionVar -q LT_shareShadingNetworks`;
+	string $shareLayers = `optionVar -q LT_shareLayers`;
+	string $createRefLocator = `optionVar -q LT_createRefLocator`;
+	
+	string $allXformsBefore[] = `ls -type transform`;
+	string $objName[];
+	
+	string $fileModifier = " ";
+	
+	//get cut code and extract date
+	string $cutCode = `about -c`;
+	int $dateCheck = `substring $cutCode 1 8`;
+	
+
+	//Set filetype and add extension to name
+	string $type;
+	if ($ext == "mb")
+		$type = "mayaBinary";
+	else if ($ext == "ma")
+		$type = "mayaAscii";
+	else if ($ext == "fbx")
+		$type = "Fbx";
+	else 
+		error ("File extension not recognized Fbx.");
+	string $file = $name+"."+$ext;
+	print $file;
+	
+	
+	//make icon if modfier = ctrl
+	//with help from david krikorian
+	int $mods = `getModifiers`;  //check for ctrl key
+	if (($mods / 4) % 2) 
+		{
+
+		//Keep HUDs visible if recreating multiple icons	
+		//this is setup in LT_createIcon for removing HUDs
+		if (`scriptJob -exists $LT_tmpScriptJobID` && $LT_tmpScriptJobID != 0) 
+			{
+			scriptJob -k $LT_tmpScriptJobID; //kill if it exist
+			}
+		
+		//Get confirmation for icon creation
+		$LT_makeIconResponse = `confirmDialog -title "Confirm" -message "An icon will be created for this file.   WARNING: You will lose any unsaved changes.  Do you want to continue?" -button "Yes" -button "No" -defaultButton "Yes" -cancelButton "No" -dismissString "No"`;	
+
+		if ($LT_makeIconResponse == "Yes") 
+			{
+			//create new file and import prop
+			file -f -new;
+			
+			// if fbx
+			//
+			if ($type == "Fbx")
+				{
+				FBXImportMode -v add;
+				FBXImport -f ($path+ "/" + $file);
+				warning "Shared shading networks not supported for fbx import.";
+				}	
+				
+			//otherwise ma or mb
+			//	
+			else	file -import -type $type -rdn -rpr $name ($path+ "/" + $file);
+	        //file -open -f ($path+ "/" + $file);
+			LT_createIcon $path $name $ext 1; 
+			//setup return of transform name
+			$xform = `pickWalk -d up`;
+			return $xform[0];
+			}
+		else
+			return "";
+					
+		}	
+		//end icon create
+		
+		
+	else //either reference or import the file
+		{		
+		if ($referenceObject == 1)
+			{
+			//Reference the file
+				
+			//check for ref options
+			if ($createRefLocator == 1)
+				$fileModifier = " -gr -gl ";
+			if ($shareShadingNetworks == 1)
+				$fileModifier = ($fileModifier + " -sharedNodes \"shadingNetworks\" ");
+			if ($shareLayers == 1)
+				$fileModifier = ($fileModifier + " -sharedNodes \"displayLayers\" ");
+			
+			
+			if ($type == "Fbx")
+				error ($file + " : Referencing is not designed to work with FBX files.");
+				
+				
+			$command = ("file -r -type " + $type + $fileModifier + " -namespace " + $name + " -options \"v=0\" ");
+			$pathfile = ("\"" + $path + "/" + $file + "\"");
+			eval ($command + $pathfile);
+			
+			
+			//look for locator before moving
+			if ($createRefLocator == 1)
+				{
+				//Locator will automatically get selected
+				string $objName[] = `ls -sl`;
+				select -r ("|"+$objName[0]);
+				//Move to user defined ground plane
+				setAttr ("|"+$objName[0]+".ty") `optionVar -q LT_groundValue`;
+				return ("|"+$objName[0]);
+				}
+			else
+				{
+				//Select all dagNodes and then isolate last imported object
+				select -r -allDagObjects;
+				string $objName[] = `ls -selection -tail 1`;
+				select -r ("|"+$objName[0]);
+				//Move to user defined ground plane
+				setAttr ("|"+$objName[0]+".ty") `optionVar -q LT_groundValue`;
+				return ("|"+$objName[0]);
+				}
+			}		
+				
+			
+		else
+			{
+			//Import the file
+			if ($shareShadingNetworks == 0)
+				if ($type == "Fbx")
+					{
+					FBXImportMode -v add;
+					FBXImport -f ($path+ "/" + $file);	
+					warning "Shared shading networks not supported for fbx import.";
+					}	
+				else // maya file
+					file -import -type $type -rpr $name ($path+ "/" + $file);
+			else
+				{
+				print ("\n");
+				if ($type == "Fbx")
+				    {
+					FBXImportMode -v add;
+					FBXImport -f ($path+ "/" + $file);	
+					}			
+				else // maya file
+					file -import -type $type -rdn -rpr $name ($path+ "/" + $file);			
+				print ("Using file option -rdn to cleanup redundant shader networks.\n");
+				}
+	
+			print ($file + " imported from : " + $path + "\n");
+
+				
+								
+			//Select all dagNodes and then isolate last imported object
+			select -r -allDagObjects;
+			string $objName[] = `ls -selection -tail 1`;
+			select -r ("|"+$objName[0]);
+
+
+			
+			if ($LT_makeIconResponse != "Yes")
+			    //Move to user defined ground plane if not creating an icon
+			    setAttr ("|"+$objName[0]+".ty") `optionVar -q LT_groundValue`;
+				
+			}
+				
+						
+			return $objName[0];
+		}		
+
+		
+}
+
+
+global proc LT_createIcon (string $path, string $name, string $ext, int $setup)
+{	
+
+		global string $LT_importPath;
+		global string $LT_tab1;
+		global string $LT_tabName;
+
+		global int $LT_tmpScriptJobID;
+
+		string $iconsSecondary = ($LT_importPath + "icons/");
+		string $iconsPrimary = ($path + "/icons/");
+		
+		string $file = $name+"."+$ext;
+
+		//int	$iconSize = `optionVar -q LT_iconSize`;
+		int $iconSize = 128;
+        string $iconFormatName = `optionVar -q LT_iconFormat`;
+        int $iconFormatNumber = `optionVar -q LT_iconFormatNumber`;	 
+        string $iconRenderer = `optionVar -q LT_iconRenderer`;  
+	    
+	    //set icon file format based on OS (No longer needed with QT)
+		/*
+		if (`about -mac`)
+			{
+			$iconFormatNumber = 7;
+			$iconFormatName = ".iff";
+			}
+		else
+			{
+			$iconFormatNumber = 20;	
+			$iconFormatName = ".bmp";
+			}			
+        */				
+				
+		if ($setup == 1) //for lighting and camera setup
+		{
+			//temporary lighting
+			directionalLight;
+			$lightName1 = `ls -sl`;
+			setAttr ($lightName1[0]+".rotateX") -27;
+			setAttr ($lightName1[0]+".rotateY") 15;
+			setAttr ($lightName1[0]+".rotateZ") 18;
+			$lightName1 = `pickWalk -d down`;
+			setAttr ($lightName1[0]+".intensity") 2;
+			setAttr ($lightName1[0]+".useDepthMapShadows") 1;
+			directionalLight;
+			$lightName2 = `ls -sl`;
+			setAttr ($lightName2[0]+".rotateX") -122;
+			setAttr ($lightName2[0]+".rotateY") -7;
+			setAttr ($lightName2[0]+".rotateZ") -66;
+			$lightName2 = `pickWalk -d down`;
+			setAttr ($lightName2[0]+".intensity") 1;
+			setAttr ($lightName2[0]+".useDepthMapShadows") 1;
+	
+			//set panel
+			string $panelList[] = `getPanel -type modelPanel`;
+			for ($currentPanel in $panelList)   
+					modelEditor -edit -displayLights "all" -displayAppearance "smoothShaded" -displayTextures 1 -rendererName "base_OpenGL_Renderer" $currentPanel;						
+
+			//setup camera
+			//setAttr "perspShape.mask" 0;
+	    	setAttr "perspShape.focalLength" 55;
+	        setAttr "perspShape.backgroundColor" -type double3 0.75 0.75 0.75 ;
+			camera -e -filmFit "fill" -displayFilmGate off -displayResolution on -overscan 1.3 persp;
+
+			//select and frame meshes
+	    	string $meshList[] = `ls -typ mesh`;
+	    	if (`size $meshList` == 0)
+	    		error "Can't render icon. No meshes found in scene.";
+	    	else
+	    	    select $meshList;
+		    	//select $meshList[0];
+	    	//Frame camera;
+			viewFit perspShape ;
+			
+			/*
+			//Can be use to dolly camera closer
+			if (`getAttr persp.tx` < 5)			
+				dolly -rel -d 0 persp;
+			if (`getAttr persp.tx` < 25)
+				dolly -rel -d (-`getAttr persp.tx` / 10) persp;
+			else if (`getAttr persp.tx` < 50)
+				dolly -rel -d (-`getAttr persp.tx` / 4) persp;
+			else if (`getAttr persp.tx` < 100)
+				dolly -rel -d (-`getAttr persp.tx` / 3) persp;
+			else
+				dolly -rel -d (-`getAttr persp.tx` / 2) persp;
+			*/
+			
+		}
+		
+		
+		//setup image
+		setAttr "defaultResolution.width" $iconSize;
+		setAttr "defaultResolution.height" $iconSize;
+		setAttr "defaultResolution.deviceAspectRatio" 1;
+		setAttr "defaultResolution.pixelAspect" 1;
+		print $iconFormatNumber;
+    	setAttr "defaultRenderGlobals.imageFormat" $iconFormatNumber;
+
+		//hardware render quality
+		setAttr "hardwareRenderGlobals.enableHighQualityLighting" 1;
+		setAttr "hardwareRenderGlobals.enableAcceleratedMultiSampling" 1;
+		setAttr "hardwareRenderGlobals.numberOfSamples" 9;
+		setAttr "hardwareRenderGlobals.colorTextureResolution" 512;
+		setAttr "hardwareRenderGlobals.bumpTextureResolution" 1024;
+
+	   	//software render quality
+		setAttr "defaultRenderQuality.edgeAntiAliasing" 1;
+
+		
+		//put iff icon image in icons folder in same location as maya file
+		//if icons folder doesn't exist it will be created
+        setAttr -type "string" defaultRenderGlobals.imageFilePrefix ($iconsPrimary+$name);
+
+
+        if ($iconRenderer == "Hardware")
+            {
+            //Hardware Render
+    		//string $LTcurrentFileFull = ("/Objects/Static/icons/"+$LTcurrentFileFinalName+$iconFormatName);
+            hwRender -fnp -cf -w $iconSize -h $iconSize -nrv -cam persp; 
+            }
+		
+		else if ($iconRenderer == "MentalRay")
+		    {
+    		//or MentalRay renderer - but first setup some quick quality settings
+    		setCurrentRenderer mentalRay;
+            miCreateDefaultNodes;
+    		setAttr "miDefaultOptions.maxSamples" 1;
+    		setAttr miDefaultOptions.filter 1;
+            setAttr miDefaultOptions.filterWidth 1;
+            setAttr miDefaultOptions.filterHeight 1;
+            setAttr "miDefaultOptions.maxReflectionRays" 2;
+            setAttr "miDefaultOptions.maxRefractionRays" 2;
+            setAttr "miDefaultOptions.maxRayDepth" 4;
+	    	Mayatomr -preview   $iconSize -y $iconSize -camera persp;
+		    }
+		else
+            {
+            //default to the Maya software render
+	    	render -x $iconSize -y $iconSize persp;
+		    }
+
+	    sysFile -rename  ($iconsPrimary+$name+$iconFormatName) ($iconsPrimary+$name+"_tmp"+$iconFormatName);
+
+		//print ("Renaming : "+$iconsPrimary+$name+"_tmp.iff  \n");
+		//print ("Rendered icon : " +$iconsPrimary + $name + $iconFormatName + "\n");
+	    print ("\nRendered icon : " +$iconsPrimary + $name + $iconFormatName + " with " + $iconRenderer + " renderer \n");
+  		
+		//refreshIcon
+		LT_UI ; tabLayout -edit -st $LT_tab1 $LT_tabName;
+		
+		//Create HUDs for re-rendering icon
+		//	
+		if (`headsUpDisplay -exists HUDIconInfo`) headsUpDisplay -remove HUDIconInfo;
+
+		headsUpDisplay -rp 2 4;
+		headsUpDisplay -s    2
+               -b        4
+               -ba       "center"
+               -dw       50
+               -label      "(Adjust camera or click drag to spin object, then push button below to re-create icon if necessary)."
+               HUDIconInfo;		
+			
+		if (`headsUpDisplay -exists HUDIconRenButton`) headsUpDisplay -remove HUDIconRenButton;
+		
+		headsUpDisplay -rp 7 4;
+		hudButton -s 7
+			  -b 4
+			  -vis 1
+			  -l "Re-Render Icon"
+			  -ba       "center"
+			  -bw 140
+			  -bsh "roundRectangle"
+			  -rc ("LT_createIcon \"" + $path + "\" \"" + $name + "\"  \"" + $ext + "\" \"0\"")
+			  HUDIconRenButton;
+			  
+		if (`headsUpDisplay -exists HUDKillIconRenButton`)	headsUpDisplay -remove HUDKillIconRenButton;
+
+		headsUpDisplay -rp 7 2;
+		hudButton -s 7
+			  -b 2
+			  -vis 1
+			  -l "Done"
+			  -ba       "center"
+			  -bw 60
+			  -bsh "rectangle"
+			  -rc "headsUpDisplay -remove HUDIconRenButton; headsUpDisplay -remove HUDKillIconRenButton; headsUpDisplay -remove HUDIconInfo; camera -e -displayFilmGate off -displayResolution off persp"
+			  HUDKillIconRenButton;
+			
+		
+		//Create scriptJob for killing HUD with file new or file open
+		//first check for existing scriptJob
+		int $exists = 0;
+		string $lastJob;
+		// get list of script jobs
+		$jobList = `scriptJob -lj`;
+		for ($lastJob in $jobList)
+		{
+			// check for HUDIconRenButton
+			string $match = match("HUDIconRenButton",$lastJob);
+			if ($match == "HUDIconRenButton")
+				{
+				$exists = 1;
+				break;
+				}
+		}
+		
+		//create scriptJob to kill with new scene or open scene
+		if ($exists == 0) $LT_tmpScriptJobID = `scriptJob -runOnce true -ct "flushingScene" "if (`headsUpDisplay -exists HUDIconRenButton`) headsUpDisplay -remove HUDIconRenButton; if (`headsUpDisplay -exists HUDKillIconRenButton`) headsUpDisplay -remove HUDKillIconRenButton; if (`headsUpDisplay -exists HUDIconInfo`) headsUpDisplay -remove HUDIconInfo ; $LT_tmpScriptJobID = 0"`;
+
+}
+
+
+global proc LT_batchCreateIcons (string $path)
+{	
+
+		global string $LT_importPath;
+		global string $LT_tab1;
+		global string $LT_tabName;
+
+		string $iconsSecondary = ($LT_importPath + "icons/");
+		string $iconsPrimary = ($path + "/icons/");
+					
+		string $file;
+	    string $nameParts[];
+		string $name;
+		string $ext;
+		
+		//int	$iconSize = `optionVar -q LT_iconSize`;
+		int $iconSize = 128;
+        string $iconFormatName = `optionVar -q LT_iconFormat`;
+        int $iconFormatNumber = `optionVar -q LT_iconFormatNumber`;
+        string $iconRenderer = `optionVar -q LT_iconRenderer`;  
+	    
+	    //set icon file format based on OS (No longer needed with QT)
+	    /*
+		if (`about -mac`)
+			{
+			$iconFormatNumber = 7;
+			$iconFormatName = ".iff";
+			}
+		else
+			{
+			$iconFormatNumber = 20;	
+			$iconFormatName = ".bmp";
+			}
+		*/
+				
+			
+		string $LT_makeIconResponse = `confirmDialog -title "Confirm" -message "Icons will be created for all files in this folder.   WARNING: You will lose any unsaved changes.  Do you want to continue?" -button "Yes" -button "No" -defaultButton "Yes" -cancelButton "No" -dismissString "No"`;	
+
+		if ($LT_makeIconResponse == "Yes") 
+			{		
+			$iconCount = 0;
+			for ($file in `LT_listFilesAtPath $path`)
+				{
+				print $file;
+				//Separate name from extension
+				//$nameParts[0] = file  :  $nameParts[1] = extension
+				tokenize ($file, ".", $nameParts);
+						
+				$name = $nameParts[0];
+				$ext = $nameParts[1];
+				
+				/*
+				//Set filetype and add extension to name
+				string $type;
+				if ($ext == "mb")
+					$type = "mayaBinary";
+				else if ($ext == "ma")
+					$type = "mayaAscii";
+				*/	
+					
+					//Set filetype and add extension to name
+				string $type;
+				if ($ext == "mb")
+					$type = "mayaBinary";
+				else if ($ext == "ma")
+					$type = "mayaAscii";
+				else if ($ext == "fbx")
+					$type = "Fbx";
+				//else 
+				//	error ("File extension not recognized Fbx.");
+				//string $file = $name+"."+$ext;
+				//print $file;	
+				
+				
+				
+				
+				if (($ext == "mb") || ($ext == "ma"))
+					{		
+					file -f -new;
+					file -import -type $type -rdn -rpr $name ($path+ "/" + $file);	
+					}		
+				
+				else if ($ext == "fbx")
+					{
+					file -f -new;
+					FBXImportMode -v add;
+					FBXImport -f ($path+ "/" + $file);	
+					}
+					
+				else
+					continue;
+					
+					
+				
+				//setup temporary lighting
+				directionalLight;
+				$lightName1 = `ls -sl`;
+				setAttr ($lightName1[0]+".rotateX") -27;
+				setAttr ($lightName1[0]+".rotateY") 15;
+				setAttr ($lightName1[0]+".rotateZ") 18;
+				$lightName1 = `pickWalk -d down`;
+				setAttr ($lightName1[0]+".intensity") 2;
+				setAttr ($lightName1[0]+".useDepthMapShadows") 1;
+				directionalLight;
+				$lightName2 = `ls -sl`;
+				setAttr ($lightName2[0]+".rotateX") -122;
+				setAttr ($lightName2[0]+".rotateY") -7;
+				setAttr ($lightName2[0]+".rotateZ") -66;
+				$lightName2 = `pickWalk -d down`;
+				setAttr ($lightName2[0]+".intensity") 1;
+				setAttr ($lightName2[0]+".useDepthMapShadows") 1;
+			
+				
+				//set panel
+				string $panelList[] = `getPanel -type modelPanel`;
+				for ($currentPanel in $panelList)   
+						modelEditor -edit -displayLights "all" -displayAppearance "smoothShaded" -displayTextures 1 -rendererName "base_OpenGL_Renderer" $currentPanel;						
+		
+				//setup camera
+				//setAttr "perspShape.mask" 0;
+			   	setAttr "perspShape.focalLength" 55;
+		     	setAttr "perspShape.backgroundColor" -type double3 0.75 0.75 0.75 ;
+				camera -e -filmFit "fill" -displayFilmGate off -displayResolution on -overscan 1.3 persp;
+		
+				//select and frame meshes
+			   	string $meshList[] = `ls -typ mesh`;
+			   	//select $meshList[0];
+			   	select $meshList;
+			   	//FrameSelected;
+				viewFit perspShape ;
+
+				//can be used to dolly camera closer
+				/*
+				if (`getAttr persp.tx` < 5)			
+					dolly -rel -d 0 persp;
+				if (`getAttr persp.tx` < 10)
+					dolly -rel -d (-`getAttr persp.tx` / 10) persp;
+				else if (`getAttr persp.tx` < 20)
+					dolly -rel -d (-`getAttr persp.tx` / 4) persp;
+				else if (`getAttr persp.tx` < 40)
+					dolly -rel -d (-`getAttr persp.tx` / 3) persp;
+				else
+					dolly -rel -d (-`getAttr persp.tx` / 2) persp;			
+				*/		
+				
+				//setup image
+				setAttr "defaultResolution.width" $iconSize;
+				setAttr "defaultResolution.height" $iconSize;
+				setAttr "defaultResolution.deviceAspectRatio" 1;
+				setAttr "defaultResolution.pixelAspect" 1;
+		    	setAttr "defaultRenderGlobals.imageFormat" $iconFormatNumber;
+
+		    	//software render quality
+				setAttr "defaultRenderQuality.edgeAntiAliasing" 1;
+		
+				//hardware render quality
+				setAttr "hardwareRenderGlobals.enableHighQualityLighting" 1;
+				setAttr "hardwareRenderGlobals.enableAcceleratedMultiSampling" 1;
+				setAttr "hardwareRenderGlobals.numberOfSamples" 9;
+				setAttr "hardwareRenderGlobals.colorTextureResolution" 512;
+				setAttr "hardwareRenderGlobals.bumpTextureResolution" 1024;	
+																
+				//put iff icon image in icons folder in same location as maya file
+				//if icons folder doesn't exist it will be created
+		        setAttr -type "string" defaultRenderGlobals.imageFilePrefix ($iconsPrimary+$name);
+
+        
+                if ($iconRenderer == "Hardware")
+                    {
+                    //Hardware Render
+            		//string $LTcurrentFileFull = ("/Objects/Static/icons/"+$LTcurrentFileFinalName+$iconFormatName);
+                    hwRender -fnp -cf -w $iconSize -h $iconSize -nrv -cam persp; 
+                    print "Icon rendered with Hardward renderer\n";
+                    }
+        		
+        		else if ($iconRenderer == "MentalRay")
+        		    {
+            		//or MentalRay renderer - but first setup some quick quality settings
+            		setCurrentRenderer mentalRay;
+                    miCreateDefaultNodes;
+            		setAttr "miDefaultOptions.maxSamples" 1;
+            		setAttr miDefaultOptions.filter 1;
+                    setAttr miDefaultOptions.filterWidth 1;
+                    setAttr miDefaultOptions.filterHeight 1;
+                    setAttr "miDefaultOptions.maxReflectionRays" 2;
+                    setAttr "miDefaultOptions.maxRefractionRays" 2;
+                    setAttr "miDefaultOptions.maxRayDepth" 4;
+                    Mayatomr -preview   $iconSize -y $iconSize -camera persp;
+                    print "Icon rendered with MentalRay renderer\n";
+        		    }
+        		else
+                    {
+                    //default to the Maya software render
+        	    	render -x $iconSize -y $iconSize persp;
+                    print "Icon rendered with Maya renderer\n";
+        		    }
+
+        		sysFile -rename  ($iconsPrimary+$name+$iconFormatName) ($iconsPrimary+$name+"_tmp"+$iconFormatName);
+
+				//print ("Renaming : "+$iconsPrimary+$name+"_tmp.iff  \n");
+				//print ("\nRendered icon : " +$iconsPrimary + $name + $iconFormatName + "\n");
+				print ("\nRendered icon : " +$iconsPrimary + $name + $iconFormatName + " with " + $iconRenderer + " renderer \n");
+				
+				
+				$iconCount ++;
+				}
+			file -f -new;
+	
+			//refreshIcons
+			LT_UI ; tabLayout -edit -st $LT_tab1 $LT_tabName;
+	
+		}
+		
+		else
+			warning "Cancelled icon batch render";
+			
+}
+
+
+global proc string[] LT_listFilesAtPath(string $currentPath)
+{
+
+	//Get list of files in props folder
+	//
+	string $currentPath;
+	string $fileList[] =`getFileList -folder $currentPath`;
+	return $fileList;
+}
+
+
+global proc LT_getPropFolderList(string $startingPoint, int $recursive)
+
+{
+	global string $LT_propFolderList[];		
+
+	string $importPrefix = `optionVar -q LT_importPrefix`;
+	string $subFolders[] = `getFileList -fld $startingPoint`;
+	int $maxFolderCount = size($subFolders);
+	int $pathListSize;
+
+	//step through list of files
+	for($folderCount=0 ; $folderCount<$maxFolderCount ; $folderCount++)
+	{
+		int $folder = `filetest -d ($startingPoint + $subFolders[$folderCount])`;
+		//if file is a folder
+		if($folder)
+			{
+			//check for prefix match
+			if (`gmatch $subFolders[$folderCount] ($importPrefix + "*")`)
+				{
+				//add matching folder to the list
+				print ("Adding : " + $startingPoint + $subFolders[$folderCount] + " to import tab.\n");
+				$pathListSize = (`size $LT_propFolderList`);
+				$LT_propFolderList[$pathListSize] = ($startingPoint + $subFolders[$folderCount]);
+				}
+			//recursively check subfolders also
+			if ($recursive == 1)
+				LT_getPropFolderList ($startingPoint + $subFolders[$folderCount] + "/", 1);
+			}
+
+	}
+}
+
+
+
+/////////////////
+// Setup Hotkeys
+
+
+global proc LT_setupWalkCam()
+{
+	// The following Hotkeys will be automatically created with setupWalkCam proc
+	//
+	/*
+	Forward: map to Alt w press:
+		LT_startWalkCam 1
+
+	Backward: map to Alt s press:
+		LT_startWalkCam 0
+	
+	Right: map to Alt d press:
+		LT_startWalkCam 2
+	
+	Left: map to Alt a press:
+		LT_startWalkCam 3
+
+	Stop: map to Alt w,s,d,a release:
+		LT_stopWalkCam;
+	*/
+	/////////////////////
+	//Named Commands
+	//
+	nameCommand
+		-annotation "LT_walkCamForwardNameCommand"
+		-command ("LT_walkCamForward")
+		LT_walkCamForwardNameCommand;
+
+	nameCommand
+		-annotation "LT_walkCamBackwardNameCommand"
+		-command ("LT_walkCamBackward")
+		LT_walkCamBackwardNameCommand;
+
+	nameCommand
+		-annotation "LT_walkCamLeftNameCommand"
+		-command ("LT_walkCamLeft")
+		LT_walkCamLeftNameCommand;
+
+	nameCommand
+		-annotation "LT_walkCamRightNameCommand"
+		-command ("LT_walkCamRight")
+		LT_walkCamRightNameCommand;
+
+	nameCommand
+		-annotation "LT_walkCamStopNameCommand"
+		-command ("LT_walkCamStop")
+		LT_walkCamStopNameCommand;
+
+	/////////////////////
+	//Run-Time Commands
+	//
+	
+	if (`runTimeCommand -exists LT_walkCamForward` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_startWalkCam 1;")
+			LT_walkCamForward;
+
+	if (`runTimeCommand -exists LT_walkCamBackward` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_startWalkCam 0;")
+			LT_walkCamBackward;
+
+	if (`runTimeCommand -exists LT_walkCamLeft` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_startWalkCam 3;")
+			LT_walkCamLeft;
+
+	if (`runTimeCommand -exists LT_walkCamRight` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_startWalkCam 2;")
+			LT_walkCamRight;
+
+	if (`runTimeCommand -exists LT_walkCamStop` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_stopWalkCam;")
+			LT_walkCamStop;
+
+	/////////////////////
+	//Hotkeys
+	//
+	/*
+	hotkey -keyShortcut "w" -alt -name ("LT_walkCamForwardNameCommand");
+	hotkey -keyShortcut "w" -alt -releaseName ("LT_walkCamStopNameCommand");
+	hotkey -keyShortcut "s" -alt -name ("LT_walkCamBackwardNameCommand");
+	hotkey -keyShortcut "s" -alt -releaseName ("LT_walkCamStopNameCommand");
+	hotkey -keyShortcut "a" -alt -name ("LT_walkCamLeftNameCommand");
+	hotkey -keyShortcut "a" -alt -releaseName ("LT_walkCamStopNameCommand");
+	hotkey -keyShortcut "d" -alt -name ("LT_walkCamRightNameCommand");
+	hotkey -keyShortcut "d" -alt -releaseName ("LT_walkCamStopNameCommand");
+	*/
+}
+
+
+
+global proc LT_setupHotkeyLT()
+{
+	// The following Hotkey will be automatically created for opening the LayoutTools UI
+	/*
+	Launch LayoutTools docked : map to l press:	
+	Launch LayoutTools floating : map to L press:	
+	*/
+	
+    source setChannelBoxVisible.mel;
+	
+	/////////////////////
+	//Named Commands
+	//
+	nameCommand
+		-annotation "LT_LaunchDockedCommandQT"
+		//-command ("if (`layout -ex LT_form`) {optionVar -intValue LT_RebuildUI 0;  optionVar -iv LT_UIMode 1; LT_UI;} else {optionVar -intValue LT_RebuildUI 1; optionVar -iv LT_UIMode 1; LT_UI;}")
+		-command ("if (`layout -ex LT_form` && `dockControl -q -visible LT_Dock` && (`optionVar -q LT_UIMode` != 0)) {dockControl -e -visible 0 LT_Dock;optionVar -iv LT_UIMode 1; raiseChannelBox;}else if (`layout -ex LT_form` && `dockControl -q -visible LT_Dock` && (`optionVar -q LT_UIMode` == 0)) {optionVar -intValue LT_RebuildUI 0;  optionVar -iv LT_UIMode 1; LT_UI;}else if  (`layout -ex LT_form` && (!`dockControl -q -visible LT_Dock`)){optionVar -intValue LT_RebuildUI 0;  optionVar -iv LT_UIMode 1; LT_UI;} else {optionVar -intValue LT_RebuildUI 1; optionVar -iv LT_UIMode 1; LT_UI;}")
+		LT_LaunchDockedCommand;			
+	
+	nameCommand
+		-annotation "LT_LaunchFloatingCommandQT;"
+		-command ("if (`layout -ex LT_form`) {optionVar -intValue LT_RebuildUI 0; optionVar -iv LT_UIMode 0;  LT_UI;} else {optionVar -intValue LT_RebuildUI 1; optionVar -iv LT_UIMode 0; LT_UI;}")
+		LT_LaunchFloatingCommand;
+	
+	/////////////////////
+	//Run-Time Commands
+	//
+	
+	if (`runTimeCommand -exists LT_LaunchDockQT` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_LaunchDockedCommandQT;")
+			LT_LaunchDockQT;
+
+	if (`runTimeCommand -exists LT_LaunchFloatQT` == 0)
+		runTimeCommand
+			-annotation ""
+			-category "User"
+			-command ("LT_LaunchFloatingCommandQT;")
+			LT_LaunchFloatQT;
+	
+	/////////////////////
+	//Hotkeys
+	//
+	hotkey -keyShortcut "l" -name ("LT_LaunchDockedCommand");	
+	hotkey -keyShortcut "L" -name ("LT_LaunchFloatingCommand");
+
+}
+
+
+
+global proc LT_setWindowWidth(int $width)
+{
+
+	global string $LT_paneLayout;
+	global string $LT_LayoutToolsDock;
+
+    /*
+    dockControl -edit -w $width -h $height $LT_LayoutToolsDock; 
+    paneLayout -edit -w $width -h $height $LT_paneLayout; 
+    formLayout -e -w $width -h $height LT_form; 
+    optionVar -iv LT_UIWidth $width; 
+    optionVar -iv LT_UIHeight $height;
+    */
+    dockControl -edit -w $width $LT_LayoutToolsDock; 
+    paneLayout -edit -w $width $LT_paneLayout; 
+    formLayout -e -w $width LT_form; 
+    optionVar -iv LT_UIWidth $width; 
+}
+
+
+
+global proc LT_storeToShelf()
+{
+    global string $gShelfTopLevel;
+	
+	string $prefix = `optionVar -q LT_importPrefix`;		
+	string $path = `optionVar -q LT_userImportPath`;
+	
+     //make shelf button containing location and path
+	if (`tabLayout -exists $gShelfTopLevel`)	
+	{
+		shelfButton
+			-parent ($gShelfTopLevel + "|" + `tabLayout -q -st $gShelfTopLevel`)
+			-command ("optionVar -sv LT_importPrefix " + $prefix + "; optionVar -sv LT_userImportPath \"" + $path + "\"; optionVar -intValue LT_RebuildUI 1; LT_UI;")
+			//-image1 ($mayaLocation+"/extras/icons/USEROUT_LIST.BMP")
+			-image1 commandButton.png
+			-iol ("LT : " + $prefix)
+			-label ("LT : " + $prefix)
+			-annotation ("LT: Folder Prefix = " + $prefix + " : Location = " + $path);
+	}
+	else
+		error ("Must have active shelf to create shelf button");
+}

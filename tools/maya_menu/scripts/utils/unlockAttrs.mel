@@ -1,0 +1,8 @@
+global proc unlockAttrs(string $obj)
+{
+//$obj = sel();
+string $attrs[] = {"tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz"};
+string $attr;
+for ($attr in $attrs)
+	setAttr -l 0 ($obj + "." + $attr);
+}

@@ -1,0 +1,1 @@
+global proc int uvEditorSelected(){if (`getPanel -wf` == "polyTexturePlacementPanel1")	return 1;else	return 0;}

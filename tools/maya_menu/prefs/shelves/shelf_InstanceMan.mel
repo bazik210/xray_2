@@ -1,0 +1,158 @@
+global proc shelf_InstanceMan () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Create Asset from Selection" 
+        -enableBackground 0
+        -align "center" 
+        -label "Create Asset" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_createAsset.png" 
+        -image1 "references/ref_createAsset.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import AssetManagment; AssetManagment.createAssetFromSelection()\");" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Export Assets from Selection" 
+        -enableBackground 0
+        -align "center" 
+        -label "Export Assets" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_exportAsset.png" 
+        -image1 "references/ref_exportAsset.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import AssetManagment; AssetManagment.exportSelectedAssets()\");" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "create copy of selected transforms, understand referenced files" 
+        -enableBackground 0
+        -align "center" 
+        -label "Copy Reference" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_copyReference.png" 
+        -image1 "references/ref_copyReference.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import referenceCopyDel; referenceCopyDel.copyTransformWithReferences()\");" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "remove selected transform, understand referenced files" 
+        -enableBackground 0
+        -align "center" 
+        -label "Remove Reference" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_removeReference.png" 
+        -image1 "references/ref_removeReference.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import referenceCopyDel; referenceCopyDel.deleteTransformWithReferences()\");" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "replace selected objects to referenced Asset" 
+        -enableBackground 0
+        -align "center" 
+        -label "Replace Reference" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_replaceReference.png" 
+        -image1 "references/ref_replaceReference.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import referenceReplace; m_replaceRefWindow = referenceReplace.m_replaceRefWin()\");" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 34
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "if a selected node is a Asset and from referenced file - Select all nodes like this" 
+        -enableBackground 0
+        -align "center" 
+        -label "Select References" 
+        -labelOffset 0
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.25 
+        -image "references/ref_selectReferences.png" 
+        -image1 "references/ref_selectReferences.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "python(\"import referenceCopyDel; referenceCopyDel.SelectAssetsBySelection()\")" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+    ;
+
+} 

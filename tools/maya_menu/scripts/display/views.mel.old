@@ -1,0 +1,83 @@
+global proc views()
+{
+//$cam = "persp";
+//$cam = "side";
+int $maya = `getApplicationVersionAsFloat`;
+string $cam = currCam();
+string $panel = `getPanel -wf`;
+if ($cam == "persp")
+{
+float $vector[] = vectorToFloat(rotationToVector("persp", <<0,0,-1>>));
+float $vectorAbs[] = {abs($vector[0]),abs($vector[1]),abs($vector[2])};
+int $axis = forInNumFloat(maxOf ($vectorAbs), $vectorAbs);
+string $ort;
+string $up = `upAxis -q -axis`;
+if ($axis == 0) $ort = "side";
+else if ($axis == 1 && $up == "y")
+	$ort = "top";
+else if ($axis == 1 && $up == "z")
+	$ort = "front";
+else if ($axis == 2 && $up == "y")
+	$ort = "front";
+else if ($axis == 2 && $up == "z")
+	$ort = "top";
+//detect what ortorgraphic camera we need
+
+$posCon = `pointConstraint -offset 0 0 0 -weight 1 persp $ort`;
+$oriCon = `orientConstraint -offset 0 0 0 -weight 1 persp $ort`;
+delete $posCon $oriCon;
+
+float $rx = `getAttr ($ort + ".rx")`;
+float $ry = `getAttr ($ort + ".ry")`;
+float $rz = `getAttr ($ort + ".rz")`;
+$rx = intToFloat(floatToInt($rx / 90 + ($rx >= 0 ? 0.5 : -0.5))) * 90;
+$ry = intToFloat(floatToInt($ry / 90 + ($ry >= 0 ? 0.5 : -0.5))) * 90;
+$rz = intToFloat(floatToInt($rz / 90 + ($rz >= 0 ? 0.5 : -0.5))) * 90;
+setAttr -type double3 ($ort + ".r") $rx $ry $rz;
+//constraint, delete constraint, fit ortographic view angle.
+
+float $coi = `getAttr "persp.centerOfInterest"`;
+string $ortShape = stringSingle(`listRelatives -s $ort`);
+setAttr ($ortShape + ".orthographicWidth") $coi;
+
+float $camPos[] = `xform -q -ws -t persp`;
+float $vector[] = vectorToFloat(rotationToVector("persp", <<0,0,-1>>));
+float $targetPos[] = vectorToFloat(floatToVector($camPos) + (floatToVector($vector) * $coi));
+float $vectorAbs[] = {abs($vector[0]),abs($vector[1]),abs($vector[2])};
+float $max = maxOf($vectorAbs);
+int $numIn = forInNumFloat($max, $vectorAbs);
+float $x = $targetPos[0] + ($coi * ($camPos[0] > $targetPos[0] ? 1 : -1));
+float $y = $targetPos[1] + ($coi * ($camPos[1] > $targetPos[1] ? 1 : -1));
+float $z = $targetPos[2] + ($coi * ($camPos[2] > $targetPos[2] ? 1 : -1));
+if ($numIn == 0)
+	move -a $x $targetPos[1] $targetPos[2] $ort;
+else if ($numIn == 1)
+	move -a $targetPos[0] $y $targetPos[2] $ort;
+else if ($numIn == 2)
+	move -a $targetPos[0] $targetPos[1] $z $ort;
+if ($maya == 6)
+	lookThroughModelPanel $ort $panel;
+else
+	switchModelView $ort;
+}
+else
+{
+$posCon = `pointConstraint -offset 0 0 0 -weight 1 $cam persp`;
+$oriCon = `orientConstraint -offset 0 0 0 -weight 1 $cam persp`;
+delete $posCon $oriCon;
+float $orthoWidth = `getAttr ($cam + ".orthographicWidth")`;
+float $coi = `getAttr ("persp" + ".centerOfInterest")`;
+float $vector[] = vectorToFloat(rotationToVector("persp", <<0,0,-1>>));
+float $move[] = vectorToFloat(floatToVector($vector) * ($coi - $orthoWidth));
+move -r $move[0] $move[1] $move[2] persp;
+setAttr ("persp" + ".centerOfInterest") $orthoWidth;
+if ($maya == 6)
+	lookThroughModelPanel persp $panel;
+else
+	switchModelView persp;
+}
+}
+
+
+
+

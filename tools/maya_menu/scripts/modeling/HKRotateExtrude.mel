@@ -1,0 +1,227 @@
+///////////////////////////////////////////  HK RotateExtrude ////////////////////////////////////
+//
+//
+// Created by Henry Korol ( aka HawK )
+// E-Mail: henrykorol@yahoo.com
+// Creation Date: 10.01.05
+//
+// This script extrudes the face(s) and rotates it(them) around the pivot( selected edge or vertex). Script
+// automaticly desides in which axis to rotate, in which direction, and in which direction to offset the pivot.
+// At first it looks like Hinge From Edge, but it can use any pivot(edge or vertex) and it's not creating a
+// shared edge while extruding, allowing for creation of better topology. Beware of trying to rotate it in a 
+// complex angles. And freeze the rotations on the object before using the script.
+//
+// Controls:
+//   Angle: The angle at which the extruded faces are rotated.( There's no need to enter negative values,
+//     the script chooses the rotation direction automaticly.
+//   Pivot Offset: The amount in which the pivot will be offseted in the main axis( which is selected
+//     automaticly), again there's no need to enter negative values.
+//   Divisions: The number of times the extrusion is subdivided.
+//  
+//   You can place this on the shelf for instant access. The icon is within the zip archeve:).
+//      Enjoy and best regards:)
+
+global proc HKRotateExtrude()
+{
+   float $Angle;float $Oset;int $Div;float $B; int $D;
+   if( `optionVar -ex HKREAngle`)
+        $Angle = `optionVar -q HKREAngle`;
+   else
+     {
+        optionVar -fv HKREAngle 90;
+        $Angle = 90;
+     }
+   if( `optionVar -ex HKREOffset`)
+        $Oset = `optionVar -q HKREOffset`;
+   else
+     {
+        optionVar -fv HKREOffset 0;
+        $Oset = 0;
+     }
+   if( `optionVar -ex HKREDivisions`)
+        $Div = `optionVar -q HKREDivisions`;
+   else
+     {
+        optionVar -iv HKREDivisions 4;
+        $Div = 4;
+     }
+  
+   if(`window -ex HKRotateExtrudeWindow`)
+        deleteUI HKRotateExtrudeWindow;
+ 
+  window -t "RotateExtrude Options" -wh 420 305 HKRotateExtrudeWindow;
+    formLayout HKREForm;
+       frameLayout -l "" HKREFrame;
+          columnLayout;
+             floatSliderGrp -l "Angle" -f 1 -v $Angle -min 0 -max 360 -pre 1 -cc "$B=`floatSliderGrp -q -v HKREAngleSlider`;optionVar -fv HKREAngle $B;" HKREAngleSlider;
+             floatSliderGrp -l "Pivot Offset" -f 1 -min 0 -max 2 -fmx 500 -pre 3 -v $Oset -cc "$B=`floatSliderGrp -q -v HKREOffsetSlider`;optionVar -fv HKREOffset $B;" HKREOffsetSlider;
+             intSliderGrp -l "Divisions" -v $Div -f 1 -min 0  -max 15 -fmx 500 -fmn 0 -cc "$D=`intSliderGrp -q -v HKREDivisionsSlider`;optionVar -iv HKREDivisions $D;"HKREDivisionsSlider;
+             setParent..; setParent..;
+       button -l "Extrude!" -h 25 -c "HKRotateExtrudeAction();" HKREExtrudeBUT;
+       button -l "Close" -h 25 -c "deleteUI HKRotateExtrudeWindow;" HKRECloseBUT;
+  
+  formLayout -e
+      -af HKREFrame top 4
+      -af HKREFrame left 1
+      -af HKREFrame bottom 29
+      -af HKREFrame right 1
+      -af HKREExtrudeBUT left 10
+      -af HKREExtrudeBUT bottom 2
+      -ap HKREExtrudeBUT right 8 53
+      -af HKRECloseBUT right 10
+      -af HKRECloseBUT bottom 2
+      -ap HKRECloseBUT left 8 50
+   HKREForm;
+
+  showWindow HKRotateExtrudeWindow;
+}
+
+global proc HKRotateExtrudeAction()
+{
+   float $Angle = `optionVar -q HKREAngle`;
+   int $Divisions = `optionVar -q HKREDivisions`;
+   float $Offset = `optionVar -q HKREOffset`;
+   int $PivotOffset[3];int $Sign;
+   string $ExtrudeNode[],$Obj[];float $pos[];
+   string $TextAx,$Ox; int $Ax[];
+   $Faces = `filterExpand -sm 34`;
+   if(`size $Faces` == 0)
+        error "No faces selected to extrude";
+   $Pivot = `filterExpand -sm 32 -sm 31`;
+   if(`size($Pivot)` == 0)
+        error "No pivot selected for extrusion.";
+   if(`size($Pivot)` > 1)
+       warning "More than 1 component selected as a pivot. Will use the first one.";
+   $Obj = `ls -hl`;
+   $V = `xform -q -rotation $Obj[0]`;
+   if( $V[0] !=  0 || $V[1] !=  0 || $V[2] != 0)
+        error "Unable to extrude, please freeze rotation on the geometry using Mofify-->Freeze Transformations.";
+
+   float $pos[3], $Center[3]; clear $pos;
+   $Center = `polyEvaluate -bc $Faces`;
+   $Center[0] = ($Center[0]+$Center[1])/2;
+   $Center[1] = ($Center[2]+$Center[3])/2;
+   $Center[2] = ($Center[4]+$Center[5])/2;
+   select -d $Faces;
+   $pos1 = `polyEvaluate -bc $Pivot[0]`;
+     $pos[0] = ($pos1[0]+$pos1[1])/2;
+     $pos[1] = ($pos1[2]+$pos1[3])/2;
+     $pos[2] = ($pos1[4]+$pos1[5])/2;
+   //// Normal /////
+   $Vtx = `polyListComponentConversion -tvf $Faces`;
+   $Vtx = `ls -fl $Vtx`;
+   float $Normal[3], $TmpNormal[3]; clear $TmpNormal;
+   
+   for ( $cur in $Vtx )
+     {
+          $Normal = `polyNormalPerVertex -q -xyz $cur`;
+          $TmpNormal[0] += $Normal[0];
+          $TmpNormal[1] += $Normal[1];
+          $TmpNormal[2] += $Normal[2];
+     }
+
+   int $Size = `size $Vtx`;
+         $Normal[0] = $TmpNormal[0]/$Size;
+         $Normal[1] = $TmpNormal[1]/$Size;
+         $Normal[2] = $TmpNormal[2]/$Size;
+
+   vector $A = <<$Center[0]-$pos[0], $Center[1]-$pos[1], $Center[2]-$pos[2]>>;
+   vector $Norm  = << $Normal[0], $Normal[1], $Normal[2] >>;
+   $Axis = cross($A,$Norm);
+
+   if( abs($Axis.x) > abs($Axis.y) && abs($Axis.x) > abs($Axis.z) )
+   {
+           if( $Axis.x > 0)
+                  $Ax = {1,0,0};
+           else
+                  $Ax = {-1,0,0};
+     $TextAx = "x";
+   }
+   else if( abs($Axis.y) > abs($Axis.z) )
+   {
+          if( $Axis.y > 0)
+                  $Ax = {0,1,0};
+          else
+                  $Ax = {0,-1,0};
+     $TextAx = "y";
+   }
+   else if( abs($Axis.z) != 0)
+   {
+         if( $Axis.z > 0)
+                 $Ax = {0,0,1};
+         else
+                 $Ax = {0,0,-1};
+     $TextAx = "z";
+   }
+   else
+       error "Unable to calculate extrude";
+
+   if( abs($A.x) > abs($A.y) && abs($A.x) > abs($A.z) )
+    {
+         $Ox = "x";
+         $PivotOffset = {1,0,0};
+         if( $A.x < 0) $Sign = 1; else $Sign = -1;
+    }
+   else if( abs($A.y) > abs($A.z) )
+    {
+         $Ox = "y";
+         $PivotOffset = {0,1,0};
+         if( $A.y < 0) $Sign = 1; else $Sign = -1;
+    }
+   else if( abs($A.z) != 0)
+    {
+         $Ox = "z";
+         $PivotOffset = {0,0,1};
+         if( $A.y < 0) $Sign = 1; else $Sign = -1;
+    }
+     $ExtrudeNode = `polyExtrudeFacet -d $Divisions -rotate ($Angle*$Ax[0]) ($Angle*$Ax[1]) ($Angle*$Ax[2]) $Faces`;
+     setAttr ($ExtrudeNode[0]+".pvx") ($pos[0]+$Offset*$PivotOffset[0]*$Sign );
+     setAttr ($ExtrudeNode[0]+".pvy") ($pos[1]+$Offset*$PivotOffset[1]*$Sign );
+     setAttr ($ExtrudeNode[0]+".pvz") ($pos[2]+$Offset*$PivotOffset[2]*$Sign );
+     setAttr -k 0 ($ExtrudeNode[0]+".tx");
+     setAttr -k 0 ($ExtrudeNode[0]+".ty");
+     setAttr -k 0 ($ExtrudeNode[0]+".tz");
+     setAttr -k 0 ($ExtrudeNode[0]+".rx");
+     setAttr -k 0 ($ExtrudeNode[0]+".ry");
+     setAttr -k 0 ($ExtrudeNode[0]+".rz");
+     setAttr -k 1 ($ExtrudeNode[0]+".r"+$TextAx);
+     setAttr -k 0 ($ExtrudeNode[0]+".sx");
+     setAttr -k 0 ($ExtrudeNode[0]+".sy");
+     setAttr -k 0 ($ExtrudeNode[0]+".sz");
+     setAttr -k 0 ($ExtrudeNode[0]+".pvx");
+     setAttr -k 0 ($ExtrudeNode[0]+".pvy");
+     setAttr -k 0 ($ExtrudeNode[0]+".pvz");
+     setAttr -k 1 ($ExtrudeNode[0]+".pv"+$Ox);
+     setAttr -k 0 ($ExtrudeNode[0]+".ran");
+     setAttr -k 0 ($ExtrudeNode[0]+".ltx");
+     setAttr -k 0 ($ExtrudeNode[0]+".lty");
+     setAttr -k 0 ($ExtrudeNode[0]+".ltz");
+     setAttr -k 0 ($ExtrudeNode[0]+".ldx");
+     setAttr -k 0 ($ExtrudeNode[0]+".ldy");
+     setAttr -k 0 ($ExtrudeNode[0]+".ldz");
+     setAttr -k 0 ($ExtrudeNode[0]+".lrx");
+     setAttr -k 0 ($ExtrudeNode[0]+".lry");
+     setAttr -k 0 ($ExtrudeNode[0]+".lrz");
+     setAttr -k 0 ($ExtrudeNode[0]+".lsx");
+     setAttr -k 0 ($ExtrudeNode[0]+".lsy");
+     setAttr -k 0 ($ExtrudeNode[0]+".lsz");
+     setAttr -k 0 ($ExtrudeNode[0]+".lc");
+     setAttr -k 0 ($ExtrudeNode[0]+".off");
+     setAttr -k 0 ($ExtrudeNode[0]+".kft");
+     setAttr -k 0 ($ExtrudeNode[0]+".twt");
+     setAttr -k 0 ($ExtrudeNode[0]+".tp");
+     rename $ExtrudeNode ("HKRotateExtrude1");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+// Copyright 2005, Henry Korol. All rights reserved.

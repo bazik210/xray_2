@@ -1,0 +1,18 @@
+// requires maya "2008";
+startAttrPreset( "XRayMtl" );
+blendAttr "translucenceCoeff" 0; 
+blendAttr "diffuseReflectivity" 0.8000000119; 
+blendAttr "colorR" 0; 
+blendAttr "colorG" 0; 
+blendAttr "colorB" 0; 
+blendAttr "incandescenceR" 0; 
+blendAttr "incandescenceG" 0; 
+blendAttr "incandescenceB" 0; 
+blendAttr "transparencyR" 0; 
+blendAttr "transparencyG" 0; 
+blendAttr "transparencyB" 0; 
+blendAttr "xrayDoubleSide" 1; 
+blendAttr "xrayEngineShader" 30972; 
+blendAttr "xrayCompilerShader" -7784; 
+blendAttr "xrayGameMaterial" 29122; 
+endAttrPreset();

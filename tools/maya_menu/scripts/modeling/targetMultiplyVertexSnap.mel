@@ -1,0 +1,27 @@
+//==============================================================================
+//Name:
+//  targetMultiplyVertexSnap.mel
+//==============================================================================
+//Purpose:
+//  targetMultiplyVertexSnap
+//==============================================================================
+//Usage:
+//  1. Save the targetMultiplyVertexSnap.mel to your scripts directory.
+//  2. Start Maya. In the command line type targetMultiplyVertexSnap().
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc targetMultiplyVertexSnap()
+{
+if (sizeSel() >= 2)
+	{
+	$sel = `ls -sl -dag -typ mesh`;
+	string $fst[] = `ls -sl -fl -type float3`;
+	string $scnd[] = stringArrayRemove($fst, $sel);
+	//if (size($fst) == 1){
+	float $p[] = `pointPosition -w $fst[0] $scnd`;
+	move -ws $p[0] $p[1] $p[2] $fst;
+	}
+else
+	print "Select two of more vertex";
+}

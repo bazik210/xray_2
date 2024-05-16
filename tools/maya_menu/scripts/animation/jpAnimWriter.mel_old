@@ -1,0 +1,1224 @@
+//James Parks 12/18/03 - 08/09/04
+//jpAnimWriter_v1.1
+
+
+//This script will write out a file containing MEL commands
+//to specifically created folders in  your project. These 
+//scripts when sourced will recreate either a selection set, 
+//a character pose, or an animation clip in your scene
+
+//The interface will then allow you to pick among these files 
+//and apply one to your current scene. There is also a project 
+//line that lets you change your project to keep the scripts 
+//associated with the right scenes and characters
+
+//Thanks to Erick Miller for some code and ideas from his pose2shelf script
+
+//v1.1  --  added elegant save method which can save tangency information
+//		added subFolder capabilities
+//		added replace/add to selection list function
+
+
+///////////////////////
+//Set the global variable for the version number
+///////////////////////
+global string $aWriterVerNum = "1.1";
+
+///////////////////////
+//switch various controls on or off as they're needed
+///////////////////////
+global proc turnAnimOptionsOn()
+{
+	floatFieldGrp -e -en 1 animRange;
+	radioButtonGrp -e -en 1 animSaveType;
+	checkBoxGrp -e -en 0 tvOffsets;
+	button -e -en 1 refreshAnimRange;
+	//button -e -en 0 blendButton;
+}//end proc turnAnimOptionsOn
+
+global proc turnAnimOptionsOff()
+{
+	floatFieldGrp -e -en 0 animRange;
+	radioButtonGrp -e -en 0 animSaveType;
+	checkBoxGrp -e -en 0 tvOffsets;
+	button -e -en 0 refreshAnimRange;
+	//button -e -en 1 blendButton;
+}//end proc turnAnimOptionsOff
+
+global proc turnSelOptionsOn()
+{
+	radioButtonGrp -e -en 1 addReplaceGrp;
+}//end proc turnSelOptionsOn
+
+global proc turnSelOptionsOff()
+{
+	radioButtonGrp -e -en 0 addReplaceGrp;
+}//end proc turnSelOptionsOff
+
+global proc toggleRecursive()
+{
+	textFieldGrp -e -en (!`textFieldGrp -q -en recursiveText`) recursiveText;
+}//end proc toggleRecursive
+
+
+///////////////////////
+//Decide which kind of file to write
+///////////////////////
+global proc writeAnimChoice()
+{
+	string $selected[];
+	string $filter = `textFieldGrp -q -tx recursiveText`;
+	if(`checkBoxGrp -q -value1 recursiveCheckBox` == 1)
+	{
+		string $initSelected[] = `ls -sl -l -tr`;
+		select -hi $initSelected;
+		string $heirarchySelected[] = `ls -sl -l -tr`;
+		$selected = filterList($heirarchySelected, $filter);
+	}//end if
+	else
+	{
+		$selected = `ls -sl -l -tr`;
+	}//end else
+	string $name = `textFieldGrp -q -tx nameGrp`;
+	float $min = `floatFieldGrp -q -v1 animRange`;
+	float $max = `floatFieldGrp -q -v2 animRange`;
+	int $saveType = `radioButtonGrp -q -sl animSaveType`;
+
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			saveSelectionToFile($name, $selected);
+			break;
+		case 2:
+			savePoseToFile($name, $selected);
+			break;
+		case 3:
+			if(`menuItem -q -rb bruteForce` == 1)
+				BruteForce_saveAnimationToFile($name, $min, $max, $saveType, $selected);
+			else
+				Elegant_saveAnimmationToFile($name, $min, $max, $saveType, $selected);
+			break;
+		default:
+			warning "An error has occured: writeAnimChoice";
+			break;
+	}
+}//end proc writeAnimChoice
+
+
+//////////////////
+//Make Directories
+//////////////////
+global proc makeDirs()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	sysFile -md $selsPath;
+	sysFile -md $posesPath;
+	sysFile -md $animsPath;
+
+	print ("\nFolders Made: \n     " + $selsPath + "\n     " + $posesPath + "\n     " + $animsPath);
+}//end proc makeDirs
+
+
+////////////////////////
+//Clean out directories of deleted files
+////////////////////////
+global proc cleanDirs()
+{
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $selFiles[] = `getFileList -fld $selsPath -fs "*.deleted"`;
+	string $poseFiles[] = `getFileList -fld $posesPath -fs "*.deleted"`;
+	string $animFiles[] = `getFileList -fld $animsPath -fs "*.deleted"`;
+
+	string $confirm = `confirmDialog 
+					-t "Clean Folders?" 
+					-ma "center" 
+					-m "This will PERMANENTLY remove all previously \ndeleted SELS, POSES, and ANIMS. Are you sure?" 
+					-b "Yes"
+					-b "No"
+					-db "No"`
+					;
+
+	if($confirm == "Yes")
+	{
+		for($file in $selFiles)
+		{
+			string $fullname = ($selsPath + "\/" + $file);
+			sysFile -del $fullname;
+		}
+		for($file in $poseFiles)
+		{
+			string $fullname = ($posesPath + "\/" + $file);
+			sysFile -del $fullname;
+		}
+		for($file in $animFiles)
+		{
+			string $fullname = ($animsPath + "\/" + $file);
+			sysFile -del $fullname;
+		}
+		print ("\nFolders cleaned of *.deleted files: \n     " + $selsPath + "\n     " + $posesPath + "\n     " + $animsPath);
+
+	}
+	else
+	{
+		print "\nClean folders aborted";
+	}
+}//end proc cleanDirs
+
+
+//////////////////////////
+//Delete the selected file
+//////////////////////////
+global proc deleteFile()
+{
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			string $fullname = ($selsPath + "\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		case 2:
+			string $fullname = ($posesPath +"\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		case 3: 
+			string $fullname = ($animsPath +"\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		default:
+			warning "An error has occured: deleteFile";
+			break;
+	}
+populateFileList();
+}//end proc deleteFile
+
+
+/////////////////////////
+//Delete All Files in the fileList
+/////////////////////////
+global proc deleteAllFiles()
+{
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $files[] = `textScrollList -q -ai writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+
+	string $confirm = `confirmDialog 
+					-t "Delete All?" 
+					-m "Delete All? Are you SURE?"
+					-ma "center" 
+					-b "Yes"
+					-b "No"
+					-db "No"`
+					;
+
+	if($confirm == "Yes")
+	{
+		for($file in $files)
+		{
+			switch($type)
+			{
+				case 1:
+					string $fullname = ($selsPath + "\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				case 2:
+					string $fullname = ($posesPath +"\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				case 3: 
+					string $fullname = ($animsPath +"\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				default:
+					warning "An error has occured: deleteAllFiles";
+					break;
+			}//end switch
+		}//end for: files
+	}//end if
+	else
+	{
+		print "\nDelete All aborted";
+	}//end else
+populateFileList();
+}//end proc deleteAllFiles
+
+
+//////////////////////////
+//Rename the selected file
+//////////////////////////
+global proc renameFile()
+{
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	string $newFileName = `textFieldGrp -q -tx newFileNameGrp`;
+
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			string $fullname = ($selsPath + "\/" + $selFile[0]);
+			string $newName = ($selsPath + "\/" + $newFileName + ".SEL");
+			sysFile -ren $newName $fullname;
+			break;
+		case 2:
+			string $fullname = ($posesPath +"\/" + $selFile[0]);
+			string $newName = ($posesPath + "\/" + $newFileName + ".POSE");
+			sysFile -ren $newName $fullname;
+			break;
+		case 3: 
+			string $fullname = ($animsPath + "\/" + $selFile[0]);
+			string $newName = ($animsPath + "\/" + $newFileName + ".ANIM");
+			sysFile -ren $newName $fullname;
+			break;
+		default:
+			warning "An error has occured: renameFile";
+			break;
+	}
+populateFileList();
+}//end proc renameFile
+
+
+global proc renameFileWin()
+{
+	string $winName = "AnimWriter_RenameWin";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t "Rename File" -wh 210 95 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+	string $tmpName[] = `textScrollList -q -si writerFileList`; 
+	string $tokName[];
+	tokenize $tmpName[0] "." $tokName;
+
+
+	columnLayout;
+		textFieldGrp 
+			-l "Old Name : "
+			-cal 1 "left" 
+			-cal 2 "left" 
+			-cw 1 75 
+			-cw 2 125 
+			-ed 0
+			-tx $tokName[0] 
+			oldFileNameGrp;
+		textFieldGrp 
+			-l "New Name : " 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cw 1 75 
+			-cw 2 125 
+			-tx $tokName[0] 
+			newFileNameGrp;
+		rowColumnLayout -nc 2;
+			button -l "Rename" -c ("renameFile();deleteUI " + $winName);
+			button -l "Cancel" -c ("deleteUI " + $winName);
+
+	window -e -wh 210 95 $winName;
+	showWindow $winName;
+}//end proc renameFileWin
+
+
+
+
+////////////////////////
+//Create a new character folder
+////////////////////////
+global proc createFolder()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $newFolderName = `textFieldGrp -q -tx newCharFolderGrp`;
+	sysFile -md ($selsPath + $newFolderName + "_Folder");
+	sysFile -md ($posesPath + $newFolderName + "_Folder");
+	sysFile -md ($animsPath + $newFolderName + "_Folder");
+	
+populateFileList();
+}//end proc createFolder
+
+
+global proc newCharFolderWin()
+{
+	string $winName = "AnimWriter_NewCharFolderWin";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t "New Character Folder" -wh 210 70 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+	columnLayout;
+		textFieldGrp 
+			-l "Character Name : " 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cw 1 90 
+			-cw 2 110 
+			-tx ""
+			newCharFolderGrp;
+		rowColumnLayout -nc 2;
+			button -l "Create" -c ("createFolder();deleteUI " + $winName);
+			button -l "Cancel" -c ("deleteUI " + $winName);
+
+	window -e -wh 210 70 $winName;
+	showWindow $winName;
+}//end proc newCharFolderWin
+
+
+
+
+//////////////////////////
+//Learn what files exist in the SELS, POSES, and ANIMS folders
+//and put those files into the textScrollList
+//////////////////////////
+global proc populateFileList()
+{
+	textScrollList -e -ra writerFileList;
+
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+
+	string $selFiles[] = `getFileList -fld $selsPath -fs "*.SEL"`;
+	string $poseFiles[] = `getFileList -fld $posesPath -fs "*.POSE"`;
+	string $animFiles[] = `getFileList -fld $animsPath -fs "*.ANIM"`;
+
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			for($sel in $selFiles)
+			{
+			textScrollList -e -append $sel writerFileList;
+			}
+			break;
+		case 2:
+			for($pose in $poseFiles)
+			{
+			textScrollList -e -append $pose writerFileList;
+			}
+			break;
+		case 3:
+			for($anim in $animFiles)
+			{
+			textScrollList -e -append $anim writerFileList;
+			}
+			break;
+		default:
+			//warning "An error has occured: populateFileList";
+			break;
+	}
+}//end proc populateFileList
+
+
+///////////////////////
+//write a file that saves a selection set
+///////////////////////
+global proc saveSelectionToFile(string $name, string $selected[])
+{
+	global string $aWriterVerNum;
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+
+	if ( !`size($selected)` )
+		error "Nothing is currently selected. No file created, or action taken.";
+
+	string $safeFileCommand = "//James parks\n//This selection script generated by jpAnimWriter v" + $aWriterVerNum + "\n\n";
+	$safeFileCommand = $safeFileCommand + "\n";
+
+	for ($node in $selected)
+	{
+		$safeFileCommand = $safeFileCommand + ("catch (`select -add \"" + $node + "\"`);\n");
+	}
+	
+	string $selectionFolder = (`workspace -q -fn` + "/SELS\/");
+	string $selectionFileName = ($name + ".SEL");
+	string $thisSelectionFile = ($selectionFolder + $selectionFileName);
+
+	$curSelectionFile = `fopen $thisSelectionFile "w+"`;
+	fprint $curSelectionFile $safeFileCommand;
+	fclose $curSelectionFile;
+
+	print ("\nSelection saved to: " + $thisSelectionFile);
+	populateFileList();
+}//end proc saveSelectionToFile
+
+
+///////////////////////
+//write a file that saves a pose
+///////////////////////
+global proc savePoseToFile(string $name, string $selected[])
+{
+	global string $aWriterVerNum;
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+
+	if ( !`size($selected)` )
+		error "Nothing is currently selected. No file created, or action taken.";
+
+	string $safeFileCommand = "//James parks\n//This pose script generated by jpAnimWriter v" + $aWriterVerNum + "\n\n";
+
+	for ($node in $selected)
+	{
+		string $keyableAttrs[] = `listAttr -r -w -k -u -v -m -s $node`;
+		if ( !`size($keyableAttrs)`)
+		{
+			continue;	
+		} 
+		for ($attr in $keyableAttrs)
+		{
+			string $value = string ( `getAttr ($node+"."+$attr)` );
+			$safeFileCommand = $safeFileCommand + ("catch (`setAttr \""+$node +"."+$attr+"\""+$value+"`);\n");
+		}
+	}
+
+	string $posesFolder = (`workspace -q -fn` + "/POSES\/");
+	string $poseFileName = ($name + ".POSE");
+	string $thisPoseFile = ($posesFolder + $poseFileName);
+
+	$curPoseFile = `fopen $thisPoseFile "w+"`;
+	fprint $curPoseFile $safeFileCommand;
+	fclose $curPoseFile;
+
+	print ("\nPose saved to: " + $thisPoseFile);
+	populateFileList();
+}//end proc savePoseToFile
+
+
+
+///////////////////////
+//Brute Force -- write a file that saves an animation sequence
+///////////////////////
+global proc BruteForce_saveAnimationToFile(string $name, float $min, float $max, int $saveType, string $selected[])
+{
+	global string $aWriterVerNum;
+	string $name = strip(`textFieldGrp -q -tx nameGrp`);
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $safeFileCommand;
+	float $earliestTime = $max;
+
+	int $numOfAnimObjs = `size($selected)`;
+	if (`size($selected)` <= 0)
+		error "Nothing is currently selected. No file created, or action taken.";
+
+	global string $gMainProgressBar;
+	int $progress = 0;
+	int $curNumObj = 1;
+	progressWindow
+		-title "Writing Curves" 
+		-progress $progress 
+		-status "Writing: "
+		-min 0 
+		-max 100;
+	progressBar 
+		-edit
+		-beginProgress
+		-status "Writing Curves" 
+		-min 0 
+		-max 100
+		$gMainProgressBar;
+
+	for($obj in $selected)
+	{
+		$safeFileCommand = ($safeFileCommand + "\n//Keys for " + $obj + "\n\n");
+		
+		string $keyableAttrs[] = `listAttr -r -w -k -u -v -m -s $obj`;
+
+		for($attr in $keyableAttrs)
+		{
+			selectKey -clear;
+			int $numOfKeys = `selectKey -add -k -t ($min + ":" + $max) ($obj + "." + $attr)`;
+			int $keyIndices[] = `keyframe -q -sl -iv`;
+
+			//what to do if you want to save curves instead of just keys
+			if($saveType == 2)
+			{
+				$safeFileCommand = ($safeFileCommand + "\n//Start and End clip keys\n");
+				float $startClipValue = `getAttr -t $min ($obj + "." + $attr)`;
+				$safeFileCommand = $safeFileCommand + ("catch(`setKeyframe -t (" + $min + " + $placeTime) -v (" + $startClipValue + " + $placeValue) " + ($obj + "." + $attr) + "`);\n");
+				float $endClipValue = `getAttr -t $max ($obj + "." + $attr)`;
+				$safeFileCommand = $safeFileCommand + ("catch(`setKeyframe -t (" + $max + " + $placeTime) -v (" + $endClipValue + " + $placeValue) " + ($obj + "." + $attr) + "`);\n");
+			}//end if
+
+			for($key in $keyIndices)
+			{
+				selectKey -clear;
+				selectKey -add -k -in $key ($obj + "." + $attr);
+				float $keyTime[] = `keyframe -q -tc`;
+				float $keyValue[] = `keyframe -q -vc`;
+
+				if($keyTime[0] < $earliestTime)
+					$earliestTime = $keyTime[0];
+
+				$safeFileCommand = $safeFileCommand + ("catch(`setKeyframe -t (" + $keyTime[0] + " + $placeTime) -v " + $keyValue[0] + " " + ($obj + "." + $attr) + "`);\n");
+			}//end for
+		}//end for
+		selectKey -clear;
+		$progress = `linstep 0 $numOfAnimObjs $curNumObj` * 100;
+		progressWindow 
+			-edit
+			-progress $progress
+			-status ("Writing: " + $obj);
+		progressBar 
+			-edit
+			-progress $progress 
+			-status ("Writing: " + $obj)
+			$gMainProgressBar;
+		$curNumObj = $curNumObj + 1;
+	}//end for
+
+	$safeFileCommand = $safeFileCommand + "\n}//end proc writeAnim\n\nwriteAnim();";
+
+	$safeFileCommand = ("float $placeTime = $cTime - $startTime;\n" + $safeFileCommand);
+	$safeFileCommand = ("float $startTime = " + $earliestTime + ";\n" + $safeFileCommand);
+	$safeFileCommand = ("float $cTime = `currentTime -q`;\n" + $safeFileCommand);
+	$safeFileCommand = ("global proc writeAnim()\n{\n" + $safeFileCommand);
+	$safeFileCommand = ("//Brute_Force Saved Animation\n\n" + $safeFileCommand);
+	$safeFileCommand = ("//James Parks\n//This anim script generated by jpAnimWriter v" + $aWriterVerNum + "\n\n" + $safeFileCommand);
+	
+	string $animsFolder = (`workspace -q -fn` + "/ANIMS\/");
+	string $animFileName = ($name + ".ANIM");
+	string $thisAnimFile = ($animsFolder + $animFileName);
+
+	$curAnimFile = `fopen $thisAnimFile "w+"`;
+	fprint $curAnimFile $safeFileCommand;
+	fclose $curAnimFile;
+
+	progressWindow -endProgress;
+	progressBar -edit -endProgress $gMainProgressBar;
+
+	print ("\nAnimation saved to: " + $thisAnimFile);
+
+	populateFileList();
+}//end proc saveAnimationToFile
+
+
+
+//////////////////////////////
+//Collect information on a specified key
+//////////////////////////////
+global proc string[] getInfoOnAKey(string $obj, string $attr, int $keyIndex)
+{
+	float $keyTime_FL[] = `keyframe -in $keyIndex -q -tc ($obj + "." + $attr)`;
+	float $keyValue_FL[] = `keyframe -in $keyIndex -q -vc ($obj + "." + $attr)`;
+	string $inTangentType[] = `keyTangent -in $keyIndex -q -itt ($obj + "."+  $attr)`;
+	string $outTangentType[] = `keyTangent -in $keyIndex -q -ott ($obj + "." + $attr)`;
+	float $inWeight_FL[] = `keyTangent -in $keyIndex -q -iw ($obj + "." + $attr)`;
+	float $outWeight_FL[] = `keyTangent -in $keyIndex -q -ow ($obj + "." + $attr)`;
+	float $inAngle_FL[] = `keyTangent -in $keyIndex -q -ia ($obj + "." + $attr)`;
+	float $outAngle_FL[] = `keyTangent -in $keyIndex -q -oa ($obj + "." + $attr)`;
+	int $weightedTangents_FL[] = `keyTangent -in $keyIndex -q -wt ($obj + "." + $attr)`;
+	int $lockTangents_FL[] = `keyTangent -in $keyIndex -q -l ($obj + "." + $attr)`;
+
+	//make all collected values strings, because maya refuses to let me return a mixed type array
+	string $keyTime = $keyTime_FL[0];
+	string $keyValue = $keyValue_FL[0];
+	string $inWeight = $inWeight_FL[0];
+	string $outWeight = $outWeight_FL[0];
+	string $inAngle = $inAngle_FL[0];
+	string $outAngle = $outAngle_FL[0];
+	string $weightedTangents = $weightedTangents_FL[0];
+	string $lockTangents = $lockTangents_FL[0];
+
+	string $keyInfo[] = {$keyTime, $keyValue, $inTangentType[0], $outTangentType[0], $inWeight, $outWeight, $inAngle, $outAngle, $weightedTangents, $lockTangents};
+
+	return $keyInfo;
+}//end proc getInfoOnAKey
+
+
+global proc Elegant_saveAnimmationToFile(string $name, float $min, float $max, int $saveType, string $selected[])
+{
+//stored as
+//obj#attr#time#value#inTangentType#outTangentType#inWeight#outWeight#inAngle#outAngle#weightedTangents#lockTangents
+//0    1    2     3          4           5             6         7       8      9            10              11
+// Sample:  6   187.7153882 clamped    clamped         1         1  80.33105156 80.33105156   0               1 //
+
+	global string $aWriterVerNum;
+	string $name = strip(`textFieldGrp -q -tx nameGrp`);
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	float $earliestTime = $min;
+	string $safeFileCommand;
+
+	int $numOfAnimObjs = `size($selected)`;
+	if (`size($selected)` <= 0)
+		error "Nothing is currently selected. No file created, or action taken.";
+
+	//initialize the progress bars
+	global string $gMainProgressBar;
+	int $progress = 0;
+	int $curNumObj = 1;
+	progressWindow
+		-title "Writing Curves" 
+		-progress $progress 
+		-status "Writing: "
+		-min 0 
+		-max 100;
+	progressBar 
+		-edit
+		-beginProgress
+		-status "Writing Curves" 
+		-min 0 
+		-max 100
+		$gMainProgressBar;
+
+	//loop through all the selected objects getting information on the keyframes
+	for($obj in $selected)
+	{
+		$safeFileCommand = ($safeFileCommand + "\n//Keys for " + $obj + "\n\n");
+		string $keyableAttrs[] = `listAttr -r -w -k -u -v -m -s $obj`;
+		for($attr in $keyableAttrs)
+		{
+			selectKey -clear;
+			int $numOfKeys = `selectKey -add -k -t ($min + ":" + $max) ($obj + "." + $attr)`;
+			int $keyIndices[] = `keyframe -q -sl -iv`;
+			print $keyIndices;
+
+			//what to do if you want to save curves instead of just keys
+			if(`size($keyIndices)` > 0)
+			{
+				if($saveType == 2)
+				{
+					float $startClipValue = `getAttr -t $min ($obj + "." + $attr)`;
+					float $endClipValue = `getAttr -t $max ($obj + "." + $attr)`;
+
+					$safeFileCommand = ($safeFileCommand + "rebuildKey(" + $obj + ", ");
+					$safeFileCommand = ($safeFileCommand + $attr + ", ");
+					$safeFileCommand = ($safeFileCommand + $min + ", " + $startClipValue + ", clamped, clamped, 1, 1, 0, 0, 0, 1)\n\n" );
+
+					$safeFileCommand = ($safeFileCommand + "rebuildKey(" + $obj + ", ");
+					$safeFileCommand = ($safeFileCommand + $attr + ", ");
+					$safeFileCommand = ($safeFileCommand + $max + ", " + $endClipValue + ", clamped, clamped, 1, 1, 0, 0, 0, 1)\n\n");
+				}//end if
+
+				for($key in $keyIndices)
+				{
+					string $keyInfo[] = getInfoOnAKey($obj, $attr, $key);
+					print $keyInfo;
+					print "\n";
+
+					if(int($keyInfo[0]) < $earliestTime)
+						$earliestTime = $keyInfo[0];
+
+					$safeFileCommand = ($safeFileCommand + "rebuildKey(\"" + $obj + "\", \"");	//procedure and object name
+					$safeFileCommand = ($safeFileCommand + $attr + "\", (");			//attribute
+					$safeFileCommand = ($safeFileCommand + $keyInfo[0] + " + $placeTime), ");	//time
+					$safeFileCommand = ($safeFileCommand + $keyInfo[1] + ", \"");			//value
+					$safeFileCommand = ($safeFileCommand + $keyInfo[2] + "\", \"");			//inTangentType
+					$safeFileCommand = ($safeFileCommand + $keyInfo[3] + "\", ");			//outTangentType
+					$safeFileCommand = ($safeFileCommand + $keyInfo[4] + ", ");			//inWeight
+					$safeFileCommand = ($safeFileCommand + $keyInfo[5] + ", ");			//outWeight
+					$safeFileCommand = ($safeFileCommand + $keyInfo[6] + ", ");			//inAngle
+					$safeFileCommand = ($safeFileCommand + $keyInfo[7] + ", ");			//outAngle
+					$safeFileCommand = ($safeFileCommand + $keyInfo[8] + ", ");			//weightedTangents
+					$safeFileCommand = ($safeFileCommand + $keyInfo[9] + ");\n");			//lockTangents
+				}//end for: keys
+			}//end if
+		}//end for: attributes
+
+		//progress the progress bars
+		selectKey -clear;
+		$progress = `linstep 0 $numOfAnimObjs $curNumObj` * 100;
+		progressWindow 
+			-edit
+			-progress $progress
+			-status ("Writing: " + $obj);
+		progressBar 
+			-edit
+			-progress $progress 
+			-status ("Writing: " + $obj)
+			$gMainProgressBar;
+		$curNumObj = $curNumObj + 1;
+	}//end for: objects
+	$safeFileCommand = $safeFileCommand + "\n}//end proc writeAnim\n\nwriteAnim();";
+
+	$safeFileCommand = ("float $placeTime = $cTime - $startTime;\n" + $safeFileCommand);
+	$safeFileCommand = ("float $startTime = " + $earliestTime + ";\n" + $safeFileCommand);
+	$safeFileCommand = ("float $cTime = `currentTime -q`;\n" + $safeFileCommand);
+	$safeFileCommand = ("global proc writeAnim()\n{\n" + $safeFileCommand);
+	$safeFileCommand = ("//Elegant Saved Animation\n\n" + $safeFileCommand);
+	$safeFileCommand = ("//James Parks\n//This anim script generated by jpAnimWriter v" + $aWriterVerNum + "\n" + $safeFileCommand);
+
+	string $animsFolder = (`workspace -q -fn` + "/ANIMS\/");
+	string $animFileName = ($name + ".ANIM");
+	string $thisAnimFile = ($animsFolder + $animFileName);
+
+	$curAnimFile = `fopen $thisAnimFile "w+"`;
+	fprint $curAnimFile $safeFileCommand;
+	fclose $curAnimFile;
+
+	progressWindow -endProgress;
+	progressBar -edit -endProgress $gMainProgressBar;
+
+	print ("\nAnimation saved to: " + $thisAnimFile);
+
+	populateFileList();
+}//end proc Elegant_saveAnimationToFile
+
+
+
+
+/////////////////////////////
+//Rebuild a key from an Elegant saved animation
+/////////////////////////////
+global proc rebuildKey(string $obj, string $attr, float $keyTime, float $keyValue, string $inTanType, string $outTanType, float $inWeight, float $outWeight, float $inAngle, float $outAngle, int $weightedTangents, int $lockTangents)
+{
+	select -cl;
+	select $obj;
+	setKeyframe -v $keyValue -t $keyTime -at $attr;
+	keyTangent -t $keyTime -at $attr -l $lockTangents;
+	keyTangent -t $keyTime -at $attr -wt $weightedTangents;
+	keyTangent -t $keyTime -at $attr -itt $inTanType;
+	keyTangent -t $keyTime -at $attr -ott $outTanType;
+	keyTangent -t $keyTime -at $attr -ia $inAngle; 
+	keyTangent -t $keyTime -at $attr -oa $outAngle;
+	keyTangent -t $keyTime -at $attr -iw $inWeight;
+	keyTangent -t $keyTime -at $attr -ow $outWeight;
+}//end proc rebuildKey
+
+
+///////////////////////////
+//Apply the file that's been selected in the list
+///////////////////////////
+global proc applyFile()
+{
+	string $project = `workspace -q -fn`;
+	//string $currentFolder = getCheckedFolder();
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+	int $addReplace = `radioButtonGrp -q -sl addReplaceGrp`;
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			if($addReplace == 2)
+				select -cl;
+			string $fullname = ("\"" + $selsPath +  $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			break;
+		case 2:
+			string $fullname = ("\"" + $posesPath + $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			break;
+		case 3: 
+			string $fullname = ("\"" + $animsPath +  $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			//writeAnim(`checkBoxGrp -q -v1`);
+			writeAnim();
+			break;
+		default:
+			warning "An error has occured: applyFile";
+			break;
+	}
+}//end proc applyFile
+
+
+////////////////////////
+//Return Selected Objects to Default Position
+////////////////////////
+global proc returnToDefault()
+{
+string $zeroObjs[] = `ls -sl`;
+for ($thisObj in $zeroObjs)
+{
+	string $zeroAttrs[] = {"translateX", "translateY", "translate Z",
+				"rotateX", "rotateY", "rotateZ"};
+	string $oneAttrs[] = {"scaleX", "scaleY", "scaleZ"};
+	string $udAttr[] = `listAttr -ud $thisObj`;
+
+	for ($attr in $zeroAttrs)
+	{
+		catch(`setAttr ($thisObj + "." + $attr) 0`);
+	}
+	for ($attr in $oneAttrs)
+	{
+		catch(`setAttr ($thisObj + "." + $attr) 1`);
+	}
+	if (`size($udAttr)` > 0)
+	{
+		for ($attr in $udAttr)
+		{
+			float $default[] = `attributeQuery -n $thisObj -ld $attr`;
+			catch(`setAttr ($thisObj + "." + $attr) $default[0]`);
+		}
+	}
+}
+}  //end proc returnToDefault
+
+
+global proc popUpName()
+{
+string $tmpName[] = `textScrollList -q -si writerFileList`; 
+string $tokName[];
+tokenize $tmpName[0] "." $tokName;
+textFieldGrp -e -tx $tokName[0] nameGrp;
+}//end proc popUpName
+
+
+////////////////////////
+//Change Project
+////////////////////////
+global proc changeProj()
+{
+setProject "";
+populateFileList();
+string $project = `workspace -q -fn`;
+textFieldButtonGrp -e -tx $project currentProj;
+}//end proc changeProj
+
+
+
+///////////////////////
+//Find character sub-folders
+///////////////////////
+global proc populateFolders()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "/SELS\/");
+	string $posesPath = ($project + "/POSES\/");
+	string $animsPath = ($project + "/ANIMS\/");
+	string $allInFolder[] = `getFileList -folder $posesPath`;
+	string $subFolders[];
+
+	int $i = 0;
+	for($object in $allInFolder)
+	{
+		string $tokFolder[];
+		int $numOfTokens = `tokenize $object "_" $tokFolder`;
+		if($tokFolder[$numOfTokens - 1] == "Folder")
+		{
+			$subFolders[$i] = $object;
+			$i = $i + 1;
+		}//end if
+	}//end for: object
+
+	for($folder in $subFolders)
+	{
+		menuItem -l $folder -cl "selectedCharacter" -rb 0 $folder;
+	}//end for: folder
+}//end proc populateFolders
+
+
+//Which subFolder is currently checked
+global proc string getCheckedFolder()
+{
+	string $allMenuItems[] = `menu -q -ia charactersMenu`;
+	string $checkedMenuItem;
+	for($item in $allMenuItems)
+	{
+		int $isDivider = `menuItem -q -divider $item`;
+		if($isDivider == 0)
+		{
+			int $isChecked = catch(`menuItem -q -rb $item`);
+			if($isChecked == 1)
+				$checkedMenuItem = $item;
+		}//end if
+	}//end for
+	if($checkedMenuItem == "baseProj")
+		$checkedMenuItem = "";
+
+	return $checkedMenuItem;
+}//end proc getCheckedFolder
+
+
+
+///////////////////////
+//The actual jpAnimWriter GUI and controls and such
+///////////////////////
+global proc jpAnimWriter()
+{
+	global string $aWriterVerNum;
+	string $winName = "AnimWriter";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t ("Animation Writer v" + $aWriterVerNum + "  --  James Parks") -wh 380 275 -rtf 0 -menuBar 1 $winName;
+
+	menu -l "Writer" writerMenu;
+		menuItem -l "Create Folders" -c "makeDirs()" createFoldersMenuItem;
+		menuItem -l "Clean Folders..." -c "cleanDirs()" cleanFoldersMenuItem;
+		menuItem -l "Refresh Window" -c "jpAnimWriter()" refreshMenuItem;
+		menuItem -divider 1 divider_1;
+		menuItem -l "Write New File" -c "writeAnimChoice()" writeNewFileMenuItem;
+		menuItem -l "Apply Selected" -c "applyFile()" applyFileMenuItem;
+		menuItem -l "Rename Selected..." -c "renameFileWin()" renameMenuItem;
+		menuItem -l "Delete Selected" -c "deleteFile()" deleteMenuItem;
+		menuItem -divider 1 divider_2;
+		menuItem -l "Delete All" -c "deleteAllFiles()" deleteAllMenuItem;
+		menuItem -divider 1 divider3;
+		menuItem -l "Close" -c ("deleteUI " + $winName) closeMenuItem;
+	menu -l "Characters" -en 0 charactersMenu;
+		menuItem -l "New Character..." -c "newCharFolderWin()" newCharMenuItem;
+		menuItem -divider 1 divider_4;
+		radioMenuItemCollection "selectedCharacter";
+	//	populateFolders();
+		menuItem -divider 1 divider_5;
+		menuItem -l "Base Project" -rb 1 -cl "selectedCharacter" baseProj;
+	menu -l "Settings" settingsMenu;
+		radioMenuItemCollection "animMethod";
+		menuItem -l "Brute Force" -rb 0 -cl "animMethod" bruteForce;
+		menuItem -l "Elegant" -rb 1 -cl "animMethod" -en 1 elegant;
+	menu -l "Help" helpMenu;
+		menuItem -l "How To Use" -c ("showHelp -docs \"aWriter_docs/aWriter_use.html\"") howToUseMenuItem;
+		menuItem -l "File Structure" -c ("showHelp -docs \"aWriter_docs/aWriter_files.html\"") fileMenuItem;
+		menuItem -divider 1 divider_6;
+		menuItem -l "Notes" -c ("showHelp -docs \"aWriter_docs/aWriter_notes.html\"") notesMenuItem;
+
+	int $poMin = `playbackOptions -q -min`;
+    	int $poMax = `playbackOptions -q -max`;
+	string $project = `workspace -q -fn`;
+
+	string $opSys[] = `fileInfo -q "osv"`;
+	string $tokOpSys[];
+	tokenize $opSys[0] " " $tokOpSys;
+
+	if($tokOpSys[0] == "Windows")
+		print ($tokOpSys[0] + "\n");
+	if($tokOpSys[0] == "Mac")
+		print ($tokOpSys[0] + "\n");
+	if($tokOpSys[0] == "Irix")
+		print ($tokOpSys[0] + "\n");
+
+	string $aWriterForm = `formLayout -numberOfDivisions 100 animWriterForm`;
+setParent $aWriterForm;
+
+	radioButtonGrp
+		//-w 300
+		-h 25
+		-nrb 3
+		-cw 1 75
+		-cw 2 75
+		-cw 3 75
+		-cw 4 75 
+		-cal 1 "left" 
+		-cal 2 "left" 
+		-cal 3 "left" 
+		-cal 4 "left"
+		-label "File Type" 
+		-l1 "Selection"
+		-l2 "Pose" 
+		-l3 "Animation" 
+		-cc1 "turnSelOptionsOn();turnAnimOptionsOff();populateFileList();" 
+		-cc2 "turnSelOptionsOff();turnAnimOptionsOff();populateFileList();" 
+		-cc3 "turnSelOptionsOff();turnAnimOptionsOn();populateFileList();" 
+		-sl 2
+		saveAsType;
+
+	string $fileList = `textScrollList 
+		-allowMultiSelection 0 
+		-w 150 
+		-dcc "applyFile()" 
+		-dkc "deleteFile()" 
+		writerFileList`;
+
+		popupMenu -b 3 -p "writerFileList";
+			menuItem -l "Apply Selected" -c "applyFile()";
+			menuItem -l "Rename Selected..." -c "renameFileWin()";
+			menuItem -l "Name --->" -c "popUpName()";
+			menuItem -divider 1;
+			menuItem -l "Delete Selected" -c "deleteFile()";
+	string $addReplace = `radioButtonGrp 
+				-nrb 2 
+				-h 25 
+				-cw 1 75 
+				-cw 2 75  
+				-l1 "Add" 
+				-l2 "Replace"
+				-en 0
+				-sl 2
+				addReplaceGrp`;
+
+//setParent ..;
+	string $controlsLayout = `rowColumnLayout 
+					-w 200
+					-nr 10 
+					-rh 1 23 
+					-rh 2 23 
+					-rh 3 23
+					-rh 4 15 
+					-rh 5 23
+					-rh 6 23 
+					-rh 7 23
+					`;
+
+			text -fn "boldLabelFont" -al "left" "Write Options";
+
+			textFieldGrp 
+				-label "Name" 
+				-cal 1 "left" 
+				-tx "...File Name..." 
+				-cw 1 60
+				-cw 2 140 
+				nameGrp;
+			rowColumnLayout 
+				-nc 2
+				-cw 1 170
+				-cw 2 30
+				;
+				floatFieldGrp 
+    					-numberOfFields 2 
+					-en 0 
+   					-label "Start/End" 
+   					-value1 $poMin  
+					-value2 $poMax  
+					-cal 1 "left" 
+					-cw 1 60 
+					-cw 2 55 
+					-cw 3 55 
+					animRange;
+				button 
+					-l "<--" 
+					-ann "Refresh" 
+					-en 0 
+					-c ("int $poMin = `playbackOptions -q -min`;int $poMax = `playbackOptions -q -max`;floatFieldGrp -e -v1 $poMin -v2 $poMax animRange;")
+					refreshAnimRange;
+		setParent ..;
+			radioButtonGrp 
+				-w 300 
+				-h 15 
+				-en 0 
+				-nrb 2 
+				-cal 1 "left"
+				-cal 2 "left" 
+				-cal 3 "left"
+				-cw 1 80 
+				-cw 2 60
+				-cw 3 60
+				-l "Save Options"
+				-l1 "Keys" 
+				-l2 "Curves" 
+				-sl 1 
+				animSaveType;
+		rowColumnLayout -nc 2 -cw 1 80 -cw 2 120;
+			checkBoxGrp 
+				-ncb 1 
+				-cw 1 60 
+				-cal 1 "left" 
+				-cal 2 "left"
+				-label "Recursive"
+				-value1 0 
+				-cc "toggleRecursive()"
+				recursiveCheckBox;
+			textFieldGrp
+				-cw 1 120 
+				-cal 1 "left"
+				-en 0 
+				-tx "*" 
+				recursiveText;
+setParent ..;
+
+			rowColumnLayout -nc 2 -cw 1 100 -cw 2 100;
+				button 
+					-label "Write New File" 
+					-w 100 
+					-c "writeAnimChoice()" ;
+				button 
+					-label "Delete File" 
+					-w 100
+					-c "deleteFile()";
+setParent ..;
+			checkBoxGrp
+				-en 0
+				-label "Paste with Value Offset"
+				-ncb 1
+				-cal 1 "left"
+				-cal 2 "left"
+				-cw 1 120
+				-cw 2 60
+				-v1 1 
+				tvOffsets;
+			rowColumnLayout -nc 3 -cw 1 66 -cw 2 66 -cw 3 66;
+				button 
+					-label "Apply"
+					-w 66
+					-c "applyFile()"
+					applyButton;
+			//	button 
+			//		-label "Blend" 
+			//		-w 66
+			//		blendButton;
+				button 
+					-label "Default"
+					-w 66 
+					-c "returnToDefault()"
+					defaultButton;
+setParent ..;
+setParent ..;
+	
+	string $currentProjLayout = `rowColumnLayout -nr 1 currentProjRow`;
+
+		textFieldButtonGrp 
+			-l "Project :" 
+			-tx $project 
+			-bl "Change" 
+			-bc "changeProj()" 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cal 3 "left" 
+			-cw 1 50 
+			-cw 2 275 
+			-cw 3 100 
+			//-adj 2 
+			-ed 0
+			-en 1 
+			currentProj;
+
+setParent $aWriterForm;
+
+	formLayout -edit 
+		-attachForm $fileList "top" 25 
+		-attachForm $fileList "left" 0 
+		-attachForm $fileList "bottom" 50 
+		//-attachForm $fileList "right" 250 
+
+		-attachForm $controlsLayout "top" 25 
+		-attachForm $controlsLayout "left" 175 
+		-attachForm $controlsLayout "right" 0 
+		-attachForm $controlsLayout "bottom" 25 
+
+		-attachForm $currentProjLayout "left" 0 
+		-attachForm $currentProjLayout "right" 0 
+		-attachForm $currentProjLayout "bottom" 0 
+		//-attachForm $currentProjLayout "top" ?
+
+		//-attachForm $addReplace "top" ?
+		-attachForm $addReplace "left" 0 
+		//-attachForm $addReplace "right" ?
+		-attachForm $addReplace "bottom" 20 
+
+		$aWriterForm;
+
+	populateFileList();
+	window -e -wh 395 275 $winName;
+	showWindow $winName;
+
+}//end proc jpAnimWriter
+
+jpAnimWriter;

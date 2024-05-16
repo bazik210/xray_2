@@ -1,0 +1,49 @@
+global proc select_FaceBorder()
+{
+if (fSelFilter() != 3) error "only for face";
+string $fStartFace[] = `ls -sl`;
+
+ConvertSelectionToEdges;
+string $fStartEdge[] = `ls -sl`;
+
+select $fStartFace;
+InvertSelection;
+
+ConvertSelectionToEdges;
+string $fInvertEdge[] = `ls -sl`;
+
+select $fStartEdge;
+select -d $fInvertEdge;
+
+string $fInvertEdge[] = `ls -sl`;
+
+select $fStartEdge;
+select -d $fInvertEdge;
+}
+
+//select filter
+
+global proc int fSelFilter()
+{
+  if( size(`ls -sl`) == 0 ) error "nothing selected";
+
+  if( size( `filterExpand -sm 31` ) != 0 )
+  {
+    return 1; //vertex
+  }
+
+  if( size( `filterExpand -sm 32` ) != 0 )
+  {
+    return 2; //edge
+  }
+  if( size( `filterExpand -sm 34` ) != 0 )
+  {
+    return 3; //face
+  }
+  if( size( `filterExpand -sm 35` ) != 0 )
+  {
+    return 4; //uv
+  }
+
+ return 0; //? (obj)
+}

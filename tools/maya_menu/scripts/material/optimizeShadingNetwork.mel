@@ -1,0 +1,465 @@
+//==============================================================================
+//Name:
+//  optimizeShadingNetwork.mel
+//==============================================================================
+//Purpose:
+//  delete dublicate material.
+//==============================================================================
+//Usage:
+//  1. Save the optimizeShadingNetwork.mel to your scripts directory.
+//  2. Start Maya. In the command line type optimizeShadingNetwork();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+global proc optimizeShadingNetwork()
+{
+	global string $oSNprogressBar;
+	// delete UI function on close/open
+	if ( `window -exists oSN` == true )
+		deleteUI oSN;
+	window
+		-title " oSN | optimzeShadingNetwork | V0.1"
+		-maximizeButton true
+		-minimizeButton true
+		-sizeable true
+		-resizeToFitChildren false
+		-menuBar true
+		-menuBarVisible true
+		-wh 340 320
+		oSN;
+	string $form = `formLayout -numberOfDivisions 100`;
+
+	string $Bexit 	= `button -label "Exit" -command "deleteUI oSN; waitCursor -state off ;"	Bexit`;
+	//----------------------------------------------------
+	string $rScroll = `frameLayout -label "" -cll false -mh 3 -bv false child1Frame`;
+					columnLayout -rs 2;
+						rowLayout
+							-numberOfColumns 1 -cat 1 "both" 5 -cw 1 130 ;
+							checkBox -l "delete Unused Nodes" -v 1 chkBoxDUN ;
+						setParent ..;
+						rowLayout ;
+							separator -w 330;
+						setParent ..;
+						rowLayout
+							-numberOfColumns 3 -cat 1 "both" 5 -cat 2 "both" 5 -cat 3 "both" 5
+							-cw 1 90 -cw 2 140 -cw 3 100;
+							text -l "Node to Optimize";
+							optionMenu nodeToOptimize;
+								menuItem -l "All Shading Network" -p nodeToOptimize;
+								menuItem -l "All Shader" -p nodeToOptimize;
+								menuItem -l "All Texture" -p nodeToOptimize;
+								menuItem -l "All Utility" -p nodeToOptimize;
+							button -w 90 -al center -l "Optimize Now" -c "optimizeNow";
+						setParent ..;
+						rowLayout ;
+							separator -w 330;
+						setParent ..;
+						rowLayout
+							-numberOfColumns 1 -cat 1 "both" 5 -cw 1 330;
+							text -w 320 -l ("optimizeShadingNodes -type ....") nodeTypeText;
+						setParent ..;
+						rowLayout
+							-numberOfColumns 1 -cat 1 "both" 5 -cw 1 330;
+							string $oSNprogressBar = `progressBar -isInterruptable true -maxValue 10 -width 330`;
+						setParent ..;
+						rowLayout ;
+							separator -w 330;
+						setParent ..;
+						rowLayout
+							-numberOfColumns 1 -cat 1 "both" 5 -cw 1 330;
+							textScrollList -w 330 -numberOfRows 10 recapList;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+
+		formLayout -edit
+
+			-attachForm		$rScroll			top	1
+			-attachForm		$rScroll			left	1
+			-attachForm		$rScroll			right	1
+			-attachControl	$rScroll			bottom	1	$Bexit
+
+			-attachNone		$Bexit		top
+			-attachForm		$Bexit		left	1
+			-attachForm		$Bexit		right	1
+			-attachForm		$Bexit		bottom	1
+
+			$form;
+
+
+showWindow oSN;
+}
+
+/////////////////////////////////////////////////
+//
+// proc for tabLabel "Basic"
+/////////////////////////////////////////////////
+global proc optimizeNow ()
+{
+	string $nodeToOptimize = `optionMenu -q -v nodeToOptimize`;
+
+	// erase item form recapList
+	textScrollList -e -ra recapList;
+
+	// listType shader, texture, utility
+	string $listShader[] = `listNodeTypes "shader"`;
+	string $listTexture[] = `listNodeTypes "texture"`;
+	string $listUtility[] = `listNodeTypes "utility"`;
+	string $listShadingNetwork[] = stringArrayCatenate($listUtility, $listTexture);
+	string $listShadingNetwork[] = stringArrayCatenate($listShadingNetwork,$listShader);
+
+	//
+	// FOR ALL SHADING NETWORK
+	if ( $nodeToOptimize == "All Shading Network")
+	{
+		// recapList
+		string $start = ( "INFO : { oSN -option All Shading Network : Start }");
+		textScrollList -e -append $start recapList;
+
+		// recap_oSN
+		int $allNodeBefore = `recap_oSN $listShadingNetwork`;
+
+		// delete unused Shading
+		if (`checkBox -q -v  chkBoxDUN`)
+		{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+
+		// loop for all shading network
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : first Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listShadingNetwork)
+		{ oSNengine($node); }
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : second Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listShadingNetwork)
+		{ oSNengine($node); }
+
+		// recap_oSN
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $done = ( "INFO : { oSN -option All Shading Network : Done }");
+		textScrollList -e -append $done recapList;
+
+		int $allNodeAfter = `recap_oSN $listShadingNetwork`;
+		string $before = ( "INFO : { oSN : "+ $allNodeBefore + " nodes before oSN }"); textScrollList -e -append $before recapList;
+		string $after = ( "INFO : { oSN : "+ $allNodeAfter + " nodes after oSN }"); textScrollList -e -append $after recapList;
+	}
+
+	//
+	// FOR ALL SHADER
+	if ( $nodeToOptimize == "All Shader")
+	{
+		// recapList
+		string $start = ( "INFO : { oSN -option All Shader : Start }");
+		textScrollList -e -append $start recapList;
+
+		// recap_oSN
+		int $allNodeBefore = `recap_oSN $listShader`;
+
+		// delete unused Shading
+		if (`checkBox -q -v  chkBoxDUN`)
+		{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+
+		// loop for all shader
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : first Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listShader )
+		{ oSNengine($node); }
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : second Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listShader )
+		{ oSNengine($node); }
+
+		// recap_oSN
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $done = ( "INFO : { oSN -option All Shader : Done }");
+		textScrollList -e -append $done recapList;
+
+		int $allNodeAfter = `recap_oSN $listShader`;
+		string $before = ( "INFO : { oSN : "+ $allNodeBefore + " nodes before oSN }"); textScrollList -e -append $before recapList;
+		string $after = ( "INFO : { oSN : "+ $allNodeAfter + " nodes after oSN }"); textScrollList -e -append $after recapList;
+
+	}
+
+	//
+	// FOR ALL TEXTURE
+	if ( $nodeToOptimize == "All Texture")
+	{
+		// recapList
+		string $start = ( "INFO : { oSN -option All Texture : Start }");
+		textScrollList -e -append $start recapList;
+
+		// recap_oSN
+		int $allNodeBefore = `recap_oSN $listTexture`;
+
+		// delete unused Shading
+		if (`checkBox -q -v  chkBoxDUN`)
+		{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+
+		// loop for all texture
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : first Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listTexture )
+		{ oSNengine($node); }
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : second Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listTexture )
+		{ oSNengine($node); }
+
+		// recap_oSN
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $done = ( "INFO : { oSN -option All Texture : Done }");
+		textScrollList -e -append $done recapList;
+
+		int $allNodeAfter = `recap_oSN $listTexture`;
+		string $before = ( "INFO : { oSN : "+ $allNodeBefore + " nodes before oSN }"); textScrollList -e -append $before recapList;
+		string $after = ( "INFO : { oSN : "+ $allNodeAfter + " nodes after oSN }"); textScrollList -e -append $after recapList;
+	}
+
+	//
+	// FOR ALL UTILITY
+	if ( $nodeToOptimize == "All Utility")
+	{
+		// recapList
+		string $start = ( "INFO : { oSN -option All Utility : Start }");
+		textScrollList -e -append $start recapList;
+
+		// recap_oSN
+		int $allNodeBefore = `recap_oSN $listUtility`;
+
+		// delete unused Shading
+		if (`checkBox -q -v  chkBoxDUN`)
+		{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+
+		// loop for all texture
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : first Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listUtility )
+		{ oSNengine($node); }
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $info = ( "INFO : { oSN : second Pass }");
+		textScrollList -e -append $info recapList;
+		for ( $node in $listUtility )
+		{ oSNengine($node); }
+
+		// recap_oSN
+		textScrollList -e -append "------------------------------------------------------" recapList;
+		string $done = ( "INFO : { oSN -option All Utility : Done }");
+		textScrollList -e -append $done recapList;
+
+		int $allNodeAfter = `recap_oSN $listUtility`;
+		string $before = ( "INFO : { oSN : "+ $allNodeBefore + " nodes before oSN }"); textScrollList -e -append $before recapList;
+		string $after = ( "INFO : { oSN : "+ $allNodeAfter + " nodes after oSN }"); textScrollList -e -append $after recapList;
+	}
+}
+
+/////////////////////////////////////////////////
+//
+// oSN Engine, the main proc for optimize Shading Network
+/////////////////////////////////////////////////
+global proc oSNengine (string $node)
+{
+	text -e -l ("optimizeShadingNodes -type " + $node) nodeTypeText;
+	global string $oSNprogressBar;
+	int $cancelled = false;
+	// listingNodes;
+	string $listingNodes[] = `ls -type $node`;
+	int $nbrNodeBefore = `size($listingNodes)`;
+
+	int $numDagz = `size($listingNodes)`;
+	// verfication node exist
+	if ( $numDagz > 1)
+	{
+		string $listingAttr[] = `listAttr -s -v $listingNodes[0]`;
+		// progressBar
+		waitCursor -state on ;
+		progressBar -edit
+			-beginProgress
+			-isInterruptable true
+			-maxValue $numDagz
+			$oSNprogressBar;
+
+		// initialisation nodeOptimize.
+		string $nodesOptimize = "";
+
+		// for comparatorA
+		for ($M = 0; $M < (size($listingNodes)-1) ; $M++)
+		{
+		string $nodeInProgress = ( "*" + $listingNodes[$M] + "*");
+		int $Ioptimize = `gmatch $nodesOptimize $nodeInProgress`;
+			if ( $Ioptimize == 0)
+			{
+				// for comparatorB
+				int $S;
+				for ($S=$M+1; $S < (size($listingNodes)) ; $S++)
+				{
+					string $classification[] = `getClassification $node`;
+
+				// check for utility/general/bump
+					if ($classification[0] == "utility/general/bump")
+					{
+						int $iCompareInputNode = `compareInputNode $listingNodes[$M] $listingNodes[$S]`;
+						int $iCompareAttrNode  = `compareAttrNode $listingNodes[$M] $listingNodes[$S]`;
+						if ( $iCompareInputNode == 1 && $iCompareAttrNode == 1)
+						{ connectionEngine $listingNodes[$M] $listingNodes[$S]; $nodesOptimize = ($nodesOptimize + $listingNodes[$S] + "|");}
+					}
+				// check for texture
+					if ($classification[0] == "texture/2d" || $classification[0] == "texture/3d" || $classification[0] == "texture/environment")
+					{
+						int $iCompareAttrNode  = `compareAttrNode $listingNodes[$M] $listingNodes[$S]`;
+						if ( $iCompareAttrNode == 1)
+						{ connectionEngine $listingNodes[$M] $listingNodes[$S]; $nodesOptimize = ($nodesOptimize + $listingNodes[$S] + "|");}
+					}
+				// check for shader/surface
+					if ($classification[0] == "shader/surface")
+					{
+						int $iCompareInputNode = `compareInputNode $listingNodes[$M] $listingNodes[$S]`;
+						int $iCompareAttrNode  = `compareAttrNode $listingNodes[$M] $listingNodes[$S]`;
+						if ( $iCompareInputNode == 1 && $iCompareAttrNode == 1)
+						{ connectionEngine $listingNodes[$M] $listingNodes[$S]; $nodesOptimize = ($nodesOptimize + $listingNodes[$S] + "|");}
+					}
+				// stop script if ESC pressed
+					if(`progressBar -query -isCancelled $oSNprogressBar`)
+					{ $cancelled = true ; }
+				}
+			}
+			progressBar -edit -step 1 $oSNprogressBar;
+		}
+		waitCursor -state off ;
+		progressBar -edit -endProgress $oSNprogressBar;
+
+		// delete unused Shading
+		if (`checkBox -q -v  chkBoxDUN`)
+		{ hyperShadePanelMenuCommand("hyperShadePanel1", "deleteUnusedNodes"); }
+
+		// recapList
+		string $listingNodesAfter[] = `ls -type $node`;
+		int $nbrNodeAfter = size($listingNodesAfter);
+		refreshRecapList $node $nbrNodeBefore $nbrNodeAfter;
+	}
+}
+
+
+/////////////////////////////////////////////////
+//
+// refreshRecapList
+/////////////////////////////////////////////////
+global proc refreshRecapList (string $node, string $nbrNodeBefore,  string $nbrNodeAfter)
+{
+	//textScrollList -e -ra recapList;
+	string $info = ( "INFO : { " + $node + " : " + $nbrNodeBefore + " > " + $nbrNodeAfter + " }");
+	textScrollList -e -append $info recapList;
+}
+
+/////////////////////////////////////////////////
+//
+// compare Input Node
+/////////////////////////////////////////////////
+global proc int compareInputNode (string $nodeA, string $nodeB)
+{
+	int $iReturn;
+	// list input du shader
+	string $listInputNodeA[] = `listConnections -d 0 -s 1 -c 0 -p 0 $nodeA`;
+	string $listInputNodeB[] = `listConnections -d 0 -s 1 -c 0 -p 0 $nodeB`;
+	if (`size($listInputNodeA)` == `size($listInputNodeB)`)
+	{
+		string $listInputPlugNodeA[] = `listConnections -d 0 -s 1 -c 0 -p 1 $nodeA`;
+		string $listInputPlugNodeB[] = `listConnections -d 0 -s 1 -c 0 -p 1 $nodeB`;
+
+		int $countOK=`size($listInputPlugNodeA)`;
+		for ($i=0; $i<$countOK; $i++)
+		{
+			if (`gmatch $listInputPlugNodeA[$i] $listInputPlugNodeB[$i]` != 1)
+			{ $iReturn = 0; return $iReturn; }
+		}
+		$iReturn = 1; return $iReturn;
+	}
+	else
+	{ $iReturn = 0; return $iReturn; }
+}
+
+/////////////////////////////////////////////////
+//
+// compare Attribute Node
+/////////////////////////////////////////////////
+global proc int compareAttrNode (string $nodeA, string $nodeB)
+{
+	int $iReturn=0;
+	string $nodeType = `nodeType $nodeA`;
+	if ($nodeType == "file")
+	{
+		string $valueA = `getAttr ($nodeA +".fileTextureName" )`;
+		string $valueB = `getAttr ($nodeB +".fileTextureName" )`;
+		if ( tolower($valueA) != tolower($valueB))
+		{ $iReturn = 0; return $iReturn; }
+	}
+	// list shader attr
+	string $listAttrNodeA[] = `listAttr -m -sa -v $nodeA`;
+	string $listAttrNodeB[] = `listAttr -m -sa -v $nodeB`;
+
+	if (`size($listAttrNodeA)` == `size($listAttrNodeB)`)
+	{
+		int $countOK=`size($listAttrNodeA)`;
+		string $maxJ = 20;
+		for ($i=0; $i<$countOK; $i++)
+		{
+			float $comparatorA = `getAttr ($nodeA +"."+ $listAttrNodeA[$i] )`;
+			float $comparatorB = `getAttr ($nodeB +"."+ $listAttrNodeB[$i] )`;
+			if ($comparatorA != $comparatorB)
+			{ $iReturn = 0; return $iReturn; }
+		}
+		{ $iReturn = 1; return $iReturn; }
+	}
+	else
+	{ $iReturn = 0; return $iReturn; }
+}
+
+/////////////////////////////////////////////////
+//
+// connection Engine
+/////////////////////////////////////////////////
+global proc connectionEngine (string $master, string $slave)
+{
+	//detection a quoi est connecte le slave
+	string $connectionS[] = `listConnections -d 1 -s 0 -c 1 -p 1 $slave`;
+	// reconnection for every attr
+	int $i;
+	for ( $i = 0 ; $i < (size($connectionS)) ; $i+=2 )
+	{
+		string $slaveBuffer[];
+		string $slaveAttrOut;
+		$numTokens1 = `tokenize $connectionS[$i] "." $slaveBuffer`;
+		// si plusieur data.data.data
+		if (size($slaveBuffer)>2)
+		{$slaveAttrOut = $slaveBuffer[1] + "." + $slaveBuffer[2];}
+		else
+		{$slaveAttrOut = $slaveBuffer[1];}
+
+		string $destinationOut = $connectionS[$i+1];
+		string $masterOut = ( $master + "." + $slaveAttrOut);
+
+		// check if already connected
+		if (`isConnected $masterOut $destinationOut` == 0)
+		{
+		connectAttr -force $masterOut $destinationOut;
+		}
+
+	}
+}
+/////////////////////////////////////////////////
+//
+// recap_oSN
+/////////////////////////////////////////////////
+global proc int recap_oSN (string $nodes[])
+{
+	int $nbrNode;
+	for ( $node in $nodes )
+	{
+		$nbrNode = $nbrNode + size(`ls -type $node`);
+	}
+	return $nbrNode;
+}

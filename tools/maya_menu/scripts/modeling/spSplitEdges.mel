@@ -1,0 +1,144 @@
+/*  This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: spSplitEdges v1.2
+''    Author: Sunit Parekh
+''    Last Updated: March 12, 2005
+''    Update/Change this file at:
+''    http://www.highend3d.com/maya/mel/?section=modeling#3462
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+
+/*
+Split Edge Cmd
+AUTHOR: Sunit Parekh
+DATE:	10.03.05
+VERSION:1.2
+
+DESCRIPTION: 	Cuts select edges, creating a "hole"
+
+INSTALLATION:	Drop into one of your scripts directories
+
+USAGE:		source spSplitEdges.mel;
+		spSplitEdges;
+
+HELP:		Select two or more edges, and cut.  With just one
+		edge selected, if you're cutting around a "pole"
+		like in a sphere, the results may be a bit 
+		unpredictable.
+
+VERSION:
+
+1.2 -	Turned off undoQueue during calculation
+	The above fixes the Maya 6.0 crash bug
+*/
+
+
+//**************************************************************************
+//CUTTING PROC
+//**************************************************************************
+
+global proc spSplitEdges()
+{
+//edges
+	string $edges[]=`filterExpand -sm 32`;
+if (size($edges)>0)
+	set_cutEdgesWorking($edges);
+else	
+	warning "Select Some Edges to Cut!";
+}
+
+global proc set_cutEdgesWorking(string $edges[])
+{
+	polyOptions -db true;
+
+
+//misc variable
+	string $dump[];
+//object
+	string $obj[1]=`ls -hl`;
+	delete -ch $obj[0];
+
+	$dump=`polyListComponentConversion -fe -tv $edges`;
+//vtxs
+	string $vtxs[]=`filterExpand -sm 31 $dump`;
+
+//grow vtx selection
+	select (`polyListComponentConversion -in -fv -te $vtxs`);
+
+	polySelectConstraint -m 2 -pp 1 -t 0x8000;
+	resetPolySelectConstraint;
+
+	string $rim[]=`filterExpand -sm 32`;
+	$rim=stringArrayRemove($edges, $rim);
+
+	select (`polyListComponentConversion -fe -tv $rim`);
+
+//rim vtxs
+	string $rVtxs[]=`filterExpand -sm 31`;
+
+//remove initial vtx selection
+	$rVtxs=stringArrayRemove($vtxs, $rVtxs);
+
+//remove edge $rVtxs	
+	select $rVtxs;
+	polySelectConstraint -w 2 -m 2 -type 0x0001;
+	resetPolySelectConstraint;
+	$rVtxs=`filterExpand -sm 31`;
+
+//split original vtxs
+	polySplitVertex -ch 0 $vtxs;
+
+	undoInfo -swf 0;
+//check for funny looking edges (nonmanifold)	
+	se_checkManifoldEdges($obj[0]);
+
+
+	select (`polyListComponentConversion -fv -te $rVtxs`);
+	
+	
+//select edge
+	polySelectConstraint -w 1 -m 2 -type 0x8000;
+	resetPolySelectConstraint;
+
+//make sure edge list is greater than 0
+	if (size(`filterExpand -sm 32`)>0)
+		polySewEdge -t 0.01 -tx 0 -ws 1 -ch 0;
+
+	
+
+//check again for funny looking edges (nonmanifold)
+	se_checkManifoldEdges($obj[0]);
+
+	undoInfo -swf 1;
+select -cl;
+}
+
+
+global proc se_checkManifoldEdges(string $obj)
+{
+string $mVtxs[]=`polyInfo -nmv $obj`;
+string $merge;
+for ($mVtx in $mVtxs){
+	$merge="polyMergeVertex -ch 0 ";	
+
+	select $mVtx;
+
+	polySelectConstraint -w 1 -m 2 -pp 1 -type 1;
+	resetPolySelectConstraint;
+
+	$dump=`filterExpand -sm 31`;
+	for ($d in $dump){
+		if (!(stringArrayCount($d,$mVtxs)))
+			$merge=$merge+$d+" ";
+		}
+	eval($merge);
+
+	}
+
+
+}

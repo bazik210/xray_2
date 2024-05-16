@@ -1,0 +1,1 @@
+global proc int forInNum(string $item, string $array[]){//$item = "b";//$array = {"a", "b", "c"};$c = 0;for (; $c < `size $array`; $c++)	{	if ($array[$c] == $item)		break;	}if ($c == `size $array`)	return -1;return $c;}

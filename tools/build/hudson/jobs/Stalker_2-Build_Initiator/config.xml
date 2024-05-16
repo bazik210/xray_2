@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.groovy.SystemGroovy>
+      <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+        <command>import hudson.model.*;
+
+items = hudson.model.Hudson.instance.items
+
+// getting current build parameters
+
+Hudson_Build_Job = &quot;Stalker_2-Build&quot;
+Hudson_Publish_Job = &quot;Stalker_2-Publish&quot;
+Hudson_Build_Initiator_Job = &quot;Stalker_2-Build_Initiator&quot;
+
+def self_job = Hudson.instance.getItem(Hudson_Build_Initiator_Job)
+def build_job = Hudson.instance.getItem(Hudson_Build_Job)
+def publish_job = Hudson.instance.getItem(Hudson_Publish_Job)
+
+def runs = self_job.getBuilds()
+def currentBuild = runs[0]
+def vr = currentBuild.getBuildVariableResolver()
+
+def rebuild = vr.resolve(&quot;rebuild&quot;)
+def burn_iso  = vr.resolve(&quot;burn_iso&quot;)
+def is_protected = vr.resolve(&quot;is_protected&quot;)
+println &quot;rebuild:&quot; + rebuild
+println &quot;burn_iso:&quot; + burn_iso
+println &quot;protected:&quot; + is_protected
+
+if ( build_job.isBuilding() || publish_job.isBuilding() )
+{
+   if ( build_job.isBuilding() )
+     println(&quot;$Hudson_Build_Job is building!&quot;)
+
+   if ( publish_job.isBuilding() )
+     println(&quot;$Hudson_Publish_Job is building!&quot;)
+
+  publish_or_build_is_building = 1
+}
+else
+  publish_or_build_is_building = 0
+
+startServer = &quot;mr.Hudson&quot;
+
+def list_of_params = new Vector&lt;StringParameterValue&gt;()
+
+if ( rebuild != null )
+    list_of_params.addElement ( new StringParameterValue(&quot;rebuild&quot;, rebuild) )
+
+if ( burn_iso != null )
+    list_of_params.addElement ( new StringParameterValue(&quot;burn_iso&quot;, burn_iso) )
+
+if ( is_protected != null )
+    list_of_params.addElement ( new StringParameterValue(&quot;protected&quot;, is_protected) )
+
+params = new hudson.model.ParametersAction((List&lt;ParameterValue&gt;)list_of_params)
+
+if ( !publish_or_build_is_building )
+{
+    println(&quot;No $Hudson_Publish_Job job is building, starting $Hudson_Build_Job job&quot;)
+    startNote   = &quot;started by $Hudson_Build_Initiator_Job job&quot;
+    cause = new hudson.model.Cause.RemoteCause(startServer, startNote)
+    build_job.scheduleBuild(0, cause, params);
+}
+else
+{
+    def build_initiator_job = Hudson.instance.getItem(Hudson_Build_Initiator_Job)
+
+    println(&quot;Rescheduling $Hudson_Build_Initiator_Job job in next minute&quot;)
+    startNote   = &quot;rescheduling $Hudson_Build_Initiator_Job job&quot;
+    cause = new hudson.model.Cause.RemoteCause(startServer, startNote)
+    build_initiator_job.scheduleBuild(1*60, cause, params);
+}</command>
+      </scriptSource>
+      <bindings></bindings>
+      <classpath></classpath>
+    </hudson.plugins.groovy.SystemGroovy>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

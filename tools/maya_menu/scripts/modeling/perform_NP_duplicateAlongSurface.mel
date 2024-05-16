@@ -1,0 +1,572 @@
+//
+//  Nicolas Pastrana Script File
+//  site: http://n.pastrana.free.fr
+//  help: http://n.pastrana.free.fr/mel/
+//  mail: n.pastrana@free.fr
+//
+// I DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+// INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+// EVENT SHALL I BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+// CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+// DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+// TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+// PERFORMANCE OF THIS SOFTWARE.                  
+//
+//
+//  more informations on: http://n.pastrana.free.fr/mel/
+//
+//  MODIFY THIS AT YOUR OWN RISK
+//
+proc string assembleCmd()
+{
+	string $cmd = "normalConstraint";
+
+	float $aimVector[] = `optionVar -query normalConstraintAimVector`;
+	float $upVector[] = `optionVar -query normalConstraintUpVector`;
+
+	$cmd = ($cmd 
+			+ " -weight " + `optionVar -query normalConstraintWeight`
+			+ " -aimVector " 
+			+ $aimVector[0] + " " + $aimVector[1] + " " + $aimVector[2]
+			+ " -upVector " 
+			+ $upVector[0] + " " + $upVector[1] + " " + $upVector[2]
+		);
+	
+	// world up related options
+	
+	string $worldUpType = `optionVar -query normalConstraintWorldUpType`;
+	$cmd = ($cmd  + " -worldUpType " + "\"" + $worldUpType + "\"" );
+	switch ( $worldUpType )
+	{
+	case "scene":
+	case "none":
+		break;
+	case "object":
+		string $worldUpObject = `optionVar -query normalConstraintWorldUpObject`;
+		$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+		break;
+	case "objectrotation":
+		float $worldUpVector[] = `optionVar -query normalConstraintWorldUpVector`;
+		$cmd = ($cmd  + " -worldUpVector " 
+				+ $worldUpVector[0] + " "
+				+ $worldUpVector[1] + " "
+				+ $worldUpVector[2]);
+		string $worldUpObject = `optionVar -query normalConstraintWorldUpObject`;
+		$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+		break;
+	case "vector":
+		float $worldUpVector[] = `optionVar -query normalConstraintWorldUpVector`;
+		$cmd = ($cmd  + " -worldUpVector " 
+				+ $worldUpVector[0] + " "
+				+ $worldUpVector[1] + " "
+				+ $worldUpVector[2]);
+		break;
+	}
+
+	return $cmd;
+}
+
+
+global proc perform_NP_duplicateAlongSurface (int $update)
+{
+	int $numbers[] = `optionVar -q _NP_DuplicateAlongSurfacesNumberUV`;
+	int $numberU = $numbers[0];
+	int $numberV = $numbers[1];
+	string $ParentGroup;
+	string $selected[] = `ls -sl`;
+	string $pathShape[];
+	
+	string $tocopy = $selected[0];
+
+	if ($update == 0)
+	{
+		string $tocopyArray[];
+		$tocopyArray[0] = $tocopy;
+		string $tempPath[]= stringArrayRemove ($tocopyArray, $selected);
+		select $tempPath;
+		select -hi;
+		$pathShape = `ls -et nurbsSurface`;
+	}
+	if ($update == 1)
+	{
+		$pathShape[0] = $selected[1];
+		$ParentGroup = $selected[2];
+	}
+	if (size($pathShape)==0) {warning "At least one nurbsSurface must be selected!";}
+	if ($numberU<=1) {warning "Number U must be greater than 1";}
+	if ($numberV<=1) {warning "Number V must be greater than 1";}
+
+	if((size ($selected)>=2)&&(size ($pathShape)>=1) && ($numberU > 1) && ($numberV > 1)) 
+	{
+		//Get Surfaces Infos
+		//
+		float $offsetU[] = `optionVar -q _NP_duplicateAlongSurfacesOffsetU`;
+		float $offsetV[] = `optionVar -q _NP_duplicateAlongSurfacesOffsetV`;
+		float $offsetStartU = $offsetU[0];
+		float $offsetEndU = $offsetU[1];
+		float $offsetStartV = $offsetV[0];
+		float $offsetEndV = $offsetV[1];
+	
+		string $prefix = "_NP_";
+		string $snapShotGroup;
+		string $duplicated;	
+
+		cycleCheck -e off;
+		waitCursor -state on;
+		if ($update == 0)
+		{
+			//Create ParentGroup
+			//
+			$ParentGroup = `group -n "DuplicateAlongSurfaces" -empty`;
+			addAttr -ln ("referenceObject") -sn "refObj" -dataType "string" -hidden true -k false;
+			setAttr -type "string" ($ParentGroup + ".referenceObject") $tocopy;
+			if (size ($pathShape)>=1)
+			{
+				setAttr -l true -k false ($ParentGroup + ".translate");
+				setAttr -l true -k false ($ParentGroup + ".rotate");
+				setAttr -l true -k false ($ParentGroup + ".scale");
+				setAttr -l true -k false ($ParentGroup + ".shear");
+				setAttr -l true -k false ($ParentGroup + ".rotateAxis");
+			}
+		}
+
+		for ( $i=0; $i<size($pathShape); ++$i ) {
+			//Set Variables
+			//
+			string $currentPath = $pathShape[$i];
+			select -r $currentPath;
+			pickWalk -d up;
+			string $pathArray[] = `ls -sl`;
+			string $path = $pathArray[0];
+
+			$snapShotGroup = `group -n ("Along_" + $path) -empty -parent $ParentGroup`;
+			float $UminValue = `getAttr ($currentPath+".minValueU")`;
+			float $UmaxValue = `getAttr ($currentPath+".maxValueU")`;
+			float $VminValue = `getAttr ($currentPath+".minValueV")`;
+			float $VmaxValue = `getAttr ($currentPath+".maxValueV")`;
+			
+			float $rangeU = ($UmaxValue - $UminValue);
+			float $rangeV = ($VmaxValue - $VminValue);
+			
+			float $newUminValue = ($UminValue + ($offsetStartU * $rangeU));
+			float $newUmaxValue = ($UmaxValue - ($offsetEndU * $rangeU));
+			float $newVminValue = ($VminValue + ($offsetStartV * $rangeV));
+			float $newVmaxValue = ($VmaxValue - ($offsetEndV * $rangeV));
+
+			float $newRangeU = ($newUmaxValue - $newUminValue);
+			float $newRangeV = ($newVmaxValue - $newVminValue);
+
+			float $stepU = ($newRangeU / ($numberU - 1));
+			float $stepV = ($newRangeV / ($numberV - 1));
+			int $formU = `getAttr ($currentPath+".formU")`;
+			int $formV = `getAttr ($currentPath+".formV")`;
+			if ($formU == 2) $stepU = ($newRangeU / $numberU);
+			if ($formV == 2) $stepV = ($newRangeV / $numberV);
+
+			int $scriptJobArray[];
+			string $changeKey;
+			int $constraintMode = `optionVar -q _NP_duplicateAlongSurfacesConstraintMode`;
+			int $customAttr = `optionVar -query _NP_duplicateAlongSurfacesAttibutes`;
+			// Add General Customs Attributes
+			//
+			if ($customAttr && $update == 0)
+			{
+				select -r $ParentGroup;
+				float $tempU=$numberU;
+				float $tempV=$numberV;
+				
+				string $attrPath = ($ParentGroup + "." + $path);
+				$changeKey = ("update_NP_duplicateAlongSurfaces (\"" + $ParentGroup + "\", \"" + $currentPath + "\", \"");
+				string $changeKey0 = ($changeKey + "0\");");
+				string $changeKey1 = ($changeKey + "1\");");
+				
+				addAttr -ln ($path + "numberUV") -sn ($path + "nbUV") -at long2 -k 1;
+					addAttr -ln ($path + "numberU") -sn ($path + "nbU") -at long -p ($path + "numberUV") -dv $numberU -k 1;
+					addAttr -ln ($path + "numberV") -sn ($path + "nbV") -at long -p ($path + "numberUV") -dv $numberV -k 1;
+				addAttr -ln ($path + "offsetU") -sn ($path + "oU") -at double2 -k 1;
+					addAttr -ln ($path + "offsetUstart") -sn ($path + "oUs") -at double -p ($path + "offsetU") -dv $offsetStartU -k 1;
+					addAttr -ln ($path + "offsetUend") -sn ($path + "oUe") -at double -p ($path + "offsetU") -dv $offsetEndU -k 1;
+				addAttr -ln ($path + "offsetV") -sn ($path + "oV") -at double2 -k 1;
+					addAttr -ln ($path + "offsetVstart") -sn ($path + "oVs") -at double -p ($path + "offsetV") -dv $offsetStartV -k 1;
+					addAttr -ln ($path + "offsetVend") -sn ($path + "oVe") -at double -p ($path + "offsetV") -dv $offsetEndV -k 1;
+
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + "numberUV") $changeKey1`;
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + "offsetU") $changeKey0`;
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + "offsetV") $changeKey0`;
+
+				addAttr -ln ($path + "Update") -at enum  -en "always:once:alwaysNumbers" -k 1 $ParentGroup;
+				setAttr ($ParentGroup + "." + $path + "Update") 1;
+
+				if (`optionVar -q _NP_duplicateAlongSurfacesConstraint`==1)
+				{
+					addAttr -ln ($path + "NormalVector") -sn ($path + "Nv") -at double3 -k 1 $ParentGroup;
+						addAttr -ln ($path + "NormalVectorX") -sn ($path + "NvX") -at double -k 1 -p ($path + "NormalVector");
+						addAttr -ln ($path + "NormalVectorY") -sn ($path + "NvY") -at double -k 1 -p ($path + "NormalVector");
+						addAttr -ln ($path + "NormalVectorZ") -sn ($path + "NvZ") -at double -k 1 -p ($path + "NormalVector");
+
+					addAttr -ln ($path + "Uvector") -sn ($path + "Uv") -at double3 -k 1 $ParentGroup;
+						addAttr -ln ($path + "UvectorX") -sn ($path + "UvX") -at double -k 1 -p ($path + "Uvector");
+						addAttr -ln ($path + "UvectorY") -sn ($path + "UvY") -at double -k 1 -p ($path + "Uvector");
+						addAttr -ln ($path + "UvectorZ") -sn ($path + "UvZ") -at double -k 1 -p ($path + "Uvector");
+				}
+			}
+
+			//Make IndexArray
+			//
+			string $surfaceInfoNode;
+			float $u, $v;
+			vector $positionArray[];
+
+			int $indexUArray[];
+			int $indexVArray[];
+			int $n;
+			int $m=0;
+			
+			for ($a = 0; $a <= ($numberU - 1); $a++) {
+				$u = ($newUminValue + ($a * $stepU));
+				for ($b = 0; $b <= ($numberV - 1); $b ++)
+				{
+					$v = ($newVminValue + ($b * $stepV));
+					$exist=0;
+					vector $posTemp = `pointOnSurface -u $u -v $v -position $currentPath`;
+					
+					for ($n=0;$n<size($positionArray);$n++)
+					{
+						vector $tempVector = $positionArray[$n];
+						if (equivalent(($posTemp.x), ($tempVector.x)) && equivalent(($posTemp.y), ($tempVector.y)) && equivalent(($posTemp.z), ($tempVector.z)))
+						{
+							$exist=1;
+							break;
+						}
+					}
+					if ($exist!=1)
+					{
+						$positionArray[$m]=$posTemp;
+						$indexUArray[$m]=$a;
+						$indexVArray[$m]=$b;
+						$m += 1;
+					}
+				}
+			}
+			// Duplicate
+			//
+			for ($a = 0; $a < size($indexUArray); $a++) {
+				$u = ($newUminValue + ($indexUArray[$a] * $stepU));
+				$v = ($newVminValue + ($indexVArray[$a] * $stepV));
+				string $duplicatedArray[];
+				if (`optionVar -q _NP_duplicateAlongSurfacesDuplicateMode`==1)
+				{
+					$duplicatedArray = `duplicate -rr $tocopy`;
+				} else {
+					$duplicatedArray = `instance $tocopy`;
+				}
+				string $duplicated = $duplicatedArray[0];
+
+				$surfaceInfoNode = `pointOnSurface -ch on -u $u -v $v -position $currentPath`;
+				connectAttr -f ($surfaceInfoNode+".position") ($duplicated+".translate");
+				select $duplicated;
+				select -hi;
+
+				//Normal Constraint
+				//
+				if (`optionVar -q _NP_duplicateAlongSurfacesConstraint`==1)
+				{
+					string $normalConstraint;
+					select -r $currentPath $duplicated;
+					int $axeNormal = `optionVar -q normalConstraintNormalVectorB`;
+					int $axeU = `optionVar -q normalConstraintUVectorB`;
+
+					if ($constraintMode==1)
+					{
+						optionVar -floatValue normalConstraintWeight 1.0;
+						optionVar -stringValue normalConstraintWorldUpType "vector";
+						optionVar -stringValue normalConstraintWorldUpObject "";
+
+						int $a;int $b;int $c;
+						switch ($axeNormal)
+						{
+							case 1:
+								$a=1;$b=$c=0;
+								break;
+							case 2:
+								$a=$c=0;$b=1;
+								break;
+							case 3:
+								$a=$b=0;$c=1;
+								break;
+						}
+
+						optionVar -floatValue normalConstraintAimVector $a
+							-floatValueAppend normalConstraintAimVector $b
+							-floatValueAppend normalConstraintAimVector $c;
+						
+						switch ($axeU)
+						{
+							case 1:
+								$a=1;$b=$c=0;
+								break;
+							case 2:
+								$a=$c=0;$b=1;
+								break;
+							case 3:
+								$a=$b=0;$c=1;
+								break;
+						}
+						optionVar -floatValue normalConstraintUpVector $a
+							-floatValueAppend normalConstraintUpVector $b
+							-floatValueAppend normalConstraintUpVector $c;
+					}
+					if ($customAttr) 
+					{
+						vector $normVector = `optionVar -q normalConstraintAimVector`;
+						setAttr ($ParentGroup + "." + $path + "NormalVector") ($normVector.x) ($normVector.y) ($normVector.z);
+						$normVector = `optionVar -q normalConstraintUpVector`;
+						setAttr ($ParentGroup + "." + $path + "Uvector")  ($normVector.x) ($normVector.y) ($normVector.z);
+					}
+					
+					$normalConstraint = assembleCmd();
+					string $normalConstraintArray[] = `eval ($normalConstraint)`;
+					$normalConstraint= $normalConstraintArray[0];
+					connectAttr -f ($surfaceInfoNode+".normalizedTangentU") ($normalConstraint+".worldUpVector");
+					if ($customAttr) 
+					{
+						connectAttr -f ($ParentGroup + "." + $path + "NormalVector") ($normalConstraint+".aimVector");
+						connectAttr -f ($ParentGroup + "." + $path + "Uvector") ($normalConstraint+".upVector");
+					}
+				}
+				//customAttr Index
+				//
+				if ($customAttr) 
+				{
+					addAttr -h true -k false -ln IndiceU -at long $duplicated;
+					setAttr ($duplicated + ".IndiceU") $indexUArray[$a];
+					addAttr -h true -k false -ln IndiceV -at long $duplicated;
+					setAttr ($duplicated + ".IndiceV") $indexVArray[$a];
+				}
+				parent $duplicated ($ParentGroup+"|"+$snapShotGroup);	
+
+			}
+			if ($customAttr && ($update == 0))
+			{
+				//Update Render (scriptNode)
+				//
+				int $numberMode = 0;
+				int $updateMode = `getAttr ($ParentGroup + "." + $path + "Update")`;
+				if ($updateMode==2) $numberMode = 1;
+				
+				string $script = ("update_NP_duplicateAlongSurfaces (\"" + $ParentGroup + "\", \"" + $currentPath + "\", \"" + $numberMode + "\");");
+				string $nodeRender = `scriptNode -st 5 -n ($path + "scriptUpdateRender") -bs $script`;
+				string $nodeUpdate = `scriptNode -st 7 -n ($path + "scriptUpdateMaya")`;
+				$changeKey = ("int $numberMode = 0;\nint $updateMode = `getAttr " + $ParentGroup + "." + $path + "Update`;\nif ($updateMode==2) $numberMode = 1;\nstring $script = (\"update_NP_duplicateAlongSurfaces (\\\"" + $ParentGroup + "\\\", \\\"" + $currentPath + "\\\",\\\"\" + $numberMode + \"\\\");\");\nscriptNode -e -bs $script " + $nodeRender + ";\nscriptNode -e -bs (\"string $selected[] = `ls -sl`;\" + $script + \"select $selected;\") " + $nodeUpdate + ";\n");
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($ParentGroup + "." + $path + "Update") $changeKey`;
+				
+				//Update Maya (scriptNode)
+				$script = "string $selected[] = `ls -sl`;\n" + $script +"\nselect $selected;";
+				scriptNode -e -bs $script $nodeUpdate;
+				
+				string $nodeUpdateNode = `scriptNode -st 1 -n ($path + "scriptScriptJobs")`;
+				
+				//Remove ScriptNodes (scriptJob)
+				//
+				$script = "if (`objExists " + $ParentGroup + "`==0 )\n{\n\tselect -r " + $nodeUpdate + " " + $nodeRender +" " + $nodeUpdateNode + ";\n\tdelete;\n}";
+				$scriptJobArray[size($scriptJobArray)] = `scriptJob -ro 1 -ad ($ParentGroup + "." + $path + "numberUV") $script`;
+				
+				//Remove ScriptJobs (scriptNode)
+				//
+				int $scriptJobID;
+				string $tempArrayID = "{";
+				for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray)-1; $scriptJobID ++)
+				{
+					$tempArrayID += $scriptJobArray[$scriptJobID];
+					if ($scriptJobID<(size($scriptJobArray)-2)) $tempArrayID += ", ";
+				}
+				$tempArrayID +="}";
+				$script = "int $scriptJobArray[] = " + $tempArrayID + ";\nint $scriptJob;\nfor ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}";
+				scriptNode -e -as $script $nodeUpdateNode;
+				
+				//Create ScriptJobs (scriptNode)
+				
+				$script = "";
+				$script += "int $numberMode = 0;\nint $updateMode = `getAttr " + $ParentGroup + "." + $path + "Update`;\nif ($updateMode==2) $numberMode = 1;\n";
+				$script += "string $script = \"update_NP_duplicateAlongSurfaces (\\\"" + $ParentGroup + "\\\", \\\"" + $currentPath + "\\\", \\\"\" + $numberMode + \"\\\");\";\n";
+				$script += "int $scriptJobArray[]={};\n$scriptJobArray[0] = `scriptJob -ac " + $ParentGroup + "." + $path + "Update $script`;\n";
+				$script += "scriptNode -e -bs $script " + $nodeRender + ";\n";
+				$script += "string $attrPath = \"" + $ParentGroup + "." + $path +"\";\n";
+				$script += "$changeKey = \"update_NP_duplicateAlongSurfaces (\\\"" + $ParentGroup + "\\\", \\\"" + $currentPath + "\\\", \";\n";
+				$script += "string $changeKey0 = ($changeKey + \"\\\"0\\\");\");\n";
+				$script += "string $changeKey1 = ($changeKey + \"\\\"1\\\");\");\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + \"numberUV\") $changeKey1`;\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + \"offsetU\") $changeKey0`;\n";
+				$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -ac ($attrPath + \"offsetV\") $changeKey0`;\n\n";
+				$script += "int $scriptJobID;\n";
+				$script += "string $tempArrayID = \"{\";\n";
+				$script += "for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray)-1; $scriptJobID ++)\n";
+				$script += "{\n\t";
+				$script += "$tempArrayID += $scriptJobArray[$scriptJobID];\n\t";
+				$script += "if ($scriptJobID<(size($scriptJobArray)-2)) $tempArrayID += \", \";\n}\n";
+				$script += "$tempArrayID +=\"}\";\n";
+				$script += "string $script = \"int $scriptJobArray[] = \"+$tempArrayID+\";int $scriptJob;for ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}\";\n";
+				$script += "scriptNode -e -as $script " + $nodeUpdateNode + ";";
+				$script += "$script = \"if (`objExists \\\"" + " + $ParentGroup + " + "\\\"`==0 ) {select -r " + $nodeUpdate + " " + $nodeRender +" " + $nodeUpdateNode + ";delete;}\";";
+				$script += "scriptJob -ro 1 -ad "+$ParentGroup+"."+$path+"numberU $script;";
+				scriptNode -e -bs $script $nodeUpdateNode;
+			}
+
+		}
+		waitCursor -state off;
+		select $ParentGroup;
+	} else {
+		warning "at least one nurbsSurface and a DAG object must be selected\nthe first select is the copied object, the other nurbsSurface selected are the path duplicator...";
+	}
+}
+
+
+
+global proc update_NP_duplicateAlongSurfaces (string $ParentGroup, string $currentPath, int $number)
+{
+	string $referenceObject = `getAttr ($ParentGroup + ".referenceObject")`;
+	float $UminValue = `getAttr ($currentPath + ".minValueU")`;
+	float $UmaxValue = `getAttr ($currentPath + ".maxValueU")`;
+	float $VminValue = `getAttr ($currentPath + ".minValueV")`;
+	float $VmaxValue = `getAttr ($currentPath + ".maxValueV")`;
+	
+	select -r $currentPath;
+	pickWalk -d up;
+	string $pathArray[] = `ls -sl`;
+	string $path = $pathArray[0];	
+	
+	string $pathShape = $ParentGroup + "." + $path;
+	
+	int $numbers[] = `getAttr ($pathShape + "numberUV")`;
+		int $numberU = $numbers[0];
+		int $numberV = $numbers[1];
+	float $offsetU[] = `getAttr ($pathShape + "offsetU")`;
+		float $offsetStartU = $offsetU[0];
+		float $offsetEndU = $offsetU[1];
+	float $offsetV[] = `getAttr ($pathShape + "offsetV")`;
+		float $offsetStartV = $offsetV[0];
+		float $offsetEndV = $offsetV[1];
+
+	if ($number == 1)
+	{
+
+
+		string $pointOnSurfacesInfoArray[] = `listConnections -type "pointOnSurfaceInfo" $currentPath`;
+		string $normalConstraintArray[] = `listConnections -type "normalConstraint" $currentPath`;
+		select -r $pointOnSurfacesInfoArray $normalConstraintArray ($ParentGroup + "|Along_" + $path);
+		delete;
+
+		optionVar -clearArray _NP_DuplicateAlongSurfacesNumberUV;
+		optionVar -intValue _NP_DuplicateAlongSurfacesNumberUV $numberU;
+		optionVar -intValueAppend _NP_DuplicateAlongSurfacesNumberUV $numberV;
+		
+		optionVar -clearArray _NP_duplicateAlongSurfacesOffsetU;
+		optionVar -floatValue  _NP_duplicateAlongSurfacesOffsetU $offsetStartU;
+		optionVar -floatValueAppend  _NP_duplicateAlongSurfacesOffsetU $offsetStartU;
+		
+		optionVar -clearArray _NP_duplicateAlongSurfacesOffsetV;
+		optionVar -floatValue  _NP_duplicateAlongSurfacesOffsetV $offsetStartV;
+		optionVar -floatValueAppend _NP_duplicateAlongSurfacesOffsetV $offsetStartV;
+	
+		select $referenceObject $currentPath $ParentGroup;
+
+		perform_NP_duplicateAlongSurface (1);
+		
+	} else {
+		
+		if ($offsetStartU < 0 || $offsetStartU > 1) 
+		{
+			if ($offsetStartU < 0) 
+			{
+				setAttr ($pathShape + "_offsetStartU") 0;
+				$offsetStartU = 0;
+			}
+			if ($offsetStartU > 1) 
+			{
+				setAttr ($pathShape + "_offsetStartU") 1;
+				$offsetStartU = 1;
+			}
+			warning "offsetStartU must be between 0 and 1";
+		}
+		if ($offsetEndU < 0 || $offsetEndU > 1) 
+		{
+			if ($offsetEndU < 0) 
+			{
+				setAttr ($pathShape + "_offsetEndU") 0;
+				$offsetEndU = 0;
+			}
+			if ($offsetStartU > 1) 
+			{
+				setAttr ($pathShape + "_offsetEndU") 1;
+				$offsetEndU = 1;
+			}
+			warning "offsetEndU must be between 0 and 1";
+		}
+		if ($offsetStartV < 0 || $offsetStartV > 1) 
+		{
+			if ($offsetStartV < 0) 
+			{
+				setAttr ($pathShape + "_offsetStartV") 0;
+				$offsetStartV = 0;
+			}
+			if ($offsetStartV > 1) 
+			{
+				setAttr ($pathShape + "_offsetStartV") 1;
+				$offsetStartV = 1;
+			}
+			warning "offsetStartV must be between 0 and 1";
+		}
+		if ($offsetEndV < 0 || $offsetEndV > 1) 
+		{
+			if ($offsetEndV < 0) 
+			{
+				setAttr ($pathShape + "_offsetEndV") 0;
+				$offsetEndV = 0;
+			}
+			if ($offsetStartV > 1) 
+			{
+				setAttr ($pathShape + "_offsetEndV") 1;
+				$offsetEndV = 1;
+			}
+			warning "offsetEndU must be between 0 and 1";
+		}
+
+		float $rangeU = ($UmaxValue - $UminValue);
+		float $rangeV = ($VmaxValue - $VminValue);
+		
+		float $newUminValue = ($UminValue + ($offsetStartU * $rangeU));
+		float $newUmaxValue = ($UmaxValue - ($offsetEndU * $rangeU));
+		float $newVminValue = ($VminValue + ($offsetStartV * $rangeV));
+		float $newVmaxValue = ($VmaxValue - ($offsetEndV * $rangeV));
+
+		float $newRangeU = ($newUmaxValue - $newUminValue);
+		float $newRangeV = ($newVmaxValue - $newVminValue);
+
+		float $stepU = ($newRangeU / ($numberU - 1));
+		float $stepV = ($newRangeV / ($numberV - 1));
+
+		int $formU = `getAttr ($currentPath+".formU")`;
+		int $formV = `getAttr ($currentPath+".formV")`;
+		if ($formU == 2) $stepU = ($newRangeU / $numberU);
+		if ($formV == 2) $stepV = ($newRangeV / $numberV);
+	
+		string $pointOnSurfacesInfoArray[] = `listConnections -type "pointOnSurfaceInfo" $currentPath`;
+		string $pointOnSurfacesInfo;
+		
+		for ($pointOnSurfacesInfo in $pointOnSurfacesInfoArray)
+		{
+			string $duplicateConnectedArray[] = `listConnections -s false $pointOnSurfacesInfo`;
+	
+			string $duplicateConnected = $duplicateConnectedArray[0];
+			float $indiceU = `getAttr ($duplicateConnected + ".IndiceU")`;
+			float $indiceV = `getAttr ($duplicateConnected + ".IndiceV")`;
+			
+			float $u = ($newUminValue + ($stepU * $indiceU));
+			float $v = ($newVminValue + ($stepV * $indiceV));
+			
+			setAttr ($pointOnSurfacesInfo + ".parameterU") $u;
+			setAttr ($pointOnSurfacesInfo + ".parameterV") $v;
+		}
+		select $ParentGroup;
+	}
+}

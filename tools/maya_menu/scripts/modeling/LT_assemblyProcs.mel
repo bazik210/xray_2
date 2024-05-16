@@ -1,0 +1,1023 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_assemblyProcs.mel
+//
+// Contains all procs used by LT_UI.mel for Assembly tab in LayoutToolsUI
+//
+// Author:		Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate  
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_assemblyProcs()
+{
+	// Force loading of all LayoutTools assembly procs
+}
+
+
+
+global proc LT_stackAllAboveLast (string $list[], int $axis)
+{
+	$size = `size $list`;
+	$last = $list[$size-1];
+	$c = $size-2;
+
+	if ($axis == 1)
+		$flag = "-x";
+	else if ($axis == 2)
+		$flag = "-y";
+	else if ($axis == 3)
+		$flag = "-z";
+	
+	$stackTo = $last;
+	
+	while ($c >= 0) 
+		{
+		select -r $list[$c] $stackTo;
+
+		//make sure first obj is definitely on top
+		align -atl $flag Max;
+		select -r $list[$c];
+		move -r -ws $flag 5000;
+
+		//then stack
+		select -r $list[$c] $stackTo;	
+		align -atl $flag Stack;
+
+		//set next obj to stack on
+		$stackTo = $list[$c];
+
+		$c--;
+		}
+
+select -r $list;
+}
+
+
+
+global proc LT_stackAllUnderLast (string $list[], int $axis)
+{
+	string $flag;
+	float $startPosition;
+	float $newPosition;
+	float $difference ;
+	
+	$size = `size $list`;
+	$last = $list[$size-1];
+	$first = $list[0];
+	$c = 1;
+
+	if ($axis == 1)
+		{
+		$flag = "-x";
+		$startPosition = `getAttr ($last + ".tx")`;
+		}
+	else if ($axis == 2)
+		{
+		$flag = "-y";
+		$startPosition = `getAttr ($last + ".ty")`;
+		}
+	else if ($axis == 3)
+		{
+		$flag = "-z";
+		$startPosition = `getAttr ($last + ".tz")`;
+		}
+	
+		
+	//start by stacking above first object
+		
+	$stackTo = $first;
+	
+	while ($c <= ($size-1)) 
+		{
+		select -r $list[$c] $stackTo;
+
+		//make sure first obj is definitely on top
+		align -atl $flag Max;
+		select -r $list[$c];
+		move -r -ws $flag 5000;
+
+		//then stack
+		select -r $list[$c] $stackTo;	
+		align -atl $flag Stack;
+
+		//set next obj to stack on
+		$stackTo = $list[$c];
+
+		$c++;
+		}
+		
+	select -r $list;
+
+	//reloacate to stack below last object
+	
+	if ($axis == 1)
+		{
+		$newPosition = `getAttr ($last + ".tx")`;
+		$difference = $startPosition - $newPosition;
+		move -r $difference 0 0;
+		}
+	else if ($axis == 2)
+		{
+		$newPosition = `getAttr ($last + ".ty")`;
+		$difference = $startPosition - $newPosition;
+		move -r 0 $difference 0;		}
+	else if ($axis == 3)
+		{
+		$newPosition = `getAttr ($last + ".tz")`;
+		$difference = $startPosition - $newPosition;
+		move -r 0 0 $difference;
+	}
+
+}
+
+
+
+global proc LT_alignObjects (string $type, int $axis)
+{
+	if (($type == "center") && ($axis == 1))  // X
+		align -atl -z Mid -y Mid;
+	else if (($type == "center") && ($axis == 2))  // Y
+		align -atl -x Mid -z Mid;
+	else if (($type == "center") && ($axis == 3))  // Z
+		align -atl -y Mid -x Mid;
+	
+	else if (($type == "base") && ($axis == 1))  // X
+		align -atl -z Mid -y Min;
+	else if (($type == "base") && ($axis == 2))  // Y
+		{
+		align -atl -x Mid -z Mid;
+		warning ("No base to align to when aligning along Y axis.  Center used instead");
+		}
+	else if (($type == "base") && ($axis == 3))  // Z
+		align -atl -y Min -x Mid;
+	
+	else if (($type == "top") && ($axis == 1))  // X
+		align -atl -z Mid -y Max;
+	else if (($type == "top") && ($axis == 2))  // Y
+		{
+		align -atl -x Mid -z Mid;
+		warning ("No top to align to when aligning along Y axis.  Center used instead");
+		}
+	else if (($type == "top") && ($axis == 3))  // Z
+		align -atl -y Max -x Mid;	
+
+	else if (($type == "dist") && ($axis == 1))  // X
+		align -x Dist;
+	else if (($type == "dist") && ($axis == 2))  // Y
+		align -y Dist;
+	else if (($type == "dist") && ($axis == 3))  // Z
+		align -z Dist;	
+	else
+		warning "wrong parameters.";
+}
+
+
+global proc LT_snapToVertCenter(int $orient, int $constrain, int $parent)
+{
+	string $selected[] = `ls -sl`;
+	string $lastSelected = $selected[`size $selected` - 1];
+	
+	
+	string $firstSelected = $selected[0];
+		
+	
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";
+		
+
+	select -r $lastSelected;
+
+	string $vert[] = `filterExpand -sm 31`;
+	float $xtotal = 0;
+	float $ytotal = 0;
+	float $ztotal = 0;
+	
+	if (`size $vert` != 1)
+		{
+		select -r $selected;
+		error ("A single vert must be selected last");
+		}
+	else
+		{
+		float $pos[] = `xform -q -ws -t -r $vert`; 
+
+
+		//get object from vert for later
+		string $bufferTemp[];
+		tokenize $vert[0] "." $bufferTemp;
+		select -r $bufferTemp[0];
+		$vertObj = `ls -sl`;
+		if (`nodeType $vertObj[0]` == "mesh")  //get mesh transform if shape selected
+			pickWalk -d up; 
+		$vertObj = `ls -sl`;
+		
+				
+		//Get average position of all verts for selected edge
+		for ($i = 0; $i <= `size $pos`; $i += 3)
+			{
+			$xtotal += $pos[$i];
+			$ytotal += $pos[$i+1];
+			$ztotal += $pos[$i+2];			
+			}
+		float $xavg = ($xtotal / (`size $pos`/3));
+		float $yavg = ($ytotal / (`size $pos`/3));
+		float $zavg = ($ztotal / (`size $pos`/3));
+
+		//Move objects to edge
+		//reselect all but last edge
+		select -r $selected;
+		select -d $lastSelected;
+		string $objects[] = `ls -sl -type transform`;
+		for ($obj in $objects)
+			{
+			float $pivotx = `getAttr ($obj + ".rotatePivotX")`;
+			float $pivoty = `getAttr ($obj + ".rotatePivotY")`;
+			float $pivotz = `getAttr ($obj + ".rotatePivotZ")`;
+			select -r $obj;
+
+			// move object and compensate for pivot
+			move -a ($xavg-$pivotx) ($yavg-$pivoty) ($zavg-$pivotz);
+
+			
+			// check for orient option
+			//			    	
+			if ($orient == 1 || $constrain == 1)
+				{
+				print "Orient enabled. \n";
+				select -r $obj;
+				select -add $vertObj[0];
+				LT_geometrySnap ($orient, $constrain, $parent);
+				}
+				
+			//if ($parent == 1)  //LT_geometrySnap above already handles parenting
+			if ($parent == 1 && $orient == 0 && $constrain == 0)  //LT_geometrySnap above already handles parenting
+		    	{
+			    select -r $obj;
+			    select -add $vertObj[0];
+			    print $vertObj;
+			    parent;
+		   		 }		
+
+			}
+
+								
+		select -r $selected;
+		select -d $lastSelected;		
+		}
+}
+
+
+
+global proc LT_snapToEdgeCenter(int $orient, int $constrain, int $parent)
+{
+	string $selected[] = `ls -sl`;
+	string $lastSelected = $selected[`size $selected` - 1];
+
+	select -r $lastSelected;
+	
+	string $firstSelected = $selected[0];
+		
+	
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";
+		
+	string $edge[] = `filterExpand -sm 32`;
+	float $xtotal = 0;
+	float $ytotal = 0;
+	float $ztotal = 0;
+	
+	if (`size $edge` != 1)
+		{
+		select -r $selected;
+		error ("A single edge must be selected last");
+		}
+	else
+		{
+		float $pos[] = `xform -q -ws -t -r $edge`; 
+
+
+		//get object from edge for later
+		string $bufferTemp[];
+		tokenize $edge[0] "." $bufferTemp;
+		select -r $bufferTemp[0];
+		$edgeObj = `ls -sl`;
+		if (`nodeType $edgeObj[0]` == "mesh")  //get mesh transform if shape selected
+			pickWalk -d up; 
+		$edgeObj = `ls -sl`;
+		
+				
+		//Get average position of all verts for selected edge
+		for ($i = 0; $i <= `size $pos`; $i += 3)
+			{
+			$xtotal += $pos[$i];
+			$ytotal += $pos[$i+1];
+			$ztotal += $pos[$i+2];			
+			}
+		float $xavg = ($xtotal / (`size $pos`/3));
+		float $yavg = ($ytotal / (`size $pos`/3));
+		float $zavg = ($ztotal / (`size $pos`/3));
+
+		//Move objects to edge
+		//reselect all but last edge
+		select -r $selected;
+		select -d $lastSelected;
+		string $objects[] = `ls -sl -type transform`;
+		for ($obj in $objects)
+			{
+			float $pivotx = `getAttr ($obj + ".rotatePivotX")`;
+			float $pivoty = `getAttr ($obj + ".rotatePivotY")`;
+			float $pivotz = `getAttr ($obj + ".rotatePivotZ")`;
+			select -r $obj;
+
+			// move object and compensate for pivot
+			move -a ($xavg-$pivotx) ($yavg-$pivoty) ($zavg-$pivotz);
+
+			
+			// check for orient option
+			//
+			if ($orient == 1 || $constrain == 1)
+				{
+				print "Orient enabled. \n";
+				select -r $obj $edgeObj[0];
+				LT_geometrySnap ($orient, $constrain, $parent);
+				}	
+					
+			//if ($parent == 1)  //LT_geometrySnap above already handles parenting
+			if ($parent == 1 && $orient == 0 && $constrain == 0)  //LT_geometrySnap above already handles parenting
+		    	{
+			    select -r $obj;
+			    select -add $edgeObj[0];
+			    parent;
+		   		 }		
+		   		 
+			}
+
+		/*
+		// Removed because of weirdness
+		//
+		//Move faces and edges to edge
+		//reselect all but last edge
+		select -r $selected;
+		select -d $lastSelected;
+		string $components[] = `filterExpand -sm 32 -sm 34`;
+		if (`size $components` != 0)
+			{
+			select -r $components;
+			bgComponentTransformManip;
+			$manip = `ls -sl`;
+			float $pivotx = `getAttr ($manip[0] + ".rotatePivotX")`;
+			float $pivoty = `getAttr ($manip[0] + ".rotatePivotY")`;
+			float $pivotz = `getAttr ($manip[0] + ".rotatePivotZ")`;
+			select -r $manip[0];
+
+			// move object and compensate for pivot
+			move -a ($xavg-$pivotx) ($yavg-$pivoty) ($zavg-$pivotz);
+			delete $manip[0];
+			}
+
+		//Move verts to edge
+		//reselect all but last edge
+		select -r $selected;
+		select -d $lastSelected;
+		string $components[] = `filterExpand -sm 31`;
+		select -r $components;
+		if (`size $components` != 0)
+			move -a ($xavg) ($yavg) ($zavg);
+		*/	
+						
+		select -r $selected;
+		select -d $lastSelected;		
+		}
+}
+
+
+global proc LT_snapToFaceCenter(int $orient, int $constrain, int $parent)
+{
+	string $selected[] = `ls -sl`;
+	string $lastSelected = $selected[`size $selected` - 1];
+
+	select -r $lastSelected;
+	
+	string $firstSelected = $selected[0];
+		
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";	
+
+	string $face[] = `filterExpand -sm 34`;
+	float $xtotal = 0;
+	float $ytotal = 0;
+	float $ztotal = 0;
+	
+	if (`size $face` != 1)
+		{
+		select -r $selected;
+		error ("A single face must be selected last");
+		}
+	else
+		{
+		float $pos[] = `xform -q -ws -t -r $face`; 
+
+
+		//get object from face for later
+		string $bufferTemp[];
+		tokenize $face[0] "." $bufferTemp;
+		select -r $bufferTemp[0];
+		$faceObj = `ls -sl`;
+		if (`nodeType $faceObj[0]` == "mesh")  //get mesh transform if shape selected
+			pickWalk -d up; 
+		$faceObj = `ls -sl`;
+
+		//Get average position of all verts for selected face
+		for ($i = 0; $i <= `size $pos`; $i += 3)
+			{
+			$xtotal += $pos[$i];
+			$ytotal += $pos[$i+1];
+			$ztotal += $pos[$i+2];			
+			}
+		float $xavg = ($xtotal / (`size $pos`/3));
+		float $yavg = ($ytotal / (`size $pos`/3));
+		float $zavg = ($ztotal / (`size $pos`/3));
+
+		//Move objects to face
+		//reselect all but last face
+		select -r $selected;
+		select -d $lastSelected;
+		string $objects[] = `ls -sl -type transform`;
+		for ($obj in $objects)
+			{
+			float $pivotx = `getAttr ($obj + ".rotatePivotX")`;
+			float $pivoty = `getAttr ($obj + ".rotatePivotY")`;
+			float $pivotz = `getAttr ($obj + ".rotatePivotZ")`;
+			select -r $obj;
+
+			// move object and compensate for pivot
+			move -a ($xavg-$pivotx) ($yavg-$pivoty) ($zavg-$pivotz);
+			
+			// check for orient option
+			//
+			if ($orient == 1 || $constrain == 1)
+				{
+				print "Orient enabled. \n";
+				select -r $obj $faceObj[0];
+				print ($obj + " to " + $faceObj[0]);
+				LT_geometrySnap ($orient, $constrain, $parent);
+				}
+ 
+			//if ($parent == 1)  //LT_geometrySnap above already handles parenting
+			if ($parent == 1 && $orient == 0 && $constrain == 0)  //LT_geometrySnap above already handles parenting
+		    	{
+			    select -r $obj;
+			    select -add $faceObj[0];
+			    parent;
+		   		 }	
+		   		    
+			}
+
+		/*
+		// Removed because of weirdness
+		//
+		//Move faces and edges to face
+		//reselect all but last face
+		select -r $selected;
+		select -d $lastSelected;
+		string $components[] = `filterExpand -sm 32 -sm 34`;
+		if (`size $components` != 0)
+			{
+			select -r $components;
+			bgComponentTransformManip;
+			$manip = `ls -sl`;
+			float $pivotx = `getAttr ($manip[0] + ".rotatePivotX")`;
+			float $pivoty = `getAttr ($manip[0] + ".rotatePivotY")`;
+			float $pivotz = `getAttr ($manip[0] + ".rotatePivotZ")`;
+			select -r $manip[0];
+
+			// move object and compensate for pivot
+			move -a ($xavg-$pivotx) ($yavg-$pivoty) ($zavg-$pivotz);
+			delete $manip[0];
+			}
+
+		//Move verts to face
+		//reselect all but last face
+		select -r $selected;
+		select -d $lastSelected;
+		string $components[] = `filterExpand -sm 31`;
+		select -r $components;
+		if (`size $components` != 0)
+			move -a ($xavg) ($yavg) ($zavg);
+		*/
+														
+		$i++;			
+
+		// check for parent option
+		//
+
+			
+			
+		select -r $selected;
+		select -d $lastSelected;
+		}
+}
+
+
+//////////////////////////////////////////////
+//	GeoSnap procs
+//////////////////////////////////////////////
+
+
+
+global proc LT_curveSnap(int $orient, int $contsrain, int $parent)
+{
+	//use geometry constraints to snap one or more objects to a curve
+	
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	
+	
+	if ($orient == 1)
+		warning "The orient option does not work with Snap To Curve";
+
+	if ($contsrain == 0)
+		print "Geometry constraints not created.\n";
+	else
+		warning "Geometry constraints created.";
+		
+	if ($parent == 1)
+		warning ("objects parented to target : " + $list[$size-1]);
+	
+		
+	// Geo and Normal snap all select to last selected
+	//
+	int $i = 0;
+	while ($i < ($size-1))
+		{
+		select -r $list[$size-1]; //target object
+		select -add $list[$i]; //current item
+		geometryConstraint -weight 1;
+
+		
+		// delete constraint if needed
+		//
+		if ($contsrain == 0)
+		    {
+			select -r $list[$i];
+			DeleteConstraints;	
+			}
+			
+						
+		// check for parent option
+		//
+		if ($parent == 1)
+		    {
+			select -r $list[$i]; //current item
+			select -add $list[$size-1]; //target object
+			parent;
+			}
+														
+		$i++;
+		}
+		
+		select -r $list;
+		select -d $list[$size-1];
+
+}
+
+
+
+global proc LT_alongCurve(int $orient, int $constrain, int $parent)
+{
+	
+	$selected = `ls -sl`;
+	PositionAlongCurve;
+
+	// check for constrain option
+	//
+	if ($constrain == 1)
+	    {
+		//snap and constrain to current position
+		// for parent to off as it will get parented here anyway
+		LT_curveSnap ($orient, $constrain, 0);
+		warning "Geometry constraint created.";	
+		}
+		
+	// check for parent option
+	//
+	if ($parent == 1)
+	    {
+		$size = `size $selected`;
+		select -r $selected;
+		//select -deselect $selected[$size-1];
+		//parent -w;
+		//select -r $selected;
+		parent;
+		
+		warning ("Objects parented to target curve");
+		}
+		
+			
+	if ($orient == 1)
+	    {
+		warning "The orient option does not work with Position Along Curve";
+		}
+		
+}
+
+
+global proc LT_geometrySnap(int $orient, int $contsrain, int $parent)
+{
+	//use geometry and normal constraints to snap one object to another
+	
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	
+	// Geo and Normal snap all select to last selected
+	//
+	int $i = 0;
+	while ($i < ($size-1))
+		{
+		select -r $list[$size-1]; //target object
+		select -add $list[$i]; //current item
+		geometryConstraint -weight 1;
+		if ($orient == 1)
+			normalConstraint -weight 1 -aimVector 0 1 0 -upVector 1 0 0 -worldUpType "scene";
+		
+		// delete constraint if needed
+		//
+		if ($contsrain == 0)
+		    {
+			select -r $list[$i];
+			DeleteConstraints;	
+			print "Geometry and Normal constraint not created.\n";
+			}
+		else
+			warning "Geometry and Normal constraint created.";
+			
+		// check for parent option
+		//
+						
+		$i++;
+		}
+		
+	if ($parent == 1)
+	    {
+		   /*
+		$tmpGroup = `createNode -name "TempGroup" transform`;
+		select -r $list; //source objects
+		select -deselect $list[$size-1]; //target object
+		select -add $tmpGroup;
+		parent;
+
+		//select -r $list; //all objects						
+		//parent;
+		
+		select -r $tmpGroup;
+		select -add $list[$size-1]; //target object
+		parent;
+		//delete $tmpGroup;
+		*/
+		select -r $list;
+		parent;
+		
+		}
+		
+	select -cl;
+
+}
+
+
+
+global proc LT_cycleAimAxis()
+{
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	float $tmpValue;
+	
+	//Cycle through normal constraint options
+	
+	for ($item in $list)
+		{
+	    select -r $item;
+		$normConstraint = `listRelatives -type normalConstraint`;
+		$tmpValue = `getAttr  ($normConstraint[0] + ".aimVectorX")`;
+		setAttr ($normConstraint[0] + ".aimVectorX") `getAttr  ($normConstraint[0] + ".aimVectorY")`;
+		setAttr ($normConstraint[0] + ".aimVectorY") `getAttr  ($normConstraint[0] + ".aimVectorZ")`;
+		setAttr ($normConstraint[0] + ".aimVectorZ") $tmpValue;
+		}
+	select -r $list;
+}
+
+
+global proc LT_flipAimAxis()
+{
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	float $tmpValue;
+	
+	//Cycle through normal constraint options
+	
+	for ($item in $list)
+		{
+	    select -r $item;
+		$normConstraint = `listRelatives -type normalConstraint`;
+		setAttr ($normConstraint[0] + ".aimVectorX") (-1 * `getAttr  ($normConstraint[0] + ".aimVectorX")`);
+		setAttr ($normConstraint[0] + ".aimVectorY") (-1 * `getAttr  ($normConstraint[0] + ".aimVectorY")`);
+		setAttr ($normConstraint[0] + ".aimVectorZ") (-1 * `getAttr  ($normConstraint[0] + ".aimVectorZ")`);
+		}
+	select -r $list;
+
+}
+
+
+
+global proc LT_cycleUpAxis()
+{
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	float $tmpValue;
+	
+	//Cycle through normal constraint options
+	
+	for ($item in $list)
+		{
+	    select -r $item;
+		$normConstraint = `listRelatives -type normalConstraint`;
+		$tmpValue = `getAttr  ($normConstraint[0] + ".upVectorX")`;
+		setAttr ($normConstraint[0] + ".upVectorX") `getAttr  ($normConstraint[0] + ".upVectorY")`;
+		setAttr ($normConstraint[0] + ".upVectorY") `getAttr  ($normConstraint[0] + ".upVectorZ")`;
+		setAttr ($normConstraint[0] + ".upVectorZ") $tmpValue;
+		}
+	select -r $list;
+
+}
+
+
+global proc LT_flipUpAxis()
+{
+	string $list[] = `ls -sl -tr`;
+	int $size = `size $list`;
+	float $tmpValue;
+	
+	//Cycle through normal constraint options
+	
+	for ($item in $list)
+		{
+	    select -r $item;
+		$normConstraint = `listRelatives -type normalConstraint`;
+		setAttr ($normConstraint[0] + ".upVectorX") (-1 * `getAttr  ($normConstraint[0] + ".upVectorX")`);
+		setAttr ($normConstraint[0] + ".upVectorY") (-1 * `getAttr  ($normConstraint[0] + ".upVectorY")`);
+		setAttr ($normConstraint[0] + ".upVectorZ") (-1 * `getAttr  ($normConstraint[0] + ".upVectorZ")`);
+		}
+	select -r $list;
+}
+
+
+
+//////////////////////////////////////////////
+//	Replicate procs
+//////////////////////////////////////////////
+
+
+global proc LT_copyToVerts(int $orient, int $constrain, int $parent, int $inst)
+{
+	string $selected[] = `ls -sl`;
+	string $firstSelected = $selected[0];
+		
+	string $verts[] = `filterExpand -sm 31`;
+	
+	string $transforms[] = `ls -sl -type "transform"`;
+	if (`size $transforms` != 1)
+		error ("Select a single object to copy, and 1 or more target verts to replicate to.");
+	
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";
+		
+	if (`size $verts` == 0)
+		error "No target verts to copy to.";
+		
+
+	for ($vert in $verts)
+		{
+		select -r $firstSelected;
+		if ($inst == 2) 
+			instance; 
+		else 
+			duplicate -rr;
+		select -add $vert;
+		
+		LT_snapToVertCenter $orient $constrain $parent;
+		}
+	select -cl;
+}
+
+
+
+global proc LT_copyToFaces(int $orient, int $constrain, int $parent, int $inst)
+{
+	string $selected[] = `ls -sl`;
+	string $firstSelected = $selected[0];
+		
+	string $faces[] = `filterExpand -sm 34`;
+
+	string $transforms[] = `ls -sl -type "transform"`;
+	if (`size $transforms` != 1)
+		error ("Select a single object to copy, and 1 or more target faces to replicate to.");
+			
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";
+		
+	if (`size $faces` == 0)
+		error "No target faces to copy to.";
+		
+
+	for ($face in $faces)
+		{
+		select -r $firstSelected;
+		if ($inst == 2) 
+			instance; 
+		else 
+			duplicate -rr;
+		select -add $face;
+		
+		LT_snapToFaceCenter $orient $constrain $parent;
+		}
+	select -cl;
+}
+
+
+global proc LT_copyToEdges(int $orient, int $constrain, int $parent, int $inst)
+{
+	string $selected[] = `ls -sl`;
+	string $firstSelected = $selected[0];
+		
+	string $edges[] = `filterExpand -sm 32`;
+	
+	string $transforms[] = `ls -sl -type "transform"`;
+	if (`size $transforms` != 1)
+		error ("Select a single object to copy, and 1 or more target edge to replicate to.");
+	
+	if (`objectType $firstSelected` != "transform")
+		error "First object selected must be a transform";
+		
+	if (`size $edges` == 0)
+		error "No target edges to copy to.";
+		
+
+	for ($edge in $edges)
+		{
+		select -r $firstSelected;
+		if ($inst == 2) 
+			instance; 
+		else 
+			duplicate -rr;
+		select -add $edge;
+		
+		LT_snapToEdgeCenter $orient $constrain $parent;
+		}
+	select -cl;
+}
+
+
+//////////////////////////////////////////////
+//	Random Replicate procs
+//////////////////////////////////////////////
+
+global proc LT_randomComponentSelection (int $number, string $type, string $source, string $target)
+{
+select -cl;
+
+if ($type == "vert")
+	{
+	$tmpString = `polyEvaluate -v $target`;
+	int $vertCount = $tmpString[0];
+	$i = 1;
+	select -r $source;
+	while ($i <= $number)
+		{	
+		//generate random number within vert count and select that vert
+		int $randNum = `rand 0 $vertCount`;
+		string $randVert = ($target + ".vtx[" + $randNum + "]");
+		select -add $randVert;
+		$currentList = `ls -sl -flatten`;
+		//continue selecting random verts until target number reached
+		$i = `size $currentList`;
+		}
+	}
+
+else if ($type == "edge")
+	{
+	$tmpString = `polyEvaluate -e $target`;
+	int $edgeCount = $tmpString[0];
+	$i = 1;
+	select -r $source;
+	while ($i <= $number)
+		{	
+		//generate random number within vert count and select that vert
+		int $randNum = `rand 0 $edgeCount`;
+		string $randVert = ($target + ".e[" + $randNum + "]");
+		select -add $randVert;
+		$currentList = `ls -sl -flatten`;
+		//continue selecting random verts until target number reached
+		$i = `size $currentList`;
+		}
+	}
+
+else if ($type == "face")
+	{
+	$tmpString = `polyEvaluate -f $target`;
+	int $faceCount = $tmpString[0];
+	$i = 1;
+	select -r $source;
+	while ($i <= $number)
+		{	
+		//generate random number within vert count and select that vert
+		int $randNum = `rand 0 $faceCount`;
+		string $randVert = ($target + ".f[" + $randNum + "]");
+		select -add $randVert;
+		$currentList = `ls -sl -flatten`;
+		//continue selecting random verts until target number reached
+		$i = `size $currentList`;
+		}
+	}
+
+else 
+	error ("No target of type " + $type);
+
+}
+
+
+
+global proc LT_randomReplicateObjects (int $verts, int $edges, int $faces, int $orient, int $constrain, int $parent, int $inst, int $number)
+{
+	$meshes = `filterExpand -sm 12`;
+
+	if (`size $meshes` < 2)
+		error ("Select two meshes: Source then target.");
+
+
+
+ 	string $source = $meshes[0];
+	string $target = $meshes[1];
+	
+	int $targetCount = $verts + $faces + $edges;
+	int $split = $number / $targetCount;
+	
+	if ($verts)
+		{
+		$tmp = `polyEvaluate -v $target`;
+		if ($split > $tmp[0])
+			error ("Not enough of component type for the desired goal.  Try setting to goal to a smaller value.");
+		LT_randomComponentSelection $split "vert" $source $target;
+		LT_copyToVerts $orient $constrain $parent $inst;
+		}
+	if ($edges)
+		{
+		$tmp = `polyEvaluate -e $target`;
+		if ($split > $tmp[0])
+			error ("Not enough of component type for the desired goal.  Try setting to goal to a smaller value.");
+		LT_randomComponentSelection $split "edge" $source $target;
+		LT_copyToEdges $orient $constrain $parent $inst;
+		}
+	if ($faces)
+		{
+		$tmp = `polyEvaluate -f $target`;
+		if ($split > $tmp[0])
+			error ("Not enough of component type for the desired goal.  Try setting to goal to a smaller value.");
+		LT_randomComponentSelection $split "face" $source $target;
+		LT_copyToFaces $orient $constrain $parent $inst;
+		}
+
+	if (`size $meshes` > 2)
+		warning ("Only the first two selected meshes were used.  Additional objects or children were ignored.");
+
+}
+	

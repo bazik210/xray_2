@@ -1,0 +1,50 @@
+//******************************************************************************
+// SCRIPT NAME: toggleNodeLockOnSelected.mel
+// DESCRIPTION: Will toggle on/off NodeLock mode.
+//
+// USAGE: Add a new command in the Hotkey Editor.
+// Type "toggleNodeLockOnSelected" and assign a hotkey.
+//******************************************************************************
+
+
+global proc toggleNodeLockOnSelected()
+{
+	string $objs[]  = `ls -sl`;
+	int $obj;
+
+	if (`size ($objs)` == 0)
+	{
+		warning "select at least 1 object";
+	}
+	else
+	{
+		for ($obj=0;$obj<size($objs);$obj++)
+		{
+			string $obj_type[] = `pickWalk -d down $objs[$obj]`;
+
+			if (`nodeType $obj_type[0]` == "mesh" ||
+				`nodeType $obj_type[0]` == "light" ||
+				`nodeType $obj_type[0]` == "camera" || 
+				`nodeType $obj_type[0]` == "nurbsSurface")
+			{
+				int $lock[] = `lockNode -q $objs[$obj]`;
+				if ($lock[0] == 0)
+				{
+					lockNode -l 1 $objs[$obj];
+					print ($objs[$obj] + " - objects locked \n");
+					polyColorPerVertex -r 0.764 -g 1.000 -b 0.764 -a 0.9 -cdo;
+				}
+				else
+				{
+					lockNode -l 0 $objs[$obj];
+					print ($objs[$obj] + " - objects unlocked \n");
+					polyColorPerVertex -nun -rem ;
+				}
+	
+			}
+		select -r $objs;
+		}
+	}
+}
+
+//******************************************************************************

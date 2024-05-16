@@ -1,0 +1,2046 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_displayProcs.mel
+//
+// Contains all procs used by LT_UI.mel for Display tab of LayoutToolsUI
+//
+// Author:		Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate  
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_displayProcs()
+{
+	// Force loading of all LayoutTools display procs
+}
+
+//////////////////////////////////////////////
+//		Display Procs
+//////////////////////////////////////////////
+
+global proc LT_showFileInfo()
+{
+	global string $LT_FileInfoMenu;
+
+	if (`window -exists LT_fileInfo`)
+		{
+		warning "File info window is already open\n";
+		//deleteUI LT_fileInfo;
+ 		//windowPref -remove LT_fileInfo;
+		}
+	else
+		{
+		string $info = `getAttr LT_fileInfo.notes`;
+		window -tbm 0 -title "File Information" -menuBar true -width 410 -height 350 LT_fileInfo;
+			menu -tearOff 0 -label "Edit";
+			    	$LT_FileInfoMenu = `menuItem -label "Save and Close"`;
+				menuItem -label "Revert to Saved" -command "deleteUI LT_fileInfo; LT_showFileInfo";
+				menuItem -label "Close Without Saving" - command "deleteUI LT_fileInfo";    	
+				menuItem -d 1;
+				menuItem -label "Delete File Info" -command "LT_deleteFileInfo";
+			columnLayout -width 445;
+
+			string $infoField = `scrollField -width 400 -height 280 -ww 0 -text $info`;
+			text -align center -label "     This info will be saved with the current file and will be displayed upon reopening";
+
+			string $saveCmd = "{ string $info = `scrollField -query -text "  + $infoField + "`;  setAttr LT_fileInfo.notes -type \"string\" $info ; deleteUI LT_fileInfo; }";
+			menuItem -e -command $saveCmd $LT_FileInfoMenu; 
+
+		showWindow LT_fileInfo;
+		}
+}
+
+
+global proc LT_deleteFileInfo()
+{
+	if (`window -exists LT_fileInfo`)
+		deleteUI LT_fileInfo ; 
+	if (`objExists "LT_fileInfoScript"`) 
+		delete LT_fileInfoScript ; 
+	if (`objExists "LT_fileInfo"`) 
+		delete LT_fileInfo;
+	warning ("All file info nodes were deleted and file information will no longer be saved with this file.");
+}
+
+
+global proc LT_createFileInfo()
+{
+	//Create node and attr for storing info
+	if ( `objExists "LT_fileInfo"` == 0)
+		{
+		print ("Creating node LT_fileInfo.\n");
+		createNode -name "LT_fileInfo" unknown;
+		}
+	if ( `attributeQuery -exists -node "LT_fileInfo" "notes"` == 0)
+		{
+		print ("Adding notes attribute to node.\n");
+		addAttr -ln "notes" -dt "string" LT_fileInfo;
+		setAttr LT_fileInfo.notes -type "string" "Replace with info specific to the current file";
+		}
+	if ( `objExists "LT_fileInfoScript"` == 0)
+		{
+		//create scriptNode for diplaying info
+		print ("Creating scriptNode for opening file info window.\n");
+
+		//this is really confusing, but the scriptNode will contain entire body of all 3 procs : LT_deleteFileInfo, LT_showFileInfo, createFileInfo with line for creating itself... trust me.
+		scriptNode  -beforeScript  "\r\nglobal proc LT_showFileInfo()\r\n{\r\n\tglobal string $LT_FileInfoMenu;\r\n\r\n\tif (`window -exists LT_fileInfo`)\r\n\t\t{\r\n\t\twarning \"File info window is already open\\n\";\r\n\t\t//deleteUI LT_fileInfo;\r\n \t\t//windowPref -remove LT_fileInfo;\r\n\t\t}\r\n\telse\r\n\t\t{\r\n\t\tstring $info = `getAttr LT_fileInfo.notes`;\r\n\t\twindow -tbm 0 -title \"File Information\" -menuBar true -width 410 -height 350 LT_fileInfo;\r\n\t\t\tmenu -tearOff 0 -label \"Edit\";\r\n\t\t\t    \t$LT_FileInfoMenu = `menuItem -label \"Save and Close\"`;\r\n\t\t\t\tmenuItem -label \"Revert to Saved\" -command \"deleteUI LT_fileInfo; LT_showFileInfo\";\r\n\t\t\t\tmenuItem -label \"Close Without Saving\" - command \"deleteUI LT_fileInfo\";    \t\r\n\t\t\t\tmenuItem -d 1;\r\n\t\t\t\tmenuItem -label \"Delete File Info\" -command \"LT_deleteFileInfo\";\r\n\t\t\tcolumnLayout -width 445;\r\n\r\n\t\t\tstring $infoField = `scrollField -width 400 -height 280 -ww 0 -text $info`;\r\n\t\t\ttext -align center -label \"     This info will be saved with the current file and will be displayed upon reopening\";\r\n\r\n\t\t\tstring $saveCmd = \"{ string $info = `scrollField -query -text \"  + $infoField + \"`;  setAttr LT_fileInfo.notes -type \\\"string\\\" $info ; deleteUI LT_fileInfo; }\";\r\n\t\t\tmenuItem -e -command $saveCmd $LT_FileInfoMenu; \r\n\r\n\t\tshowWindow LT_fileInfo;\r\n\t\t}\r\n}\r\n\r\n\r\nglobal proc LT_deleteFileInfo()\r\n{\r\n\tif (`window -exists LT_fileInfo`)\r\n\t\tdeleteUI LT_fileInfo ; \r\n\tif (`objExists \"LT_fileInfoScript\"`) \r\n\t\tdelete LT_fileInfoScript ; \r\n\tif (`objExists \"LT_fileInfo\"`) \r\n\t\tdelete LT_fileInfo;\r\n}\r\n\r\n\r\nglobal proc createFileInfo()\r\n{\r\n\t//Create node and attr for storing info\r\n\tif ( `objExists \"LT_fileInfo\"` == 0)\r\n\t\t{\r\n\t\tprint (\"Creating node LT_fileInfo.\\n\");\r\n\t\tcreateNode -name \"LT_fileInfo\" unknown;\r\n\t\t}\r\n\tif ( `attributeQuery -exists -node \"LT_fileInfo\" \"notes\"` == 0)\r\n\t\t{\r\n\t\tprint (\"Adding notes attribute to node.\\n\");\r\n\t\taddAttr -ln \"notes\" -dt \"string\" LT_fileInfo;\r\n\t\tsetAttr LT_fileInfo.notes -type \"string\" \"Replace with info specific to the current file\";\r\n\t\t}\r\n\tif ( `objExists \"LT_fileInfoScript\"` == 0)\r\n\t\t{\r\n\t\t//create scriptNode for diplaying info\r\n\t\tprint (\"Creating scriptNode for opening file info window.\\n\");\r\n\t\tscriptNode  -beforeScript  \"\\r\\nglobal proc LT_showFileInfo()\\r\\n{\\r\\n\\tglobal string $LT_FileInfoMenu;\\r\\n\\r\\n\\tif (`window -exists LT_fileInfo`)\\r\\n\\t\\t{\\r\\n\\t\\twarning \\\"File info window is already open\\\\n\\\";\\r\\n\\t\\t//deleteUI LT_fileInfo;\\r\\n \\t\\t//windowPref -remove LT_fileInfo;\\r\\n\\t\\t}\\r\\n\\telse\\r\\n\\t\\t{\\r\\n\\t\\tstring $info = `getAttr LT_fileInfo.notes`;\\r\\n\\t\\twindow -tbm 0 -title \\\"File Information\\\" -menuBar true -width 410 -height 350 LT_fileInfo;\\r\\n\\t\\t\\tmenu -tearOff 0 -label \\\"Edit\\\";\\r\\n\\t\\t\\t    \\t$LT_FileInfoMenu = `menuItem -label \\\"Save and Close\\\"`;\\r\\n\\t\\t\\t\\tmenuItem -label \\\"Revert to Saved\\\" -command \\\"deleteUI LT_fileInfo; LT_showFileInfo\\\";\\r\\n\\t\\t\\t\\tmenuItem -label \\\"Close Without Saving\\\" - command \\\"deleteUI LT_fileInfo\\\";    \\t\\r\\n\\t\\t\\t\\tmenuItem -d 1;\\r\\n\\t\\t\\t\\tmenuItem -label \\\"Delete File Info\\\" -command \\\"deleteFileInfo\\\";\\r\\n\\t\\t\\tcolumnLayout -width 445;\\r\\n\\r\\n\\t\\t\\tstring $infoField = `scrollField -width 400 -height 280 -ww 0 -text $info`;\\r\\n\\t\\t\\ttext -align center -label \\\"     This info will be saved with the current file and will be displayed upon reopening\\\";\\r\\n\\r\\n\\t\\t\\tstring $saveCmd = \\\"{ string $info = `scrollField -query -text \\\"  + $infoField + \\\"`;  setAttr LT_fileInfo.notes -type \\\\\\\"string\\\\\\\" $info ; deleteUI LT_fileInfo; }\\\";\\r\\n\\t\\t\\tmenuItem -e -command $saveCmd $LT_FileInfoMenu; \\r\\n\\r\\n\\t\\tshowWindow LT_fileInfo;\\r\\n\\t\\t}\\r\\n}\\r\\n\\r\\n\\r\\nglobal proc deleteFileInfo()\\r\\n{\\r\\n\\tif (`window -exists LT_fileInfo`)\\r\\n\\t\\tdeleteUI LT_fileInfo ; \\r\\n\\tif (`objExists \\\"LT_fileInfoScript\\\"`) \\r\\n\\t\\tdelete LT_fileInfoScript ; \\r\\n\\tif (`objExists \\\"LT_fileInfo\\\"`) \\r\\n\\t\\tdelete LT_fileInfo;\\r\\n}\\r\\n\\r\\n\\r\\nglobal proc createFileInfo()\\r\\n{\\r\\n\\t//Create node and attr for storing info\\r\\n\\tif ( `objExists \\\"LT_fileInfo\\\"` == 0)\\r\\n\\t\\t{\\r\\n\\t\\tprint (\\\"Creating node LT_fileInfo.\\\\n\\\");\\r\\n\\t\\tcreateNode -name \\\"LT_fileInfo\\\" unknown;\\r\\n\\t\\t}\\r\\n\\tif ( `attributeQuery -exists -node \\\"LT_fileInfo\\\" \\\"notes\\\"` == 0)\\r\\n\\t\\t{\\r\\n\\t\\tprint (\\\"Adding notes attribute to node.\\\\n\\\");\\r\\n\\t\\taddAttr -ln \\\"notes\\\" -dt \\\"string\\\" LT_fileInfo;\\r\\n\\t\\tsetAttr LT_fileInfo.notes -type \\\"string\\\" \\\"Replace with info specific to the current file\\\";\\r\\n\\t\\t}\\r\\n\\tif ( `objExists \\\"LT_fileInfoScript\\\"` == 0)\\r\\n\\t\\t{\\r\\n\\t\\t//create scriptNode for diplaying info\\r\\n\\t\\tprint (\\\"Creating scriptNode for opening file info window.\\\\n\\\");\\r\\n\\t\\t//setAttr LT_fileInfoScript.scriptType 1;\\r\\n\\t\\t}\\r\\n\\r\\n\\tLT_showFileInfo;\\r\\n}\\r\\n\\r\\ncreateFileInfo;\" -n LT_fileInfoScript;\r\n\t\tsetAttr LT_fileInfoScript.scriptType 1;\r\n\t\t}\r\n\r\n\tLT_showFileInfo;\r\n}\r\n\r\ncreateFileInfo;" -n LT_fileInfoScript;
+		setAttr LT_fileInfoScript.scriptType 1;
+		}
+
+	LT_showFileInfo;
+}
+
+	
+
+////////////////////////////////////////////////////
+// HUD Count Displays
+//
+
+global proc float LT_edgeLengthCalc()
+{
+	// Author : Hiroyuki Haga
+	// Last update : Aug 22th, 2004
+	
+	 string $edges[] = `filterExpand -sm 32`;
+	 float $edgeLength = 0.0;
+	
+	 string $vertices[];
+	 float $v1[3];
+	 float $v2[3];
+	 float $edgeFloat[3];
+	 vector $edgeVector;
+	 float $tmpEdgeLength;
+	 string $attached[];
+	
+	 if ( `size($edges)` ){
+	  for( $thisEdge in $edges ){
+	    $attached = `polyListComponentConversion -ff -fe -fuv -fvf -tv $thisEdge`;
+	    
+	    $vertices = `filterExpand -sm 31 $attached`;
+	
+	    $v1 = `pointPosition $vertices[0]`;
+	    $v2 = `pointPosition $vertices[1]`;
+	    
+	    for ( $i = 0; $i < 3; $i++ ){
+		$edgeFloat[$i] = $v1[$i] - $v2[$i];
+	    }
+	    $edgeVector = $edgeFloat;
+	    
+	    $tmpEdgeLength = `mag $edgeVector`;
+	    $edgeLength += $tmpEdgeLength;
+	  }
+	 }
+	 else {
+	  $edgeLength = 0.0;
+	 }
+	    print ($edgeLength + "\n");
+	
+	    return $edgeLength;
+}
+
+
+global proc float LT_VertDistanceCalc()
+{
+	// Author : Hiroyuki Haga
+	// Last update : Aug 22th, 2004
+	
+	 float $VertDistance = 0.0;
+	
+	 string $vertices[];
+	 float $v1[3];
+	 float $v2[3];
+	 float $edgeFloat[];
+	 vector $edgeVector;
+	 $vertices = `filterExpand -sm 31`;
+	 
+	 if (`size $vertices` == 2)
+	 	{
+	 	   $v1 = `pointPosition $vertices[0]`;
+	    	$v2 = `pointPosition $vertices[1]`;
+	    
+		    for ( $i = 0; $i < 3; $i++ ){
+			$edgeFloat[$i] = $v1[$i] - $v2[$i];
+		    }
+	    	$edgeVector = $edgeFloat;
+	    
+	    	$VertDistance = `mag $edgeVector`;
+	 	}
+	 
+	 return $VertDistance;
+}
+
+
+global proc int[] LT_shellCounter ()
+{
+	//Count number of shells in selected poly objects
+	//
+	string $names[] = `filterExpand -sm 12` ;  // polygon
+	int $scountSelected[0];
+	
+	if (`size( $names )`) 
+		$scountSelected = `polyEvaluate -s`;
+	else 
+		$scountSelected[0] = 0;
+	
+	return $scountSelected;
+}
+
+
+global proc LT_createEdgeLengthHUD (){
+
+	headsUpDisplay -rp 0 6;
+
+	headsUpDisplay
+		-section          0
+		-block            6
+		-blockSize        "small"
+		-label            "Edge Length:"
+		-labelFontSize    "small"
+		-dataFontSize	  "small"
+		-command          "LT_edgeLengthCalc"
+		-event            "SelectionChanged"
+		-nodeChanges      "attributeChange"
+		-dp		4
+	HUDEdgeLength;
+}
+
+
+global proc LT_createVertDistanceHUD (){
+
+	headsUpDisplay -rp 0 5;
+	
+	headsUpDisplay
+		-section          0
+		-block            5
+		-blockSize        "small"
+		-label            "Vert Distance:"
+		-labelFontSize    "small" 
+		-dataFontSize	  "small"
+		-command          "LT_VertDistanceCalc"
+		-event            "SelectionChanged"
+		-nodeChanges      "attributeChange"
+		-dp		4
+	HUDVertDistance;
+}
+
+
+global proc LT_createShellCountHUD (){
+
+	headsUpDisplay -rp 0 7;
+	
+	headsUpDisplay
+		-section          0
+		-block            7
+		-blockSize        "small"
+		-label            "Shells:"
+		-labelFontSize    "small"
+		-dataFontSize	    "small"
+		-command          "LT_shellCounter"
+		-event            "SelectionChanged"
+		-nodeChanges      "attributeChange"
+	HUDShellCounter;
+}
+
+
+global proc LT_toggleShellCountHUD ()
+{
+
+    if (`headsUpDisplay -ex HUDShellCounter`)
+	headsUpDisplay -rem HUDShellCounter;
+    else 
+        LT_createShellCountHUD;
+     	
+}
+
+
+global proc LT_toggleEdgeLengthHUD (){
+
+    if (`headsUpDisplay -ex HUDEdgeLength`)
+	headsUpDisplay -rem HUDEdgeLength;
+    else 
+        LT_createEdgeLengthHUD;
+     	
+}
+
+global proc LT_toggleVertDistanceHUD (){
+
+    if (`headsUpDisplay -ex HUDVertDistance`)
+	headsUpDisplay -rem HUDVertDistance;
+    else 
+        LT_createVertDistanceHUD;
+     	
+}
+
+
+
+////////////////////////////////////////////////////
+// General Display Settings
+//
+
+
+
+global proc LT_resetPolyViewDisplay()
+	
+{
+	polyOptions -activeObjects -ae  -sb 2  -db 0  -dmb 0  -dv 0  -dn 0 -facet  -dc 0  -dt 0  -dw 0  -din 0 0 0 0  -sn 0.4 -bc  -duv 0  -uvt 0  -cs 0  -cm diffuse  -bcv 1;
+	//add other settings
+}
+
+
+global proc LT_cycleBGColor()
+{
+	// cycles the background color white/lightGray/middleGray/black
+	//
+
+	float $c[] = `displayRGBColor -q background`;
+	$color = $c[0];
+	
+	if ($color == 0) displayRGBColor -c background .99 .99 .99;
+	else if ($color < 0.4)  displayRGBColor -c background 0 0 0;
+	else if ($color < 0.7)  displayRGBColor -c background .357 .357 .357;
+	else if ($color < 1) displayRGBColor -c background .672 .672 .672;
+	else print ("nada \n");
+}
+
+
+global proc LT_cycleAxisView()
+{
+	int $axisState = `optionVar -q LT_axisVisibilty`;
+	
+	switch ($axisState)
+				
+			{
+			
+			case 0:	
+				toggleAxis -o off;
+				setViewAxisVisibility 1;
+				optionVar -intValue LT_axisVisibilty 1;
+				break;
+			case 1:
+				toggleAxis -o on;
+				setViewAxisVisibility 0;
+				optionVar -intValue LT_axisVisibilty 2;
+				break;
+			case 2:
+				toggleAxis -o on;
+				setViewAxisVisibility 1;
+				optionVar -intValue LT_axisVisibilty 3;
+				break;
+			case 3:
+				toggleAxis -o off;
+				setViewAxisVisibility 0;
+				optionVar -intValue LT_axisVisibilty 0;
+				break;		
+			}	
+
+}
+						
+	
+global proc LT_toggleWireOnShaded ()
+{
+	//Toggle disply of wireframe on shaded for all panels
+
+	$panels = `getPanel -type "modelPanel"`;
+	
+	$wosState = `optionVar -q LT_wosView`;
+
+	for ($panel in $panels)
+		{
+		if ($wosState == 0) 
+			{
+			modelEditor -edit -wos 1 $panel;
+			}
+		else 
+			{
+			modelEditor -edit -wos 0 $panel;
+			}
+		}
+		
+	if (`optionVar -q LT_wosView` == 0)
+		{
+		optionVar -intValue LT_wosView 1;
+
+		//Old method
+		//displayPref -wsa "full";  //also make sure wire on shaded for selection is on
+		for ($panel in $panels)
+			modelEditor -edit -selectionHiliteDisplay 1 $panel;
+
+		
+	    if (`headsUpDisplay -ex HUDwoss` == 1)
+			 headsUpDisplay -rem HUDwoss;	
+		}
+	else
+		optionVar -intValue LT_wosView 0;
+}	
+
+
+
+
+
+
+
+
+global proc LT_toggleSelectionHighlight()
+{
+	//Toggle disply of wireframe on selected/shaded for all panels
+	
+	$panels = `getPanel -type "modelPanel"`;
+	
+	$selectHighliteState = `optionVar -q LT_selectHighlight`;	
+
+	//string $check = `displayPref -q -wsa`;
+	
+	if ( $selectHighliteState == 0)
+	 {
+		 //Old method
+		 displayPref -wsa "full";
+		 for ($panel in $panels)
+			modelEditor -edit -selectionHiliteDisplay 1 $panel;
+			
+         if (`headsUpDisplay -ex HUDwoss` == 1)
+			 headsUpDisplay -rem HUDwoss;
+			 
+		 optionVar -intValue LT_selectHighlight 1;
+
+
+	 }
+	else
+	 {
+		 //Old method
+		 //displayPref -wsa "none";
+		 for ($panel in $panels)
+			{
+			//also make sure wire on shaded is off	
+			modelEditor -edit -selectionHiliteDisplay 0 $panel;			
+			modelEditor -edit -wos 0 $panel;
+			optionVar -intValue LT_wosView 0;
+			optionVar -intValue LT_selectHighlight 0;
+
+			}
+	      if (`headsUpDisplay -ex HUDwoss` == 0)
+			  {
+			  headsUpDisplay 
+				  	   -s 2
+		               -b `headsUpDisplay  -nextFreeBlock 2`
+		               -blockSize        "small"
+		               -label            "Selection Highlighting Disabled"
+		               -labelFontSize    "small"
+					   -ba "center"
+		               HUDwoss;	
+			  }
+		
+	};
+	
+
+}
+
+
+global proc LT_toggleFastInteraction ()
+{
+	//Toggle shading while interacting for all panels
+
+	$panels = `getPanel -type "modelPanel"`;
+	
+	$fastInteractState = `optionVar -q LT_fastInteract`;
+
+	for ($panel in $panels)
+		{
+		if ($fastInteractState == 0) 
+			{
+			modelEditor -edit -ui 1 $panel;
+			}
+		else 
+			{
+			modelEditor -edit -ui 0 $panel;
+			}
+		}
+		
+	if (`optionVar -q LT_fastInteract` == 0)
+		optionVar -intValue LT_fastInteract 1;
+	else
+		optionVar -intValue LT_fastInteract 0;
+}
+
+
+global proc LT_toggleTextureFilter ()
+{
+	//Toggle texture filtering for all panels
+
+	$panels = `getPanel -type "modelPanel"`;
+	
+	$fastInteractState = `optionVar -q LT_textureFilter`;
+
+	for ($panel in $panels)
+		{
+		if ($fastInteractState == 0) 
+			{
+			modelEditor -e -ts 1 $panel;
+			}
+		else 
+			{
+			modelEditor -e -ts 2 $panel;
+			}
+		}
+		
+	if (`optionVar -q LT_textureFilter` == 0)
+		optionVar -intValue LT_textureFilter 1;
+	else
+		optionVar -intValue LT_textureFilter 0;
+}
+
+
+global proc LT_changeGridSize()
+{		
+	global string $LT_gridSliderName;
+	grid -size `intSlider -q -v $LT_gridSliderName`;
+}
+
+
+global proc LT_toggleGridNumbers()
+{
+	//toggle grid numbers
+	//
+
+	$gridNumberState = `grid -q -dpl`;
+	if ($gridNumberState == 0) 
+		{
+		grid -dpl 1;
+		grid -dol 1;
+		}
+	else 
+		{
+		grid -dpl 0;
+		grid -dol 0;
+		}
+}	
+
+
+global proc LT_toggleXRayPanels ()
+{
+	//Toggle xRay for all panels
+
+	$panels = `getPanel -type "modelPanel"`;
+	
+	$xRayState = `optionVar -q LT_xRayPanel`;
+
+	for ($panel in $panels)
+		{
+		if ($xRayState == 0) 
+			{
+			modelEditor -edit -xr 1 $panel;
+			}
+		else 
+			{
+			modelEditor -edit -xr 0 $panel;
+			}
+		}
+		
+	if (`optionVar -q LT_xRayPanel` == 0)
+		optionVar -intValue LT_xRayPanel 1;
+	else
+		optionVar -intValue LT_xRayPanel 0;
+}
+
+
+global proc LT_toggleXRay()
+{
+	//Toggle Xray view for selected models for if nothing selected toggle for all panels
+
+	string $selected[] = `ls -sl`;
+	string $filtered[] = `filterExpand -sm 10 -sm 12 -sm 68 $selected`;
+	
+	
+	if (`size $filtered` ==  0)
+		{
+		$filtered = `ls -type mesh`;
+		print ("All Meshes and Surfaces : ");
+		}
+	else
+		print ("Selected Meshes and Surfaces : ");
+	
+	for ($obj in $filtered)
+		{
+			int $state = `optionVar -q LT_xRay`;
+			if ($state == 1)
+				{
+					print ($obj + "\n");
+				displaySurface -xRay 0 $obj;
+				}
+			else
+				{
+				displaySurface -xRay 1 $obj;
+				}
+		}	
+		
+	if (`optionVar -q LT_xRay` == 0)
+		{
+		optionVar -intValue LT_xRay 1;
+		print ("XRay mode enabled - per object.\n");
+		}
+	else
+		{
+		optionVar -intValue LT_xRay 0;	
+		print ("XRay mode disabled - per object.\n");
+		}
+}
+
+
+global proc LT_toggleUIVisibility()
+{
+	//Toggle UI between current state and hidden UI elements
+	
+	//contains procs for setting prefs
+	source createPrefWndUI.mel;
+
+		
+	global string $gMainWindow;
+	int $state = `optionVar -q LT_uiVisibility`;
+	
+	if ($state) //if UI already on
+		{	
+		toggleMenuBarsInPanels false; 
+		window -e -mbv false $gMainWindow; 
+		HideUIElements;
+		optionVar -iv LT_uiVisibility 0;
+
+		if( (`window -exists LayoutTools`) == true )
+			print ""; 	//do nothing
+		else if (`layout -ex LT_form`) 
+			{
+			//make sure LayoutTools is nested
+			optionVar -intValue LT_UIMode 1; LT_UI;	
+			}	
+		//else
+		//	showChannelsLayers "Channel Box / Layer Editor" 1;
+	}
+		
+	else
+		{
+		toggleMenuBarsInPanels true; 
+		window -e -mbv true $gMainWindow; 
+		RestoreUIElements;
+		optionVar -iv LT_uiVisibility 1;
+		int $channelsLayersVisibility = `optionVar -query channelsLayersVisible`;
+
+
+		if( (`window -exists LayoutTools`) == true )
+			{
+			print ""; 	//do nothing
+			showChannelsLayers $channelsLayersVisibility;
+			}
+		else if (`layout -ex LT_form`) 
+			{
+			//make sure LayoutTools is floating
+			optionVar -intValue LT_UIMode 1; LT_UI;	
+			}	
+		else
+			showChannelsLayers $channelsLayersVisibility;
+		}
+
+}
+
+
+global proc LT_showAllUI()
+{
+	//Make visible all UI elements
+	
+	//contains procs for setting prefs
+	source createPrefWndUI.mel;
+
+	global string $gMainWindow;
+	
+	toggleMenuBarsInPanels true; 
+	window -e -mbv true $gMainWindow; 
+	ShowUIElements;
+	optionVar -iv LT_uiVisibility 1;
+	int $channelsLayersVisibility = `optionVar -query channelsLayersVisible`;	
+
+	if( (`window -exists LayoutTools`) == true )
+		{
+		print ""; 	//do nothing
+		showChannelsLayers $channelsLayersVisibility;
+		}
+	else if (`layout -ex LT_form`) 
+		{
+		//make sure LayoutTools is floating
+		optionVar -intValue LT_UIMode 1; LT_UI;	
+		}	
+	else
+		showChannelsLayers $channelsLayersVisibility;
+
+
+}
+
+
+////////////////////////////////////////////////////
+// Poly Display Settings
+//
+
+global proc LT_toggleFaceNormals()
+{
+	$selected = `ls -sl`;
+	if (`size $selected` == 0)
+		error "No polygons selected to toggle normals for.";
+		
+	$vertNormDisp = `polyOptions -q -pt`;
+	if ($vertNormDisp[0] == 1) 
+		polyOptions -f -dn 1;
+	else
+		polyOptions -r -f -dn 1;
+}
+
+
+global proc LT_toggleVertNormals()
+{
+	$selected = `ls -sl`;
+	if (`size $selected` == 0)
+		error "No polygons selected to toggle normals for.";
+		
+	$FaceNormDisp = `polyOptions -q -f`;
+	if ($FaceNormDisp[0] == 1) 
+		polyOptions -pt -dn 1;
+	else
+		polyOptions -r -pt -dn 1;
+}
+
+
+global proc LT_changeNormalLength()
+{		
+	$selected = `ls -sl`;
+	if (`size $selected` == 0)
+		error "No polygons selected to change normal length for.";
+		
+		
+	global string $LT_normSliderName;
+	polyOptions -sn `floatSlider -q -v $LT_normSliderName`;
+}
+
+
+global proc LT_changeBorderThickness()
+{		
+	$selected = `ls -sl`;
+	if (`size $selected` == 0)
+		error "No polygons selected to change border thickness for.";
+		
+		
+	global string $LT_bordSliderName;
+	polyOptions -sb `floatSlider -q -v $LT_bordSliderName`;
+}
+
+
+global proc LT_toggleCulling()
+{
+	
+	string $selected[] = `ls -sl`;	
+	string $filtered[] = `filterExpand -sm 12 $selected`;
+	
+	if (`size $filtered` ==  0)
+		{
+		$filtered = `ls -type mesh`;
+		print ("All Meshes : ");
+		}	
+	else
+		print ("Selected Meshes : ");
+
+		
+	for ($obj in $filtered)
+		{
+			int $state = `optionVar -q LT_culling`;
+			if ($state == 1)
+				{
+				polyOptions -bc $obj;
+				}
+			else
+				{
+				polyOptions -fb $obj;
+				}
+		}	
+	
+		if (`optionVar -q LT_culling` == 0)
+			{
+			optionVar -intValue LT_culling 1;
+			print ("Backface Culling enabled - per object.\n");		
+			}
+		else
+			{
+			optionVar -intValue LT_culling 0;
+			print ("Backface Culling disabled - per object.\n");					
+			}
+}
+
+
+global proc LT_toggleDoubleSided()
+{
+	//Toggle double sided attr
+	
+	$doubleSidedState = `optionVar -q LT_doubleSided`;
+			
+	string $selected[] = `ls -sl`;
+	string $poly;
+	string $polys[] = `filterExpand -sm 12`;
+	
+	if (`size $polys` > 0)
+		{
+		//Toggle selected
+			
+		for ($poly in $polys)
+			{
+			select -r $poly;
+			$shape = `listRelatives -s`;
+			$attr = $shape[0]+".doubleSided";
+			//change for toggling individually
+			//if (`getAttr $attr`)
+			if ($doubleSidedState)
+				setAttr $attr off;
+			else
+				setAttr $attr on;
+			}
+		print ("Selected Meshes : ");
+		}
+		
+	else
+		{
+		//Toggle selected		
+		string $polys[] = `ls -type mesh`;
+			
+		for ($poly in $polys)
+			{
+			if ($doubleSidedState == 0)
+				{
+				//print ("\n "+$poly);
+				$attr = $poly+".doubleSided";
+				setAttr $attr 1;
+				}
+			else
+				{
+				//print ("\n "+$poly);
+				$attr = $poly+".doubleSided";
+				setAttr $attr 0;
+				}			
+			}				
+		print ("All Meshes : ");
+		}
+
+	if (`optionVar -q LT_doubleSided` == 0)
+			{
+			optionVar -intValue LT_doubleSided 1;
+			print ("Double sided enabled - per object.\n");		
+
+			}
+	else
+			{
+			optionVar -intValue LT_doubleSided 0;
+			print ("Double sided disabled - per object.\n");		
+			}
+
+		
+	select -r $selected;
+}
+
+
+
+
+
+global proc LT_toggleBoundingBox()
+{
+	//Toggle bounding box attr
+	
+	$bbState = `optionVar -q LT_boundingBox`;
+			
+	string $selected[] = `ls -sl`;
+	string $poly;
+	string $polys[] = `filterExpand -sm 12`;
+	
+	if (`size $polys` > 0)
+		{
+		//Toggle selected
+			
+		for ($poly in $polys)
+			{
+			select -r $poly;
+			$shape = `listRelatives -s`;
+			$attr = $shape[0]+".overrideEnabled";
+			$attr2 = $shape[0]+".overrideLevelOfDetail";
+
+			//change for toggling individually
+			//if (`getAttr $attr`)
+			if ($bbState)
+				{
+				setAttr $attr off;
+				setAttr $attr2 0;
+				}
+			else
+				{
+				setAttr $attr on;
+				setAttr $attr2 1;
+
+				}
+			}
+		print ("Selected Meshes : ");
+		}
+		
+	else
+		{
+		//Toggle selected		
+		string $polys[] = `ls -type mesh`;
+			
+		for ($poly in $polys)
+			{
+			if ($bbState == 0)
+				{
+				//print ("\n "+$poly);
+				$attr = $poly+".overrideEnabled";
+				setAttr $attr 1;
+				$attr2 = $poly+".overrideLevelOfDetail";
+				setAttr $attr2 1;
+				}
+			else
+				{
+				//print ("\n "+$poly);
+				$attr = $poly+".overrideEnabled";
+				setAttr $attr 0;
+				$attr2 = $poly+".overrideLevelOfDetail";
+				setAttr $attr2 0;
+				}			
+			}				
+		print ("All Meshes : ");
+		}
+
+	if (`optionVar -q LT_boundingBox` == 0)
+			{
+			optionVar -intValue LT_boundingBox 1;
+			print ("Bounding Box enabled - per object.\n");		
+
+			}
+	else
+			{
+			optionVar -intValue LT_boundingBox 0;
+			print ("Bounding Box disabled - per object.\n");		
+			}
+
+		
+	select -r $selected;
+}
+
+
+
+
+////////////////////////////////////////////////////
+// Vertex Color Diplay
+//
+
+global proc LT_vertColorDisplay(int $displayMode)
+
+{
+	// displayTextures  = 	on/off
+	// renderMode  = 	hwRender_OpenGL_Renderer/base_OpenGL_Renderer
+	// lightMode  = 			all/none/selected
+	// colorChannel  = 		emmision/abientDiffuse
+	// materialBlend  = 		overwrite/multiply
+
+	
+	// get list of all modeling panels
+	string $panelList[] = `getPanel -type modelPanel`;
+
+	// get list of selected meshes and lights
+	string $selected[] = `ls -long -sl -type "transform"`;
+	string $selectedShapes[] = `listRelatives -fullPath -type shape $selected`;
+	
+	select -r $selectedShapes;
+	string $meshes[] = `ls -long -sl -type "mesh"`;
+	string $lights[] = `ls -long -sl -type "light"`;
+	
+	
+	
+	//works exclusivly - either disp color on all meshes or none		
+	if (`size $meshes` ==  0)
+		{
+		$meshes = `ls -type mesh`;
+		print ("All Meshes : ");
+		}	
+	else
+		{
+		print ("Selected Meshes : ");
+		//first disable vert color display for all meshes
+		//for some strange reason the attr has to be touched directly in order for HQ mode to refresh correctly	
+		for ($mesh in `ls -type mesh`)
+			setAttr ($mesh+".displayColors") 0;
+		//select `ls -type mesh`;
+		//polyOptions -cs 0;	
+		}
+		
+		
+	//select polys to change
+	
+		switch ($displayMode)
+			
+		{
+		
+		case 0:	//Reset all to default
+				//
+				//Turn off Vertex Color display and reset panels to default
+	
+				select -r $meshes;
+				polyOptions -cs 0 -colorMaterialChannel "ambientDiffuse" -materialBlend "overwrite" -activeObjects;
+
+					
+				//Check shading, textures and lighting for each modeling panel
+				for ($currentPanel in $panelList)   
+					modelEditor -edit 
+						-displayAppearance "smoothShaded" 
+						-displayTextures 1
+						-rendererName "base_OpenGL_Renderer"
+						-displayLights "default" 
+						$currentPanel;					
+				break;
+
+				
+		case 1:	//Vert Color Only
+				//
+				//Set view mode to Emission and blend to Overwrite
+				//Set panels to view no lights with textures turned off
+	
+				select -r $meshes;
+				polyOptions -cs 1 -colorMaterialChannel "emission" -materialBlend "overwrite" -activeObjects;
+
+					
+				//Check shading, textures and lighting for each modeling panel
+				for ($currentPanel in $panelList)   
+					modelEditor -edit 
+						-displayAppearance "smoothShaded" 
+						-displayTextures off
+						-rendererName "base_OpenGL_Renderer"
+						-displayLights "none" 
+						$currentPanel;
+				break;
+	
+	
+		case 2:	//Vertex Color and Textures
+				//
+				//Set view mode to Emission and blend to Overwrite
+				//Set panels to view no lights with textures turned on
+	
+				select -r $meshes;
+				polyOptions -cs 1 -colorMaterialChannel "emission" -materialBlend "overwrite" -activeObjects;
+
+				
+				//Check shading, textures and lighting for each modeling panel
+				for ($currentPanel in $panelList)   
+					modelEditor -edit 
+						-displayAppearance "smoothShaded" 
+						-displayTextures 1
+						-rendererName "base_OpenGL_Renderer"
+						-displayLights "none" 
+						$currentPanel;
+				break;
+				
+				
+		case 3:	//Display Vertex Color + Textures and Lights 
+				//
+				//Set view mode to AmbientDiffuse and blend to Multiply
+				//Set panels to view either all or default lighting with textures on
+	
+				string $lightMode;
+				
+				if (`size $lights` != 0)
+					$lightMode = "active";  //use selected lights
+				else
+					{
+					string $lights[] = `ls -type light`;
+					if (`size $lights` != 0)
+						$lightMode = "all";
+					else
+						$lightMode = "default";
+					}
+				
+				select -r $meshes;
+				polyOptions -cs 1 -colorMaterialChannel "ambientDiffuse" -materialBlend "multiply" -activeObjects;
+					
+				//Check shading, textures and lighting for each modeling panel
+				for ($currentPanel in $panelList)   
+					modelEditor -edit 
+						-displayAppearance "smoothShaded" 
+						-displayTextures 1
+						-rendererName "base_OpenGL_Renderer"
+						-displayLights $lightMode 
+						$currentPanel;				
+				break;
+			
+				
+		case 4:	//Display Vertex Color + Textures and Lights in HighQuality mode (hardware dependant)
+				//
+				//Set view mode to AmbientDiffuse and blend to Multiply
+				//Set panels to view either all or default lighting with textures on
+	
+				string $lightMode;
+				
+				if (`size $lights` != 0)
+					$lightMode = "active";  //use selected lights
+				else
+					{
+					string $lights[] = `ls -type light`;
+					if (`size $lights` != 0)
+						$lightMode = "all";
+					else
+						$lightMode = "default";
+					}
+				
+				select -r $meshes;
+				polyOptions -cs 0 -activeObjects;				
+				polyOptions -cs 1 -colorMaterialChannel "ambientDiffuse" -materialBlend "multiply" -activeObjects;
+					
+				//Check shading, textures and lighting for each modeling panel
+				for ($currentPanel in $panelList)   
+					modelEditor -edit 
+						-displayAppearance "smoothShaded" 
+						-displayTextures 1
+						-rendererName "hwRender_OpenGL_Renderer"
+						-displayLights $lightMode 
+						$currentPanel;	
+				break;				
+	
+		}
+	
+	//reselect original selection
+	select -r $selected;
+}
+
+
+////////////////////////////////////////////////////
+// Camera Settings
+//
+
+global proc LT_changeClippingPlane(int $source)
+{		
+	global string $LT_clipPlaneSliderName;
+	
+	if ($source == 1)  //from LT_UI
+		$value = `intSlider -q -v $LT_clipPlaneSliderName`;
+	if ($source == 2)  //from LT HUD
+		$value = `LT_returnSliderValue ("HUDClipSlider")`;
+	
+	$currentPanel = `getPanel -withFocus`;
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+		{
+		$cam = `modelPanel -q -camera $currentPanel`;
+		
+		
+		/*
+		$isOrtho = `getAttr ($cam + ".orthographic")`;
+		if ($isOrtho != 1) //if it's a perspective
+			{
+			setAttr ($cam+"Shape.farClipPlane") $value;
+			}
+		else 
+			warning ("Clipping place slider only works in perspective view.");
+			}
+		*/
+
+		$camShape = `listRelatives -shapes $cam`;
+		
+		setAttr ($camShape[0]+".farClipPlane") $value;
+			
+
+		}
+	else
+		warning ("Set active panel to a camera.");
+	
+}
+
+
+
+
+global proc float LT_getClippingPlane()
+{		
+
+	
+	$currentPanel = `getPanel -withFocus`;
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+		{
+		$cam = `modelPanel -q -camera $currentPanel`;
+		
+		
+		/*
+		$isOrtho = `getAttr ($cam + ".orthographic")`;
+		if ($isOrtho != 1) //if it's a perspective
+			{
+			setAttr ($cam+"Shape.farClipPlane") $value;
+			}
+		else 
+			warning ("Clipping place slider only works in perspective view.");
+			}
+		*/
+
+		$camShape = `listRelatives -shapes $cam`;
+		
+		return `getAttr ($camShape[0]+".farClipPlane")`;
+			
+
+		}
+	else
+		{
+		//warning ("Set active panel to a camera.");
+		return 1000;
+		}
+}
+
+
+
+
+////////////////////////////////////////////////////
+//	First Person Cam (based on fly cam)
+//
+//  Creation Date:  08 June 1999
+//  Author:         bwk
+//  Modified by: Steven Roselle
+//	Last Update: 11/23/04
+
+
+global proc string LT_getFirstPersonCamera()
+{
+	string $panel = `getPanel -underPointer`;
+	string $camera = "";
+	if ($panel != "") {
+		//
+		//	Make sure the panel is a model view and contains a
+		//	perspective camera.
+		//
+		string $type = `getPanel -typeOf $panel`;
+		if ($type == "modelPanel") {
+			$camera = `modelPanel -query -camera $panel`;
+			if (`camera -query -orthographic $camera`) {
+				warning ("First Person cam only works in perspective views");
+				$camera = "";
+			}
+		}
+	}
+	return $camera;
+}
+
+
+global proc LT_firstPersonCamPress()
+{
+	float  $position[] = `draggerContext -query -anchorPoint firstPersonCamContext`;
+
+	//	Last coordinates of the mouse.
+	//
+	global float $gFirstPersonLastPosition[];
+
+	//	Last rotation values of the camera.
+	//
+	global float $gFirstPersonRotation[];
+
+	//	Coordinates of the mouse when the press happened or when the Ctrl
+	//	key was released.
+	//
+	global float $gFirstPersonAnchor[];
+
+	if (`LT_getFirstPersonCamera` != "")
+		{
+		$gFirstPersonAnchor = `draggerContext -query -anchorPoint firstPersonCamContext`;
+		$gFirstPersonRotation = `getAttr (LT_getFirstPersonCamera() + ".rotate")`;
+					
+		$gFirstPersonLastPosition = $position;
+	
+
+		//Just record last position and orientation for undo queue
+		setAttr (LT_getFirstPersonCamera() + ".rotate") `getAttr (LT_getFirstPersonCamera() + ".rx")` `getAttr (LT_getFirstPersonCamera() + ".ry")` `getAttr (LT_getFirstPersonCamera() + ".rz")`;
+		setAttr (LT_getFirstPersonCamera() + ".translate") `getAttr (LT_getFirstPersonCamera() + ".tx")` `getAttr (LT_getFirstPersonCamera() + ".ty")` `getAttr (LT_getFirstPersonCamera() + ".tz")`;
+		}	
+}
+
+
+global proc LT_firstPersonCamRelease()
+{	
+	if (`LT_getFirstPersonCamera` != "")
+		{
+		//Just record last position and orientation for undo queue
+		setAttr (LT_getFirstPersonCamera() + ".rotate") `getAttr (LT_getFirstPersonCamera() + ".rx")` `getAttr (LT_getFirstPersonCamera() + ".ry")` `getAttr (LT_getFirstPersonCamera() + ".rz")`;
+		setAttr (LT_getFirstPersonCamera() + ".translate") `getAttr (LT_getFirstPersonCamera() + ".tx")` `getAttr (LT_getFirstPersonCamera() + ".ty")` `getAttr (LT_getFirstPersonCamera() + ".tz")`;
+		}	
+}
+
+
+global proc LT_firstPersonCamDrag()
+{
+	float  $position[] = `draggerContext -query -dragPoint firstPersonCamContext`;
+	int    $button     = `draggerContext -query -button firstPersonCamContext`;
+	string $modifier   = `draggerContext -query -modifier firstPersonCamContext`;
+	int    $refresh    = false;
+
+	//	These values represent the amount by which the camera will move 
+	//	forward, backward and side to side.
+	//
+	float  $stepForwardDistance = 0.5;
+	float  $stepSideDistance = 0.5;
+	
+	global float $gFirstPersonLastPosition[];
+	global float $gFirstPersonRotation[];
+	global float $gFirstPersonAnchor[];
+
+	string $camera = LT_getFirstPersonCamera();
+	if ("" != $camera) {
+		if (1 == $button) {
+				//
+				//	No modifier button.  Interpret mouse movements as looking
+				//	around in the scene.
+				//
+
+				float $dy = $position[1] - $gFirstPersonAnchor[1];
+				float $dx = ($position[0] - $gFirstPersonAnchor[0]);
+				float $newRotation[] = $gFirstPersonRotation;
+				$newRotation[0] = $gFirstPersonRotation[0] + $dy;
+				$newRotation[1] = $gFirstPersonRotation[1] - $dx;
+
+				setAttr ($camera + ".rotate") 
+					$newRotation[0] $newRotation[1] $newRotation[2];
+
+				$refresh = true;
+
+				//	Need to update the anchor position and camera rotation so that
+				//	when the camera stops moving further look actions are relative
+				//	to where the Ctrl key was released.
+				//
+				$gFirstPersonAnchor = $position;
+				$gFirstPersonRotation = `getAttr ($camera + ".rotate")`;
+			}
+		}
+	$gFirstPersonLastPosition = $position;
+
+	if ($refresh) refresh -currentView;
+}
+
+
+global proc LT_firstPersonCam()
+{
+    if (`draggerContext -exists firstPersonCamContext`)
+        deleteUI firstPersonCamContext;
+
+    draggerContext
+	    -pressCommand   "LT_firstPersonCamPress"
+		-dragCommand  ("undoInfo -swf 0; LT_firstPersonCamDrag ; undoInfo -swf 1")   // turn off undo first & turn on undo after
+		-releaseCommand "LT_firstPersonCamRelease"
+		-cursor         "fly"
+		-image1         "flyThrough.xpm"	
+        firstPersonCamContext;
+	
+	setToolTo firstPersonCamContext;
+}
+
+
+
+global proc LT_startWalkCam(int $direction)
+{
+	//Direction: 1=forward  0=backward  2=right  3=left
+	//
+	$currentPanel = `getPanel -withFocus`;
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+		{
+		$cam = `modelPanel -q -camera $currentPanel`;
+		$isOrtho = `getAttr ($cam + ".orthographic")`;
+		if ($isOrtho != 1) //if it's a perspective
+			{
+			print ("LT_walkCamera: forward\n");
+			//Just record last position and orientation for undo queue
+			setAttr ($cam + ".rotate") `getAttr ($cam + ".rx")` `getAttr ($cam + ".ry")` `getAttr ($cam + ".rz")`;
+			setAttr ($cam + ".translate") `getAttr ($cam + ".tx")` `getAttr ($cam + ".ty")` `getAttr ($cam + ".tz")`;
+			scriptJob -ie ("LT_walkCamera " + $cam + " " +$direction);
+			undoInfo -swf 0;
+			}
+		else 
+			warning ("Walk cam only works in perspective views.");
+		}
+	else
+		warning ("Set active panel to a camera.");
+}
+
+
+global proc LT_stopWalkCam()
+{	
+	string $lastJob;
+	// get list of script jobs
+	$jobList = `scriptJob -lj`;
+	
+	for ($lastJob in $jobList)
+	{
+		// make sure last job is LT_walkCamera
+		string $match = match("LT_walkCamera",$lastJob);
+	
+		if ($match == "LT_walkCamera")
+		{		
+			// extract first 4 characters from string
+			string $ID = `substring $lastJob 1 5`;
+
+			// check to see if colan is attached to string
+			string $match = match(":",$ID);
+
+			if ($match == ":") 
+				$ID = `substring $lastJob 1 4`;
+
+			string $match = match(":",$ID);
+		
+			if ($match == ":") 
+				$ID = `substring $lastJob 1 3`;
+
+			string $match = match(":",$ID);
+
+			if ($match == ":") 
+				$ID = `substring $lastJob 1 2`;
+
+			// kill all instances of LT_walkCamera
+			int $IDnum = $ID;
+			scriptJob -kill $IDnum ;
+			//print ("LT_walkCamera: stop\n");
+		}
+		//else print("ERROR : wrong job");
+	}
+	
+	
+	$currentPanel = `getPanel -withFocus`;
+	if (`getPanel -typeOf $currentPanel` == "modelPanel")
+		{
+		$cam = `modelPanel -q -camera $currentPanel`;
+		$isOrtho = `getAttr ($cam + ".orthographic")`;
+		if ($isOrtho != 1) //if it's a perspective
+			{	//Just record last position and orientation for undo queue
+				setAttr ($cam + ".rotate") `getAttr ($cam + ".rx")` `getAttr ($cam + ".ry")` `getAttr ($cam + ".rz")`;
+				setAttr ($cam + ".translate") `getAttr ($cam + ".tx")` `getAttr ($cam + ".ty")` `getAttr ($cam + ".tz")`;
+			}
+		}
+	undoInfo -swf 1;
+	//print ("LT_walkCamera: stop\n");
+			
+}
+
+
+global proc LT_walkCamera( string $cam, int $moveMode )
+{
+	// This script moves the camera only in x and z along the view direction. 
+	// You can combine it with the walk tool, where the walk tool sets the current
+	// view direction. However you can't change the view direction while moving
+	// with the arrow keys.
+	//
+	// This moves the camera relative to its current view direction a step.
+	// It attaches a vectorProduct node to get the view direction vector from 
+	// the camera matrix.
+	//
+	// Written by Duncan Brimsmead
+	// Modified by Steven Roselle
+
+	float $speed = `optionVar -q LT_walkCamSpeed`;  
+    //float $speed = `getAttr ($cam + ".speed")`;
+    string $camMat = $cam + ".xformMatrix";
+    string $vprod = "";
+     if( `connectionInfo -is $camMat` ){
+        string $camMatConnections[] = `connectionInfo -dfs $camMat`;
+        if( size($camMatConnections) ){
+            $vprod = `basename $camMatConnections[0] ".matrix"`;
+        }
+    }
+    if( !size($vprod) ){
+        $vprod = `createNode vectorProduct`;
+        connectAttr $camMat ($vprod + ".matrix");
+        setAttr ($vprod + ".input1Z") 1;
+        setAttr ($vprod + ".operation") 3;
+    }
+    float $pt[] = getAttr($cam + ".t");
+    float $vec[] = getAttr($vprod + ".output");
+
+    // normalize the velocity
+    float $vlen = sqrt( $vec[0]*$vec[0]+$vec[2]*$vec[2]);
+    if( $vlen > 0 ){
+        $speed = $speed/$vlen;
+    } else {
+        $speed = 0;
+    }
+
+    if( $moveMode == 0 ){
+        $pt[0] += $vec[0] * $speed;
+        $pt[2] += $vec[2] * $speed;
+    } else if( $moveMode == 1 ){
+        $pt[0] -= $vec[0] * $speed;
+        $pt[2] -= $vec[2] * $speed;
+    } else if( $moveMode == 2 ){
+        $pt[0] += $vec[2] * $speed;
+        $pt[2] -= $vec[0] * $speed;
+    }  else if( $moveMode == 3 ){
+        $pt[0] -= $vec[2] * $speed;
+        $pt[2] += $vec[0] * $speed;
+    }
+    setAttr ($cam + ".t") $pt[0] $pt[1] $pt[2];
+
+    select -cl;
+}
+
+
+
+
+////////////////////////////////////////////////////
+// HUD Buttons and Slider
+//
+
+
+global proc float LT_returnSliderValue( string $HUD )
+{
+	float $value = `hudSlider -q -v $HUD`;
+	return $value;
+}
+
+
+global proc LT_HUDDispOff ()
+{
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+//		headsUpDisplay -v 0 -s 5 -b $HUDCount;
+		$HUDCount ++;
+		}
+}
+
+global proc LT_HUDViewDisp1 ()
+{	
+	
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+//		headsUpDisplay -v 0 -s 5 -b $HUDCount;
+		$HUDCount ++;
+		}
+		
+		
+	hudButton -s 5
+			  -b 10
+			  -vis 1
+			  -l " Cycle  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDViewDisp2"
+			  HUDCycleButtons;
+	
+	
+	headsUpDisplay -section          5
+	               -block            9
+	               -blockSize        "medium"
+	               -label            "     View Display:"
+	               //-labelFontSize    "large"
+	               HUDdisplayPosition;	
+	
+	hudButton -s 5
+			  -b 8
+			  -vis 1
+			  -l "Toggle UI"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleUIVisibility"
+			  HUDtoggleUIButton;	
+				
+	
+	hudButton -s 5
+			  -b 7
+			  -vis 1
+			  -l "Show All UI"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_showAllUI"
+			  HUDshowUIButton;		
+	
+	
+		
+	hudButton -s 5
+			  -b 6
+			  -vis 1
+			  -l "Cycle BG"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_cycleBGColor"
+			  HUDcycleBGButton;	
+
+	
+	hudButton -s 5
+			  -b 5
+			  -vis 1
+			  -l "Toggle Grid"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "ToggleGrid"
+			  HUDgridButton;	
+	
+	
+	hudButton -s 5
+			  -b 4
+			  -vis 1
+			  -l "Grid Numbers"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleGridNumbers"
+			  HUDgridNumButton;	
+	
+		
+	$gridSize = `grid -q -size`;			
+	hudSlider -s 5
+			  -block 3
+			  -visible 1
+			  -label "        Grid Size:"
+			  -value $gridSize
+			  -type "float"
+			  -minValue 5
+			  -maxValue 20000
+			  -labelWidth 105
+			  -valueWidth 50
+			  -sliderLength 500
+			  -sliderIncrement 5
+			  -pressCommand  "undoInfo -swf 0 "
+			  -dragCommand "grid -size  `LT_returnSliderValue ( \"HUDGridSlider\" )`"
+			  -releaseCommand  "undoInfo -swf 1 "
+			  HUDGridSlider;		
+
+	
+		
+	hudSlider -s 5
+			  -block 2
+			  -visible 1
+			  -label "      Far Clipping:"
+			  -value `LT_getClippingPlane`
+			  -type "float"
+			  -minValue 5
+			  -maxValue 20000
+			  -labelWidth 105
+			  -valueWidth 50
+			  -sliderLength 500
+			  -sliderIncrement 5
+			  -dragCommand "LT_changeClippingPlane 2"
+			  HUDClipSlider;		
+
+	hudButton -s 5
+			  -b 1
+			  -vis 1
+			  -l " Kill  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDDispOff"
+			  HUDKillButtons;
+
+}
+
+
+global proc LT_HUDViewDisp2 ()
+{	
+	
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+		$HUDCount ++;
+		}
+
+	
+	hudButton -s 5
+			  -b 10
+			  -vis 1
+			  -l " Cycle  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDPolyDisp1"
+			  HUDCycleButtons;
+	
+	
+	headsUpDisplay -section          5
+	               -block            9
+	               -blockSize        "medium"
+	               -label            "     View Display:"
+	               //-labelFontSize    "large"
+	               HUDdisplayPosition;
+	
+	
+	hudButton -s 5
+			  -b 8
+			  -vis 1
+			  -l "Shaded Wire"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleWireOnShaded"
+			  HUDWireShadedButton;
+	
+	
+	hudButton -s 5
+			  -b 7
+			  -vis 1
+			  -l "Selection Hilite"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleSelectionHighlight"
+			  HUDWireSelecteddButton;
+		
+	
+	hudButton -s 5
+			  -b 6
+			  -vis 1
+			  -l "XRay Panel"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleXRayPanels"
+			  HUDXRayViewButton;
+	
+	
+	hudButton -s 5
+			  -b 5
+			  -vis 1
+			  -l "XRay Object"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleXRay"
+			  HUDXRayObjButton;
+		
+		
+	hudButton -s 5
+			  -b 4
+			  -vis 1
+			  -l "Back Culling"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleCulling"
+			  HUDCullingButton;
+	
+	hudButton -s 5
+			  -b 3
+			  -vis 1
+			  -l "1:2 Sided"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleDoubleSided"
+			  HUDSidedButton;
+	
+	hudButton -s 5
+			  -b 1
+			  -vis 1
+			  -l " Kill  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDDispOff"
+			  HUDKillButtons;
+}
+
+
+
+global proc LT_HUDPolyDisp1 ()
+{	
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+		$HUDCount ++;
+		}
+
+	
+	hudButton -s 5
+			  -b 10
+			  -vis 1
+			  -l " Cycle  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDPolyDisp2"
+			  HUDCycleButtons;
+	
+	
+	headsUpDisplay -section          5
+	               -block            9
+	               -blockSize        "medium"
+	               -label            "      Poly Display:"
+	               //-labelFontSize    "large"
+	               HUDdisplayPosition;
+	
+	hudButton -s 5
+			  -b 8
+			  -vis 1
+			  -l "Face Normals"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleFaceNormals"
+			  HUDFaceNormalsButton;
+	
+	hudButton -s 5
+			  -b 7
+			  -vis 1
+			  -l "Vert Normals"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_toggleVertNormals"
+			  HUDVertNormalsButton;
+	
+	hudSlider -s 5
+			  -block 6
+			  -visible 1
+			  -label "    Normal Length:"
+			  -value 1
+			  -type "float"
+			  -minValue 0.1
+			  -maxValue 10
+			  -labelWidth 105
+			  -valueWidth 50
+			  -sliderLength 60
+			  -sliderIncrement 0.01
+			  -dragCommand "polyOptions -sn `LT_returnSliderValue ( \"HUDNormalSlider\" )`"
+			  HUDNormalSlider;
+	
+	hudButton -s 5
+			  -b 5
+			  -vis 1
+			  -l "Geo Borders"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -dmb 0; polyOptions  -r -db 1"
+			  HUDGeoBordersButton;
+		
+	hudButton -s 5
+			  -b 4
+			  -vis 1
+			  -l "Text Borders"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -db 0; polyOptions -r -dmb 1"
+			  HUDTextBordersButton;
+	
+		
+	hudSlider -s 5
+			  -block 3
+			  -visible 1
+			  -label "    Border  Width:"
+			  -value 2
+			  -type "float"
+			  -minValue 1
+			  -maxValue 10
+			  -labelWidth 105
+			  -valueWidth 50
+			  -sliderLength 60
+			  -sliderIncrement 0.01
+			  -dragCommand "polyOptions -sb  `LT_returnSliderValue ( \"HUDBorderSlider\" )`"
+			  HUDBorderSlider;
+	
+	hudButton -s 5
+			  -b 1
+			  -vis 1
+			  -l " Kill  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDDispOff"
+			  HUDKillButtons;
+}
+
+
+global proc LT_HUDPolyDisp2 ()
+{	
+	
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+		$HUDCount ++;
+		}
+
+	
+	hudButton -s 5
+			  -b 10
+			  -vis 1
+			  -l " Cycle  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDColorDisp"
+			  HUDCycleButtons;
+	
+	
+	headsUpDisplay -section          5
+	               -block            9
+	               -blockSize        "medium"
+	               -label            "      Poly Display:"
+	               //-labelFontSize    "large"
+	               HUDdisplayPosition;
+
+	hudButton -s 5
+			  -b 8
+			  -vis 1
+			  -l "Vertices"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -r -dv 1"
+			  HUDVertsButton;
+	
+	hudButton -s 5
+			  -b 7
+			  -vis 1
+			  -l "UVs"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -r -duv 1; polyOptions -uvt 1"
+			  HUDUVsButton;
+	
+	hudButton -s 5
+			  -b 6
+			  -vis 1
+			  -l "Hidden Tris"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -r -dt 1"
+			  HUDTrisButton;
+	
+	
+	hudButton -s 5
+			  -b 5
+			  -vis 1
+			  -l "Soft Edges"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "int $cond[1]=`polyOptions -q -ae`; if ($cond[0]) polyOptions -se; else polyOptions -ae;"
+			  HUDSoftButton;
+	
+	
+	hudButton -s 5
+			  -b 4
+			  -vis 1
+			  -l "Face Centers"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "polyOptions -r -dc 1"
+			  HUDFaceCentersButton;
+	
+	hudButton -s 5
+		  -b 3
+		  -vis 1
+		  -l "Reset Display"
+		  -bw 100
+		  -bsh "rectangle"
+		  -rc "LT_resetPolyViewDisplay"
+		  HUDResetDispButton;
+
+	hudButton -s 5
+			  -b 1
+			  -vis 1
+			  -l " Kill  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDDispOff"
+			  HUDKillButtons;
+
+}	
+
+
+
+
+global proc LT_HUDColorDisp ()
+{	
+	
+	$HUDCount = 1;
+	while ($HUDCount <= 10)
+		{
+		headsUpDisplay -rp 5 $HUDCount;
+		$HUDCount ++;
+		}
+
+	
+	hudButton -s 5
+			  -b 10
+			  -vis 1
+			  -l " Cycle  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDViewDisp1"
+			  HUDCycleButtons;
+	
+	headsUpDisplay -section          5
+	               -block            9
+	               -blockSize        "medium"
+	               -label            "     Color Display:"
+	               //-labelFontSize    "large"
+	               HUDVertColorPosition;
+	
+	
+	hudButton -s 5
+			  -b 8
+			  -vis 1
+			  -l "Vert Color Only"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_vertColorDisplay 1"
+			  HUDVertOnlyButton;
+	
+	hudButton -s 5
+			  -b 7
+			  -vis 1
+			  -l "+Texture"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_vertColorDisplay 2"
+			  HUDVertTextButton;
+	
+	
+	hudButton -s 5
+			  -b 6
+			  -vis 1
+			  -l "+Text +Light"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_vertColorDisplay 3"
+			  HUDVertLightButton;
+	
+	
+	hudButton -s 5
+			  -b 5
+			  -vis 1
+			  -l "+Text +Light +HQ"
+			  -bw 100
+			  -bsh "rectangle"
+			  -rc "LT_vertColorDisplay 4"
+			  HUDVertHQButton;	
+
+	
+	hudButton -s 5
+		  -b 3
+		  -vis 1
+		  -l "Reset"
+		  -bw 100
+		  -bsh "rectangle"
+		  -rc "LT_vertColorDisplay 0"
+		  HUDVertResetButton;
+	
+	
+	hudButton -s 5
+			  -b 1
+			  -vis 1
+			  -l " Kill  HUD"
+			  -bw 100
+			  -bsh "roundRectangle"
+			  -rc "LT_HUDDispOff"
+			  HUDKillButtons;	
+}
+

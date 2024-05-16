@@ -1,0 +1,111 @@
+/* This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: Random Select
+''    Author: danmoreno
+''    Last Updated: Feb 15, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/misc/1109.html
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//  Random select v 1.0
+//
+//
+// If you need help please visit: http://www.danmoreno.com/help/rsel.jpg
+
+if (`window -ex sel` == 1){
+	deleteUI sel;
+	}
+
+window -t "Random Tools" -resizeToFitChildren 1 -s 1 -menuBar true -widthHeight 100 50 sel;
+
+menu -label "Help" -helpMenu true;
+		string $website = "system(\"start explorer http://www.danmoreno.com/help/random.jpg\")";
+ 		menuItem -c $website -label "About this script...";
+
+columnLayout -rowSpacing 5;
+	frameLayout -cll 1 -label "Random" -w 300 -mw 20 -borderStyle "in";
+	columnLayout -rs 5;
+		floatSliderGrp -v 50 -pre 0 -min 0 -max 100  -cw3 50 50 20 -label "Percent" -field true porcentagem;
+		button -l "Random Select" -w 255 -c random_select -annotation "Makes the Selected Camera the only one Renderable" camButton;
+	setParent ..;
+
+setParent ..;
+
+textField -text "       www.danmoreno.com " -fn "boldLabelFont" -editable false -width 300 StatusLine;
+
+showWindow sel;
+
+global proc select_ObjectRandom(){
+	string $selection[] = `ls -selection`;
+	int $sel_number = size($selection);
+	float $percent = `floatSliderGrp -q -v porcentagem`;
+	int $choice = ($percent * 0.01) * $sel_number;
+
+	int $sobra[];
+	int $boladavez;
+	int $escolhidos[];
+
+	$z = 0;
+
+	while ($z < $choice){
+		$sobra[$z] = $z;
+		$z = $z + 1;
+	}
+
+	$z = 0;
+
+	while ($z < $choice){
+		$boladavez = rand($sel_number);
+
+		if ($sobra[$boladavez] != -11){
+			$escolhidos[$z] = $boladavez;
+			$sobra[$boladavez] = -11;
+			$z = $z + 1;
+		}
+
+	select -cl;
+
+	for ($f in $escolhidos){
+
+		select -add $selection[$f];
+	}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

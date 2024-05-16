@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<hudson.scm.SubversionSCM_-DescriptorImpl>
+  <generation>33</generation>
+  <credentials class="hashtable">
+    <entry>
+      <string>&lt;http://profile:80&gt; GSC Game World STK-SOC SubVersion Repository</string>
+      <hudson.scm.SubversionSCM_-DescriptorImpl_-PasswordCredential>
+        <userName>build_station</userName>
+        <password>THRkdGtqZ3RI</password>
+      </hudson.scm.SubversionSCM_-DescriptorImpl_-PasswordCredential>
+    </entry>
+  </credentials>
+  <revPropSupport class="hashtable"/>
+</hudson.scm.SubversionSCM_-DescriptorImpl>

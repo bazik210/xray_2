@@ -1,0 +1,12 @@
+global proc vector rotationToVector(string $objSel, vector $vec)
+{
+//$objSel = sel1();
+float $rotated[] = `xform -q -ws -ro $objSel`;
+$rotated[0] = deg_to_rad($rotated[0]);
+$rotated[1] = deg_to_rad($rotated[1]);
+$rotated[2] = deg_to_rad($rotated[2]);
+$vec = `rot $vec <<1,0,0>> $rotated[0]`;
+$vec = `rot $vec <<0,1,0>> $rotated[1]`;
+$vec = `rot $vec <<0,0,1>> $rotated[2]`;
+return $vec;
+}                                          

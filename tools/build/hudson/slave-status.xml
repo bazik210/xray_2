@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<com.youdevise.hudson.slavestatus.SlaveStatusPlugin>
+  <initiator>
+    <port>3141</port>
+    <reporters>
+      <com.youdevise.hudson.slavestatus.IsRunningReporter/>
+      <com.youdevise.hudson.slavestatus.MemoryReporter/>
+    </reporters>
+  </initiator>
+  <port>3141</port>
+</com.youdevise.hudson.slavestatus.SlaveStatusPlugin>

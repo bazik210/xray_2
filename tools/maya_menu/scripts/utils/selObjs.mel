@@ -1,0 +1,1 @@
+global proc string[] selObjs(){return `ls -sl -o`;}

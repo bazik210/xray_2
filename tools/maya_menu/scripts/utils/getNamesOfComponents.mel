@@ -1,0 +1,17 @@
+global proc string[] getNamesOfComponents (int $numbers[], string $componentType, string $shape)
+{
+/*
+int $numbers[] = {15, 64, 28};
+string $componentType = "v";
+string $shape = "pSphere1";
+*/
+if ($componentType == "v")
+	$componentType = "vtx";
+string $names[] = {};
+
+for ($number in $numbers)
+	{
+	$names[`size $names`] = ($shape + "." + $componentType + "[" + $number + "]");
+	}
+return $names;
+}

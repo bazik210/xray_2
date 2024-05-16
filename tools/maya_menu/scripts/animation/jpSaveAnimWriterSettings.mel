@@ -1,0 +1,34 @@
+global proc jpSaveAnimWriterSettings()
+{
+	//acquire settings
+	int $noTangents = `menuItem -q -rb bruteForce`;
+	int $tangents = `menuItem -q -rb elegant`;
+	int $longNodeNames = `menuItem -q -rb longNodeNames`;
+	int $shortNodeNames = `menuItem -q -rb shortNodeNames`;
+	int $windows = `menuItem -q -rb windows`;
+	int $mac = `menuItem -q -rb mac`;
+	int $linux = `menuItem -q -rb linux`;
+	int $irix = `menuItem -q -rb irix`;
+	int $overwrite = `menuItem -q -cb overwrite`;
+	int $refReTarget = `menuItem -q -cb refReTarget`;
+	int $listAlpha = `menuItem -q -rb listAlpha`;
+	int $listCreation = `menuItem -q -rb listCreation`;
+
+	optionVar
+		-iv "jpAwTangents" $tangents
+		-iv "jpAwNoTangents" $noTangents
+		-iv "jpAwLongNodeNames" $longNodeNames
+		-iv "jpAwShortNodeNames" $shortNodeNames
+		-iv "jpAwWindows" $windows
+		-iv "jpAwMac" $mac
+		-iv "jpAwLinux" $linux
+		-iv "jpAwIrix" $irix
+		-iv "jpAwOverwrite" $overwrite
+		-iv "jpAwRefReTarget" $refReTarget
+		-iv "jpAwListAlpha" $listAlpha
+		-iv "jpAwListCreation" $listCreation
+		;
+
+	print ("\nSettingsSaved");
+
+}//end proc jpSaveAnimWriterSettings

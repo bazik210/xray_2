@@ -1,0 +1,11 @@
+global proc int edgeHardness (string $edge)
+{
+//$sel = `ls -sl -fl`;
+//$edge = $sel[0];
+string $hardOrNot[] = `polyInfo -ev $edge`;
+$sizeHard = `size $hardOrNot[0]`;
+if (`substring $hardOrNot[0] ($sizeHard - 4) ($sizeHard - 1)` == "Hard")
+  return yes;
+else
+  return no;
+}

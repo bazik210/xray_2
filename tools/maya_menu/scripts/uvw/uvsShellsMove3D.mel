@@ -1,0 +1,95 @@
+//==============================================================================
+//Name:
+//  uvsShellsMove3D.mel
+//==============================================================================
+//Purpose:
+//uvsShellsMove3D; 					//Move Uv Without Uv Texture Editor.
+//==============================================================================
+//Usage:
+//  1. Save the uvsShellsMove3D.mel to your scripts directory.
+//  2. Start Maya. In the command line type uvsShellsMove3D();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc uvsShellsMove3D()
+{
+if (`contextInfo -ex dragUv`)
+	deleteUI dragUv;
+draggerContext -pc "dragUvPress" -dc "dragUvDrag" -cursor "crossHair" dragUv;
+setToolTo dragUv;
+}
+
+global proc dragUvPress()
+{
+global float $gDragUvCenterOfUvs[];
+string $uvs[] = conv(sel(), "u");
+string $uv = $uvs[0];
+string $face = stringSingle(conv({$uv},"f"));
+string $faceEdges[] = conv({$face}, "e");
+string $vertex = stringSingle(conv({$uv}, "v"));
+string $vertexEdges[] = conv({$vertex}, "e");
+string $uvsEdges[] = stringIntersect($vertexEdges, $faceEdges);
+string $edge = $uvsEdges[0];
+string $targetUv = stringSingle(stringArrayRemove(conv({$vertex}, "u"), conv({$edge},"u")));
+string $targetVertex = stringSingle(conv({$targetUv}, "v"));
+//select $targetUv;
+//select $targetVertex;
+vector $verticesVector = twoVerticesVector($vertex, $targetVertex);
+float $polyAngle = angleD(<<0,1,0>>, $verticesVector);
+vector $uvsVector = twoUvsVector($targetUv,$uv);
+float $uvAngle = angleD(<<0,1,0>>,$uvsVector);
+float $angle = $polyAngle - $uvAngle;
+global float $gMoveUvsAngle;
+$gMoveUvsAngle = $angle;
+
+float $uvDist = twoUVsDistance($uv, $targetUv);
+float $vertDist = twoVerticesDistance($vertex, $targetVertex);
+float $texel = $vertDist / $uvDist;
+global float $gMoveUvsTexel;
+$gMoveUvsTexel = $texel;
+
+float $center[] = uvsCenter($uvs);
+$gDragUvCenterOfUvs = $center;
+
+float $camPos[] = `xform -q -ws -t (currCam())`;
+float $polyCenter[] = centerOfVertices(conv($uvs, "v"));
+float $dist = twoPointsDistance($camPos, $polyCenter);
+global float $gMoveUvsDistance;
+$gMoveUvsDistance = $dist;
+}
+
+global proc dragUvDrag()
+{
+global float $gMoveUvsTexel;
+float $texel = $gMoveUvsTexel;
+global float $gMoveUvsAngle;
+float $angle = $gMoveUvsAngle;
+global float $gMoveUvsDistance;
+float $dist = $gMoveUvsDistance;
+
+float $pos1[] = `draggerContext -q -ap dragUv`;
+float $pos2[] = `draggerContext -q -dp dragUv`;
+float $sens = $dist / $texel / 5000;
+float $dragUv[] = {($pos2[0] - $pos1[0]) * $sens, ($pos2[1] - $pos1[1]) * $sens};
+global float $gDragUvCenterOfUvs[];
+float $beginPos[] = $gDragUvCenterOfUvs;
+float $pos[];
+vector $dragUvVector = floatToVector($dragUv);
+$dragUv = vectorToFloat(`rot $dragUvVector <<0,0,-1>> (deg_to_rad($angle * 1))`);
+$pos[0] = $beginPos[0] - $dragUv[0];
+$pos[1] = $beginPos[1] - $dragUv[1];
+string $uvs[] = conv(sel(), "u");
+moveUvsAbs ($uvs, $pos);
+refresh -cv;
+print ("dist: " + $dist + "  texel " + $texel + "  angle " + $angle);
+}
+
+global proc moveUvsAbs(string $uvs[], float $pos[])
+{
+//$uvs = `ls -sl -fl`;
+//$pos = {0.0,0.0};
+$posOfShell = uvsShellBBpos($uvs);
+$pos[0] -= $posOfShell[0];
+$pos[1] -= $posOfShell[1];
+polyEditUV -u $pos[0] -v $pos[1] $uvs;
+}

@@ -1,0 +1,34 @@
+//==============================================================================
+//Name:
+//  toggleDisplayDrawLabel.mel
+//==============================================================================
+//Purpose:
+//if keysPressed == "" 					 	// - hide Joint Local Axis
+//if keysPressed == "Ctrl" 		 		 	// - display Joint Local Axis
+//==============================================================================
+//Usage:
+//  1. Save the toggleDisplayDrawLabel.mel to your scripts directory.
+//  2. Start Maya. In the command line type toggleDisplayLocalJointAxis();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc toggleDisplayDrawLabel()
+{
+string $keys = keysPressed();
+if ($keys == "")
+{
+for($joints in `ls-type joint`)
+	{
+	setAttr ($joints + ".drawLabel") 0;
+	}
+print "hide Joint Local Axis";
+}
+if ($keys == "Ctrl")
+{
+for($joints in `ls-type joint`)
+	{
+	setAttr ($joints + ".drawLabel") 1;
+	}
+print "display Joint Local Axis";
+}
+}

@@ -1,0 +1,384 @@
+/*
+cbBuildEnd v 1.0b
+"""""""""""""""""""""""""
+
+//----------------------------------------------------------
+
+What?_
+This script will automatically build geometry to create a
+quad-ending to two parallel edgeloops. Like the "Build End"
+functionality found in the Polyboost plugin/Graphite
+Modeling Tools for 3dsmax.
+
+//----------------------------------------------------------
+
+Who?_
+Author: Christer Bjørklund
+Website: www.christerb.com
+eMail: christer@christerb
+
+Copyright ©2010 Christer Bjørklund - All Rights Reserved.
+//----------------------------------------------------------
+
+Why?_
+Cause I wanted a fast way to resolve these kind of situations.
+
+//----------------------------------------------------------
+
+How?_
+Place the cbBuildEnd.mel file in your Maya scripts
+directory, source the file (or reboot Maya).
+Select an edge that's shared by a quad and a hexagon and run
+the cbBuildEnd(); command.
+
+For a quick demonstration, have a look here:
+http://vimeo.com/13773386
+
+I have also included a couple of icons for shelf usage.
+( cbBuildEndShelfIcon.bmp )
+( cbBuildEndTransparentShelfIcon.bmp )
+
+
+Shelfbutton example:
+#1:
+source "C://Documents and Settings//userName//My Documents//maya//X.X//scripts//cbBuildEnd.mel";
+cbBuildEnd();
+
+#2:
+cbBuildEnd();
+//----------------------------------------------------------
+
+Information_
+
+Version(s):
+        1.0b - First release ("public beta")
+
+Known issues:
+        - Gets fairly slow on "dense" meshes. More polys and more 
+          selected edges == slowness.
+          This is due to Maya's native polySplit slowness. At least
+          that's what I think it is.
+          I'm looking into different methods to make it faster.
+        - Messy, unefficient code because it's written pretty fast
+          with only one thing in mind; "Get it to work!". ;)
+
+Compability:
+        Tested and working in Maya 2008, but should run in other
+        versions as well.
+
+Usage:
+        Use at your own risk. I will not stand responsible for
+        any damage caused by this script.
+
+//----------------------------------------------------------
+*/
+
+
+global proc cbBuildEnd()
+{
+//VARIABLES
+string $transform[];
+
+string $origVerts[];
+
+string $origEdge[];
+
+string $origEdge00[];
+string $origEdge01[];
+string $origEdge10[];
+string $origEdge11[];
+
+string $origVerts00[];
+string $origVerts01[];
+string $origVerts10[];
+string $origVerts11[];
+
+string $mergeVert00;
+string $mergeVert10;
+
+string $mergeVerts[];
+
+string $edgeFaces[];
+string $faceVerts[];
+
+string $hexagon[];
+string $hexagonVerts[];
+string $hexagonEdges[];
+
+// List Selection
+string $sel[] = `ls -sl -fl -l`;
+// Filter edges only
+$sel = `filterExpand -sm 32 $sel`;
+// Flatten out and make longName
+$sel = `ls -l -fl $sel`;
+
+// Filter out VALID edges only
+for ($i in $sel)
+    {
+    string $current[];
+    string $newSel[] = $sel;
+    
+    string $getOrigHexagon[] = `polyListComponentConversion -tf $i`;
+    $getOrigHexagon = `ls -l -fl $getOrigHexagon`;
+
+    string $hexagonVerts0[] = `polyListComponentConversion -tv $getOrigHexagon[0]`;
+    $hexagonVerts0 = `ls -l -fl $hexagonVerts0`;
+
+    string $hexagonVerts1[] = `polyListComponentConversion -tv $getOrigHexagon[1]`;
+    $hexagonVerts1 = `ls -l -fl $hexagonVerts1`;
+
+    if ((size($hexagonVerts0) != 6) && (size($hexagonVerts1) != 6))
+        {
+        $current[0] = $i;
+        $newSel = stringArrayRemove($current, $sel);
+        }
+    clear $getOrigHexagon;
+    $sel = $newSel;
+    }
+
+
+if (size($sel) != 0)
+    {
+// MAIN LOOP
+    for ($i in $sel)
+        {
+        $origEdge[0] = $i;
+        
+        string $getHexagon[] = `polyListComponentConversion -tf $i`;
+        $getHexagon = `ls -l -fl $getHexagon`;
+        for ($j in $getHexagon)
+            {
+            $hexagonVerts = `polyListComponentConversion -tv $j`;
+            $hexagonVerts = `ls -l -fl $hexagonVerts`;
+    
+            if ((size($hexagonVerts) == 6) || (size($hexagonVerts) == 7) || (size($hexagonVerts) == 8))
+                {
+                $hexagon[0] = $j;
+    
+                $hexagonEdges = `polyListComponentConversion -te $j`;
+                $hexagonEdges = `ls -l -fl $hexagonEdges`;
+                }
+            }
+    //Skip if edge isn't connected to any hexagon.
+    if (size($hexagon) != 1)
+        {
+        continue;
+        }
+    
+        tokenize $i "." $transform;
+        string $shape[] = `listRelatives -fullPath -shapes $transform[0]`;
+    
+        $origVerts = `polyListComponentConversion -tv $i`;
+        $origVerts = `ls -l -fl $origVerts`;
+    
+    
+        string $origVert0 = $origVerts[0];
+        string $origVert1 = $origVerts[1];
+    
+    // GET EDGE 01
+        $origEdge00 = `polyListComponentConversion -te $origVert0`;
+        $origEdge00 = `ls -l -fl $origEdge00`;
+    
+    
+        for ($k in $origEdge00)
+            {
+            for ($l in $hexagonEdges)
+                {
+                if (($k == $l) && ($k != $i))
+                    {
+                    string $lArray[];
+                    $lArray[0] = $l;
+                    $origEdge00 = $lArray;
+    
+                    $origVerts00 = `polyListComponentConversion -tv $origEdge00[0]`;
+                    $origVerts00 = `ls -l -fl $origVerts00`;
+                    }
+                }
+    
+            $origEdge01 = `polyListComponentConversion -tv $origEdge00`;
+            $origEdge01 = `polyListComponentConversion -te $origEdge01`;
+            $origEdge01 = `ls -l -fl $origEdge01`;
+    
+            for ($k in $origEdge01)
+                {
+                for ($l in $hexagonEdges)
+                    {
+                    if (($k == $l) && ($k != $i) && ($k != $origEdge00[0]))
+                        {
+                        string $lArray[];
+                        $lArray[0] = $l;
+                        $origEdge01 = $lArray;
+    
+                        $origVerts01 = `polyListComponentConversion -tv $origEdge01[0]`;
+                        $origVerts01 = `ls -l -fl $origVerts01`;
+                        }
+                    }
+                }
+    	    }
+    
+        for ($k in $origVerts01)
+            {
+            if (($k != $origVerts00[0]) && ($k != $origVerts00[1]))
+                {
+                $mergeVert00 = $k;
+                }
+            }
+    
+    // GET EDGE 11
+        $origEdge10 = `polyListComponentConversion -te $origVert1`;
+        $origEdge10 = `ls -l -fl $origEdge10`;
+    
+    
+        for ($k in $origEdge10)
+            {
+            for ($l in $hexagonEdges)
+                {
+                if (($k == $l) && ($k != $i))
+                    {
+                    string $lArray[];
+                    $lArray[0] = $l;
+                    $origEdge10 = $lArray;
+    
+                    $origVerts10 = `polyListComponentConversion -tv $origEdge10[0]`;
+                    $origVerts10 = `ls -l -fl $origVerts10`;
+                    }
+                }
+    
+            $origEdge11 = `polyListComponentConversion -tv $origEdge10`;
+            $origEdge11 = `polyListComponentConversion -te $origEdge11`;
+            $origEdge11 = `ls -l -fl $origEdge11`;
+    
+            for ($k in $origEdge11)
+                {
+                for ($l in $hexagonEdges)
+                    {
+                    if (($k == $l) && ($k != $i) && ($k != $origEdge10[0]))
+                        {
+                        string $lArray[];
+                        $lArray[0] = $l;
+                        $origEdge11 = $lArray;
+    
+                        $origVerts11 = `polyListComponentConversion -tv $origEdge11[0]`;
+                        $origVerts11 = `ls -l -fl $origVerts11`;
+                        }
+                    }
+                }
+    	    }
+    
+        for ($k in $origVerts11)
+            {
+            if (($k != $origVerts10[0]) && ($k != $origVerts10[1]))
+                {
+                $mergeVert10 = $k;
+                }
+            }
+    
+    // Get $origEdge01 ID
+        string $dataA = $origEdge01[0];
+    
+        string $bufferOneA[];
+        tokenize $dataA "[" $bufferOneA;
+    
+        string $bufferTwoA = $bufferOneA[1];
+        tokenize $bufferTwoA "]" $origEdge01;
+    
+        int $splitOne = $origEdge01[0];
+    
+        $origEdge01[0] = $dataA; //Resets $origEdge01[0]
+    
+    // Get $origEdge11 ID
+        string $dataB = $origEdge11[0];
+    
+        string $bufferOneB[];
+        tokenize $dataB "[" $bufferOneB;
+    
+        string $bufferTwoB = $bufferOneB[1];
+        tokenize $bufferTwoB "]" $origEdge11;
+    
+        int $splitTwo = $origEdge11[0];
+    
+        $origEdge11[0] = $dataB; //Resets $origEdge11[0]
+    
+    // Get $origEdge ID
+        string $dataC = $origEdge[0];
+    
+        string $bufferOneC[];
+        tokenize $dataC "[" $bufferOneC;
+    
+        string $bufferTwoC = $bufferOneC[1];
+        tokenize $bufferTwoC "]" $origEdge;
+    
+        int $splitOrig = $origEdge[0];
+    
+        $origEdge[0] = $dataC; //Resets $origEdge[0]
+    
+        
+        polySplit -s 3 -ep $splitOne 0.5 -ep $splitTwo 0.5 $shape[0];
+    
+    
+        int $vertexCounter[] = `polyEvaluate -v $shape[0]`;
+        $vertexCounter[0] = $vertexCounter[0] - 1;
+    
+        int $edgeCounter[] = `polyEvaluate -e $shape[0]`;
+        $edgeCounter[0] = $edgeCounter[0] - 1;
+    
+        int $vtxMove00 = $vertexCounter[0] - 3;
+        int $vtxMove01 = $vertexCounter[0] - 2;
+    
+        int $centerEdge = $edgeCounter[0] - 1;
+    
+        int $splitPos = 0;
+    
+        string $split00[] = `polySplit -s 1 -ep $splitOrig 0 -ep $centerEdge $splitPos $shape[0]`;
+    
+        //$edgeCounter = `polyEvaluate -e $shape[0]`;
+        $edgeCounter[0] = $edgeCounter[0] + 5;
+    
+        $edgeFaces = `polyListComponentConversion -tf ($transform[0] + ".e[" + $edgeCounter[0] + "]")`;
+        $edgeFaces = `ls -l -fl $edgeFaces`;
+    
+        $faceVerts = `polyListComponentConversion -tv $edgeFaces[0]`;
+        $faceVerts = `ls -l -fl $faceVerts`;
+    
+    
+        if (size($faceVerts) == 5)
+            {
+            setAttr ($split00[0] + ".edge[1]") 1;
+            }
+        else
+            {
+            $splitPos = 1;
+            }
+        
+        polySplit -s 1 -ep $splitOrig 1 -ep $centerEdge $splitPos $shape[0];
+    
+        float $merge0[] = `pointPosition -w $mergeVert00`;
+        float $merge1[] = `pointPosition -w $mergeVert10`;
+    
+        string $vertToMove00 = ($transform[0] + ".vtx[" + $vtxMove00 + "]");
+        string $vertToMove01 = ($transform[0] + ".vtx[" + $vtxMove01 + "]");
+    
+        move -rpr $merge0[0] $merge0[1] $merge0[2] $vertToMove00;
+        move -rpr $merge1[0] $merge1[1] $merge1[2] $vertToMove01;
+    
+        stringArrayInsertAtIndex(0, $mergeVerts, $vertToMove00);
+        stringArrayInsertAtIndex(0, $mergeVerts, $mergeVert00);
+        stringArrayInsertAtIndex(0, $mergeVerts, $vertToMove01);
+        stringArrayInsertAtIndex(0, $mergeVerts, $mergeVert10);
+    
+        clear $hexagon;
+        clear $transform;
+        }
+    
+    polyMergeVertex -d 0.0 $mergeVerts;
+    
+    clear $mergeVerts;
+    select -cl;
+    
+    }
+else
+    {
+    warning "Ooops! You made a poopie. No valid edges are selected!";
+    }
+
+}

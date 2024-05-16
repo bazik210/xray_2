@@ -1,0 +1,1 @@
+global proc int[] getNumbersOfComponents(string $items[]){string $buffer[];int $listNumbers[];for ($item in $items)	{	tokenize $item "[]" $buffer;	$listNumbers[`size $listNumbers`] = $buffer[1];	}return $listNumbers;}

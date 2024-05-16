@@ -1,0 +1,298 @@
+/* This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: Crack Me
+''    Author:
+''    Last Updated: Jun 12, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/modeling/misc/4386.html
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//CrackMe v1.0.0 created by Chase Cooper
+//Character Technical Director/Rigger
+//http://www.3dcooper.com
+//Please email all comments and bugs found to chase@3dcooper.com
+//
+//Directions can be found in the "Help" menu item.
+//
+//To load, source or run the script, then type "crackMe;" into the command line (without the quotes).
+//
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////
+////                              crackMe                                            ////
+/////////////////////////////////////////////////////////////////////////////////////////
+global proc crackMe()
+{
+   //Check for multiple similar windows.
+           string $window = "crackMeWindow";
+	if (`window -q -ex $window`) deleteUI $window;
+
+   //Build window.
+	window -w 350 -h 325 -title "Crack Me v1.5" $window;
+
+   //Build 'Edit' menu.
+	string $menuBarLayout = `menuBarLayout`;
+	menu -label "Edit";
+ 			menuItem -label "About" -command "crackMeAbout;";
+ 			menuItem -label "Help" -command "crackMeHelp;";
+ 			menuItem -label "Close" -command "deleteUI crackMeWindow";
+
+ //layout
+ columnLayout -adjustableColumn true ;
+
+
+         text -align "left" "Step #1 :";
+         text -align "left" "Select Polygonal Object, create cutting plane.";
+         frameLayout -label "Carving Plane Options" -w 300 -labelAlign "center" -collapsable false -borderStyle "etchedOut" -cl 1;
+                              columnLayout -adjustableColumn true ;
+          $strNumSplitsField = `intFieldGrp
+                -width 300
+		-columnWidth2 105 30
+		-columnAttach2 "both" "both"
+		-columnOffset2 3 0
+		-columnAlign2 "right" "left"
+		-label "Poly Plane Divisions:"
+		-numberOfFields 1
+		-value1 25
+		-enable1 1
+		numOfDivs`;
+         $sizeField = `intFieldGrp
+                -width 300
+		-columnWidth2 105 30
+		-columnAttach2 "both" "both"
+		-columnOffset2 3 0
+		-columnAlign2 "right" "left"
+		-label "Poly Plane Size"
+		-numberOfFields 1
+		-value1 1
+		-enable1 1
+		planeSize`;
+
+           text -align "left" -label "Other Options:";
+          button -label "Duplicate Carving Plane" -bgc 0.75 0.85 0.95 -c "duplicate -rr ;";
+          button -label "Rename Duplicate Carving Plane" -bgc 0.65 0.75 0.85 -c carvePlaneRename;
+         separator -h 10;
+
+          setParent..;
+           setParent..;
+
+
+
+
+         button -label "Create Plane" -bgc 0.75 1.00 0.75 -c createPlane;
+
+
+
+
+
+         text -align "left" "Step #2 :";
+         text -align "left" "Select Polygonal Object to Crack:";
+         button -label "Make Crack" -c crackMeCode;
+
+                separator -h 10;
+
+
+ //text field to show nodes in use
+         columnLayout -adjustableColumn true;
+         text -align "left" -label "Object Currently Being Seperated";
+			textField -editable false currentObjectToCrackField;
+
+
+                                  setParent..;
+                             setParent..;
+                             setParent..;
+
+showWindow $window;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+////                              Multiple Planes Procedures                         ////
+/////////////////////////////////////////////////////////////////////////////////////////
+
+global proc carvePlaneRename()
+{
+
+   string $selected[] = `ls -sl`;
+   rename $selected[0] carvingPlane;
+
+
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+////                              crackMe Procedure                             ////
+/////////////////////////////////////////////////////////////////////////////////////////
+global proc crackMeCode()
+{
+ //query polygonal object and plane
+ string $select[] = `ls -sl`;
+ string $plane = "carvingPlane";
+
+ if ($select[0] == "")
+ {
+   warning "Please select object to be sliced and try again.";
+ }
+ else
+ {
+
+  //duplicate for booleans
+
+  select -r $select[0];
+  string $duplicateObject[] = `duplicate -rr`;
+
+  select -r $plane;
+  string $duplicatePlane[] = `duplicate -rr`;
+
+  //inverse the normals on the second plane
+  polyNormal -normalMode 3 -ch 1 $duplicatePlane[0];
+
+  //boolean the object
+  string $boolean1[] = `polyBoolOp -op 2 -ch 1 $select[0] $plane`;
+  string $boolean2[] = `polyBoolOp -op 2 -ch 1 $duplicateObject[0] $duplicatePlane[0]`;
+
+  //delete history and center pivot on new objects
+    select -r $boolean1[0];
+    delete -ch;
+    CenterPivot;
+    makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+
+    select -r $boolean2[0];
+    delete -ch;
+    CenterPivot;
+    makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+}
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+////                              crackMe create plane procedure                    ////
+/////////////////////////////////////////////////////////////////////////////////////////
+global proc createPlane()
+{
+   string $select[] =`ls -sl`;
+   if ($select[0] == "")
+   {
+     warning "Please select polygonal object and try again.";
+   }else
+   {
+   //query the object selected for menu
+        string $currentBaseMesh = `textField -q -text currentObjectToCrackField`;
+        string $currentSelXform[] = `ls -sl`;
+	string $currentSelShape[] = `listRelatives -shapes $currentSelXform[0]`;
+
+	if ($currentSelXform[1] != "")
+	{
+		warning "No polygonal object selected. Please select only 1 polygonal object.\n";
+	} else
+		{
+			if (`objectType $currentSelShape[0]` != "mesh")
+			{
+				warning "Selection must be a polygonal object. NURBS and SUBD surfaces are not supported.\n";
+			} else
+				{
+					textField -edit -tx $currentSelXform[0] currentObjectToCrackField;
+					print ($currentSelXform[0] + " was loaded as the base mesh.\n");
+				}
+		}
+
+    //create plane at selected object
+    string $getType[] = `listRelatives -path -s $select[0]`;
+
+    if (!`objectType -isType "mesh" $getType[0]`)
+    {
+      warning "Object Selected Is Not A Polygonal Surface. Please select A Polygonal Surface and Try Again.";
+    }
+    else
+    {
+
+          //get int from text field for plane
+        int $divisionsFromTextField = `intFieldGrp -q -value1 numOfDivs`;
+        int $sizeFromTextField = `intFieldGrp -q -value1 planeSize`;
+        string $plane[] = `polyPlane -w $sizeFromTextField -h $sizeFromTextField -sx $divisionsFromTextField -sy $divisionsFromTextField -ax 0 1 0 -tx 1 -ch 1 -n carvingPlane`;
+
+        float $worldSpace[] = `xform -q -ws -rp $select[0]`;
+        setAttr ($plane[0] + ".translateX") $worldSpace[0];
+        setAttr ($plane[0] + ".translateY") $worldSpace[1];
+        setAttr ($plane[0] + ".translateZ") $worldSpace[2];
+
+        select -r $plane[0];
+        delete -ch;
+        makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+        select -cl;
+        select -r $plane[0];
+
+    }
+
+  }
+
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////////////
+////                             Help                             ////
+/////////////////////////////////////////////////////////////////////////////////////////
+global  proc crackMeHelp()
+{
+  //Check for multiple similar windows.
+           string $window = "helpWindow";
+	if (`window -q -ex $window`) deleteUI $window  ;
+
+  //Build window.
+	window -w 400 -h 315 -title "Help For Crack Me v1.0.0" $window;
+
+  //create layout
+        columnLayout -adjustableColumn true "Help";
+        text "DIRECTIONS";
+        text -align "left" "Step #1: Create a polygonal object and name accordingly";
+        text -align "left" "Step #2: Select that object, and click CREATE PLANE. This creates a carving plane.";
+        text -align "center" "Also notice that the object being carved is put into the text field";
+        text -align "left" "Step #3: Edit the vertices on the carving plane either by hand or by randomizing the vertices";
+        text -align "left" "Step #4: Select the object only, and then click MAKE CRACK";
+        text -align "left" "Note: The crack is made and the object is split into two pieces by a boolean. ";
+        text -align "left" "If the object dissappears, the geometry may be bad.";
+        text -align "left" "To fix, check the vertices and make sure they are merged.";
+        text " ";
+        text -align "center" "UPDATE";
+        text -align "center" "How to use multiple planes for carving:";
+        text -align "left" "Duplicate a created carving plane as many times as needed, and place where crack is to be made.";
+        text -align "left" "NOTE: The 'Duplicate Carving Plane' button just duplicates the selected carving plane (ctrl-D also works)";
+        text -align "left" "NOTE: The 'Rename Duplicate Carving Plane' will rename selected object to 'carvingPlane' allowing it ";
+        text -align "center" "useable for cutting.";
+        text " ";
+        text "For Questions, please contact the author at www.3dcooper.com";
+
+
+        setParent..;
+
+
+	showWindow $window;
+}
+/////////////////////////////////////////////////////////////////////////////////////////
+////                              About                             ////
+/////////////////////////////////////////////////////////////////////////////////////////
+global  proc crackMeAbout()
+{
+  //Check for multiple similar windows.
+           string $window = "aboutWindow";
+	if (`window -q -ex $window`) deleteUI $window  ;
+
+  //Build window.
+	window -w 400 -h 150 -title "About Crack Me v1.0.0" $window;
+
+  //create layout
+        columnLayout -adjustableColumn true "About";
+        text "Created by: Chase Cooper";
+         text "http://www.3dcooper.com";
+         text "email: chase@3dcooper.com";
+         text "Please report any bugs or problems found to the author";
+         text "and they will be corrected.";
+        setParent..;
+
+
+	showWindow $window;
+}

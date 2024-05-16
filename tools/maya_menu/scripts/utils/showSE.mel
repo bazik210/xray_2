@@ -1,0 +1,1 @@
+global proc showSE(string $action){if ($action == "begin")	{	global int $gHideScriptEditor;	$gHideScriptEditor = !`window -q -vis CommandWindow`;	ScriptEditor;	}else	{	global int $gHideScriptEditor;	if ($gHideScriptEditor)		window -e -vis 0 CommandWindow;	}}

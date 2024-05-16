@@ -1,0 +1,401 @@
+global string $pinLiner;
+
+global proc pinLiner() {
+	if (`window -exists pinLinerWindow` == true) {
+			deleteUI pinLinerWindow;
+	}
+
+	if (`outlinerPanel -exists pinLinerPanel` == true) {
+			deleteUI -pnl pinLinerPanel;
+	}
+
+	if (`window -exists pinLinerAboutWindow` == true) {
+			deleteUI pinLinerAboutWindow;
+	}
+
+ 	window
+		-title ("Pinworms Outliner ")
+		-titleBar true
+		-sizeable true
+		-w 300
+		-h 650
+	pinLinerWindow;
+
+source "pinLiner_commands.mel";
+source "pinLiner_notes.mel";
+
+		string $form = `formLayout -numberOfDivisions 100`;
+		string $row =  `rowColumnLayout -nc 10
+							-cw 1 28
+							-cw 2 28 -cs 2 1
+							-cw 3 28 -cs 3 1
+							-cw 4 28 -cs 4 1
+							-cw 5 28 -cs 5 1
+							-cw 6 28 -cs 6 1
+							-cw 7 28 -cs 7 1
+							-cw 8 28 -cs 8 1
+							-cw 9 28 -cs 9 1
+							-cw 10 28 -cs 10 1
+						pinLiner_topShelfRC
+						`;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_OUT_HS.BMP")
+					-ann "Hide selected objects"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "HS"
+					-c "command_h1()"
+					-p pinLiner_topShelfRC
+				pinLiner_h1;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_OUT_HUS.BMP")
+					-ann "Hide unselected objects"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "HU"
+					-c "command_h2()"
+					-p pinLiner_topShelfRC
+				pinLiner_h2;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_OUT_SS.BMP")
+					-ann "Show selected objects"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "SSel"
+					-c "command_h3()"
+					-p pinLiner_topShelfRC
+				pinLiner_h3;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_OUT_SALL.BMP")
+					-ann "Show All"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "SAll"
+					-c "command_h4()"
+					-p pinLiner_topShelfRC
+				pinLiner_h4;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_WIRE.BMP")
+					-ann "Show reference from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "Wire"
+					-c "command_h5()"
+					-p pinLiner_topShelfRC
+				pinLiner_h5;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_TEMPLATE.BMP")
+					-ann "Freese from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "Freese"
+					-c "command_h6()"
+					-p pinLiner_topShelfRC
+				pinLiner_h6;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_BBOX.BMP")
+					-ann "Toggle Bouding box from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "BBox"
+					-c "command_h8()"
+					-p pinLiner_topShelfRC
+				pinLiner_h7;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_SPACER.BMP")
+					-ann "Toggle visible from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "Visual"
+					-c "command_h7()"
+					-p pinLiner_topShelfRC
+				pinLiner_h8;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_SOFTHARD.BMP")
+					-ann "Toggle Soft Hard from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "softhard"
+					-c "command_h9()"
+					-p pinLiner_topShelfRC
+				pinLiner_h9;
+
+				shelfButton
+					-w 28 -h 28
+					-image ("ICO_XRAYOUTLINER.BMP")
+					-ann "Toggle Xray from selected object"
+        				-font "smallPlainLabelFont"
+//					-imageOverlayLabel "XRay"
+					-c "command_h10()"
+					-p pinLiner_topShelfRC
+				pinLiner_h10;
+
+			setParent ..;
+
+		string $column = `rowColumnLayout -nr 19
+							-rs 1 30
+							-rh 2 30 -rs 2 1
+							-rh 3 30 -rs 3 1
+							-rh 4 30 -rs 4 1
+							-rh 5 30 -rs 5 1
+							-rh 6 30 -rs 6 1
+							-rh 7 30 -rs 7 1
+							-rh 8 30 -rs 8 1
+							-rh 9 30 -rs 9 1
+							-rh 10 30 -rs 10 1
+							-rh 11 30 -rs 11 1
+							-rh 12 30 -rs 12 1
+							-rh 13 30 -rs 13 1
+							-rh 14 30 -rs 14 1
+							-rh 15 30 -rs 15 1
+							-rh 16 30 -rs 16 1
+							-rh 17 30 -rs 17 1
+							-rh 18 30 -rs 18 1
+							-rh 19 30 -rs 19 1
+							`;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Creates New Layer and Assigns Selected Objects"
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "Layer"
+				-c "command_v1()"
+			pinLiner_v1;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_RANDOMCOLOR.BMP")
+				-ann "SetCustomOverrideColor"
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v2()"
+			pinLiner_v2;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ico_correctshapename.BMP")
+				-ann "XRay object renamer"
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v3()"
+			pinLiner_v3;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ico_delselinput.bmp")
+				-ann "XRay Create Instances"
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v4()"
+			pinLiner_v4;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ico_exportall.bmp")
+				-ann "Transform to Instance."
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v5()"
+			pinLiner_v5;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Selected all instanced object(s)"
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "SIn"
+				-c "command_v6()"
+			pinLiner_v6;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v7()"
+			pinLiner_v7;
+
+           shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v8()"
+			pinLiner_v8;
+
+           shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v9()"
+			pinLiner_v9;
+
+           shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v10()"
+			pinLiner_v10;
+
+           shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v11()"
+			pinLiner_v11;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v12()"
+			pinLiner_v12;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v13()"
+			pinLiner_v13;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v14()"
+			pinLiner_v14;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann ""
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel ""
+				-c "command_v15()"
+			pinLiner_v15;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Auto smooth 45 grad from selected object."
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "45auto"
+				-c "command_v16()"
+			pinLiner_v16;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Auto smooth 75 grad from selected object."
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "75auto"
+				-c "command_v17()"
+			pinLiner_v17;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Merge vertex dist 1 mm from selected object."
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "V 0.01"
+				-c "command_v18()"
+			pinLiner_v18;
+
+			shelfButton
+				-w 30 -h 30
+				-image ("ICO_SPACER.BMP")
+				-ann "Merge UV from selected object."
+      				-font "smallPlainLabelFont"
+				-imageOverlayLabel "UVmerge"
+				-c "command_v19()"
+			pinLiner_v19;
+
+
+		setParent ..;
+
+		string $pane = `paneLayout -ps 1 0 75 -ps 2 0 13 -configuration "horizontal2"`;
+
+		string $panel = `outlinerPanel pinLinerPanel`;
+	 	string $outliner = `outlinerPanel  -init -mbv true -query -outlinerEditor $panel`;
+
+		$pinLiner = `outlinerEditor -edit
+		    -mainListConnection "worldList"
+		    -selectionConnection "modelList"
+			-dropIsParent true
+		    -showShapes false
+		    -showAttributes false
+		    -showConnected false
+		    -showAnimCurvesOnly false
+		    -autoExpand false
+		    -showDagOnly true
+		    -ignoreDagHierarchy false
+		    -expandConnections false
+		    -showCompounds true
+		    -showNumericAttrsOnly false
+		    -highlightActive true
+		    -autoSelectNewObjects false
+		    -doNotSelectNewObjects false
+		    -transmitFilters false
+			-showSetMembers true
+//			-sec "pinLiner_selCmd()"
+			-setFilter defaultSetFilter
+		$outliner`;
+
+			setParent ..;
+
+			scrollField
+				-wordWrap true
+				-ed true
+				-bgc 0.75 0.75 0.75
+				-kpc pinLinerNoteUpdate
+			pinLinerNoteField;
+
+			setParent ..;
+
+		setParent ..;
+
+		formLayout
+			-edit
+
+			-attachForm		$row		"top"		1
+			-attachForm		$row		"left"		1
+		 	-attachNone  	$row     	"bottom"
+			-attachForm		$row		"right"		1
+
+			-attachControl	$pane 		"top"		1 $row
+			-attachControl  $pane		"left"		1 $column
+	 		-attachForm		$pane		"bottom"	1
+	 		-attachForm		$pane		"right"		1
+			$form;
+
+	setParent ..;
+
+	string $ann;
+	string $image;
+
+	showWindow pinLinerWindow;
+}

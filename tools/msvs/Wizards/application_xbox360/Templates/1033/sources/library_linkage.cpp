@@ -1,0 +1,9 @@
+////////////////////////////////////////////////////////////////////////////
+//	Created		: [!output CURRENT_DATE]
+//	Author		: [!output AUTHOR_NAME]
+//	Copyright (C) GSC Game World - [!output CURRENT_YEAR]
+////////////////////////////////////////////////////////////////////////////
+
+#include "pch.h"
+#include <xray/core/library_linkage.h>
+#include <xray/engine/library_linkage.h>

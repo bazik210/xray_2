@@ -1,0 +1,1 @@
+global proc float[] stringArrayToFloatArray(string $stringArray[]){float $floatArray[];for ($stringItem in $stringArray)	{	$floatArray[`size $floatArray`] = $stringItem;	}return $floatArray;}

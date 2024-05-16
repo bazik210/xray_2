@@ -1,0 +1,6 @@
+global proc createSet(string $name)
+{
+if (`objExists $name`)
+	delete $name;
+sets -name $name;
+}

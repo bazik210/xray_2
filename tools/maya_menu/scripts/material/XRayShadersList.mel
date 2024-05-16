@@ -1,0 +1,52 @@
+global proc XRayShadersList()
+{
+//string $path = `internalVar -ups` + "attrPresets/XRayMtl/";
+string $path = "x:/bin/_maya_menu_/scripts/attrPresets/XRayMtl/";
+
+string $files[] = `getFileList -folder $path`;
+string $presets[] = {};
+string $file;
+for ($file in $files)
+ {
+ //$file = $files[0];
+ int $size = `size $file`;
+ $presets[`size $presets`] = `substring $file 1 ($size - 4)`;
+ }
+$wind = "shadersList";
+if (`window -exists $wind`)
+ deleteUI $wind;
+window $wind;
+ $width = 35;
+ columnLayout;
+ textScrollList -dcc shaderAssign -dgc callbackClipsChooser
+  -nr 10 -ams 0 -w 127 -h 700 -aas 0 shadersList;
+ for ($preset in $presets)
+  textScrollList -e -a $preset shadersList;
+ button -l Assign -w 141 -h 25 -c shaderAssign;
+ setParent ..;
+window -e -w 153 -h 756 $wind;
+//window -q -wh $wind;
+showWindow;
+}
+
+global proc shaderAssign()
+{
+string $mtl_selected;
+string $multiListerSelection[] = `listerEditor -q -hl multiListerPanel1TopTab1`;
+string $presets[] = `textScrollList -q -si shadersList`;
+  if ((!(size($multiListerSelection))) == 1)
+	{
+	confirmDialog -message "Please highlight just one material."
+	-button "Ok" -cancelButton "Ok" -dismissString "Ok";
+	}
+for ($mtl_selected in $multiListerSelection)
+	{
+	print $mtl_selected;
+	print "  =>_assign preset_=>  ";
+	print $presets;
+
+	string $material1[] = `listConnections -s on -d off $mtl_selected`;
+	applyPresetToNode $material1[0] "" "" $presets[0] 1;
+	}
+}
+XRayShadersList;

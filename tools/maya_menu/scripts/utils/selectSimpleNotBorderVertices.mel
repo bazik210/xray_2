@@ -1,0 +1,17 @@
+global proc selectSimpleNotBorderVertices()
+{
+string $vertices[] = conv(`ls -sl`, "v");
+string $objSel[] = `ls -sl -o`;
+string $vertex;
+string $simpleVertices[];
+for ($vertex in $vertices)
+	{
+//$vertex = $vertices[0];
+	$edges = conv({$vertex}, "e");
+	$faces = conv({$vertex}, "f");
+	if (`size $edges` <= 2 && `size $faces` > 1)
+		$simpleVertices[`size $simpleVertices`] = $vertex;
+	}
+select $simpleVertices;
+selectionMode($objSel[0], "v");
+}

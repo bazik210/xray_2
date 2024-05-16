@@ -1,0 +1,67 @@
+
+global proc isolateAction(int $action)
+{
+/*
+$action = 0;
+0 - cancel isolate
+10 - cancel isolate current panel only
+1 - isolate
+11 - isolate current panel only
+2 - add
+3 - remove
+*/
+$sel = sel();
+
+string $mode = "o";
+if (size (selMask("v")) > 0)
+	{
+	$mode = "v";
+	select (selObjs());
+	}
+else if (size (selMask("e")) > 0)
+	{
+	$mode = "e";
+	select (selObjs());
+	}
+else if (size (selMask("u")) > 0)
+	{
+	$mode = "u";
+	select (selObjs());
+	}
+
+string $panelCurrent = `getPanel -wf`;
+$panels = `lsUI -p`;
+string $modelPanels[] = {};
+string $panel;
+for ($panel in $panels)
+	if (`objectType $panel` == "TmodelPane")
+		$modelPanels[`size $modelPanels`] = $panel;
+if ($action == 11)
+	{
+	$action = 1;
+	$panels = {$panelCurrent};
+	}
+if ($action == 10)
+	{
+	$action = 0;
+	$panels = {$panelCurrent};
+	}
+
+if ($action == 0 || $action == 1)
+	for ($panel in $modelPanels)
+		enableIsolateSelect $panel $action;
+else if ($action == 2)
+	for ($panel in $modelPanels)
+		addSelectedToEditor $panel;
+else if ($action == 3)
+	for ($panel in $modelPanels)
+		removeSelectedFromEditor $panel;
+select $sel;
+
+if ($mode != "o")
+	{
+	string $objects[] = selObjs();
+	for ($object in $objects)
+		selectionMode($object, $mode);
+	}
+}

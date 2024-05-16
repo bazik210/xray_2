@@ -1,0 +1,1933 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_UI.mel
+//
+// Contains all procs for user interface of LayoutToolsUI
+//
+// Author:             Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate  
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_UI ()
+{
+
+	//////////////////////
+	//
+	// This is the main UI proc for LayoutTools. 
+	// The command <LT_UI> will launch user interface.
+	//
+	//////////////////////
+	
+	//First make sure the other LT procs are available
+	//
+
+	//LT_layoutProcs;  //No longer used
+	LT_generalProcs;
+	LT_displayProcs;
+	LT_placementProcs;
+	LT_assemblyProcs;
+
+	//Initialize default settings for UI and set Path for importing and icons
+	LT_optionVars;
+	
+	//Setup hotkeys for Walk Camera
+	LT_setupWalkCam;
+	LT_setupHotkeyLT;
+	
+	// Initialize Global vars for UI controls
+	global string $LT_form;
+	global string $LT_menuBar;
+	global string $LT_rotateFieldName;
+	global string $LT_moveFieldName;
+	global string $LT_scaleFieldName;
+	global string $LT_snapRotateButtonName;
+	global string $LT_snapMoveButtonName;
+	global string $LT_moveAxisX;
+	global string $LT_moveAxisY;
+	global string $LT_moveAxisZ;
+	global string $LT_normSliderName;
+	global string $LT_bordSliderName;
+	global string $LT_popupFieldName;
+	global string $LT_camSpeedSliderName;
+	global string $LT_gridSliderName;
+	global string $LT_clipPlaneSliderName;
+	global string $LT_edgeSegmentOptionName;
+	global string $LT_autoCleanLightsCheckBox;
+	global string $LT_autoCleanCamerasCheckBox;
+	global string $LT_setPathButtonName;
+	global string $LT_setPathTextName;
+	global string $LT_setGroundFloatName;
+	global string $LT_setPrefixTextName; 
+	global string $LT_tabName;
+	global string $LT_tab1;
+	global string $LT_tab2;
+	global string $LT_tab3;
+	global string $LT_tab4;
+	global string $LT_importFrameName;
+	global string $LT_shareLayersCheckBox;
+	global string $LT_refLocatorCheckBox;
+	global string $LT_dupShadersCheckBox;
+	global string $LT_replicateFieldName;
+	global string $LT_randMoveMinFieldName;
+	global string $LT_randRotMinFieldName;
+	global string $LT_randScaleMinFieldName;
+	global string $LT_randMoveMaxFieldName;
+	global string $LT_randRotMaxFieldName;
+	global string $LT_randScaleMaxFieldName;
+    global string $LT_makeIconResponse;
+	
+		
+	global string $gChannelBoxForm;
+    global string $gMainWindow;
+	
+	global string $LT_paneLayout;
+	global string $LT_LayoutToolsDock;
+	
+
+	//Initialize paths
+	global string $LT_projectPath;
+	global string $LT_importPath;
+	global string $LT_propFolderList[];		
+
+	//Initialize local vars
+	string $importPrefix;
+	float $moveValue;
+	float $rotateValue;
+	int $autoCleanCameras;
+	int $autoCleanLights;
+	string $iconsPrimary;
+	string $iconsSecondary;
+	int $iconCount;
+	string $iconFormat = `optionVar -q LT_iconFormat`;
+	int $iconSize = `optionVar -q LT_iconSize`;
+	int $gridSize;
+	string $file;
+	string $name[];
+	string $command;
+	string $annotation;
+	string $propFolderList[];
+	float $LT_frameColor1[] = {.57, .34, .34}; //red-ish
+	float $LT_frameColor2[] = {.38, .57, .38}; //green-ish
+	float $LT_frameColor3[] = {.32, .42, .6}; //blue-ish
+	float $LT_frameColor4[] = {.56, .53, .35}; //yellow-ish
+	float $LT_frameColor5[] = {.64, .4, .64}; //magenta-ish
+	float $LT_frameColor6[] = {.5, .5, .4}; //orange-ish
+	float $LT_frameColor7[] = {.5, .5, .5}; //gray-ish
+	int $LT_columnWidth = 60;
+	int $LT_columnWidth2 = 80;
+				
+	
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Create Window, Tabs and Buttons for LayoutTools
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
+
+    // Get main UI settings
+    //
+    $LT_windowHeight = `optionVar -q LT_UIHeight`;		
+    $LT_windowWidth = `optionVar -q LT_UIWidth`;
+    $LT_UI_mode = `optionVar -q LT_UIMode`;  //check to see UI mode (docked or floating)
+	$LT_UIDockSide = `optionVar -q LT_UIDockSide`;  //check to see if the user prefered dock side should be right or left
+	$LT_rebuildUI = `optionVar -q LT_RebuildUI`;  //check to see if UI needs to be simply opened or completely rebuilt
+	
+	
+    if ($LT_rebuildUI == 1)  // then rebuild UI from scractch
+    {
+    
+    
+    dockControl -exists LT_Dock;
+    	
+    	//first delete window if it exists already
+    	if( (`window -exists LayoutTools`) == true )
+    			{
+    			deleteUI LayoutTools;
+     			windowPref -remove LayoutTools;
+    			}
+        
+    	if (`layout -ex LT_form`) 
+    	   {
+    	    deleteUI LT_form;
+    		}
+    
+    	print ("\nBuilding LayoutTools 2011 UI\n\n");	
+
+    
+    		
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // Initialize LayoutTools window
+    //
+
+	 	//window  -h 4128   -w 200 -tb 1 -s 1 -menuBar true -t "LayoutTools 2011" LayoutTools;
+	     window  -tb 1 -s 1 -menuBar true -t "LayoutTools 2011" LayoutTools;
+
+			//$LT_form = `formLayout -w $LT_windowWidth LT_form`; 
+			$LT_form = `formLayout  LT_form`; 
+		 	$LT_menuBar = `menuBarLayout`;
+				
+			menu -tearOff 0 -l "Edit";
+			    menuItem -l "Reset Placement/Assembly/Display Settings" -ann "Reset all setting to default values." -c "LT_deleteLayoutOptionVars ; optionVar -intValue LT_RebuildUI 1 ;LT_UI";
+			    menuItem -l "Reset Import Settings" -ann "Reset all setting to default values." -c "LT_deleteImportOptionVars ; optionVar -intValue LT_settingsFrame 0; optionVar -intValue LT_RebuildUI 1 ; LT_UI";
+
+    			menuItem -divider true;
+			    menuItem -l "Update Import Icons" -ann "Check for new importable files and update import icons" -c "optionVar -intValue LT_RebuildUI 1 ; LT_UI";
+ 
+    			menuItem -divider true;
+    		    menuItem -l "Tear Off LayoutTools UI (Floating)" -ann "Make LayoutTools a floating window." -c "optionVar -intValue LT_UIMode 0; optionVar -intValue LT_RebuildUI 0; LT_UI; source setChannelBoxVisible; raiseChannelBox";
+    		    
+    		    menuItem -divider true;
+    			menuItem -l "Dock LayoutTools UI (Right)" -ann "Dock LayoutTools on right side." -c "optionVar -intValue LT_UIMode 1; optionVar -intValue LT_UIDockSide 1; optionVar -intValue LT_RebuildUI 0; LT_UI";
+    			menuItem -l "Dock LayoutTools UI (Left)" -ann "Dock LayoutTools on left side." -c "optionVar -intValue LT_UIMode 1; optionVar -intValue LT_UIDockSide 0; optionVar -intValue LT_RebuildUI 0; LT_UI";
+    
+    			//menuItem -divider true;
+    			//menuItem -l "Reset Window Size" -ann "Reset window to default size." -c "dockControl -edit -w 270 -h 200 $LT_LayoutToolsDock; paneLayout -edit -w 270 -h 200 $LT_paneLayout; formLayout -e -w 270 -h 200 LT_form; optionVar -iv LT_UIWidth 270; optionVar -iv LT_UIHeight 200";
+
+
+					
+			menu -label "Help" -helpMenu true;
+				menuItem -l "Help on LayoutTools2011..." -c "LT_help";
+				columnLayout;
+		 		text -height 1 -label "                                                                                                 " ;
+		 		setParent ..;	
+			setParent ..;
+
+    	
+    
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // begin UI setup
+    
+    	
+    	
+        $LT_tabName = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5`; 
+    	formLayout -edit 
+    			-attachControl $LT_tabName "top" 0 $LT_menuBar
+    			-attachForm   $LT_tabName "left" 0 
+    			-attachForm $LT_tabName "bottom" 0 
+    			-attachForm $LT_tabName "right" 0
+    			$LT_form; 
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //					Import Tab
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+                $LT_tab1 = `scrollLayout -hst 0 -cr 1`;	//create scroll bar		
+    
+    			columnLayout -adjustableColumn true;
+    
+    
+    
+    
+    				//////////////////////
+    				//Make a collapsable frame for import settings
+    					int $settingsState = `optionVar -q LT_settingsFrame`;
+        				$LT_importFrameName = `frameLayout -l "Settings" -bgc $LT_frameColor7[0] $LT_frameColor7[1] $LT_frameColor7[2] -li 0 -cll 1 -borderStyle "in" -cl $settingsState -cc "optionVar -iv LT_settingsFrame 1" -ec "optionVar -iv LT_settingsFrame 0"`;
+    
+    
+    				//////////////////////
+    				// Import path settings : either use the current project for import path or allow user to browse for path
+    
+    					$LT_projectPath = (`workspace -q -fn` +  "/scenes/");
+    
+    
+    					columnLayout -adjustableColumn true;
+    
+    				        rowColumnLayout -numberOfColumns 6 -columnWidth 2 15   -columnWidth 3 50  -columnWidth 4 20 -columnWidth 5 40   ;
+    				        					
+    							text -l "File Type:  " -al right -fn boldLabelFont -ann "Set to Maya or FBX";
+    							checkBox -al "left" -l "" -ann "Search for Maya Binary files." -v `optionVar -q LT_MB`
+    								-onc "optionVar -iv LT_MB 1; LT_UI 1" 
+    								-ofc "optionVar -iv LT_MB 0; LT_UI 1";
+    							text -l "Include" -ann "Search for Maya Binary files." ;									
+    							text -l " .mb" -fn smallBoldLabelFont -ann "Search for Maya Binary files." ;
+    							text -l "files" -ann "Search for Maya Binary files." ;
+    							separator -st none;
+    
+    							
+    							separator -st none;
+    							checkBox -al "left" -l "" -ann "Search for Maya ASCII files." -v `optionVar -q LT_MA`
+    								-onc "optionVar -iv LT_MA 1; LT_UI" 
+    								-ofc "optionVar -iv LT_MA 0; LT_UI";
+    							text -l "Include" -ann "Search for Maya ASCII files." ;									
+    							text -l " .ma" -fn smallBoldLabelFont -ann "Search for Maya ASCII files." ;
+    							text -l "files" -ann "Search for Maya ASCII files." ;
+    							separator -st none;
+    
+    
+    							separator -st none;
+    							checkBox -al "left" -l "" -ann "Search for FBX files." -v `optionVar -q LT_FBX` -en `exists FBXImport`
+    								-onc "optionVar -iv LT_FBX 1; LT_UI" 
+    								-ofc "optionVar -iv LT_FBX 0; LT_UI";
+    							text -l "Include" -ann "Search for FBX files.";									
+    							text -l " .fbx" -fn smallBoldLabelFont -ann "Search for FBX files.";
+    							text -l "files" -ann "Search for FBX files.";
+    							separator -st none;
+    							
+    						setParent ..; //column
+    						
+    						
+    						///////////////
+    						///////////////
+    						
+    						
+    						//////////////////////
+    						//		LOCATION
+    						//
+    						
+    
+    				        rowColumnLayout -numberOfColumns 3 -columnWidth 2 120 ;
+    
+    					    separator -st single;
+    						separator -st single;
+    						separator -st single;
+    						
+    						
+    						text -l "Location:   " -al right -fn boldLabelFont -ann "Set search path relative to project or to user defined path";
+    						
+    						checkBox -al "center" -l "Use Current Project" -ann "Use project path as starting point for importing props.  Turn off to set user defined path instead." -v `optionVar -q LT_relativeToProject`
+    								-onc "optionVar -intValue LT_relativeToProject  1 ; $LT_importPath = $LT_projectPath ; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ; frameLayout -e -cl 0 $LT_importFrameName" 
+    								-ofc "optionVar -intValue LT_relativeToProject  0 ; $LT_importPath = `optionVar -q LT_userImportPath` ; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ; frameLayout -e -cl 0 $LT_importFrameName";
+    						separator -st none;  
+    						
+    						
+    						setParent ..; //column
+    						rowColumnLayout -numberOfColumns 1;	
+    						    text -l "- or -  " -al center -ann "Search relative to project or to user defined path";
+    						
+    						separator -st none;  
+    												
+    						setParent ..; //column					
+    						
+
+    						//SetPath Button
+    						//
+    						rowColumnLayout -numberOfColumns 4  -columnWidth 1 30 -columnWidth 4 30;
+    
+    							// initialize $LT_importPath and create file browser button for setting
+    							separator -st none;
+    							if (`optionVar -q LT_relativeToProject ` == 1) 	
+    								{
+    								//if relative to project, disable button 
+    								$LT_setPathButtonName = `button -en 0 -l "Set Path..." -ann "Use file browser to set user defined path for importing props" -c "LT_setUserImportPathName; LT_UI;"`;
+    									//-c "fileBrowserDialog -m 4 -fc LT_setUserImportPathName -an \"Set Path for Importing Props\" ; LT_UI"`;		
+    								$LT_importPath = $LT_projectPath;
+    								}
+    							else  						
+    								{
+    								//if user defined, enable button
+    								$LT_setPathButtonName = `button -en 1 -l "Set Path..." -ann "Use file browser to set user defined path for importing props" -c "LT_setUserImportPathName; LT_UI;"`;
+    									//-c "fileBrowserDialog -m 4 -fc LT_setUserImportPathName -an \"Set Path for Importing Props\" ; LT_UI"`;		
+    								$LT_importPath = `optionVar -q LT_userImportPath`;
+    								}
+                                
+    							//display current path setting
+    							$LT_setPathTextName = `textField -tx $LT_importPath -ann ("Current path : " + $LT_importPath) -ed 0`;		
+                                separator -st none;
+    
+    							separator -st none;separator -st none;separator -st none;separator -st none;
+    					        separator -st single;separator -st single;separator -st single;separator -st single;
+    						    
+    						setParent ..; //column
+    		
+    						
+    				        rowColumnLayout -numberOfColumns 5 -columnWidth 2 40 -columnWidth 3 80 -columnWidth 4 1  ;
+    
+        						text -l "Search:   " -al right -fn boldLabelFont -ann "Set search path relative to project or to user defined path";
+        						        	
+        							//define prefix for importing or referencing							
+        							$importPrefix = `optionVar -q LT_importPrefix`;
+        							text -l "Prefix : " -al right -ann ("Current setting for import prefix : " + $importPrefix);
+        							$LT_setPrefixTextName = `textField -tx $importPrefix -ann "Current setting for import prefix" -cc "LT_setImportPrefix $LT_setPrefixTextName"`;		
+    
+    						setParent ..; //column
+    		
+    						
+    				        rowColumnLayout -numberOfColumns 3 -columnWidth 2 120 ;
+        						separator -st none;
+     
+        
+        						checkBox -al "left" -l "Include Subfolders" -ann "Also build groups of icons for any subfolders found with import prefix" -v `optionVar -q LT_includeSubfolders`
+        								-onc "optionVar -iv LT_includeSubfolders 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ; frameLayout -e -cl 0 $LT_importFrameName" 
+        								-ofc "optionVar -iv LT_includeSubfolders 0; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ; frameLayout -e -cl 0 $LT_importFrameName";
+        						separator -st none;
+                            setParent ..; //column
+    
+     				rowColumnLayout -numberOfColumns 3 -columnWidth 2 160 ;					
+    	
+        				separator -st none; separator -st none; separator -st none;
+        				separator -st none;
+        				button -l "Update Import Icons" -al "center" -w 60 -h 15 -bgc 0.8 0.8 0.8 -ann "Update import icons based on new prefix or added prop files" -c "optionVar -intValue LT_RebuildUI 1;  LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ";
+        				separator -st none;
+        				separator -st none;
+        				button -l "Store Path/Prefix To Shelf" -al "center" -w 60 -h 15 -bgc 0.8 0.8 0.8 -ann "Store the current path and prefix as a shelf button for direct access" -c "LT_storeToShelf;";
+        				separator -st none;
+        				separator -st single;separator -st single;separator -st single;
+        				separator -st none;separator -st none;separator -st none;
+        	
+
+        		    setParent ..; // column   				
+    										
+    						//////////////////////
+    						//		METHOD
+    						//
+    						
+    				        rowColumnLayout -numberOfColumns 5 -columnWidth 2 53 -columnWidth 3 68 -columnWidth 4 1  ;
+    						    text -l "Method:  " -al right -fn boldLabelFont -ann "Define how files are brought into scene";						
+    				
+    									
+    							//should we import or reference
+    							radioCollection;
+    							if (`optionVar -q LT_reference` == 0)
+    								{
+    								radioButton -l "Import" -ann "Import objects into scene" -sl -onc "optionVar -iv LT_reference 0 ; checkBox -edit -en 1 $LT_dupShadersCheckBox ; checkBox -edit -en 0 $LT_refLocatorCheckBox ; checkBox -edit -en 0 $LT_shareLayersCheckBox";
+    								radioButton -l "Reference" -ann "Reference objects from scene" -onc "optionVar -iv LT_reference 1 ; checkBox -edit -en 1 $LT_dupShadersCheckBox ; checkBox -edit -en 1 $LT_refLocatorCheckBox; checkBox -edit -en 1 $LT_shareLayersCheckBox";
+    								}
+    							else if (`optionVar -q LT_reference` == 1)
+    								{
+    								radioButton -l "Import" -ann "Import objects into scene" -onc "optionVar -iv LT_reference 0 ;  checkBox -edit -en 1 $LT_dupShadersCheckBox ; checkBox -edit -en 0 $LT_refLocatorCheckBox; checkBox -edit -en 0 $LT_shareLayersCheckBox";
+    								radioButton -l "Reference" -ann "Reference objects from scene" -sl -onc "optionVar -iv LT_reference 1 ;  checkBox -edit -en 1 $LT_dupShadersCheckBox ; checkBox -edit -en 1 $LT_refLocatorCheckBox; checkBox -edit -en 1 $LT_shareLayersCheckBox";
+    								}
+    								separator -st none;
+    								separator -st none;
+    
+    						setParent ..; //column
+    								
+    								
+    				        rowColumnLayout -numberOfColumns 3 -columnWidth 2 120 ;
+    						
+                                separator -st none;
+                                $LT_dupShadersCheckBox = `checkBox`;
+    							checkBox -edit -en 1 -al "left" -l "Re-use Shaders" -ann "Automatically consolidate any redundant shading networks (materials/textures) when importing or referencing" -v `optionVar -q LT_shareShadingNetworks` 
+    								-onc "optionVar -iv LT_autoCleanHyperShade 1; optionVar -iv LT_shareShadingNetworks 1" 
+    								-ofc "optionVar -iv LT_autoCleanHyperShade 0; optionVar -iv LT_shareShadingNetworks 0" $LT_dupShadersCheckBox;
+                                separator -st none;
+    
+                                separator -st none;
+    							$LT_shareLayersCheckBox = `checkBox`;
+    							checkBox -edit -en `optionVar -q LT_reference` -al "left" -l "Merge Layers" -ann "Automatically consolidate any redundant display layers when referencing" -v `optionVar -q LT_shareLayers` 
+    								-onc "optionVar -iv LT_shareLayers 1" 
+    								-ofc "optionVar -iv LT_shareLayers 0" $LT_shareLayersCheckBox;							
+                                separator -st none;
+    							
+                                separator -st none;
+    							$LT_refLocatorCheckBox = `checkBox`;
+    							checkBox -edit -en `optionVar -q LT_reference` -al "left" -l "Reference Locator" -ann "Create locator for placement of referenced object" -v `optionVar -q LT_createRefLocator` 
+    								-onc "optionVar -iv LT_createRefLocator 1" 
+    								-ofc "optionVar -iv LT_createRefLocator 0" $LT_refLocatorCheckBox;
+                                separator -st none;
+    
+    						setParent ..; //column								
+    																		
+    						separator -st single;  
+    											
+    							
+    					setParent ..; //frame
+    				setParent ..; //column
+    
+    				
+    				//End of import settings
+    				//
+    				////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    				
+    				
+    				//Refresh button for updating icons by resourcing LT_UI	
+    				//
+    				
+
+        		    
+    				
+    				//////////////////////
+    				//		ICONS
+    				//
+    						
+    				//text -l "  Icon Size:" -al left -fn boldLabelFont -ann "Define size of import icons";						
+    				
+    				rowColumnLayout -numberOfColumns 6 -columnWidth 2 60   -columnWidth 3 60  -columnWidth 4 60 -columnWidth 5 60   ;					
+    							separator -st none;
+    							radioCollection;
+    							if (`optionVar -q LT_iconSize` == 32)
+    								{
+    								radioButton -l "Small" -ann "Display and render icons at smaller 32x32 size.  " -sl -onc "optionVar -iv LT_iconSize 32; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Med" -ann "Display and render icons at medium 48x48 size.  " -onc "optionVar -iv LT_iconSize 48; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Large" -ann "Display and render icons at larger 64x64 size.  " -onc "optionVar -iv LT_iconSize 64; LT_setWindowWidth 330; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "XL" -ann "Display and render icons at larger 128x128 size.  " -onc "optionVar -iv LT_iconSize 128; LT_setWindowWidth 430; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								}
+    							else if (`optionVar -q LT_iconSize` == 48)
+    								{
+    								radioButton -l "Small" -ann "Display and render icons at smaller 32x32 size.  " -onc "optionVar -iv LT_iconSize 32; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Med" -ann "Display and render icons at medium 48x48 size.  " -sl -onc "optionVar -iv LT_iconSize 48; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Large" -ann "Display and render icons at larger 64x64 size.  " -onc "optionVar -iv LT_iconSize 64; LT_setWindowWidth 330; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "XL" -ann "Display and render icons at larger 128x128 size.  " -onc "optionVar -iv LT_iconSize 128; LT_setWindowWidth 430; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								}
+    							else if (`optionVar -q LT_iconSize` == 64)
+    								{
+    								radioButton -l "Small" -ann "Display and render icons at smaller 32x32 size.  " -onc "optionVar -iv LT_iconSize 32; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Med" -ann "Display and render icons at medium 48x48 size.  " -onc "optionVar -iv LT_iconSize 48; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Large" -ann "Display and render icons at larger 64x64 size.  " -sl -onc "optionVar -iv LT_iconSize 64; LT_setWindowWidth 330; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "XL" -ann "Display and render icons at larger 128x128 size.  " -onc "optionVar -iv LT_iconSize 128; LT_setWindowWidth 430; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								}
+    							else if (`optionVar -q LT_iconSize` == 128)
+    								{
+    								radioButton -l "Small" -ann "Display and render icons at smaller 32x32 size.  " -onc "optionVar -iv LT_iconSize 32; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Med" -ann "Display and render icons at medium 48x48 size.  " -onc "optionVar -iv LT_iconSize 48; LT_setWindowWidth 296; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "Large" -ann "Display and render icons at larger 64x64 size.  "  -onc "optionVar -iv LT_iconSize 64; LT_setWindowWidth 330; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								radioButton -l "XL" -ann "Display and render icons at larger 128x128 size.  " -sl -onc "optionVar -iv LT_iconSize 128; LT_setWindowWidth 430; optionVar -intValue LT_RebuildUI 1; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName";
+    								}
+    							separator -st none;
+    						setParent ..; //column
+    						
+    										
+    				
+                    rowColumnLayout -numberOfColumns 4  -columnWidth 1 30 -columnWidth 4 30;
+    					separator -st none;separator -st none;separator -st none;separator -st none;
+    					separator -st double;separator -st double;separator -st double;	separator -st double;		
+    					separator -st none;separator -st none;separator -st none;separator -st none;
+    
+    					//define ground plane (Y value) for initial placement of objects
+    					//text -l "  Initial Ground :    Y = " -al left -ann ("Starting point (Y value) for initial placement of objects." + $importPrefix);
+    					separator -st none;
+    					button -l "Set Ground : Y=" -al center -ann ("Set starting point (Y value) for initial placement of objects to match selected object or component.") -command "LT_setGroundToObj";
+    					float $groundVal = `optionVar -q LT_groundValue`;
+    					$LT_setGroundFloatName = `floatField -v $groundVal -pre 3 -ann "Current setting for initial ground plane" -cc "LT_setFloatFieldValue $LT_setGroundFloatName LT_groundValue"`;		
+                        separator -st none;
+                        
+    					separator -st single; separator -st single; separator -st single; separator -st single;
+    				setParent ..; //column	
+    										
+    			//////////////////////
+    			// Make a collapsable set of import buttons for each folder found with given prefix
+    			// Get list of all prop folders : any folder found with prefix defined by $importPrefix in $importPath
+    
+    			//get current prefix setting
+    			$importPrefix = `optionVar -q LT_importPrefix`;
+    
+    			//clear old propFolderList if there is one
+    			string $emptyList[];
+    			$LT_propFolderList = $emptyList;
+    			
+    			//get list of all folders with prefix and subfolders if specified
+    			//the following proc will set the $LT_propFolderList
+    			LT_getPropFolderList ($LT_importPath, `optionVar -q LT_includeSubfolders`);
+    
+    			$iconCount = 0;
+    			
+    			//Starting with Maya2011 the default icon format for all platforms is now ".png" (now set as an optionVar above)
+       			/*
+    			if (`about -mac`)
+    				$iconFormat = ".iff";
+    			else
+    				$iconFormat = ".bmp";
+    			*/
+    				
+    			
+    			for ($propFolder in $LT_propFolderList)
+    
+    				{
+    				//Set paths for icons
+    				//look in either the props folder itself or in top level
+    				$iconsPrimary = ($propFolder + "/icons/");
+    				$iconsSecondary = ($LT_importPath + "/icons/");
+    				
+    
+    				//strip off path from name of folder for frame label
+    				string $buffer[];
+    				int $numTokens = `tokenize $propFolder "/" $buffer`;
+        			frameLayout -l $buffer[$numTokens - 1] -cll 1 -borderStyle "in";
+    
+    				columnLayout -adjustableColumn true ;
+    	
+    					//button for batch rendering of icons for folder	
+    					//
+    					
+    				rowColumnLayout -numberOfColumns 3 -columnWidth 2 160 ;					
+    
+        					separator -st none;
+        					$command = ("LT_batchCreateIcons \"" + $propFolder + "/\"  ; LT_UI; tabLayout -edit -st $LT_tab1 $LT_tabName ");
+        					button -l "Render Folder's Icons" -al "center" -w 110 -h 15 -bgc 0.8 0.8 0.8 -ann ("Render Icons for each file in the "+$buffer[$numTokens - 1]+" folder") -c $command;
+        					separator -st none;        					
+        					separator -st none; separator -st none; separator -st none;
+    					setParent ..; // column
+    					
+    					
+    				rowColumnLayout -numberOfColumns 1;	
+    				    if (`about -mac`)				
+    					    text ("( Command + click any button to render icon )");
+    				    else
+    					    text ("( CTRL + click any button to render icon )");
+    				    
+    				setParent ..; // column
+
+    				    
+    					// Dynamically build buttons based on the number and names of files returned from props folders
+    					// If icon doesn't exist a generic button will be created instead with name of file.
+    	
+    					if ($iconSize == 32)
+    						gridLayout -cr 1 -ag 1 -cellWidthHeight 32 32;
+    					else if ($iconSize == 48)	
+    						gridLayout -cr 1 -ag 1 -cellWidthHeight 42 42;
+    					else if ($iconSize == 64)
+    						gridLayout -cr 1 -ag 1 -cellWidthHeight 58 58 ;
+    					else 
+    						gridLayout -cr 1 -ag 1 -cellWidthHeight 128 128;
+    						
+    						
+    					//experimenting with flowLayout	
+                        //flowLayout -columnSpacing 10 -wr 1;
+    						
+    						
+    					for ($file in `LT_listFilesAtPath ($propFolder + "/")`)
+    						{
+    						//Separate name from extension
+    						//$name[0] = file  :  $name[1] = extension
+    						tokenize ($file, ".", $name);
+    						
+    						
+    						//set file found to 0 to start
+    						int $found = 0;
+    						
+    						//Check for mb, ma or fbx
+    						//
+    						if (`optionVar -q LT_FBX`)
+    							{
+    							//look for FBX files
+    							if ($name[1] == "fbx") 
+    								$found = 1;
+    							}
+    						if (`optionVar -q LT_MB`)
+    							{
+    							//make sure it's a Maya mb
+    							if ($name[1] == "mb") 
+    								$found = 1;
+    							}			
+    						if (`optionVar -q LT_MA`)
+    							{
+    							//make sure it's a Maya ma
+    							if ($name[1] == "ma") 
+    								$found = 1;
+    							}	
+    
+    						if ($found == 0) continue;							
+    													
+    						$annotation = $name[0] + "." + $name[1] + " : Click/Drag to place on current gound plane  Ctrl:Constrain vertically  Shift:Constrain to view plane";
+    	
+    	                    
+    						//Check for icon in primary location (props folder)
+    						if (`file -q -ex ($iconsPrimary+$name[0]+$iconFormat)`)
+    							{
+    							//Format command string for extra quotes
+    							$command = "LT_getProp \"" + $propFolder + "\" \"" + $name[0] + "\" \"" + $name[1] + "\"; if ($LT_makeIconResponse == \"Yes\") LT_clickSpinObj; else LT_clickDragObj;  $LT_makeIconResponse = \"No\"; ";  //use $LT_makeIconResponse to determine regular import or icon creation
+    							iconTextButton -w $iconSize  -h $iconSize  -bgc .2 .2 .2 -st "iconOnly" -ann $annotation -i1 ($iconsPrimary+$name[0]+$iconFormat) -l $name[0] -c $command;  	
+    							
+    							$command = "LT_getProp \"" + $propFolder + "\" \"" + $name[0] + "\" \"" + $name[1] + "\"; if ($LT_makeIconResponse == \"Yes\") LT_clickSpinObj; else LT_clickDragObj; $LT_makeIconResponse = \"No\"; ";//use $LT_makeIconResponse to determine regular import or icon creation
+
+    							}
+    						//Then check in secondary (top level of search path)
+    						else if (`file -q -ex ($iconsSecondary+$name[0]+$iconFormat)`)
+    							{
+    							//Format command string for extra quotes
+    							$command = "LT_getProp \"" + $propFolder + "\" \"" + $name[0] + "\" \"" + $name[1] + "\"; if ($LT_makeIconResponse == \"Yes\") LT_clickSpinObj; else LT_clickDragObj; $LT_makeIconResponse = \"No\"; "; //use $LT_makeIconResponse to determine regular import or icon creation
+    							iconTextButton -w $iconSize  -h $iconSize  -bgc .2 .2 .2 -st "iconOnly" -ann $annotation -i1 ($iconsSecondary+$name[0]+$iconFormat) -l $name[0] -c $command;  	
+    							}
+    						//Otherwise create simple button
+    						else
+    							{
+    							//Format command string for extra quotes
+    							$command = "LT_getProp \"" + $propFolder + "\" \"" + $name[0] + "\" \"" + $name[1] + "\"; if ($LT_makeIconResponse == \"Yes\") LT_clickSpinObj; else LT_clickDragObj; $LT_makeIconResponse = \"No\"; "; //use $LT_makeIconResponse to determine regular import or icon creation
+    							button -w $iconSize  -h $iconSize  -bgc .66 .66 .66  -ann $annotation -l $name[0] -c $command ;  	
+    							}
+    						$iconCount ++;
+    						}
+    						setParent ..; //sub column for icons
+    					setParent ..; //frame for folders
+    				setParent ..; //main column 
+    				}
+    				
+    
+    			// Print warning in UI if no importable files are found
+    			//
+    			if (`size $LT_propFolderList` != 0) 
+    				{
+    				print ("\n");
+    				print ($iconCount + " icon buttons built for " + `size $LT_propFolderList` + " folders with prefix \"" +  $importPrefix + "\" at path -> " + $LT_importPath + "\n");
+    				}
+    			else
+    				{
+    				warning ("No folders with prefix \"" + $importPrefix + "\" were found in " + $LT_importPath);
+    
+    				string $info = "\n  Nothing to import.  \n\nCheck settings above.  Either there is a problem with the path or there were no folders with the current prefix found at that location.  See the script editor for details." ;
+    				string $infoField = `scrollField -width 160 -height 220 -ed 0 -wordWrap true -text ($info)`;
+    
+    				//frameLayout -e -cl 1 $LT_importFrameName;
+    				//setParent ..; //column
+    				}
+    
+    			setParent ..; //scroll
+    		setParent ..; // tab-window
+    
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //					Placement Tab
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    			string $LT_tab2 = `scrollLayout -hst 0 -cr 1`;
+    
+    			columnLayout -adjustableColumn true;
+    
+    
+    
+    
+    				//////////////////////
+    				//		Transform
+    				//
+    	   			frameLayout -l "Transform" -bgc $LT_frameColor1[0] $LT_frameColor1[1] $LT_frameColor1[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_generalFrame` -cc "optionVar -iv LT_generalFrame 1" -ec "optionVar -iv LT_generalFrame 0";
+    				  columnLayout -adjustableColumn true;
+    				  
+    						rowColumnLayout -numberOfColumns 3;					
+    							separator -st none;separator -st none;separator -st none;
+    							separator -st single;separator -st single;separator -st single;
+    							separator -st none;separator -st none;separator -st none;
+    							
+    						setParent ..; //rowColumn
+    							
+    						rowColumnLayout -numberOfColumns 1;		
+    
+    							text -l "Interactive Transform Tools " -al center -ann "Tools for transforming objects.";
+    						setParent ..;  //column 
+    						
+    
+    						rowColumnLayout -numberOfColumns 3;						
+    
+    						button -l "Drag Tool" -bgc 0.8 0.8 0.8 -ann "Drag Tool : Interactively place selected object(s) along XZ plane  Ctrl:Constrain to Y  Shift:Constrain to view plane" -c "LT_clickDragObj";						
+      						button -l "Spin Tool" -bgc 0.8 0.8 0.8 -ann "Spin Tool : Interactively rotate selected object(s) along Y axis  Ctrl/Shift:Rotate each object independantly" -c "LT_clickSpinObj";
+    						button -l "MRS Tool" -bgc 0.8 0.8 0.8 -ann "Multi-manip for moving, rotating and scaling" -c "MoveRotateScaleTool";
+    						//Taken out of LT but can still be found in bonusTools
+    						//button -l "CTM Tool" -en `exists bgComponentTransformManip` -bgc 0.8 0.8 0.8 -ann $tempAnnotation -c "bgComponentTransformManip; MoveRotateScaleTool";
+  
+    						separator -st none;separator -st none;separator -st none;
+    					
+    					setParent ..;  //frame 
+    				  setParent ..;  //rowColumn				
+    				setParent ..;  //column				
+    			
+    				//////////////////////
+    				//		POSITION
+    				//
+    				source manipMoveOrient; //for edge and face move manip
+    				
+    				frameLayout -l "Position" -bgc $LT_frameColor2[0] $LT_frameColor2[1] $LT_frameColor2[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_positionFrame` -cc "optionVar -iv LT_positionFrame 1" -ec "optionVar -iv LT_positionFrame 0";
+    
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    					
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;separator -st single;separator -st single;					
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						
+    						separator -st none;
+    						text -l "Move " -al right  -fn boldLabelFont;
+    						$moveValue = `optionVar -q LT_moveValue`;
+    						$LT_moveFieldName = `floatField -minValue 0 -maxValue 100 -value $moveValue -pre 3 -step 5.0 -cc "LT_setFloatFieldValue $LT_moveFieldName LT_moveValue"`;
+     						text -l " Units" -ann "Value used for move offset and snapping" -al left;
+                            separator -st none;
+                            	
+    						//Get state of axis radio buttons
+    						if 	((`optionVar -q LT_moveSpace` == "-os") || (`optionVar -q LT_moveSpace` == "-ws"))
+    							$axisState = 1;
+    						else 
+    							$axisState = 0;
+    						
+                            separator -st none;
+    						radioCollection;
+    							if (`optionVar -q LT_moveOffsetAxis` == 1)
+    								{
+    								$LT_moveAxisX = `radioButton -al center -en $axisState -l "X" -sl -onc "optionVar -iv LT_moveOffsetAxis 1"`;
+    								$LT_moveAxisY = `radioButton -al center -en $axisState -l "Y" -onc "optionVar -iv LT_moveOffsetAxis 2"`;
+    								$LT_moveAxisZ = `radioButton -al center -en $axisState -l "Z" -onc "optionVar -iv LT_moveOffsetAxis 3"`;
+    								}
+    							else if (`optionVar -q LT_moveOffsetAxis` == 2)
+    								{
+    								$LT_moveAxisX = `radioButton -al center -en $axisState -l "X" -onc "optionVar -iv LT_moveOffsetAxis 1"`;
+    								$LT_moveAxisY = `radioButton -al center -en $axisState -l "Y" -sl -onc "optionVar -iv LT_moveOffsetAxis 2"`;
+    								$LT_moveAxisZ = `radioButton -al center -en $axisState -l "Z" -onc "optionVar -iv LT_moveOffsetAxis 3"`;
+    								}
+    							else if (`optionVar -q LT_moveOffsetAxis` == 3)
+    								{
+    								$LT_moveAxisX = `radioButton -al center -en $axisState -l "X" -onc "optionVar -iv LT_moveOffsetAxis 1"`;
+    								$LT_moveAxisY = `radioButton -al center -en $axisState -l "Y" -onc "optionVar -iv LT_moveOffsetAxis 2"`;
+    								$LT_moveAxisZ = `radioButton -al center -en $axisState -l "Z" -sl -onc "optionVar -iv LT_moveOffsetAxis 3"`;
+    								}
+                            separator -st none;
+    		
+                            separator -st none;
+    						radioCollection;
+    							if (`optionVar -q LT_moveSpace` == "-os")
+    								{
+    								text -l "Space :  " -al left;
+    								radioButton -l "Object" -ann "move in object space" -sl -onc "setToolTo $gMove; manipMoveContext -e -mode 0 Move; optionVar -sv LT_moveSpace \"-os\"; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+    								radioButton -l "World" -ann "move in world space" -onc "setToolTo $gMove; manipMoveContext -e -mode 1 Move; optionVar -sv LT_moveSpace \"-ws\"; button -e -en 1 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+                                    separator -st none;								
+                                    separator -st none;								
+                                    separator -st none;								
+    								radioButton -l "Edge" -ann "move along edge" -onc "optionVar -sv LT_moveSpace \"-edge\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";
+    								radioButton -l "Face" -ann "move along face normal" -onc "optionVar -sv LT_moveSpace \"-normal\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";
+    								button -l "< Set" -ann "Set move axis to align to selected edge or face" -c "LT_setCustomAxis" -al right;
+    								}
+    							else if (`optionVar -q LT_moveSpace` == "-ws")
+    								{
+    								text -l "Space :  " -al left;
+    								radioButton -l "Object" -ann "move in object space" -onc "setToolTo $gMove; manipMoveContext -e -mode 0 Move; optionVar -sv LT_moveSpace \"-os\"; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+    								radioButton -l "World" -ann "move in world space" -sl -onc "setToolTo $gMove; manipMoveContext -e -mode 1 Move; optionVar -sv LT_moveSpace \"-ws\"; button -e -en 1 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+                                    separator -st none;								
+                                    separator -st none;								
+                                    separator -st none;								
+    								radioButton -l "Edge" -ann "move along edge" -onc "optionVar -sv LT_moveSpace \"-edge\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";
+    								radioButton -l "Face" -ann "move along face normal" -onc "optionVar -sv LT_moveSpace \"-normal\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";								
+    								button -l "< Set" -ann "Set move axis to align to selected edge or face" -c "LT_setCustomAxis" -al right;
+    								}
+    							else if (`optionVar -q LT_moveSpace` == "-edge")
+    								{
+    								text -l "Space :  " -al left;
+    								radioButton -l "Object" -ann "move in object space" -onc "setToolTo $gMove; manipMoveContext -e -mode 0 Move; optionVar -sv LT_moveSpace \"-os\"; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+    								radioButton -l "World" -ann "move in world space" -onc "setToolTo $gMove; manipMoveContext -e -mode 1 Move; optionVar -sv LT_moveSpace \"-ws\"; button -e -en 1 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+                                    separator -st none;								
+                                    separator -st none;								
+                                    separator -st none;								
+    								radioButton -l "Edge" -sl -ann "move along edge" -onc "optionVar -sv LT_moveSpace \"-edge\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";
+    								radioButton -l "Face" -ann "move along face normal" -onc "optionVar -sv LT_moveSpace \"-normal\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";						
+    								button -l "< Set" -ann "Set move axis to align to selected edge or face" -c "LT_setCustomAxis" -al right;
+    								}
+    							else if (`optionVar -q LT_moveSpace` == "-normal")
+    								{
+    								text -l "Space :  " -al left;
+    								radioButton -l "Object" -ann "move in object space" -onc "setToolTo $gMove; manipMoveContext -e -mode 0 Move; optionVar -sv LT_moveSpace \"-os\"; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+    								radioButton -l "World" -ann "move in world space" -onc "setToolTo $gMove; manipMoveContext -e -mode 1 Move; optionVar -sv LT_moveSpace \"-ws\"; button -e -en 1 $LT_snapMoveButtonName; radioButton -e -en 1 $LT_moveAxisX; radioButton -e -en 1 $LT_moveAxisY; radioButton -e -en 1 $LT_moveAxisZ";
+                                    separator -st none;								
+                                    separator -st none;								
+                                    separator -st none;								
+                                    radioButton -l "Edge" -ann "move along edge" -onc "optionVar -sv LT_moveSpace \"-edge\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";
+    								radioButton -l "Face" -sl -ann "move along face normal" -onc "optionVar -sv LT_moveSpace \"-normal\"; LT_setCustomAxis; button -e -en 0 $LT_snapMoveButtonName; radioButton -e -en 0 $LT_moveAxisX; radioButton -e -en 0 $LT_moveAxisY; radioButton -e -en 0 $LT_moveAxisZ";						
+     								button -l "< Set" -ann "Set move axis to align to selected edge or face" -c "LT_setCustomAxis" -al right;
+    								}
+                           separator -st none;
+    									
+    
+    
+    
+    					setParent ..; //rowColumn
+    
+        					rowColumnLayout -numberOfColumns 3;
+        					
+        						separator -st none;separator -st none;separator -st none;
+        						separator -st single;separator -st single;separator -st single;					
+        						separator -st none;separator -st none;separator -st none;
+        						
+        						if (`optionVar -q LT_moveSpace` == "-ws")
+        							$LT_snapMoveButtonName = `button -l "Snap" -en 1 -ann "Snap to nearest point along selected axis divisible by value : world axis only" -c "setToolTo $gMove; LT_snapToVirtualGrid `optionVar -q LT_moveValue` `optionVar -q LT_moveOffsetAxis`" `;
+        						else
+        							$LT_snapMoveButtonName = `button -l "Snap" -en 0 -ann "Snap to nearest point along selected axis divisible by value : world axis only" -c "setToolTo $gMove; LT_snapToVirtualGrid `optionVar -q LT_moveValue` `optionVar -q LT_moveOffsetAxis`" `;
+        	
+        						button -l "Offset -" -ann "Decrement position along selected axis based on value" -c "LT_moveOffset (`optionVar -q LT_moveValue` * -1) `optionVar -q LT_moveOffsetAxis` `optionVar -q LT_moveSpace`" ;
+        						button -l "Offset +" -ann "Increment position along selected axis based on value" -c "LT_moveOffset `optionVar -q LT_moveValue` `optionVar -q LT_moveOffsetAxis` `optionVar -q LT_moveSpace`" ;
+        	
+    						separator -st none;separator -st none;separator -st none;
+    					
+    					setParent ..; //rowColumn
+    				setParent ..;  //column
+    
+    				
+    				//////////////////////
+    				//		ORIENT
+    				//
+    	   			frameLayout -l "Orient" -bgc $LT_frameColor3[0] $LT_frameColor3[1] $LT_frameColor3[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_orientFrame` -cc "optionVar -iv LT_orientFrame 1" -ec "optionVar -iv LT_orientFrame 0";
+    				  columnLayout -adjustableColumn true;
+    
+    
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    					
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;separator -st single;separator -st single;					
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						
+    						separator -st none;
+    						text -l "Rotate " -al right  -fn boldLabelFont;
+    						$rotateValue = `optionVar -q LT_rotateValue`;
+    						$LT_rotateFieldName = `floatField -minValue 0 -maxValue 360 -value $rotateValue -step 15 -pre 1 -cc "LT_setFloatFieldValue $LT_rotateFieldName LT_rotateValue"`;
+    						text -l " Degrees" -ann "Degree value used for rotation offset and snapping" -al left;
+    		                separator -st none;
+    		                
+                            separator -st none;
+    						radioCollection;
+    							if (`optionVar -q LT_rotateOffsetAxis` == 1)
+    								{
+    								radioButton -l "X" -al center -sl -onc "optionVar -iv LT_rotateOffsetAxis 1";
+    								radioButton -l "Y" -al center -onc "optionVar -iv LT_rotateOffsetAxis 2";
+    								radioButton -l "Z" -al center -onc "optionVar -iv LT_rotateOffsetAxis 3";
+    								}
+    							else if (`optionVar -q LT_rotateOffsetAxis` == 2)
+    								{
+    								radioButton -l "X" -al center -onc "optionVar -iv LT_rotateOffsetAxis 1";
+    								radioButton -l "Y" -al center -sl -onc "optionVar -iv LT_rotateOffsetAxis 2";
+    								radioButton -l "Z" -al center -onc "optionVar -iv LT_rotateOffsetAxis 3";
+    								}
+    							else if (`optionVar -q LT_rotateOffsetAxis` == 3)
+    								{
+    								radioButton -l "X" -al center -onc "optionVar -iv LT_rotateOffsetAxis 1";
+    								radioButton -l "Y" -al center -onc "optionVar -iv LT_rotateOffsetAxis 2";
+    								radioButton -l "Z" -al center -sl -onc "optionVar -iv LT_rotateOffsetAxis 3";
+    								}
+    						separator -st none;
+    
+    						separator -st none;		
+    						radioCollection;
+    							//text -label "Mode :  " -al right;
+    							//separator -st none;separator -st none;
+    							if (`optionVar -q LT_rotateSpace` == "-os")
+    								{
+    								radioButton -l "Local" -ann "rotate in local space" -sl -onc "setToolTo $gRotate; manipRotateContext -e -mode 0 Rotate; optionVar -sv LT_rotateSpace \"-os\"; button -e -en 1 $LT_snapRotateButtonName";
+    								radioButton -l "World" -ann "rotate in world space around each object's own pivot" -onc "setToolTo $gRotate; manipRotateContext -e -mode 1 Rotate; optionVar -sv LT_rotateSpace \"-ws\"; button -e -en 0 $LT_snapRotateButtonName";
+    								radioButton -l "BBox" -ann "rotate in world space around bounding box center of all selected objects" -onc "setToolTo $gSelect ; optionVar -sv LT_rotateSpace \"-bb\"; button -e -en 0 $LT_snapRotateButtonName";;
+    								}
+    							else if (`optionVar -q LT_rotateSpace` == "-ws")
+    								{
+    								radioButton -l "Local" -ann "rotate in object space" -onc "setToolTo $gRotate; manipRotateContext -e -mode 0 Rotate; optionVar -sv LT_rotateSpace \"-os\"; button -e -en 1 $LT_snapRotateButtonName";
+    								radioButton -l "World" -ann "rotate in world space around each object's own pivot" -sl -onc "setToolTo $gRotate; manipRotateContext -e -mode 1 Rotate; optionVar -sv LT_rotateSpace \"-ws\"; button -e -en 0 $LT_snapRotateButtonName";
+    								radioButton -l "BBox" -ann "rotate in world space around bounding box center of all selected objects" -onc "setToolTo $gSelect ; optionVar -sv LT_rotateSpace \"-bb\"; button -e -en 0 $LT_snapRotateButtonName";;
+    								}			
+    							else if (`optionVar -q LT_rotateSpace` == "-bb")
+    								{
+    								radioButton -l "Local" -ann "rotate in object space" -onc "setToolTo $gRotate; manipRotateContext -e -mode 0 Rotate; optionVar -sv LT_rotateSpace \"-os\"; button -e -en 1 $LT_snapRotateButtonName";
+    								radioButton -l "World" -ann "rotate in world space around each object's own pivot" -onc "setToolTo $gRotate; manipRotateContext -e -mode 1 Rotate; optionVar -sv LT_rotateSpace \"-ws\"; button -e -en 0 $LT_snapRotateButtonName";
+    								radioButton -l "BBox" -ann "rotate in world space around bounding box center of all selected objects" -sl -onc "setToolTo $gSelect ; optionVar -sv LT_rotateSpace \"-bb\"; button -e -en 0 $LT_snapRotateButtonName";;
+    								}
+    						separator -st none;
+    						setParent ..; //rowColumn
+    
+    
+    
+    					    rowColumnLayout -numberOfColumns 3;
+        						separator -st none;separator -st none;separator -st none;
+        						if (`optionVar -q LT_rotateSpace` == "-os")
+        							$LT_snapRotateButtonName = `button -l "Snap" -en 1 -ann "Snap rotate to nearest angle (between 0 and 360) divisible by degree value : object axis only" -c "setToolTo $gRotate; LT_rotateSnap `optionVar -q LT_rotateValue` `optionVar -q LT_rotateOffsetAxis`"` ;
+        						else if (`optionVar -q LT_rotateSpace` == "-ws" || `optionVar -q LT_rotateSpace` == "-bb" )
+        							$LT_snapRotateButtonName = `button -l "Snap" -en 0 -ann "Snap rotate to nearest angle (between 0 and 360) divisible by degree value : object axis only" -c "setToolTo $gRotate; LT_rotateSnap `optionVar -q LT_rotateValue` `optionVar -q LT_rotateOffsetAxis`"` ;
+        		
+        						button -l "Offset -" -ann "Decrement rotation along selected axis based on value" -c "LT_rotateOffset (`optionVar -q LT_rotateValue` * -1) `optionVar -q LT_rotateOffsetAxis` `optionVar -q LT_rotateSpace`" ;
+        						button -l "Offset +" -ann "Increment rotation along selected axis based on value" -c "LT_rotateOffset `optionVar -q LT_rotateValue` `optionVar -q LT_rotateOffsetAxis` `optionVar -q LT_rotateSpace`" ;		
+        	
+        						separator -st none;separator -st none;separator -st none;
+        						separator -st single;separator -st single;separator -st single;
+        						separator -st none;separator -st none;separator -st none;
+    	
+    						setParent ..; //rowColumn
+    
+    
+    				setParent ..; //rowColumn
+    				setParent ..;  //column
+    
+    
+    
+    				
+    				//////////////////////
+    				//		Size
+    				//
+    	   			frameLayout -l "Size" -bgc $LT_frameColor4[0] $LT_frameColor4[1] $LT_frameColor4[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_scaleFrame` -cc "optionVar -iv LT_scaleFrame 1" -ec "optionVar -iv LT_scaleFrame 0";
+    				  columnLayout -adjustableColumn true;
+    
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    					
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;separator -st single;	separator -st single;						
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						
+                            separator -st none;
+    						text -l "Scale " -al right  -fn boldLabelFont;
+    						$scaleValue = `optionVar -q LT_scaleValue`;
+    						$LT_scaleFieldName = `floatField -minValue 0 -maxValue 10000 -value $scaleValue -step 15 -pre 1 -cc "LT_setFloatFieldValue $LT_scaleFieldName LT_scaleValue"`;
+    						text -l " Percent" -ann "Degree value used for scale offset and snapping" -al left;
+                            separator -st none;
+    
+    		
+                            separator -st none;
+    						checkBox -l "X" -align "center" -v `optionVar -q LT_scaleOffsetX` -onc "optionVar -iv LT_scaleOffsetX 1" -ofc "optionVar -iv LT_scaleOffsetX 0";
+    						checkBox -l "Y" -align "center" -v `optionVar -q LT_scaleOffsetY` -onc "optionVar -iv LT_scaleOffsetY 1" -ofc "optionVar -iv LT_scaleOffsetY 0";
+    						checkBox -l "Z" -align "center" -v `optionVar -q LT_scaleOffsetZ` -onc "optionVar -iv LT_scaleOffsetZ 1" -ofc "optionVar -iv LT_scaleOffsetZ 0";
+                            separator -st none;
+    		
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    					setParent ..;  //frame 
+    
+    		
+    					rowColumnLayout -numberOfColumns 2;					
+    
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    
+   
+    						button -l "Scale Relative" -ann "Scale relative to current size of all selected objects" -c "setToolTo $gScale; LT_scaleAll (1, `optionVar -q LT_scaleOffsetX`, `optionVar -q LT_scaleOffsetY`, `optionVar -q LT_scaleOffsetZ`,`optionVar -q LT_scaleValue`)";
+    						button -l "Scale Absolute" -ann "Scale all selected objects to absolute size" -c "setToolTo $gScale; LT_scaleAll (2, `optionVar -q LT_scaleOffsetX`, `optionVar -q LT_scaleOffsetY`, `optionVar -q LT_scaleOffsetZ`,`optionVar -q LT_scaleValue`)";
+    
+    
+    						separator -st none;separator -st none;
+    						
+    					setParent ..;  //frame 
+    				setParent ..; //rowColumn
+    				setParent ..;  //column	
+    					
+    				
+    
+    
+    
+    
+    				//////////////////////
+    				//		Random
+    				//
+    	   			frameLayout -l "Random"  -bgc $LT_frameColor5[0] $LT_frameColor5[1] $LT_frameColor5[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_orientFrame` -cc "optionVar -iv LT_orientFrame 1" -ec "optionVar -iv LT_orientFrame 0";
+    				  columnLayout -adjustableColumn true;
+    
+    					rowColumnLayout -numberOfColumns 3;
+    
+    						separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;					
+    						separator -st none;separator -st none;separator -st none;
+    
+    					setParent ..;  //frame 
+    
+    					rowColumnLayout -numberOfColumns 4 -columnWidth 2 $LT_columnWidth -columnWidth 3 $LT_columnWidth;
+    
+                            separator -st none;
+    						text -l "Min" -ann "Unit value used for random move offest" -al center;
+    						text -l "Max" -ann "Unit value used for random move offest" -al center;
+                            separator -st none;
+                            
+    						text -l "Move " -ann "Unit value used for random move offest" -al right;
+    						$minValue = `optionVar -q LT_randMoveMinValue`;
+    						$maxValue = `optionVar -q LT_randMoveMaxValue`;
+    						$LT_randMoveMinFieldName = `floatField -value $minValue -cc "LT_setFloatFieldValue $LT_randMoveMinFieldName LT_randMoveMinValue"`;
+    						$LT_randMoveMaxFieldName = `floatField -value $maxValue -cc "LT_setFloatFieldValue $LT_randMoveMaxFieldName LT_randMoveMaxValue"`;	
+    
+    						$units = `currentUnit -query -linear`;
+    						text -l (" "+$units) -al left  -fn boldLabelFont;
+    
+    						text -l "Rotate " -ann "Degree used for random rotate offset" -al right;
+    						$minValue = `optionVar -q LT_randRotMinValue`;
+    						$maxValue = `optionVar -q LT_randRotMaxValue`;
+    						$LT_randRotMinFieldName = `intField -value $minValue -cc "LT_setIntFieldValue $LT_randRotMinFieldName LT_randRotMinValue"`;
+    						$LT_randRotMaxFieldName = `intField -value $maxValue -cc "LT_setIntFieldValue $LT_randRotMaxFieldName LT_randRotMaxValue"`;		
+    						text -l " °" -al left  -fn boldLabelFont;
+    
+    						text -l "Scale " -ann "Percent used for random scale offset" -al right;
+    						$minValue = `optionVar -q LT_randScaleMinValue`;
+    						$maxValue = `optionVar -q LT_randScaleMaxValue`;
+    						$LT_randScaleMinFieldName = `intField -value $minValue -cc "LT_setIntFieldValue $LT_randScaleMinFieldName LT_randScaleMinValue"`;
+    						$LT_randScaleMaxFieldName = `intField -value $maxValue -cc "LT_setIntFieldValue $LT_randScaleMaxFieldName LT_randScaleMaxValue"`;		
+    						text -l " %" -al left  -fn boldLabelFont;
+    
+    					setParent ..;  //frame 
+    
+    
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    
+                            separator -st none;
+    						checkBox -l " X" -align "right" -v `optionVar -q LT_randomOffsetX` -onc "optionVar -iv LT_randomOffsetX 1" -ofc "optionVar -iv LT_randomOffsetX 0";
+    						checkBox -l " Y" -align "center" -v `optionVar -q LT_randomOffsetY` -onc "optionVar -iv LT_randomOffsetY 1" -ofc "optionVar -iv LT_randomOffsetY 0";
+    						checkBox -l " Z" -align "left" -v `optionVar -q LT_randomOffsetZ` -onc "optionVar -iv LT_randomOffsetZ 1" -ofc "optionVar -iv LT_randomOffsetZ 0";
+                            separator -st none;
+                            
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;	separator -st single;separator -st single;				
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;						
+    
+    					setParent ..;  //frame 
+                        rowColumnLayout -numberOfColumns 3;
+    						button -l "Move" -ann "Randomly offset move for selected objects" -c "setToolTo $gMove; LT_randomMove (`optionVar -q LT_randMoveMinValue`, `optionVar -q LT_randMoveMaxValue`)";
+    						button -l "Rotate" -ann "Randomly offset rotate for selected objects" -c "setToolTo $gRotate; LT_randomRotate (`optionVar -q LT_randRotMinValue`, `optionVar -q LT_randRotMaxValue`)";
+    						button -l "Scale" -ann "Randomly offset scale for selected objects" -c "setToolTo $gScale; LT_randomScale (`optionVar -q LT_randScaleMinValue`, `optionVar -q LT_randScaleMaxValue`)";
+    	                    
+    					setParent ..;  //frame 
+    				setParent ..; //rowColumn
+    				setParent ..;  //column	
+    
+    
+    
+    
+    
+    
+    				
+    			setParent ..; // scroll
+    		setParent ..; //tab window
+    
+    
+    
+    
+    
+    
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //					Assembly Tab
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    			string $LT_tab3 = `scrollLayout -hst 0  -cr 1`;
+    
+    			columnLayout -adjustableColumn true;
+    
+    
+    
+    				
+    				//////////////////////
+    				//		ALIGN
+    				//
+    				frameLayout -l "Align" -bgc $LT_frameColor1[0] $LT_frameColor1[1] $LT_frameColor1[2]   -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_alignFrame` -cc "optionVar -iv LT_alignFrame 1" -ec "optionVar -iv LT_alignFrame 0";
+    				  columnLayout -adjustableColumn true;
+    				  
+    					rowColumnLayout -numberOfColumns 3;
+    									
+    						separator -st none;separator -st none;separator -st none;
+    						separator -st single;separator -st single;separator -st single;					
+    						separator -st none;separator -st none;separator -st none;
+    						
+    						setParent ..; //rowColumn
+    
+    							
+    						rowColumnLayout -numberOfColumns 1;		
+    							text -l "Bounding Box Based Alignment" -al center -ann "Align objects based on their bounding boxes.";
+    							separator -st none;
+    						setParent ..;  //column 
+    						
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    					
+    						separator -st none;
+    						radioCollection;
+    							if (`optionVar -q LT_alignAxis` == 1)
+    								{
+    								radioButton -l "X" -al center -sl -onc "optionVar -iv LT_alignAxis 1";
+    								radioButton -l "Y" -al center -onc "optionVar -iv LT_alignAxis 2";
+    								radioButton -l "Z" -al center -onc "optionVar -iv LT_alignAxis 3";
+    								}
+    							else if (`optionVar -q LT_alignAxis` == 2)
+    								{
+    								radioButton -l "X" -al center -onc "optionVar -iv LT_alignAxis 1";
+    								radioButton -l "Y" -al center -sl -onc "optionVar -iv LT_alignAxis 2";
+    								radioButton -l "Z" -al center -onc "optionVar -iv LT_alignAxis 3";
+    								}
+    							else if (`optionVar -q LT_alignAxis` == 3)
+    								{
+    								radioButton -l "X" -al center -onc "optionVar -iv LT_alignAxis 1";
+    								radioButton -l "Y" -al center -onc "optionVar -iv LT_alignAxis 2";
+    								radioButton -l "Z" -al center -sl -onc "optionVar -iv LT_alignAxis 3";
+    								}
+    								
+    						separator -st none;
+    								
+    					setParent ..;  //frame 
+    		
+    					rowColumnLayout -numberOfColumns 2;
+    
+    						separator -st none;separator -st none;
+    						button -l "Align Bottom" -ann "Line up all selected objects with the base (or bottom) of the last selected along specified axis (defaults to center for Y)" -c "LT_alignObjects base `optionVar -q LT_alignAxis`" ;
+    						button -l "Align Top" -ann "Line up all selected objects with the top of the last selected along specified axis (defaults to center for Y)" -c "LT_alignObjects top `optionVar -q LT_alignAxis`" ;
+    						button -l "Align Center" -ann "Line up and center all selected objects with last selected along the specified axis" -c "LT_alignObjects center `optionVar -q LT_alignAxis`" ;
+    						button -l "Equidistant" -ann "Make selected objects equidistant along specified axis" -c "LT_alignObjects dist `optionVar -q LT_alignAxis`";
+    						button -l "Stack Above" -ann "Stack all selected objects above (or in front of) last selected on specified axis" -c "LT_alignObjects center `optionVar -q LT_alignAxis`; LT_stackAllAboveLast `ls -sl` `optionVar -q LT_alignAxis`" ;
+    						button -l "Stack Below" -ann "Stack all selected objects below (or behind) last selected on specified axis" -c "LT_alignObjects center `optionVar -q LT_alignAxis`; LT_stackAllUnderLast `ls -sl` `optionVar -q LT_alignAxis`" ;
+    
+    								
+    					setParent ..; //rowColumn
+    
+    						
+    					rowColumnLayout -numberOfColumns 1;		
+    						button -l "Other Align Options..." -ann "Open option box for Align Objects." -c "performAlignObjects 1";
+    						separator -st none; separator -st single; separator -st none;
+    	
+    						text -l "Interactive Alignment " -al center -ann "Tools for aligning position or orientation of one object to another.";
+    					setParent ..;  //column 
+    					
+    
+    
+    					rowColumnLayout -numberOfColumns 2;
+    								
+    						button -l "Toggle Axis" -ann "Toggle display of local rotation axis for selected objects" -c "toggle -localAxis";
+    
+    						if (`exists orientToTool`)
+    							$tempAnnotation = "Orient To Edge/Vert Tool : select a vert on the object to be rotated, followed by a vert/edge on target object.";
+    						else
+    							$tempAnnotation = "TOOL NOT FOUND.  Install BonusTools for this feature.";
+    
+    						button -l "Orient Tool" -en `exists orientToTool` -bgc 0.8 0.8 0.8 -ann $tempAnnotation -c "orientToTool; ToggleToolSettings";
+    
+    						button -l "Toggle BBox" -ann "Toggle display of bounding box for selected meshes, or for all objects if nothing is selected" -c "LT_toggleBoundingBox";
+    						button -l "Align Tool" -bgc 0.8 0.8 0.8 -ann "Align Tool : use manipulator to align one object with another based on bounding boxes" -c "setToolTo alignToolCtx";
+    
+    						
+    						separator -st none;separator -st none;
+    					
+    					setParent ..;  //frame 
+    
+    				  setParent ..;  //column
+    				setParent ..;  //column
+    				
+    				
+    				//////////////////////
+    				//		SNAP  -bgc $LT_frameColor6[0] $LT_frameColor6[1] $LT_frameColor6[2] 
+    				//
+    				frameLayout -l "Snap" -bgc $LT_frameColor2[0] $LT_frameColor2[1] $LT_frameColor2[2]  -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_snapFrame` -cc "optionVar -iv LT_snapFrame 1" -ec "optionVar -iv LT_snapFrame 0";
+    					columnLayout -adjustableColumn true;
+    	
+    						rowColumnLayout -numberOfColumns 3;
+    												
+    							separator -st none;separator -st none;separator -st none;
+    							separator -st single;separator -st single;separator -st single;
+    							separator -st none;separator -st none;separator -st none;
+    							
+    						setParent ..; //rowColumn
+    
+    							
+    						rowColumnLayout -numberOfColumns 1;		
+    							text -l "Pivot Independant Snapping " -al center -ann "Snap one object to another independant of pivot points.";
+    						setParent ..;  //column 
+    						
+    
+    						rowColumnLayout -numberOfColumns 2;
+    
+    							button -l "pt To pt" -ann "Point to point snap (first object to second)" -c "SnapPointToPoint";
+    							button -l "3pt To 3pt"  -ann "3 point to 3 point snap and orient (first object to second)" -c "Snap3PointsTo3Points(0)";
+    																	
+    														
+    						setParent ..; //rowColumn
+    				
+    						rowColumnLayout -numberOfColumns 3;
+    												
+    							button -l "2pt Left"  -ann "2 point to 2 point snap and orient / align left (first object to second)" -c "snap2PointsTo2Points(0,1)";
+    							button -l "2pt Mid"  -ann "2 point to 2 point snap and orient / align center (first object to second)" -c "snap2PointsTo2Points(0,2)";
+    							button -l "2pt Right"  -ann "2 point to 2 point snap and orient / align right (first object to second)" -c "snap2PointsTo2Points(0,3)";
+    
+    							separator -st none;separator -st none;separator -st none;
+    							separator -st single;separator -st single;separator -st single;
+    							separator -st none;separator -st none;separator -st none;
+    							
+    						setParent ..; //rowColumn
+    
+    							
+    						rowColumnLayout -numberOfColumns 1;
+    							text -l "Interactive Object Snapping " -al center -ann "Snap together tool for pivot independant snapping.";
+    						setParent ..;  //column 
+    						
+    														
+    						rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;					
+    		
+    							separator -st none;
+    							checkBox -l " Face" -al "left" -ann "Set face center snapping option for snapTogether tool"
+    								-v `snapTogetherCtx -query -snapPolygonFace snapTogetherToolCtx`
+    								-onc "snapTogetherCtx -edit -spf 1 snapTogetherToolCtx" 
+    								-ofc "snapTogetherCtx -edit -spf 0 snapTogetherToolCtx";
+    							checkBox -l " Orient" -al "left" -ann "Set orient option for snapTogether tool" 
+    								-v `snapTogetherCtx -query -setOrientation snapTogetherToolCtx`
+    								-onc "snapTogetherCtx -edit -so 1 snapTogetherToolCtx" 
+    								-ofc "snapTogetherCtx -edit -so 0 snapTogetherToolCtx";
+    							button -l "Snap Tool" -bgc 0.8 0.8 0.8 -ann "Snap Together Tool : use manipulator to snap one object to another at any arbitrary point (hold v to snap to verts)" -c "setToolTo snapTogetherToolCtx";
+    							separator -st none;
+    
+    						setParent ..; //rowColumn
+    
+    							
+    						rowColumnLayout -numberOfColumns 1;
+    						    separator -st none;	separator -st single;	
+    							text -l "Edge Snap Settings " -al center -ann "Configure preferences for edge segment snapping.";
+    						setParent ..;  //column 
+    						
+    						
+    												
+        					rowColumnLayout -numberOfColumns 4 -columnWidth 2 $LT_columnWidth2  -columnWidth 3 $LT_columnWidth2 ;
+    	
+    							//text -l "Edge Snap  " -al center -ann "Easy access to settings for edge segment snapping (hold c key and use middle mouse button to snap)";
+    		
+    							int $edgeSnap;
+    							if (`snapMode -q -edgeMagnetTolerance` == 0) $edgeSnap = 0;
+    							else $edgeSnap = 1;
+    							
+    							separator -st none;;	
+    							checkBox -l " Segments" -al "left" -ann "Turn edge segment snapping on (hold c key and use middle mouse button to snap to segment of desired edge)" -v $edgeSnap
+    								-onc "snapMode -edgeMagnetTolerance 100;"  //Max snapping tolerance
+    								-ofc "snapMode -edgeMagnetTolerance 0;";
+    							//text -l "Settings : " -al center -ann "Easy access to settings for edge segment snapping (hold c key and use middle mouse button to snap)";
+    		
+    							$LT_edgeSegmentOptionName = `optionMenu -cc "LT_setEdgeSegment $LT_edgeSegmentOptionName" -ann "Set number of points for edge segment snapping"`;
+    								menuItem -l "Mid Point";
+    								menuItem -l "Thirds";
+    
+    
+    								menuItem -l "Quarter";
+    								menuItem -l "User Prefs";
+    							if (`snapMode -q -edgeMagnet` > 3)
+    								optionMenu -e -sl  4 $LT_edgeSegmentOptionName;
+    							else if (`snapMode -q -edgeMagnet` == 0)
+    								optionMenu -e -sl 1 $LT_edgeSegmentOptionName;
+    							else
+    								optionMenu -e -sl `snapMode -q -edgeMagnet` $LT_edgeSegmentOptionName;
+    							separator -st none;;	
+    
+    							
+    												
+    						setParent ..;  //column 
+    					setParent ..; //frame
+    				setParent ..;  //column
+    				
+    				
+    				//////////////////////
+    				//		TARGET  
+    				//
+    
+    				frameLayout -l "Target" -bgc $LT_frameColor3[0] $LT_frameColor3[1] $LT_frameColor3[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_targetFrame` -cc "optionVar -iv LT_targetFrame 1" -ec "optionVar -iv LT_targetFrame 0";
+    					columnLayout -adjustableColumn true;
+    						
+    						rowColumnLayout -numberOfColumns 1;		
+    						    separator -st none;
+    						    separator -st single;
+    							text -l "Snap Objects to Target " -al center -ann "Snap, orient, constrain and parent all selected objects to last selected component or object.";
+    						setParent ..;  //column 
+    						
+    
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth  -columnWidth 4 $LT_columnWidth ;
+    						
+    							separator -st none;
+    							checkBox -l "Orient" -al "left" -ann "Orient all selected objects to target curve/geo after snapping" -v `optionVar -q LT_targetOrient` -onc "optionVar -iv LT_targetOrient 1" -ofc "optionVar -iv LT_targetOrient 0";						
+    							checkBox -l "Constrain" -al "left" -ann "Constrain all selected objects to target curve/geo after snapping" -v `optionVar -q LT_targetConstrain` -onc "optionVar -iv LT_targetConstrain 1" -ofc "optionVar -iv LT_targetConstrain 0";
+    							checkBox -l "Parent" -al "left" -ann "Parent all selected objects to target curve/geo after snapping" -v `optionVar -q LT_targetParent` -onc "optionVar -iv LT_targetParent 1" -ofc "optionVar -iv LT_targetParent 0";
+    							separator -st none;
+    							separator -st none;separator -st none;
+    							
+    						setParent ..;  //column 
+    
+    														
+    						rowColumnLayout -numberOfColumns 2;
+    						
+    							button -l "Snap To Curve" -ann "Snap position of all selected objects to nearest point on last selected curve (orient not applicable)" -c "LT_curveSnap (`optionVar -q LT_targetOrient`, `optionVar -q LT_targetConstrain`, `optionVar -q LT_targetParent`)";
+    							button -l "Along Curve" -ann "Position all selected objects uniformly along last selected curve (orient not applicable)" -c "LT_alongCurve (`optionVar -q LT_targetOrient`, `optionVar -q LT_targetConstrain`, `optionVar -q LT_targetParent`)";
+    
+    							button -l "Snap To Edge" -ann "Snap all selected objects to selected edge center (orient, constrain, parent are optional)" -c "LT_snapToEdgeCenter (`optionVar -q LT_targetOrient`, `optionVar -q LT_targetConstrain`, `optionVar -q LT_targetParent`)";
+    							button -l "Snap To Face" -ann "Snap all selected objects to selected face center (orient, constrain, parent are optional)" -c "LT_snapToFaceCenter (`optionVar -q LT_targetOrient`, `optionVar -q LT_targetConstrain`, `optionVar -q LT_targetParent`)";
+    																										
+    							button -l "Snap To Geo" -ann "Snap position and orientation of all selected objects to nearest point and normal of last selected object" -c "LT_geometrySnap (`optionVar -q LT_targetOrient`, `optionVar -q LT_targetConstrain`, `optionVar -q LT_targetParent`)";
+    							button -l "Break" -ann "Remove position and normal constraints for selected object" -c "DeleteConstraints";
+    							
+    						setParent ..;  //column 
+    
+    	
+    	
+    						rowColumnLayout -numberOfColumns 1;
+    							separator -st none;separator -st single;separator -st none;		
+    							text -l "Modify Constraint" -al center -ann "Update axis for normal constraint (created by tools above) for selected object(s).";
+    						setParent ..;  //column 
+    
+    						
+    						rowColumnLayout -numberOfColumns 2;
+    																				
+    							button -l "Front/Back" -ann "Reverse aim axis for seleceted object : assumes object is constrained" -c "LT_flipAimAxis";
+    							button -l "Top/Bottom" -ann "Reverse up axis for seleceted object : assumes object is constrained" -c "LT_flipUpAxis";
+    							button -l "Aim Axis" -ann "Cycle aim axis for selected object : assumes object is constrained" -c "LT_cycleAimAxis";
+    							button -l "Up Axis" -ann "Cycle up axis for selected object : assumes object is constrained" -c "LT_cycleUpAxis";
+    							
+    		
+    
+    						setParent ..; //rowColumn
+    							
+    						
+    						rowColumnLayout -numberOfColumns 3;
+    							
+    						
+    							
+    												
+    						setParent ..;  //column 
+    					setParent ..;  //frame 
+    				setParent ..;  //column
+    				
+    
+    
+    				//////////////////////
+    				//		Replicate
+    				//
+    				frameLayout -l "Replicate" -bgc $LT_frameColor4[0] $LT_frameColor4[1] $LT_frameColor4[2]  -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_replicateFrame` -cc "optionVar -iv LT_replicateFrame 1" -ec "optionVar -iv LT_replicateFrame 0";
+    				   columnLayout -adjustableColumn true;
+    										
+    						rowColumnLayout -numberOfColumns 1;
+    							text -l "Copy and Snap to Targets" -al center -ann "Copy or instance first selected object to target components";
+    						setParent ..;  //column 
+    												
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth  -columnWidth 3 $LT_columnWidth2  -columnWidth 4 $LT_columnWidth ;
+    						
+    							separator -st none;
+    							checkBox -l "Orient" -al "left" -ann "Orient all selected objects to target curve/geo after snapping" -v `optionVar -q LT_replicateOrient` -onc "optionVar -iv LT_replicateOrient 1" -ofc "optionVar -iv LT_replicateOrient 0";						
+    							checkBox -l "Constrain" -al "left" -ann "Constrain replicated objects to target curve/geo after snapping" -v `optionVar -q LT_replicateConstrain` -onc "optionVar -iv LT_replicateConstrain 1" -ofc "optionVar -iv LT_replicateConstrain 0";
+    							checkBox -l "Parent" -al "left" -ann "Parent duplicate replicated objects to target curve/geo after snapping" -v `optionVar -q LT_replicateParent` -onc "optionVar -iv LT_replicateParent 1" -ofc "optionVar -iv LT_replicateParent 0";
+    							separator -st none;
+    							
+    						setParent ..;  //column 
+    
+    					rowColumnLayout -numberOfColumns 4 -columnWidth 2 $LT_columnWidth2  -columnWidth 3 $LT_columnWidth2;
+    						
+    							separator -st none;
+    							radioCollection;
+    								if (`optionVar -q LT_replicateType` == 2) // instance
+    									{
+    									radioButton -l "Copy" -ann "Set replicate mode to copy" -al center -onc "optionVar -iv LT_replicateType  1";
+    									radioButton -l "Inst" -ann "Set replicate mode to instance" -al center -sl -onc "optionVar -iv LT_replicateType  2";
+    									}
+    								else // copy
+    									{
+    									radioButton -l "Copy" -ann "Set replicate mode to copy" -al center -sl -onc "optionVar -iv LT_replicateType  1";
+    									radioButton -l "Inst" -ann "Set replicate mode to instance" -al center -onc "optionVar -iv LT_replicateType  2";
+    									}
+    							separator -st none;
+    							
+    						setParent ..;  //column 
+    
+    
+    						rowColumnLayout -numberOfColumns 1;
+    							separator -st none;separator -st single;separator -st none;		
+    							text -l "...to Selected Components" -al center -ann "Copy or instance source object to target components";
+    						setParent ..;  //column 
+    						
+    														
+    						rowColumnLayout -numberOfColumns 3;
+    	
+    							button -l "To Verts" -ann "Copy or instance source object to location of each target vert (orient, constrain, parent are optional)" -c "LT_copyToVerts (`optionVar -q LT_replicateOrient`, `optionVar -q LT_replicateConstrain`, `optionVar -q LT_replicateParent`, `optionVar -q LT_replicateType`)";						
+    							button -l "To Edges" -ann "Copy or instance source object to center of each target edge (orient, constrain, parent are optional)" -c "LT_copyToEdges (`optionVar -q LT_replicateOrient`, `optionVar -q LT_replicateConstrain`, `optionVar -q LT_replicateParent`, `optionVar -q LT_replicateType`)";
+    							button -l "To Faces" -ann "Copy or instance source object to center of each target face (orient, constrain, parent are optional)" -c "LT_copyToFaces (`optionVar -q LT_replicateOrient`, `optionVar -q LT_replicateConstrain`, `optionVar -q LT_replicateParent`, `optionVar -q LT_replicateType`)";
+    
+    							separator -st none;separator -st none;separator -st none;
+    							separator -st single;separator -st single;separator -st single;
+    							separator -st none;separator -st none;separator -st none;
+    	
+    						setParent ..;  //column 
+    
+    						rowColumnLayout -numberOfColumns 1;
+    							text -l "...to Random Components" -al center -ann "Create copies or instances or first selected object and snap them to random components of second object";
+    						setParent ..;  //column 
+    
+    
+    				    	rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth -columnWidth 3 $LT_columnWidth -columnWidth 4 $LT_columnWidth;	
+    
+    							separator -st none;
+    							checkBox -l "Verts" -ann "Include verts of selected target object" -v `optionVar -q LT_replicateVerts` -onc "optionVar -iv LT_replicateVerts 1" -ofc "optionVar -iv LT_replicateVerts 0";;
+    							checkBox -l "Edges" -ann "Include edges of selected target object" -v `optionVar -q LT_replicateEdges` -onc "optionVar -iv LT_replicateEdges 1" -ofc "optionVar -iv LT_replicateEdges 0";;
+    							checkBox -l "Faces" -ann "Include faces of selected target object" -v `optionVar -q LT_replicateFaces` -onc "optionVar -iv LT_replicateFaces 1" -ofc "optionVar -iv LT_replicateFaces 0";;
+                                separator -st none;
+    						setParent ..;  //column                             
+                                
+    						rowColumnLayout -numberOfColumns 4 -columnWidth 2 $LT_columnWidth2 -columnWidth 3 $LT_columnWidth2 ;
+    						    separator -st none;
+    							$replicateCount = `optionVar -q LT_replicateCount`;
+    							$LT_replicateFieldName = `intField -minValue 1 -maxValue 1000  -ann "Set target goal for number of copies.  End result may be off by 1 or 2 due to rounding." -value $replicateCount -cc "LT_setIntFieldValue $LT_replicateFieldName LT_replicateCount"`;
+    							text -l " Random Copies" -ann "Set target goal for number of copies.  End result may be off by 1 or 2 due to rounding." -al left;
+                                separator -st none;
+    
+    						setParent ..;  //column                             
+                                
+    						rowColumnLayout -numberOfColumns 3 -columnWidth 1 $LT_columnWidth -columnWidth 3 $LT_columnWidth ;                            
+    						    separator -st none;
+                                //text -l "Replicate" -ann "Set target goal for number of copies.  End result may be off by 1 or 2 due to rounding." -al center;
+    							button -label "To Mesh" -ann "Randomly copy or instance source object to random set of components on target object (orient, constrain, parent are optional)" -c "LT_randomReplicateObjects (`optionVar -q LT_replicateVerts`, `optionVar -q LT_replicateEdges`, `optionVar -q LT_replicateFaces`, `optionVar -q LT_replicateOrient`, `optionVar -q LT_replicateConstrain`, `optionVar -q LT_replicateParent`, `optionVar -q LT_replicateType`, `optionVar -q LT_replicateCount`)";;
+                                separator -st none;
+    
+    
+    						setParent ..;  //column 						
+    
+    					setParent ..;  //frame 
+    				setParent ..;  //column
+    
+    
+    
+    
+    				//////////////////////
+    				//		REPLACE
+    				//
+    				frameLayout -l "Replace" -bgc $LT_frameColor5[0] $LT_frameColor5[1] $LT_frameColor5[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_replaceFrame` -cc "optionVar -iv LT_replaceFrame 1" -ec "optionVar -iv LT_replaceFrame 0";
+    
+    					rowColumnLayout -numberOfColumns 1;
+                             separator -st none;
+                             separator -st single;
+                             separator -st none;
+    					setParent ..;  //rowColumn 
+                                					
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 $LT_columnWidth -columnWidth 3 $LT_columnWidth -columnWidth 4 $LT_columnWidth;	
+    								
+                        separator -st none;
+    					radioCollection;
+    						if (`optionVar -q LT_replaceType` == 1) // copy
+    							{
+    							radioButton -l "Copy" -ann "Set replace mode to copy" -al center -sl -onc "optionVar -iv LT_replaceType  1";
+    							radioButton -l "Inst" -ann "Set replace mode to instance" -al center -onc "optionVar -iv LT_replaceType  2";
+    							radioButton -l "Ref" -ann "Set replace mode to reference" -al center -onc "optionVar -iv LT_replaceType  3";
+    							}
+    						else if (`optionVar -q LT_replaceType` == 2) // instance
+    							{
+    							radioButton -l "Copy" -ann "Set replace mode to copy" -al center -onc "optionVar -iv LT_replaceType  1";
+    							radioButton -l "Inst" -ann "Set replace mode to instance" -al center -sl -onc "optionVar -iv LT_replaceType  2";
+    							radioButton -l "Ref" -ann "Set replace mode to reference" -al center -onc "optionVar -iv LT_replaceType  3";
+    							}
+    						else if (`optionVar -q LT_replaceType` == 3) // reference
+    							{
+    							radioButton -l "Copy" -ann "Set replace mode to copy" -al center -onc "optionVar -iv LT_replaceType  1";
+    							radioButton -l "Inst" -ann "Set replace mode to instance" -al center -onc "optionVar -iv LT_replaceType  2";
+    							radioButton -l "Ref" -ann "Set replace mode to reference" -al center -sl -onc "optionVar -iv LT_replaceType  3";
+    							}							
+                        separator -st none;
+    					separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    				
+    					
+    
+                        separator -st none;
+    					text -l "Inherit :  " -ann "Choose attributes to copy" -al right;
+    					checkBox -l "Rotate" -al "left" -ann "Inherit rotate" -v `optionVar -q LT_replaceRotate` -onc "optionVar -iv LT_replaceRotate 1" -ofc "optionVar -iv LT_replaceRotate 0";
+    					checkBox -l "Scale" -al "left" -ann "Inherit scale" -v `optionVar -q LT_replaceScale` -onc "optionVar -iv LT_replaceScale 1" -ofc "optionVar -iv LT_replaceScale 0";
+                        separator -st none;
+    
+                        separator -st none;
+    					text -l "Original :  " -ann "Keep original object as well" -al right;
+    					checkBox -l "Keep" -al "left" -ann "Keep original object as well" -v `optionVar -q LT_keepOrig` -onc "optionVar -iv LT_keepOrig 1" -ofc "optionVar -iv LT_keepOrig 0";
+    
+    					//Now uses standard Maya proc
+    					//  global proc replaceObjects( int $rot, int $scale, int $inst, int $keepOriginal )
+    				setParent ..;  //column                             
+                                
+    				rowColumnLayout -numberOfColumns 3 -columnWidth 1 $LT_columnWidth -columnWidth 3 $LT_columnWidth ;    					
+    				    separator -st none;
+                        button -l "Replace Object" -ann "Replace all selected with last selected" -c "replaceObjects(`optionVar -q LT_replaceRotate`, `optionVar -q LT_replaceScale`, `optionVar -q LT_replaceType`, `optionVar -q LT_keepOrig`)" ;
+    					//button -l "Replace" -ann "Replace all selected with last selected" -c "LT_replaceObj(`optionVar -q LT_replaceType`, `optionVar -q LT_replaceRotate`, `optionVar -q LT_replaceScale`)" ;
+                        separator -st none;
+    
+    					setParent ..;  //rowColumn 
+    				setParent ..;  //column
+    				
+    			setParent ..; // scroll
+    		setParent ..; //tab window
+    
+    
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //					Display Tab
+    //
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    			$LT_tab4 = `scrollLayout -hst 0 -cr 1`;	//create scroll bar		
+    
+    			columnLayout -adjustableColumn true;
+    
+    
+    				//////////////////////
+    				//		INFO
+    				//
+    	    		frameLayout -l "Info" -bgc $LT_frameColor1[0] $LT_frameColor1[1] $LT_frameColor1[2]  -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_infoFrame` -cc "optionVar -iv LT_infoFrame 1" -ec "optionVar -iv LT_infoFrame 0";
+    	    		  columnLayout -adjustableColumn true;
+    	    		 
+    					rowColumnLayout -numberOfColumns 5 -columnWidth 2 90 -columnWidth 3 25 -columnWidth 4 70;	
+    
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;						
+    						separator -st single;separator -st single;separator -st single;separator -st single;separator -st single;
+    						separator -st none;separator -st none;separator -st none;separator -st none;separator -st none;
+    						
+    						separator -st none;
+    						checkBox -al "right" -l "UI Popup Help" -ann "Toggle UI popup tool tips on/off" -v `help -q -popupMode` -onc "help -popupMode true"  -ofc "help -popupMode false" ;
+    //						$popupValue = `help -q -popupDisplayTime`;
+    //						$LT_popupFieldName = `intField -minValue 1 -maxValue 15 -value $popupValue -step 1 -cc "LT_setPopupTime $LT_popupFieldName"`;
+    
+    						$popupValue = `optionVar -q LT_setPopupTime`;
+    						$LT_popupFieldName = `intField -ann "Set number of seconds for helper popups to stay visible" -minValue 0 -maxValue 10 -value $popupValue  -step 1 -cc "LT_setPopupTime $LT_popupFieldName"`;
+    						text -fn smallPlainLabelFont -l " Seconds" -al left -ann "Set number of seconds for helper popups to stay visible";
+                            separator -st none;
+    																		
+    					setParent ..; // column
+    
+    						
+    					rowColumnLayout -numberOfColumns 2;
+    													
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    						
+    						button -l "Annotate File" -c "LT_createFileInfo" -ann "Create an annotation that will save with the current file.  Upon reopening the info will be displayed in an editable window";
+    						button -l "Annotate Obj" -c "CreateAnnotateNode" -ann "Add an annotation to the selected object";
+    
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;				
+    						separator -st none;separator -st none;
+    				
+    					setParent ..; //rowColumn
+    							
+    					rowColumnLayout -numberOfColumns 1;		
+    						text -fn smallPlainLabelFont -l "Heads Up Display Toggles" -al center -ann "Toggle various heads up displays in panels.";
+    					setParent ..;  //column 
+    										
+    					rowColumnLayout -numberOfColumns 2;
+    
+    						button -l "Poly Count" -al "center" -ann "Heads Up Display: Standard poly count info (Verts/Edges/Faces/Tris/UVs)" -c "TogglePolyCount";
+    						button -l "Shell Count" -ann "Heads Up Display: Count number of poly shells for all selected objects" -c "LT_toggleShellCountHUD";
+    						button -l "Edge Length" -ann "Heads Up Display: Calculate total length of all selected edges" -c "LT_toggleEdgeLengthHUD";
+    						button -l "Vert Distance" -ann "Heads Up Display: Calculate distance between two selected vertices" -c "LT_toggleVertDistanceHUD";
+    					
+    					setParent ..; // column
+    
+    
+    			      setParent ..;  // frame
+    				setParent ..; //column;
+    
+    				
+    				//////////////////////
+    				//		VIEW
+    				//
+    	    		frameLayout -l "View" -bgc $LT_frameColor2[0] $LT_frameColor2[1] $LT_frameColor2[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_viewFrame` -cc "optionVar -iv LT_viewFrame 1" -ec "optionVar -iv LT_viewFrame 0";
+    				  columnLayout -adjustableColumn true;;
+    					rowColumnLayout -numberOfColumns 2;
+    
+    						button -l "HUD ON" -ann "Toggle View heads up display on"  -h 17 -bgc $LT_frameColor2[0] $LT_frameColor2[1] $LT_frameColor2[2] -c "LT_HUDViewDisp1";
+    						button -l "HUD OFF" -ann "Toggle View heads up display off" -h 17 -bgc $LT_frameColor2[0] $LT_frameColor2[1] $LT_frameColor2[2] -c "LT_HUDDispOff";
+    	
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;				
+    						separator -st none;separator -st none;
+    						    
+    						button -l "Toggle UI" -ann "Toggle UI elements : including menus" -c "LT_toggleUIVisibility";
+    						button -l "Show All UI" -ann "Show all UI elements : including menus" -c "LT_showAllUI";
+    						
+    						button -l "Cycle BG" -ann "Cycle Background Color between (Light Gray | Dark Gray | Black | White)" -c "LT_cycleBGColor";
+    						button -l "Cycle Axis" -ann "Cycle axis display between (View | Origin | Both | Off)" -c "LT_cycleAxisView";
+    	
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    						
+    						text -l "Walk Cam   " -al "right"  -fn boldLabelFont -ann "Use Alt + (w | s | a | d) to go (forward | backward | left | right) in any perspective view";
+    						button -l "First Person"  -bgc 0.8 0.8 0.8 -ann "Use left mouse to change direction and Alt + (w | s | a | d) to go (forward | backward | left | right) in any perspective view" -c "LT_firstPersonCam";	
+    											
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2 -columnWidth 1 $LT_columnWidth;
+    					
+    						text -l " Walk Speed " -al "right" -ann "Set speed of walk cam : Slow <-> Fast";
+    						$camSpeed = `optionVar -q LT_walkCamSpeed`;
+    						$LT_camSpeedSliderName = `floatSlider -ann "Set speed of walk cam : Slow <-> Fast" -min .1 -max 20 -step 1 -value $camSpeed -dc "LT_setWalkCamSpeed $LT_camSpeedSliderName"`;		
+    
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2;
+    							
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2 -columnWidth 1 $LT_columnWidth;
+    					
+    						separator -st single;separator -st single;
+    						text -l "Clipping " -al "right" -ann "Set far clipping plane for camera in active panel : Close <-> Distant";
+    						$clipSize = `LT_getClippingPlane`;
+    						$LT_clipPlaneSliderName = `intSlider -ann "Set far clipping plane for camera in active panel : Close <-> Distant" -min 5 -max 20000 -step 5 -value $clipSize -cc "print (\"Far clipping plane set to \" + `LT_getClippingPlane` + \" units.\\n\")" -dc "undoInfo -swf 0; LT_changeClippingPlane 1; undoInfo -swf 1"`;		
+    
+    					setParent ..; // column
+    											
+    					rowColumnLayout -numberOfColumns 2;
+    
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    	
+    						button -l "Toggle Grid" -ann "Toggle grid display in all panels" -c "ToggleGrid";
+    						button -l "Grid numbers" -ann "Toggle grid numbers in all panels" -c "LT_toggleGridNumbers";				
+    
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2 -columnWidth 1 $LT_columnWidth;
+    											
+    						text -l "Grid Size " -al "right" -ann "Set grid size : Small <-> Large";	
+    						$gridSize = `grid -q -size`;	
+    						$LT_gridSliderName = `intSlider -ann "Set grid size : Small <-> Large" -min 5 -max 10000 -step 5 -value $gridSize -cc "print (\"Grid set to \" + `grid -q -size` + \" units.\\n\")" -dc "undoInfo -swf 0; LT_changeGridSize; undoInfo -swf 1"`;		
+    
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    						
+    					setParent ..; // column
+    											
+    							
+    					rowColumnLayout -numberOfColumns 1 ;		
+    						text -fn smallPlainLabelFont -l "Panel Display Toggles" -al center -ann "Toggle various panel display settings.";
+    					setParent ..;  //column
+    					
+    										
+    					rowColumnLayout -numberOfColumns 2;
+    
+    						button -l "Wire Shaded" -ann "Toggle wireframe on shaded display mode in all panels" -c "LT_toggleWireOnShaded";
+    						button -l "Selection Hilite" -ann "Toggle selection highlighting in all panels" -c "LT_toggleSelectionHighlight";
+    						button -l "X-Ray Panel" -ann "Toggle xray display mode in all panels" -c "LT_toggleXRayPanels";
+    						button -l "Fast Interact" -ann "Toggle interactive wire shading for faster navigation in active panel" -c "LT_toggleFastInteraction";
+    						
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 1;
+    						separator -st single;
+    						separator -st none;		
+    						text -fn smallPlainLabelFont -l "Object Display Toggles" -al center -ann "Toggle various object display settings.";
+    					setParent ..;  //column
+    					
+    					rowColumnLayout -numberOfColumns 2;
+    					
+    						button -l "X-Ray Object" -ann "Toggle xray display mode for selected meshes, or for all meshes if nothing is selected" -c "LT_toggleXRay";
+    						button -l "Bounding Box" -ann "Toggle bounding box display mode for selected meshes, or all meshes if nothing is selected" -c "LT_toggleBoundingBox";
+    
+    
+    					setParent ..; // column
+    
+    					setParent ..;  // frame
+    					setParent ..; //column;
+    
+    
+    				//////////////////////
+    				//		POLYS
+    				//
+    	    		frameLayout -l "Polys" -bgc $LT_frameColor3[0] $LT_frameColor3[1] $LT_frameColor3[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_polyFrame` -cc "optionVar -iv LT_polyFrame 1" -ec "optionVar -iv LT_polyFrame 0";
+      				  columnLayout -adjustableColumn true;;
+    					rowColumnLayout -numberOfColumns 2;
+    										
+    						button -l "HUD ON" -ann "Toggle Custom Polygon heads up display on"  -h 17 -bgc $LT_frameColor3[0] $LT_frameColor3[1] $LT_frameColor3[2] -c "LT_HUDPolyDisp1";
+    						button -l "HUD OFF" -ann "Toggle Custom Polygon heads up display off"  -h 17 -bgc $LT_frameColor3[0] $LT_frameColor3[1] $LT_frameColor3[2] -c "LT_HUDDispOff";
+    						
+    						separator -st none;separator -st none;
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    						
+    					setParent ..; // column
+    											
+    							
+    					rowColumnLayout -numberOfColumns 1;		
+    
+    						text -fn smallPlainLabelFont -l "Custom Poly Display Toggles" -al center -ann "Toggle various custom polygon display settings.";
+    					setParent ..;  //column
+    					
+    					
+    					rowColumnLayout -numberOfColumns 2;
+    					
+    						button -l "Back Culling" -ann "Toggle backface culling for selected objects" -c "LT_toggleCulling";
+    						button -l "1:2 Sided" -ann "Toggle selected polygon objects single/double sided : Toggle all if nothing is selected" -c "LT_toggleDoubleSided";
+    						//button -l "All 1 Sided" -ann "Make all polygon objects single sided" -c "allSingleSided";
+    						//button -l "All 2 Sided" -ann "Make all polygon objects double sided" -c "allDoubleSided";
+    
+    						  separator -st none;separator -st none;
+    						separator -st single;separator -st single;				
+    						separator -st none;separator -st none;
+    						
+    						button -l "Face Normals" -ann "Toggle display of face normals on selected objects" -c "LT_toggleFaceNormals";
+    						button -l "Vertex Normals" -ann "Toggle display of vertex normals on selected objects" -c "LT_toggleVertNormals";
+    						
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2 -columnWidth 1 $LT_columnWidth2;
+    					
+    						text -l "Normal Length " -al "right";		
+    						$LT_normSliderName = `floatSlider -min 0 -max 3  -value .25 -dc "LT_changeNormalLength"` ;					
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2;
+    	
+    						button -l "Geo Borders" -ann "Toggle display of thick geometry borders on selected objects" -c "polyOptions -dmb 0 ;polyOptions  -r -db  on";
+    						button -l "Text Borders" -ann "Toggle display of thick texture borders on selected objects" -c "polyOptions -db 0 ;polyOptions -r -dmb 1";
+    
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2 -columnWidth 1 $LT_columnWidth2;
+    											
+    						text -l "Border Width " -al "right";		
+    						$LT_bordSliderName = `floatSlider -min 1 -max 8  -value 3 -dc "LT_changeBorderThickness"` ;					
+    						separator -st single;separator -st single;
+    						separator -st none;separator -st none;
+    						
+    					setParent ..; // column
+    
+    					rowColumnLayout -numberOfColumns 2;
+    	
+    						button -l "Soft Edges" -ann "Toggle display of wireframe soft edges on selected objects" -c "int $cond[1]=`polyOptions -q -ae`; if ($cond[0]) polyOptions -se; else polyOptions -ae;";
+    						button -l "Hidden Tris" -ann "Toggle display of hidden inner triangles on selected objects" -c "polyOptions -r -dt 1 ;polyOptions -sb 3";
+    						button -l "Poly Options" -ann "Open CustomPolygonDisplay options" -c "CustomPolygonDisplayOptions";
+    	  					button -l "Reset" -ann "Disable all CustomPolygonDisplay options for selected objects" -c "polyOptions -activeObjects -ae  -sb 2  -db 0  -dmb 0  -dv 0  -dn 0 -facet  -dc 0  -dt 0  -dw 0  -din 0 0 0 0  -sn 0.4 -bc  -duv 0  -uvt 0  -cs 0  -cm diffuse  -bcv 1";
+    
+    						setParent ..; // column
+    					setParent ..;  // frame
+    					setParent ..; //column;
+    
+    				
+    				//////////////////////
+    				//		Color
+    				//
+    	    		frameLayout -l "Color" -bgc $LT_frameColor4[0] $LT_frameColor4[1] $LT_frameColor4[2] -li 0 -cll 1 -borderStyle "in" -cl `optionVar -q LT_colorFrame` -cc "optionVar -iv LT_colorFrame 1" -ec "optionVar -iv LT_colorFrame 0";
+    					columnLayout -adjustableColumn true;
+    					
+    						rowColumnLayout -numberOfColumns 2;
+    							
+    							button -l "HUD ON" -ann "Toggle Color Per Vertex heads up display on"  -h 17 -bgc $LT_frameColor4[0] $LT_frameColor4[1] $LT_frameColor4[2] -c "LT_HUDColorDisp";
+    							button -l "HUD OFF" -ann "Toggle Color Per Vertex heads up display off"  -h 17 -bgc $LT_frameColor4[0] $LT_frameColor4[1] $LT_frameColor4[2] -c "LT_HUDDispOff";
+    							
+    							separator -st none;separator -st none;
+    							separator -st single;separator -st single;		
+    							separator -st none;separator -st none;
+    							
+    							button -l "Vertex Color Only" -ann "Display vertex color only for selected objects - all if nothing selected" -c "LT_vertColorDisplay 1";
+    							button -l "+ Texture" -ann "Display vertex color blended with texture for selected objects - all if nothing selected" -c "LT_vertColorDisplay 2";
+    							button -l "+ Texture + Light" -ann "Display vertex color with texture and lighting for selected objects - all if nothing selected" -c "LT_vertColorDisplay 3";
+    							button -l "+ Texture + Light + HQ" -ann "Display vertex color with texture, lighting, and HighQuality Mode for selected objects - all if nothing selected" -c "LT_vertColorDisplay 4";
+    
+    							
+    						setParent ..; //column
+    	
+    						rowColumnLayout -numberOfColumns 3	-columnWidth 1 $LT_columnWidth -columnWidth 3 $LT_columnWidth;					
+    							separator -st none;
+    							button -l "Disable" -ann "Disable vertex color display for selected objects - all if nothing selected" -c "LT_vertColorDisplay 0";
+                                separator -st none;
+    	
+    						setParent ..; // column
+    					setParent ..;  // frame
+    					setParent ..; //column;
+    
+    			setParent ..; // scroll
+    		setParent ..; // tab-window
+    
+    
+    
+    
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    
+    
+    
+    			////////////////////////
+    			//Finish setting up tabs
+    			//
+    			//Tabs updated to Import, Placement, Assembly and Display begining with LayoutTools2011
+    			//
+    			tabLayout -edit -tabLabel $LT_tab1 "Import" -tabLabel $LT_tab2 "Placement" -tabLabel $LT_tab3 "Assembly" -tabLabel $LT_tab4 "Display" $LT_tabName;
+    			tabLayout -edit -sc "optionVar -iv LT_selectedTab \`tabLayout -q -sti $LT_tabName\` " $LT_tabName;
+    			tabLayout -edit -sti `optionVar -q LT_selectedTab` $LT_tabName;
+				
+				
+    }  //End UI rebuild from scratch			
+
+
+			
+// end	UI setup			
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				
+
+    /////////////////////////////////////////    
+    // if new UI should be built from scratch
+    //  
+    
+    //floating
+    if ((`dockControl -exists LT_Dock` == 0) && ($LT_UI_mode == 0))
+		 {
+        $LT_paneLayout = `paneLayout -configuration "single" -parent $gMainWindow "LT_Panel"`;  
+        $LT_LayoutToolsDock = `dockControl -allowedArea  "right"  -allowedArea  "left" -area "right" -floating on -content LT_Panel -label "LT_Dock" LT_Dock`;
+        control -e  -w $LT_windowWidth -h $LT_windowHeight -p $LT_paneLayout LT_form ;
+        }
+    //right  
+    else if ((`dockControl -exists LT_Dock` == 0) && ($LT_UI_mode == 1) && ($LT_UIDockSide == 1))
+		{
+        $LT_paneLayout = `paneLayout -configuration "single" -parent $gMainWindow "LT_Panel"`;  
+        $LT_LayoutToolsDock = `dockControl -allowedArea  "right"  -allowedArea  "left" -area "right" -floating off -content LT_Panel -label "LT_Dock" LT_Dock`;
+        control -e  -w $LT_windowWidth -h $LT_windowHeight -p $LT_paneLayout LT_form ;
+        dockControl -e -raise LT_Dock;
+		}
+	//left	
+    else if ((`dockControl -exists LT_Dock` == 0) && ($LT_UI_mode == 1) && ($LT_UIDockSide == 0))
+		{
+        $LT_paneLayout = `paneLayout -configuration "single" -parent $gMainWindow "LT_Panel"`;  
+        $LT_LayoutToolsDock = `dockControl -allowedArea  "right"  -allowedArea  "left" -area "left" -floating off -content LT_Panel -label "LT_Dock" LT_Dock`;
+        control -e  -w $LT_windowWidth -h $LT_windowHeight -p $LT_paneLayout LT_form ;
+        dockControl -e -raise LT_Dock;
+		}
+		
+		        
+    ////////////////////////////////////////////////////
+    //  if UI already exists and just needs to be opened
+    //
+    else if (`dockControl -exists LT_Dock`)
+        if (`dockControl -q -visible LT_Dock` == 0) // if UI exists but is not visible
+            {
+            control -e  -p $LT_paneLayout LT_form ;   
+            dockControl -edit -visible 1 $LT_LayoutToolsDock;
+            print ("LayoutTools: Unhide\n");             
+            }
+   
+        else if (`dockControl -q -visible LT_Dock`) // if UI exists and is already visible
+            {
+            //refresh form
+            //Floating  
+            if ($LT_UI_mode == 0)
+                {
+                control -e -p $LT_paneLayout LT_form ;
+                dockControl -e -floating on LT_Dock;
+                print ("LayoutTools: Floating\n");             
+                }
+            //Right
+            else if ($LT_UI_mode == 1 && $LT_UIDockSide == 1)
+                {
+                control -e -p $LT_paneLayout LT_form ;  
+                dockControl -e -floating off -area "right" LT_Dock; 
+                dockControl -e -raise LT_Dock;
+                print ("LayoutTools: Dock Right\n");             
+                }
+            //Left
+            else if ($LT_UI_mode == 1 && $LT_UIDockSide == 0)
+                {
+                control -e -p $LT_paneLayout LT_form ;  
+                dockControl -e -floating off -area "left"  LT_Dock;              
+                dockControl -e -raise LT_Dock;
+                print ("LayoutTools: Dock Left\n");             
+                }
+            else         
+                 {       
+                error ("Should not be reaching default here???\n");             
+                }
+
+            }
+
+}
+
+
+//optionVar -intValue LT_RebuildUI 1;  LT_UI;
+

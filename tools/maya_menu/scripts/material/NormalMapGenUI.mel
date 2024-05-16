@@ -1,0 +1,1334 @@
+//---------------------------------------------------------------------------
+
+//        create a window to contain the normal map gen interface
+
+//---------------------------------------------------------------------------
+
+global proc buildNormalMapWindow()
+{
+                string $mainWindow = "NormalMapUI";
+                if(`window -ex $mainWindow`)
+                        deleteUI $mainWindow;
+                window
+                        -w 10
+                        -h 10
+                        -rtf 1
+                        -title "Generate Normal Map"
+                        $mainWindow;
+
+                updateBuildNormalMapLayout;
+                buildNormalMapLayout NormalMapUI;
+
+                showWindow $mainWindow;
+}
+
+//---------------------------------------------------------------------------
+//        create a portable layout for the normal map interface
+//---------------------------------------------------------------------------
+// Uh, this window is drawn horribly because i didn't care to learn how to do it right.
+// if you wanna fix it, feel free!
+
+global proc buildNormalMapLayout(string $parent)
+{
+                        $form = `formLayout -numberOfDivisions 100 -p $parent st_normalMapLayout`;
+                        $column1 = `columnLayout -adjustableColumn true -p $form`;
+                                        columnLayout -adjustableColumn true;
+                                                text -l "High Polygon Objects";
+                                                textScrollList
+                                                        -allowMultiSelection true
+                                                        -allowAutomaticSelection  true
+                                                        -w 190
+                                                        -nr 15
+                                                        -dkc "clearSelectedFromList(\"lt_highPolyList\");"
+                                                        -sc "select (`textScrollList -q -si lt_highPolyList`);"
+                                                        lt_highPolyList;
+                                        setParent ..;
+                                        rowLayout
+
+                                                -numberOfColumns 3
+                                                -adjustableColumn 1
+                                                -columnWidth 2 35
+                                                -columnWidth 3 55
+                                                -columnAttach 1 "both" 0
+                                                -columnAttach 2 "both" 0
+                                                -columnAttach 3 "both" 0;
+                                                        button -label "Add to High Poly" -h 25 -c "addSelectedToHighPolyList;";
+                                                        button -label "Clear" -h 25 -c "clearSelectedFromList(\"lt_highPolyList\");";
+                                                        button -label "Clear All" -w 30 -h 25 -c "textScrollList -e -removeAll lt_highPolyList; optionVar -rm nr_highPolyList";
+                                        setParent ..;
+                                                        checkBox
+                                                                -ann "Use tangent space (default = on)"
+                                                                -value (`optionVar -q nr_tangentSpace`)
+                                                                -cc         "optionVar -iv nr_tangentSpace (`checkBox -q -v nr_tangentCheck`)"
+                                                                -label "Tangent Space"
+                                                                nr_tangentCheck;
+                                                       checkBox
+                                                                -ann "5 samples per pixel (better results, but 5x slower, default=off)"
+                                                                -value `optionVar -q nr_multiSample`
+                                                                -cc         "optionVar -iv nr_multiSample (`checkBox -q -v nr_multiSampleCheck`)"
+                                                                -label "Multi Sample"
+                                                                nr_multiSampleCheck;
+                                                        checkBox
+                                                                -ann "Toggle error correction passes on/off"
+                                                                -value `optionVar -q nr_multiPassErrorCorrection`
+                                                                -cc         "optionVar -iv nr_multiPassErrorCorrection (`checkBox -q -v nr_multiPassErrorCorrectionCheck`)"
+                                                                -label "MultiPass Error Correction"
+                                                                nr_multiPassErrorCorrectionCheck;
+                                                        checkBox
+                                                                -ann "Expands pixels to empty areas after Renderbump (default=on, recommended!)"
+                                                                -value `optionVar -q nr_expandFilter`
+                                                                -cc         "optionVar -iv nr_expandFilter (`checkBox -q -v nr_expandFilterCheck`)"
+                                                                -label "Expand Filter"
+                                                                nr_expandFilterCheck;
+                                                        checkBox
+                                                                -ann "Vertical flip maps when saving to disk (default=on)"
+                                                                -value `optionVar -q nr_verticalFlip`
+                                                                -cc         "optionVar -iv nr_verticalFlip (`checkBox -q -v nr_verticalFlipCheck`)"
+                                                                -label "Vertical Flip"
+                                                                nr_verticalFlipCheck;
+                                                        checkBox
+                                                                -ann "Flip Y when writing normalmap to disk, I.e. Normal(x,y,z) = Norma(x,-y,z) (Doom3, nVidia Photoshop plugin uses this convention) Tangent space only"
+                                                                -value `optionVar -q nr_flipYInNormal`
+                                                                -cc         "optionVar -iv nr_flipYInNormal (`checkBox -q -v nr_flipYInNormalCheck`)"
+                                                                -label "Flip Y In Normal"
+                                                                nr_flipYInNormalCheck;
+                                                        checkBox
+                                                                -ann "Antialias filter (default=on)"
+
+                                                                -value `optionVar -q nr_antiAlias`
+
+                                                                -cc         "optionVar -iv nr_antiAlias (`checkBox -q -v nr_antiAliasCheck`)"
+
+                                                                -label "Anti Alias"
+
+                                                                nr_antiAliasCheck;
+
+                                                        checkBox
+
+                                                                -ann "nVidia low end (Geforce4MX, etc) or driver bug fix, use this if generated map is black with text (obvious error)"
+
+                                                                -value `optionVar -q nr_backBufferOnly`
+
+                                                                -cc         "optionVar -iv nr_backBufferOnly (`checkBox -q -v nr_backBufferOnlyCheck`)"
+
+                                                                -label "Back Buffer Only"
+
+                                                                nr_backBufferOnlyCheck;
+
+
+
+                                        setParent ..;
+
+                        $column2 = `columnLayout -adjustableColumn true -p $form`;
+
+                                        columnLayout -adjustableColumn true;
+
+                                                text -l "Low Polygon Objects";
+
+                                                textScrollList
+
+                                                        -allowMultiSelection true
+
+                                                        -allowAutomaticSelection  true
+
+                                                        -dkc "clearSelectedFromList(\"lt_lowPolyList\");"
+
+                                                        -sc "select (`textScrollList -q -si lt_lowPolyList`);"
+
+                                                        -w 190
+
+                                                        -nr 15
+
+                                                        lt_lowPolyList;
+
+                                        setParent ..;
+
+                                        rowLayout
+
+                                                -numberOfColumns 3
+
+                                                -adjustableColumn 1
+
+                                                -columnWidth 2 35
+
+                                                -columnWidth 3 55
+
+                                                -columnAttach 1 "both" 0
+
+                                                -columnAttach 2 "both" 0
+
+                                                -columnAttach 3 "both" 0;
+
+                                                button -label "Add to Low Poly" -rs true -h 25 -c "addSelectedToLowPolyList;";
+
+                                                button -label "Clear" -rs true -h 25 -c "clearSelectedFromList(\"lt_lowPolyList\");";
+
+                                                button -label "Clear All" -rs true -h 25 -c "textScrollList -e -removeAll lt_lowPolyList; optionVar -rm nr_lowPolyList";
+
+                                        setParent ..;
+
+
+
+
+
+                                        rowLayout;
+
+                                                text -label "Diffuse Format:";
+
+                                        setParent ..;
+
+                                        rowLayout;
+
+                                                optionMenuGrp
+
+                                                        -cl2 "left" "right"
+
+                                                        -cw2 80 120
+
+                                                        -cc "optionVar -iv nr_diffuseFormat (`optionMenuGrp -q -sl nr_diffuseFormatOption`)"
+
+                                                        nr_diffuseFormatOption;
+
+                                                        menuItem
+
+                                                                -label "No output";
+
+                                                        menuItem
+
+                                                                -label "Highpoly vertex color";
+
+                                                        menuItem
+
+                                                                -label "Lowpoly vertex color";
+
+                                                        menuItem
+
+                                                                -label "Highpoly material color";
+
+                                                        menuItem
+
+                                                                -label "Lowpoly material color";
+
+                                                        menuItem
+
+                                                                -label "Highpoly texture sample";
+
+                                                        menuItem
+
+                                                                -label "Lowpoly texture sample";
+
+                                        optionMenuGrp -e -select (`optionVar -q  nr_diffuseFormat`) nr_diffuseFormatOption;
+
+                                        setParent ..;
+
+                                        rowLayout;
+
+                                                text -label "Displacement Format:";
+
+                                        setParent ..;
+
+                                        rowLayout;
+
+                                                optionMenuGrp
+
+                                                        -cl2 "left" "right"
+
+                                                        -cw2 80 120
+
+                                                        -cc "optionVar -iv nr_displacementFormat (`optionMenuGrp -q -sl nr_displacementFormatOption`)"
+
+                                                        -ann "Displacement map output format (default = 1) 0 = No output 1 = Grayscale signed 2 = Grayscale unsigned (not implemented yet) 3 = RGB 4 = IEEE float 32 bit"
+
+                                                        nr_displacementFormatOption;
+
+                                                        menuItem
+
+                                                                -label "No output";
+
+                                                        menuItem
+
+                                                                -label "Grayscale signed";
+
+                                                        menuItem
+
+                                                                -label "Grayscale unsigned";
+
+                                                        menuItem
+
+                                                                -label "RGB";
+
+                                                        menuItem
+
+                                                                -label "IEEE float 32 bit";
+
+                                                optionMenuGrp -e -select (`optionVar -q  nr_displacementFormat`) nr_displacementFormatOption;
+
+                                        setParent ..;
+
+                                        columnLayout;
+
+                                                        optionMenuGrp
+
+                                                                //-cl2 "left" "right"
+
+                                                                -label "Width"
+
+                                                                -cw2 80 120
+
+                                                                -cc "optionVar -iv nr_width (`optionMenuGrp -q -sl nr_widthOption`)"
+
+                                                                nr_widthOption;
+
+                                                                menuItem
+
+                                                                        -label 32;
+
+                                                                menuItem
+
+                                                                        -label 64;
+
+                                                                menuItem
+
+                                                                        -label 128;
+
+                                                                menuItem
+
+                                                                        -label 512;
+
+                                                                menuItem
+
+                                                                        -label 1024;
+
+                                                        optionMenuGrp -e -select (`optionVar -q nr_width`) nr_widthOption;
+
+                                                        optionMenuGrp
+
+                                                                -label "Height"
+
+                                                                //-cl2 "left" "right"
+
+                                                                -cw2 80 120
+
+                                                                -cc "optionVar -iv nr_height (`optionMenuGrp -q -sl nr_heightOption`)"
+
+                                                                nr_heightOption;
+
+                                                                menuItem
+
+                                                                        -label 32;
+
+                                                                menuItem
+
+                                                                        -label 64;
+
+                                                                menuItem
+
+                                                                        -label 128;
+
+                                                                menuItem
+
+                                                                        -label 512;
+
+                                                                menuItem
+
+                                                                        -label 1024;
+
+                                                        optionMenuGrp -e -select (`optionVar -q  nr_height`) nr_heightOption;
+
+
+
+                                        setParent ..;
+
+                                        columnLayout;
+
+                                                text -label "Ray Hit Distance:";
+
+                                                textField
+
+                                                        -ann "Ray hit distance (1.0 = lowpoly triangle bounding sphere radius) also NUMPAD +/- in 3D view"
+
+                                                        -text (`optionVar -q nr_rayHitDistance`)
+
+                                                        -cc "optionVar -sv nr_rayHitDistance (`textField -q -text nr_rayHitDistanceField`)"
+
+                                                        nr_rayHitDistanceField;
+
+                                        setParent ..;
+
+                                setParent ..;
+
+                        setParent ..;
+
+                        $row1 = `columnLayout -adjustableColumn true -p $form`;
+
+                                textFieldButtonGrp
+
+                                        -cw 1 95
+
+                                        -cw 2 195
+
+                                        -label "ORB Directory:"
+
+                                        -ann "Directory containing ORB.exe"
+
+                                        -buttonLabel "Browse"
+
+                                        -bc "getDirectory \"nr_orbDir\""
+
+                                        -fi `optionVar -q nr_orbDir`
+
+                                        -cc "optionVar -sv nr_orbDir (`textFieldGrp -q -text nr_orbDir`)"
+
+                                        -adj 2
+
+                                        nr_orbDir;
+
+                                textFieldGrp
+
+                                        -label "Output Name:"
+
+                                        -ann "Output name of the .CFG and .OBJ files"
+
+                                        -text (`optionVar -q nr_outputName`)
+
+                                        -cw 1 95
+
+                                        -cw 2 195
+
+                                        -cc "optionVar -sv nr_outputName (`textFieldGrp -q -text nr_outputNameField`)"
+
+                                        -adj 2
+
+                                        nr_outputNameField;
+
+                                button
+
+                                        -label "Render Normal Map"
+
+                                        -ann "Renders the normal map"
+
+                                        -w 120
+
+                                        -h 25
+
+                                        -c "source normalMapGenUI; renderNormalMap;";
+
+                                button
+
+                                        -label "Export Object"
+
+                                        -ann "Export selection object"
+
+                                        -w 120
+
+                                        -h 25
+
+                                        -c "source normalMapGenUI; exportObject;";
+
+
+
+
+
+
+
+                        formLayout -edit
+
+                                -attachForm $column1 "top" 5
+
+                                -attachForm $column1 "left" 5
+
+                                -attachControl $column1 "bottom" 5 $row1
+
+                                -attachControl $column1 "right" 5 $column2
+
+
+
+                                -attachForm $column2 "top" 5
+
+                                -attachPosition $column2 "left" 5 50
+
+                                -attachControl $column2 "bottom" 5 $row1
+
+                                -attachForm $column2 "right" 5
+
+
+
+                                -attachNone $row1 "top"
+
+                                -attachForm $row1 "left" 5
+
+                                -attachForm $row1 "bottom" 5
+
+                                -attachForm $row1 "right" 5
+
+                        $form;
+
+
+
+
+
+
+
+        //
+
+        //        set up file list based on stored settings
+
+
+
+                updateBuildNormalMapLayout;
+
+
+
+}
+
+
+
+//---------------------------------------------------------------------------
+
+//        update file list and title based on stored settings
+
+//---------------------------------------------------------------------------
+
+global proc updateBuildNormalMapLayout()
+
+{
+
+        int $test = 1;
+
+        int $test2 = 6;
+
+        //some stuff
+
+        if(!`optionVar -ex nr_width`)
+
+                optionVar -iv nr_width 4;
+
+        if(!`optionVar -ex nr_height`)
+
+                optionVar -iv nr_height 4;
+
+        if(!`optionVar -ex nr_displacementFormat`)
+
+                optionVar -iv nr_displacementFormat 1;
+
+        if(!`optionVar -ex nr_diffuseFormat`)
+
+                optionVar -iv nr_diffuseFormat 1;
+
+        if(!`optionVar -ex nr_rayHitDistance`)
+
+                optionVar -fv nr_rayHitDistance 0.1;
+
+        if(!`optionVar -ex nr_renderDir`)
+
+                optionVar -sv nr_renderDir "";
+
+        if(!`optionVar -ex nr_outputName`)
+
+                optionVar -sv nr_outputName "fromMaya";
+
+        if(!`optionVar -ex nr_orbDir`)
+
+                optionVar -sv nr_orbDir "";
+
+        if(!`optionVar -ex nr_tangentSpace`)
+
+                optionVar -iv nr_tangentSpace 1;
+
+        if(!`optionVar -ex nr_multiSample`)
+
+                optionVar -iv nr_multiSample 0;
+
+        if(!`optionVar -ex nr_multiPassErrorCorrection`)
+
+                optionVar -iv nr_multiPassErrorCorrection 0;
+
+        if(!`optionVar -ex nr_expandFilter`)
+
+                optionVar -iv nr_expandFilter 1;
+
+
+
+        if(!`optionVar -ex nr_verticalFlip`)
+
+                optionVar -iv nr_verticalFlip 0;
+
+
+
+        if(!`optionVar -ex nr_flipYInNormal`)
+
+                optionVar -iv nr_flipYInNormal 0;
+
+
+
+        if(!`optionVar -ex nr_antiAlias`)
+
+                optionVar -iv nr_antiAlias 0;
+
+
+
+        if(!`optionVar -ex nr_backBufferOnly`)
+
+                optionVar -iv nr_backBufferOnly 0;
+
+
+
+        if(!`optionVar -ex nr_highPolyList`) {
+
+        } else {
+
+                if(`textScrollList -ex lt_highPolyList`) {
+
+                        textScrollList -e -removeAll lt_highPolyList;
+
+                        $highPolyList = `optionVar -q nr_highPolyList`;
+
+                        for($obj in $highPolyList){
+
+                                textScrollList -e -append $obj lt_highPolyList;
+
+                        }
+
+                }
+
+        }
+
+        if(!`optionVar -ex nr_lowPolyList`) {
+
+        } else {
+
+                if(`textScrollList -ex lt_lowPolyList`){
+
+                        textScrollList -e -removeAll lt_lowPolyList;
+
+                        $highPolyList = `optionVar -q nr_lowPolyList`;
+
+                        for($obj in $highPolyList){
+
+                                textScrollList -e -append $obj lt_lowPolyList;
+
+                        }
+
+                }
+
+        }
+
+
+
+
+
+}
+
+
+
+
+
+global proc addSelectedToHighPolyList()
+
+{
+
+        string $selected[] = `ls -sl`;
+
+        for($object in $selected) {
+
+                textScrollList -e -append $object lt_highPolyList;
+
+                optionVar -sva nr_highPolyList $object;
+
+        }
+
+}
+
+
+
+global proc addSelectedToLowPolyList()
+
+{
+
+        string $selected[] = `ls -sl`;
+
+        for($object in $selected) {
+
+                textScrollList -e -append $object lt_lowPolyList;
+
+                optionVar -sva nr_lowPolyList $object;
+
+
+
+        }
+
+}
+
+
+
+global proc clearSelectedFromList(string $list){
+
+        $items = `textScrollList -q -si $list`;
+
+        for ($item in $items){
+
+                textScrollList -e -ri $item $list;
+
+        }
+
+}
+
+
+
+global proc renderNormalMap()
+
+{
+
+        string $toolsPath = `optionVar -q lt_toolPath`;
+
+        string $ORB_Path = `optionVar -q nr_orbDir`;
+
+        string $ORB_ExportPath = ($ORB_Path + "imports\\");
+
+        string $hp_exportAs = ($ORB_ExportPath + (`optionVar -q nr_outputName`) + "_HP.obj");
+
+        string $lp_exportAs = ($ORB_ExportPath + (`optionVar -q nr_outputName`) + "_LP.obj");
+
+
+
+        $dir = `pwd`;
+
+        $sel = `ls -sl`;
+
+
+
+        string $highPolyPieces[] = `textScrollList -q -ai lt_highPolyList`;
+
+        string $lowPolyPieces[] = `textScrollList -q -ai lt_lowPolyList`;
+
+        //Remove non-geometrical stuff
+
+        string $highPolyPieces[] = `filterExpand -sm 12 $highPolyPieces`;
+
+        string $lowPolyPieces[] = `filterExpand -sm 12 $lowPolyPieces`;
+
+
+
+        //Duplicate and triangulate all the peices
+
+        $duplicateHighPolyPieces = `duplicate -rr -renameChildren $highPolyPieces`;
+
+        group -n "duplicateHighPolyPieces" -w $duplicateHighPolyPieces;
+
+        //make sure allowTopologyMod is on
+
+        for($obj in $duplicateHighPolyPieces){
+
+                setAttr ($obj + ".allowTopologyMod") 1;
+
+                polyTriangulate $obj;
+
+        }
+
+        //I want to add stuff here to normalize the low poly's group
+
+        //so that it can be offset and automatically be dealt with.
+
+
+
+        $duplicateLowPolyPieces = `duplicate -rr -renameChildren $lowPolyPieces`;
+
+        group -n "duplicateLowPolyPieces" -w $duplicateLowPolyPieces;
+
+        for($obj in $duplicateLowPolyPieces){
+
+                setAttr ($obj + ".allowTopologyMod") 1;
+
+                polyTriangulate $obj;
+
+        }
+
+
+
+        //Export OBJs
+
+        //save options
+
+        optionVar -sv "OBJexportOptions" "groups=0;ptgroups=0;materials=1;smoothing=1;normals=1";
+
+        select duplicateHighPolyPieces;
+
+        file -f -es -typ "OBJexport" $hp_exportAs ;
+
+        select duplicateLowPolyPieces;
+
+        file -f -es -typ "OBJexport" $lp_exportAs ;
+
+
+
+        //Export textures for the orb to use
+
+        string $textures[] = `getRelatedTextures($highPolyPieces)`;
+
+        for ($texture in $textures) {
+
+                string $baseName = basename($texture, "");
+
+                string $ORB_PathFix = substituteAllString($ORB_Path, "\\", "/");
+
+                string $textureDestination = ($ORB_PathFix + "imports/" + $baseName);
+
+                sysFile -copy $textureDestination $texture;
+
+                print $texture;
+
+                print "\n";
+
+                print $textureDestination;
+
+        }
+
+
+
+        //Create a cfg file to run
+
+        string $cmd = createOrbCFG();
+
+        //for 1.75
+
+        //string $cfgFileName = ($ORB_Path + "fromMaya.cfg");
+
+
+
+        //for v1.8
+
+        string $cfgFileName = ($ORB_Path + (`optionVar -q nr_outputName`) + ".cfg");
+
+
+
+        $fileID =`fopen $cfgFileName "w"`;
+
+        fwrite $fileID $cmd;
+
+        fclose $fileID;
+
+
+
+        //run ORB
+
+        //for 1.8
+
+        int $sizeArray[] = {0, 32, 64, 128, 512, 1024};
+
+        int $widthIndex = `optionVar -q nr_width`;
+
+        int $heightIndex = `optionVar -q nr_height`;
+
+        int $height = $sizeArray[$heightIndex];
+
+        int $width = $sizeArray[$widthIndex];
+
+
+
+        string $sys_cmd = ("Orb.exe -width " + $width + " -height " + $height + " -exec " + (`optionVar -q nr_outputName`) + ".cfg");
+
+
+
+        //for 1.75
+
+        //string $sys_cmd = ("Orb.exe");
+
+        chdir $ORB_Path;
+
+        print $sys_cmd;
+
+        system($sys_cmd);
+
+
+
+        delete duplicateLowPolyPieces;
+
+        delete duplicateHighPolyPieces;
+
+        chdir $dir;
+
+}
+
+
+
+global proc string createOrbCFG()
+
+{
+
+        string $onoff[] = {"off", "on"};
+
+        string $cmd;
+
+        string $outputName = `optionVar -q nr_outputName`;
+
+        string $importModelCMD = ("ImportModel imports/" + $outputName + "_HP.obj imports/" + $outputName + "_LP.obj\n");
+
+        string $dispMapFormatCMD = ("DispmapFormat " + ((`optionVar -q nr_displacementFormat`)-1) + "\n");
+
+        int $tangentSpace = (`optionVar -q nr_tangentSpace`);
+
+        string $tangentSpaceCMD = ("TangentSpace " + $onoff[$tangentSpace] + "\n");
+
+        int $multiSample = (`optionVar -q nr_multiSample`);
+
+        string $multiSampleCMD = ("MultiSample " + $onoff[$multiSample] + "\n");
+
+
+
+        int $multiPassErrorCorrection = (`optionVar -q nr_multiPassErrorCorrection`);
+
+        string $multiPassErrorCorrectionCMD = ("MultiPassErrorCorrection " + $onoff[$multiPassErrorCorrection] + "\n");
+
+
+
+        int $expandFilter = (`optionVar -q nr_expandFilter`);
+
+        string $expandFilterCMD = ("expandFilter " + $onoff[$expandFilter] + "\n");
+
+
+
+        int $verticalFlip = (`optionVar -q nr_verticalFlip`);
+
+        string $verticalFlipCMD = ("verticalFlip " + $onoff[$verticalFlip] + "\n");
+
+
+
+        int $flipYInNormal = (`optionVar -q nr_flipYInNormal`);
+
+        string $flipYInNormalCMD = ("flipYInNormalMap " + $onoff[$flipYInNormal] + "\n");
+
+
+
+        int $antiAlias = (`optionVar -q nr_antiAlias`);
+
+        string $antiAliasCMD = ("antiAlias " + $onoff[$antiAlias] + "\n");
+
+
+
+        int $backBufferOnly = (`optionVar -q nr_backBufferOnly`);
+
+        string $backBufferOnlyCMD = ("backBufferOnly " + $onoff[$backBufferOnly] + "\n");
+
+
+
+        string $diffuseFormatCMD = ("DiffuseFormat " + ((`optionVar -q nr_diffuseFormat`)-1) + "\n");
+
+        string $rayHitDistanceCMD = ("SetRayHitDistance "+(`optionVar -q nr_rayHitDistance`)+"\n");
+
+        string $renderBumpCMD = ("RenderBump exports/" + (`optionVar -q nr_outputName`));
+
+        return ( $importModelCMD + $backBufferOnlyCMD + $antiAliasCMD + $dispMapFormatCMD + $flipYInNormalCMD + $verticalFlipCMD + $expandFilterCMD + $tangentSpaceCMD + $multiSampleCMD + $multiPassErrorCorrectionCMD + $diffuseFormatCMD + $rayHitDistanceCMD + $renderBumpCMD);
+
+}
+
+
+
+global proc string[] getRelatedTextures(string $objs[]){
+
+        //Get textures relating to objects, returns an array
+
+        string $returnFiles[];
+
+        $i = 0;
+
+        for ($object in $objs) {
+
+                string $shapes[] = `listRelatives -s $object`; //// shape
+
+                for ( $shape in $shapes ) {
+
+                        string $shaderGrps[] = `listConnections -type shadingEngine $shape`; ///// shading group
+
+                        string $shaderGrps[] = stringArrayRemoveDuplicates($shaderGrps);
+
+                        for ($shaderGrp in $shaderGrps) {
+
+                                string $mats[] = `listConnections -type lambert $shaderGrp`; ///// material
+
+                                for ($mat in $mats) {
+
+                                        string $fileTextures[] = `listConnections -type file $mat`; ///// file texture
+
+                                        for ($fileTexture in $fileTextures) {
+
+                                                string $file_path = `getAttr ($fileTexture + ".fileTextureName") `; ///// file path
+
+                                                $returnFiles[$i] = $file_path;
+
+                                                $i = $i + 1;
+
+                                        }
+
+                                }
+
+                        }
+
+                }
+
+        }
+
+        string $returnFiles[] = stringArrayRemoveDuplicates($returnFiles);
+
+        return $returnFiles;
+
+}
+
+
+
+
+
+//==========================================================================================
+
+
+
+global proc exportObject()
+
+{
+
+        string $toolsPath = `optionVar -q lt_toolPath`;
+
+        string $ORB_Path = `optionVar -q nr_orbDir`;
+
+        string $ORB_ExportPath = ($ORB_Path + "imports\\");
+
+        string $hp_exportAs = ($ORB_ExportPath + (`optionVar -q nr_outputName`) + "_HP.obj");
+
+        string $lp_exportAs = ($ORB_ExportPath + (`optionVar -q nr_outputName`) + "_LP.obj");
+
+
+
+        $dir = `pwd`;
+
+        $sel = `ls -sl`;
+
+
+
+        string $highPolyPieces[] = `textScrollList -q -ai lt_highPolyList`;
+
+        string $lowPolyPieces[] = `textScrollList -q -ai lt_lowPolyList`;
+
+        //Remove non-geometrical stuff
+
+        string $highPolyPieces[] = `filterExpand -sm 12 $highPolyPieces`;
+
+        string $lowPolyPieces[] = `filterExpand -sm 12 $lowPolyPieces`;
+
+
+
+        //Duplicate and triangulate all the peices
+
+        $duplicateHighPolyPieces = `duplicate -rr -renameChildren $highPolyPieces`;
+
+        group -n "duplicateHighPolyPieces" -w $duplicateHighPolyPieces;
+
+        //make sure allowTopologyMod is on
+
+        for($obj in $duplicateHighPolyPieces){
+
+                setAttr ($obj + ".allowTopologyMod") 1;
+
+                polyTriangulate $obj;
+
+        }
+
+        //I want to add stuff here to normalize the low poly's group
+
+        //so that it can be offset and automatically be dealt with.
+
+
+
+        $duplicateLowPolyPieces = `duplicate -rr -renameChildren $lowPolyPieces`;
+
+        group -n "duplicateLowPolyPieces" -w $duplicateLowPolyPieces;
+
+        for($obj in $duplicateLowPolyPieces){
+
+                setAttr ($obj + ".allowTopologyMod") 1;
+
+                polyTriangulate $obj;
+
+        }
+
+
+
+        //Export OBJs
+
+        //save options
+
+        optionVar -sv "OBJexportOptions" "groups=0;ptgroups=0;materials=1;smoothing=1;normals=1";
+
+        select duplicateHighPolyPieces;
+
+        file -f -es -typ "OBJexport" $hp_exportAs ;
+
+        select duplicateLowPolyPieces;
+
+        file -f -es -typ "OBJexport" $lp_exportAs ;
+
+
+
+        //Export textures for the orb to use
+
+        string $textures[] = `getRelatedTextures($highPolyPieces)`;
+
+        for ($texture in $textures) {
+
+                string $baseName = basename($texture, "");
+
+                string $ORB_PathFix = substituteAllString($ORB_Path, "\\", "/");
+
+                string $textureDestination = ($ORB_PathFix + "imports/" + $baseName);
+
+                sysFile -copy $textureDestination $texture;
+
+                print $texture;
+
+                print "\n";
+
+                print $textureDestination;
+
+        }
+
+
+
+        //Create a cfg file to run
+
+        string $cmd = createOrbCFG();
+
+        //for 1.75
+
+        //string $cfgFileName = ($ORB_Path + "fromMaya.cfg");
+
+
+
+        //for v1.8
+
+        string $cfgFileName = ($ORB_Path + (`optionVar -q nr_outputName`) + ".cfg");
+
+
+
+        $fileID =`fopen $cfgFileName "w"`;
+
+        fwrite $fileID $cmd;
+
+        fclose $fileID;
+
+
+
+        //run ORB
+
+        //for 1.8
+
+        int $sizeArray[] = {0, 32, 64, 128, 512, 1024};
+
+        int $widthIndex = `optionVar -q nr_width`;
+
+        int $heightIndex = `optionVar -q nr_height`;
+
+        int $height = $sizeArray[$heightIndex];
+
+        int $width = $sizeArray[$widthIndex];
+
+
+
+        string $sys_cmd = ("Orb2.exe -width " + $width + " -height " + $height + " -exec " + (`optionVar -q nr_outputName`) + ".cfg");
+
+
+
+        //for 1.75
+
+        //string $sys_cmd = ("Orb.exe");
+
+        chdir $ORB_Path;
+
+        print $sys_cmd;
+
+        system($sys_cmd);
+
+
+
+        delete duplicateLowPolyPieces;
+
+        delete duplicateHighPolyPieces;
+
+        chdir $dir;
+
+}
+
+
+
+global proc string createOrbCFG()
+
+{
+
+        string $onoff[] = {"off", "on"};
+
+        string $cmd;
+
+        string $outputName = `optionVar -q nr_outputName`;
+
+        string $importModelCMD = ("ImportModel imports/" + $outputName + "_HP.obj imports/" + $outputName + "_LP.obj\n");
+
+        string $dispMapFormatCMD = ("DispmapFormat " + ((`optionVar -q nr_displacementFormat`)-1) + "\n");
+
+        int $tangentSpace = (`optionVar -q nr_tangentSpace`);
+
+        string $tangentSpaceCMD = ("TangentSpace " + $onoff[$tangentSpace] + "\n");
+
+        int $multiSample = (`optionVar -q nr_multiSample`);
+
+        string $multiSampleCMD = ("MultiSample " + $onoff[$multiSample] + "\n");
+
+
+
+        int $multiPassErrorCorrection = (`optionVar -q nr_multiPassErrorCorrection`);
+
+        string $multiPassErrorCorrectionCMD = ("MultiPassErrorCorrection " + $onoff[$multiPassErrorCorrection] + "\n");
+
+
+
+        int $expandFilter = (`optionVar -q nr_expandFilter`);
+
+        string $expandFilterCMD = ("expandFilter " + $onoff[$expandFilter] + "\n");
+
+
+
+        int $verticalFlip = (`optionVar -q nr_verticalFlip`);
+
+        string $verticalFlipCMD = ("verticalFlip " + $onoff[$verticalFlip] + "\n");
+
+
+
+        int $flipYInNormal = (`optionVar -q nr_flipYInNormal`);
+
+        string $flipYInNormalCMD = ("flipYInNormalMap " + $onoff[$flipYInNormal] + "\n");
+
+
+
+        int $antiAlias = (`optionVar -q nr_antiAlias`);
+
+        string $antiAliasCMD = ("antiAlias " + $onoff[$antiAlias] + "\n");
+
+
+
+        int $backBufferOnly = (`optionVar -q nr_backBufferOnly`);
+
+        string $backBufferOnlyCMD = ("backBufferOnly " + $onoff[$backBufferOnly] + "\n");
+
+
+
+        string $diffuseFormatCMD = ("DiffuseFormat " + ((`optionVar -q nr_diffuseFormat`)-1) + "\n");
+
+        string $rayHitDistanceCMD = ("SetRayHitDistance "+(`optionVar -q nr_rayHitDistance`)+"\n");
+
+        string $renderBumpCMD = ("RenderBump exports/" + (`optionVar -q nr_outputName`));
+
+        return ( $importModelCMD + $backBufferOnlyCMD + $antiAliasCMD + $dispMapFormatCMD + $flipYInNormalCMD + $verticalFlipCMD + $expandFilterCMD + $tangentSpaceCMD + $multiSampleCMD + $multiPassErrorCorrectionCMD + $diffuseFormatCMD + $rayHitDistanceCMD + $renderBumpCMD);
+
+}
+
+
+
+global proc string[] getRelatedTextures(string $objs[]){
+
+        //Get textures relating to objects, returns an array
+
+        string $returnFiles[];
+
+        $i = 0;
+
+        for ($object in $objs) {
+
+                string $shapes[] = `listRelatives -s $object`; //// shape
+
+                for ( $shape in $shapes ) {
+
+                        string $shaderGrps[] = `listConnections -type shadingEngine $shape`; ///// shading group
+
+                        string $shaderGrps[] = stringArrayRemoveDuplicates($shaderGrps);
+
+                        for ($shaderGrp in $shaderGrps) {
+
+                                string $mats[] = `listConnections -type lambert $shaderGrp`; ///// material
+
+                                for ($mat in $mats) {
+
+                                        string $fileTextures[] = `listConnections -type file $mat`; ///// file texture
+
+                                        for ($fileTexture in $fileTextures) {
+
+                                                string $file_path = `getAttr ($fileTexture + ".fileTextureName") `; ///// file path
+
+                                                $returnFiles[$i] = $file_path;
+
+                                                $i = $i + 1;
+
+                                        }
+
+                                }
+
+                        }
+
+                }
+
+        }
+
+        string $returnFiles[] = stringArrayRemoveDuplicates($returnFiles);
+
+        return $returnFiles;
+
+}
+
+
+
+
+
+
+
+//==========================================================================================
+
+global proc getDirectory( string $field)
+
+{
+
+        global string $targetDirectory;
+
+        string $targetNtDirectory;
+
+        string $targetPathElements[];
+
+        int $i, $pathElementsCount;
+
+
+
+        fileBrowser "getTargetDirectory" "Choose Tool Path" "directory" 4;
+
+        tokenize $targetDirectory "/" $targetPathElements;
+
+        $pathElementsCount=size($targetPathElements);
+
+
+
+        for ($i=0;$i<$pathElementsCount;$i++)
+
+                      $targetNtDirectory=$targetNtDirectory+$targetPathElements[$i]+"\\";
+
+
+
+        optionVar -sv $field $targetNtDirectory;
+
+        textFieldButtonGrp -e -fi $targetNtDirectory $field;
+
+}
+
+
+
+global proc getTargetDirectory ( string $directory , string $type)
+
+{
+
+        global string $targetDirectory;
+
+        $targetDirectory=$directory + "/";
+
+}

@@ -1,0 +1,1 @@
+global proc float angleD (vector $v1, vector $v2){$angle = rad_to_deg(`angle $v1 $v2`);return $angle;}

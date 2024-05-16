@@ -1,0 +1,526 @@
+/*  This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: ali.mel v0.9
+''    Author: Sergei Tsyptsyn
+''    Last Updated: January 9, 2001
+''    Update/Change this file at:
+''    http://www.highend3d.com/maya/mel/?section=interface#778
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+
+/*
+ali.mel was the request from Max users to simulate Max's Align Tool.
+It allows to snap one objest to another by pivots, centers, min and max.
+Usual way to do it in MAYA is to create constrain and delete it.
+ali.mel is also useful to math rotations of two objects.
+
+How to use:
+Put ali.mel into your script directory (or where scripts are visible).
+Select target first (any object with transform node or joint).
+Select object to be aligned second (any object with transform node or joint).
+From command line print "ali" and press Enter.
+You must select only two object to align second one to the first.
+
+
+When you press X,Y or Z checkboxes at the top of AlignToolBox window, 
+current(green) object is moved toward target(white) to coincide their pivots or centers or min/max of bbox points.
+
+You can also copy all rotaions and scales from target to current object by using Rotations and Scales Align checkboxes.
+
+Limitation - min and max are calculated from bounding box and may not be lay on the surface boundaries(actually on the CVs).
+Script was written long time ago - the code is not very nice :(
+*/
+
+
+
+
+proc xyzRotation( float $theta, float $axis[], float $rotation[] )
+//
+//	Description:
+//		Given an angle for rotation (in radians) and an axis about which to 
+//		do the rotation, return the rotation as XYZ values (in $rotation). This is part of snap2to2.mel
+//
+{
+	// set up the xyzw quaternion values
+	//
+	$theta *= 0.5;
+	float $w = cos($theta);
+	float $factor = sin($theta);
+	float $axisLen2 = dotProduct( $axis, $axis, 0 );
+	if ( $axisLen2 != 1.0 && $axisLen2 != 0.0 ) $factor /= sqrt($axisLen2);
+	float $x = $factor * $axis[0];
+	float $y = $factor * $axis[1];
+	float $z = $factor * $axis[2];
+
+	// setup rotation in a matrix
+	//
+	float $matrix[];
+	float $ww = $w*$w;
+	float $xx = $x*$x;
+	float $yy = $y*$y;
+	float $zz = $z*$z;
+	float $s = 2.0 / ($ww + $xx + $yy + $zz);
+	float $xy = $x*$y;
+	float $xz = $x*$z;
+	float $yz = $y*$z;
+	float $wx = $w*$x;
+	float $wy = $w*$y;
+	float $wz = $w*$z;
+	$matrix[0] = 1.0 - $s * ($yy + $zz);
+	$matrix[1] = $s * ($xy + $wz);
+	$matrix[2] = $s * ($xz - $wy);
+	$matrix[5] = 1.0 - $s * ($xx + $zz);
+	$matrix[6] = $s * ($yz + $wx);
+	$matrix[9] = $s * ($yz - $wx);
+	$matrix[10] = 1.0 - $s * ($xx + $yy);
+
+	// get x,y,z values for rotation
+	//
+	float $solution1[];
+	float $solution2[];
+	float $cosB = sqrt($matrix[0]*$matrix[0] + $matrix[1]*$matrix[1]);
+	if ( $cosB > 1.0e-10 )
+	{
+		float $a, $b, $c;
+		float $pi = 3.14159265;
+ 
+		$solution1[0] = $a = atan2( $matrix[6], $matrix[10]);
+		$solution1[1] = $b = atan2(-$matrix[2], $cosB);
+		$solution1[2] = $c = atan2( $matrix[1], $matrix[0]);
+
+		$solution2[0] = $a + (($a < $pi) ? $pi : -$pi);
+		$solution2[1] = (($b > -$pi) ? $pi : -$pi) - $b;
+		$solution2[2] = $c + (($c < $pi) ? $pi : -$pi);    
+
+		if ( abs($solution2[0]) + abs($solution2[1]) + abs($solution2[2]) <
+			abs($solution1[0]) + abs($solution1[1]) + abs($solution1[2]) )
+		{
+			$rotation = $solution2;
+		}
+		else 
+		{
+			$rotation = $solution1;
+		}
+	}
+	else
+	{
+		$rotation[0] = atan2(-$matrix[9], $matrix[5]);
+		$rotation[1] = atan2(-$matrix[2], $cosB);
+		$rotation[2] = 0.0;
+	}
+}
+
+
+
+
+//
+// UI Functions ********************************************************************************
+global proc Close()
+{
+global string $wname;
+//print $wname;
+        if ((`window -exists $wname`) == true)
+                deleteUI $wname;
+}
+
+global proc Update()
+{
+global int $count;
+global string $ob1;
+global string $ob2;
+global float $old[6];
+global float $oldr[6];
+global float $olds[6];
+global float $pivot1[6];
+
+global float $bb1[6];
+global float $bb2[6];
+global float $rb2[6];
+global float $rc2[6];
+global float $rot1[6];
+global float $sc1[6];
+int $uiWidth = 400;
+
+	string $objList[] = `ls -selection`;
+        $count = `size ($objList)`;
+
+	if( $count != 2 ) {
+				confirmDialog -m "Need TWO objects!!" -b "Select TWO objects";
+				return;
+			   }
+	if( nodeType( $objList[0] ) != "transform" &&  nodeType( $objList[0] ) != "joint" ) {
+				confirmDialog -m "Select objects with transform node or joints" -b "Select transform or joint";
+				return;
+			   }
+
+	if( nodeType( $objList[1] ) != "transform" &&  nodeType( $objList[1] ) != "joint") {
+				confirmDialog -m "Select objects with transform node or joints" -b "Select transform or joint";
+				return;
+			   }
+
+
+resetProc;
+	$ob1 = $objList[0];
+	$ob2 = $objList[1];
+	$pivot1 = `xform -q -ws -pivots $ob1`; 
+	$bb1 = `xform -q -ws -bb $ob1`;
+	$bb2 = `xform -q -ws -bb $ob2`;
+	$old = `xform -q -ws -pivots $ob2`;
+	$oldr = `xform -q -ws -ro $ob2`;
+	$olds = `xform -q -ws -s $ob2`;
+	$rb2[0]=$old[0]-$bb2[0]; $rb2[3]=$bb2[3]-$old[0];
+	$rb2[1]=$old[1]-$bb2[1]; $rb2[4]=$bb2[4]-$old[1];
+	$rb2[2]=$old[2]-$bb2[2]; $rb2[5]=$bb2[5]-$old[2];
+	$rc2[0]=$old[0]-($bb2[3]+$bb2[0])/2;
+	$rc2[1]=$old[1]-($bb2[4]+$bb2[1])/2;
+	$rc2[2]=$old[2]-($bb2[5]+$bb2[2])/2;
+	$rot1 = `xform -q -ws -ro $ob1`;
+	$sc1 = `xform -q -ws -s $ob1`;
+
+
+global float $axisX[], $axisY[], $axisZ[];
+global float $angleX, $angleY, $angleZ;
+ 
+float $st[] = `xform -q -os -m $ob1`; vector $ex = << $st[0], $st[1], $st[2] >>;vector $ey = << $st[4], $st[5], $st[6] >>;vector $ez = << $st[8], $st[9], $st[10] >>;
+$st = `xform -q -os -m $ob2`; vector $ext = << $st[0], $st[1], $st[2] >>;vector $eyt = << $st[4], $st[5], $st[6] >>;vector $ezt = << $st[8], $st[9], $st[10] >>;
+vector $crossx = unit( cross( unit($ext), unit($ex))); vector $crossy = unit( cross( unit($eyt), unit($ey))); vector $crossz = unit( cross( unit($ezt), unit($ez)));
+float $angx = angle( $ex, $ext); float $angy = angle( $ey, $eyt); float $angz = angle( $ez, $ezt);
+$axisX = { $crossx.x, $crossx.y, $crossx.z };
+$axisY = { $crossy.x, $crossy.y, $crossy.z };
+$axisZ = { $crossz.x, $crossz.y, $crossz.z };
+$angleX = $angx; $angleY = $angy; $angleZ = $angz;  
+
+
+global string $wname;
+window  -e -title ("Align Selection (" + $ob2 +")") $wname;
+
+
+//text -edit -label ("Current: "+$ob2) -width $uiWidth GreenText;
+//text -edit -label ("Target: "+$ob1)  -width $uiWidth WhiteText;
+}
+
+global proc RotProc ()
+{
+global int $count;
+global string $ob1;
+global string $ob2;
+global float $old[6];
+global float $oldr[6];
+global float $pivot1[6];
+global float $rot1[6];
+global float $axisX[], $axisY[], $axisZ[];
+global float $angleX, $angleY, $angleZ;
+
+float $xyz[6];
+int $checksum = `checkBox -q -value r1_xbox` + `checkBox -q -value r1_ybox` +`checkBox -q -value r1_zbox`;
+//print $checksum;
+if ( $checksum > 1 )
+	{
+ 	rotate -ws  $rot1[0] $rot1[1] $rot1[2] $ob2; 
+ 	print( "rotate -ws "+ $rot1[0]+" "+ $rot1[1]+" "+ $rot1[2]+" "+ $ob2+"\n");
+	return;
+      }   
+//if ( $checksum == 0 )
+//	{
+	rotate -ws  $oldr[0] $oldr[1] $oldr[2] $ob2;
+//      }   
+
+        if (`checkBox -q -value r1_xbox`) {
+			float $rotation[]; 
+			xyzRotation( $angleX, $axisX, $rotation);
+			eval("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2);
+			print("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2+"\n");
+		}
+         else if (`checkBox -q -value r1_ybox`) {
+			float $rotation[]; 
+			xyzRotation( $angleY, $axisY, $rotation);
+			eval("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2); 
+			print("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2+"\n");
+		}
+         else if (`checkBox -q -value r1_zbox`) {
+			float $rotation[]; 
+			xyzRotation( $angleZ, $axisZ, $rotation);
+			eval("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2);
+			print("rotate -r " + $rotation[0] + "rad " + $rotation[1] + "rad " + $rotation[2] + "rad " + $ob2+"\n");
+		}
+	
+
+
+
+}//
+
+
+global proc ScaleProc ()
+{
+global int $count;
+global string $ob1;
+global string $ob2;
+global float $old[6];
+global float $olds[6];
+global float $pivot1[6];
+global float $sc1[6];
+float $xyz[6];
+         if (`checkBox -q -value scale_xbox`) {
+            setAttr ($ob2+".sx") $sc1[0];
+		}
+        else {
+            setAttr ($ob2+".sx") $olds[0];
+             }   
+        if (`checkBox -q -value scale_ybox`) {
+            setAttr ($ob2+".sy") $sc1[1];
+		}
+        else {
+            setAttr ($ob2+".sy") $olds[1];
+             }   
+         if (`checkBox -q -value scale_zbox`) {
+            setAttr ($ob2+".sz") $sc1[2];
+		}
+        else {
+            setAttr ($ob2+".sz") $olds[2];
+             }   
+	
+
+
+
+}//
+
+global proc f1_all ()
+{
+f1_uix();
+}
+
+global proc f1_uix ()
+{
+global int $count;
+global string $ob1;
+global string $ob2;
+global float $old[6];
+global float $pivot1[6];
+global float $bb1[6];
+global float $rb2[6];
+global float $rc2[6];
+float $xyz[6];
+		if (`radioCollection -q -select mod1` == "Pivot") {
+			$xyz = $pivot1;
+			}
+		if (`radioCollection -q -select mod1` == "Center") {
+			$xyz[0] = ($bb1[0]+$bb1[3])/2.0;
+			$xyz[1] = ($bb1[1]+$bb1[4])/2.0;
+			$xyz[2] = ($bb1[2]+$bb1[5])/2.0;
+			}
+		if (`radioCollection -q -select mod1` == "Minimum") {
+			$xyz[0] = $bb1[0];
+			$xyz[1] = $bb1[1];
+			$xyz[2] = $bb1[2];
+			}
+		if (`radioCollection -q -select mod1` == "Maximum") {
+			$xyz[0] = $bb1[3];
+			$xyz[1] = $bb1[4];
+			$xyz[2] = $bb1[5];
+                        }
+		if (`radioCollection -q -select mod2` == "Minimum") { 
+			$xyz[0] += $rb2[0];
+			$xyz[1] += $rb2[1];
+			$xyz[2] += $rb2[2];
+			}
+		if (`radioCollection -q -select mod2` == "Maximum") {
+			$xyz[0] -= $rb2[3];
+			$xyz[1] -= $rb2[4];
+			$xyz[2] -= $rb2[5];
+			}
+		if (`radioCollection -q -select mod2` == "Center") {
+			$xyz[0] += $rc2[0];
+			$xyz[1] += $rc2[1];
+			$xyz[2] += $rc2[2];
+			}
+
+        if (`checkBox -q -value f1_xbox`) {
+                move -ws -rpr -x $xyz[0] $xyz[1] $xyz[2] $ob2;
+		}
+        else {
+		move -ws -rpr -x $old[0] $old[1] $old[2] $ob2;
+             }  
+ 
+        if (`checkBox -q -value f1_zbox`) {
+                 move -ws -rpr -z $xyz[2] $xyz[2] $xyz[2] $ob2;
+		}
+        else {
+		move -ws -rpr -z $old[2] $old[2] $old[2]$ob2;
+             }   
+	
+        if (`checkBox -q -value f1_ybox`) {
+                move -ws -rpr -y $xyz[1] $xyz[1] $xyz[1] $ob2;
+		}
+        else {
+		move -ws -rpr -y $old[1] $old[1] $old[1] $ob2;
+             }   
+
+
+
+}
+
+
+
+global proc cancelProc ()
+{
+resetProc;
+ScaleProc;
+RotProc;
+f1_uix;
+Close;
+}
+global proc resetProc ()
+{
+checkBox -e -v 0 scale_xbox;
+checkBox -e -v 0 scale_ybox;
+checkBox -e -v 0 scale_zbox;
+checkBox -e -v 0 f1_xbox;
+checkBox -e -v 0 f1_ybox;
+checkBox -e -v 0 f1_zbox;
+checkBox -e -v 0 r1_xbox;
+checkBox -e -v 0 r1_ybox;
+checkBox -e -v 0 r1_zbox;
+}
+
+
+/* *****************************************************/
+global proc ali()
+{
+global int $count;
+global string $ob1;
+global string $ob2;
+global string $wname = "winalign";
+int $uiWidth = 358;
+
+        string $version = "Align V0.33theta - Written by Ptits - Copywrong 2000";
+	string $objList[] = `ls -selection`;
+        $count = `size ($objList)`;
+	if( $count != 2 ) {
+				confirmDialog -m "Need TWO objects!!" -b "Select TWO objects";
+				return;
+			   }
+	if( nodeType( $objList[0] ) != "transform" &&  nodeType( $objList[0] ) != "joint" ) {
+				confirmDialog -m "Select objects with transform node or joints" -b "Select transform or joint";
+				return;
+			   }
+
+	if( nodeType( $objList[1] ) != "transform" &&  nodeType( $objList[1] ) != "joint") {
+				confirmDialog -m "Select objects with transform node or joints" -b "Select transform or joint";
+				return;
+			   }
+
+
+	
+        if ((`window -exists $wname`) == true)
+                deleteUI $wname;
+
+        window  -maximizeButton  true -w $uiWidth -h 361
+               -title "Align Selection" -iconName "Align Selection" $wname;
+
+                columnLayout -co "left" 12  -cw 240 -rs 10 ;
+		     rowLayout  -numberOfColumns 2
+					 -columnWidth 1 250
+                               -columnWidth 2 75;
+			frameLayout  -label " Align Position (World):"  -borderStyle "etchedIn"  -w 242 -fn "plainLabelFont" FF1;
+	                columnLayout -rs 12;
+      	          
+// XYZ Checks ____________________________________________________________________
+                        rowLayout -columnAlign 1 "center"
+                                  -numberOfColumns 4
+                                  -columnWidth 1 14
+                                  -columnWidth 2 75
+                                  -columnWidth 3 75
+                                  -columnWidth 4 75;
+				text -label "   ";
+                                checkBox -label "X Position" -value false -changeCommand "f1_uix" f1_xbox;
+                                checkBox -label "Y Position" -value false -changeCommand "f1_uix" f1_ybox;
+                                checkBox -label "Z Position" -value false -changeCommand "f1_uix" f1_zbox;
+                        setParent ..; // to colunmL
+
+                        rowLayout -columnAlign 2 "center"
+                                  -numberOfColumns 4
+                                  -columnWidth 1 14
+                                  -columnWidth 2 100
+                                  -columnWidth 3 14
+	                            -columnWidth 4 100;
+					text -label " ";
+					frameLayout  -label "Current Object:"  -borderStyle "etchedIn"  -w 98 -fn "plainLabelFont";
+	      		          columnLayout -co "left" 10 -rs 6;
+						radioCollection mod1; 
+							radioButton -cc "f1_all" Minimum;
+							radioButton -cc "f1_all" Center;
+							radioButton -cc "f1_all" -l "Pivot Point" -sl Pivot;
+							radioButton -cc "f1_all" Maximum;
+					    setParent ..;// to frame
+					setParent ..; // to row
+					text -label " ";
+					frameLayout  -label "Target Object:"  -borderStyle "etchedIn"  -w 98 -fn "plainLabelFont";
+	      		          columnLayout -co "left" 10 -rs 6;
+						radioCollection mod2; 
+							radioButton -cc "f1_all" Minimum;
+							radioButton -cc "f1_all" Center;
+							radioButton -cc "f1_all"  -l  "Pivot Point" -sl Pivot;
+							radioButton -cc "f1_all" Maximum;
+					    setParent ..; //to frame
+					setParent ..; // to row
+
+
+			    setParent ..; //to  col 
+			setParent ..; // to frame
+ 		  setParent ..; // to ROW	
+// BUTTS
+              columnLayout -rs 6;
+                  button -label "OK" -w 75 -align "center" -c "Close" CloseButton;
+                  button -label "Cancel" -w 75 -align "center" -c "cancelProc" CancelButton;
+			text -h 6 " ";
+                  button -label "Update" -w (75) -align "center" -c "Update" UpButton;
+			iconTextCheckBox -w 75 -h 24 -i1 "menuiconhelp.xpm" -cc "text -e -vis `iconTextCheckBox -q -v sl0` TXT;" sl0 ; 
+			text -vis 0 -w 75 -l "You can select\n next 2 obj and\n click Update" TXT;
+ 		  setParent ..; // to ROW	
+
+		setParent ..; // to col
+
+
+// ROTATE & Scale _______________________________________________
+		frameLayout  -label " Align Orientation (Local):"  -borderStyle "etchedIn"  -w 242 -fn "plainLabelFont" FF2;
+               columnLayout -rs 12;
+                        rowLayout -columnAlign 1 "center"
+                                  -numberOfColumns 4
+                                  -columnWidth 1 14
+                                  -columnWidth 2 75
+                                  -columnWidth 3 75
+                                  -columnWidth 4 75;
+					text -label "   ";
+                                checkBox -label "X Axis" -value false -changeCommand "RotProc" r1_xbox;
+                                checkBox -label "Y Axis" -value false -changeCommand "RotProc" r1_ybox;
+                                checkBox -label "Z Axis" -value false -changeCommand "RotProc" r1_zbox;
+                        setParent ..; // to col
+            setParent ..; //to frame
+          setParent ..; //to col
+//Scale _______________________________________________
+		frameLayout  -label " Match Scale:"  -borderStyle "etchedIn"  -w 242 -fn "plainLabelFont" FF3;
+               columnLayout -rs 12;
+                        rowLayout -columnAlign 1 "center"
+                                  -numberOfColumns 4
+                                  -columnWidth 1 14
+                                  -columnWidth 2 75
+                                  -columnWidth 3 75
+                                  -columnWidth 4 75;
+					text -label "   ";
+                                checkBox -label "X Axis" -value false -changeCommand "ScaleProc" scale_xbox;
+                                checkBox -label "Y Axis" -value false -changeCommand "ScaleProc" scale_ybox;
+                                checkBox -label "Z Axis" -value false -changeCommand "ScaleProc" scale_zbox;
+                        setParent ..; // to col
+            setParent ..; //to frame
+          setParent ..; //to col
+
+ 
+
+        showWindow $wname;
+Update();
+}

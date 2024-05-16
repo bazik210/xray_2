@@ -1,0 +1,80 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector">
+    <hudson.triggers.TimerTrigger>
+      <spec>30 1,9,13,19 * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.plugins.groovy.SystemGroovy>
+      <scriptSource class="hudson.plugins.groovy.StringScriptSource">
+        <command>import hudson.model.*;
+
+items = hudson.model.Hudson.instance.items
+
+empty_queue = 1
+
+Hudson_Restart_Job = &quot;Hudson_Restart&quot;
+Hudson_Restart_Impl_Job = &quot;Hudson_Restart_Impl&quot;
+
+for (item in items) 
+{
+  if ( item.name == Hudson_Restart_Job )
+    continue;
+
+  if  ( item.isInQueue() || item.isBuilding() )
+  {
+     println(&quot;$item.name is in queue or is building!&quot;)
+     empty_queue = 0
+  }
+}
+
+println(&quot;Queue is empty: $empty_queue&quot;)
+
+startServer = &quot;mr.Hudson&quot;
+
+if ( !empty_queue )
+{
+   def Restart_Job = Hudson.instance.getItem(Hudson_Restart_Job)
+
+   println(&quot;Rescheduling $Hudson_Restart_Job job next hour&quot;)
+   startNote   = &quot;rescheduled : queue was not emtpy&quot;
+   cause = new hudson.model.Cause.RemoteCause(startServer, startNote)
+   Restart_Job.scheduleBuild(1*60, cause);
+}
+else
+{
+   def Restart_Impl_Job = Hudson.instance.getItem(Hudson_Restart_Impl_Job)
+
+   println(&quot;Calling $Hudson_Restart_Impl_Job job that will do restart&quot;)
+   startNote   = &quot;called by $Hudson_Restart_Job job&quot;
+   cause = new hudson.model.Cause.RemoteCause(startServer, startNote)
+   Restart_Impl_Job.scheduleBuild(cause);
+}</command>
+      </scriptSource>
+      <bindings></bindings>
+      <classpath></classpath>
+    </hudson.plugins.groovy.SystemGroovy>
+  </builders>
+  <publishers/>
+  <buildWrappers>
+    <hudson.plugins.locksandlatches.LockWrapper>
+      <locks>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Hudson_Restart_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+      </locks>
+    </hudson.plugins.locksandlatches.LockWrapper>
+  </buildWrappers>
+</project>

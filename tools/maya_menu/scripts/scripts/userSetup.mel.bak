@@ -1,0 +1,8 @@
+displayPref -displayGradient true; // create color gradient in maya viewport scheme
+source ajrAutoSave.mel; ajrAutoSave;
+source "myMenu.mel" ;
+source libSkin.mel;
+source libString.mel;
+source displayInfo.mel; //displayInfo;
+source HKLocalTools.mel;
+

@@ -1,0 +1,201 @@
+/*
+Script: craSpreadOnCurve.mel
+Author: Carlos Rico Adega
+
+This script is used to duplicate a source object over a curve evenly spacing the copies.
+It uses motionPath nodes to achieve that. The resulting objects get parented to locators.
+Each locator has an "U Value" attribute that lets you animate the object along the 
+length of the curve.
+
+Launch UI:
+
+craSpreadOnCurve();
+
+
+Change log:
+
+Version: 1.0
+Date: July 20, 2010
+- Added "Copy as instances" option.
+- Added "MotionPath Options" menu to control the attributes of the resulting motionPaths.
+
+Version: 0.9
+Date: July 19, 2010
+
+*/
+
+
+
+global proc craCopyOnObject(int $mode) {
+	
+	string $objs[] = `ls -sl -fl`;
+	
+	for( $i=0; $i<(`size($objs)`-1); $i++ )
+	{
+		select -cl;
+		select  $objs[size($objs)-1];
+		string $newObj[];
+		if(!`checkBox -q -v cra_instancesOnCurveCB`)
+			$newObj = `duplicate`;
+		else
+			$newObj = `duplicate -ilf`;
+		select -cl;
+		select $objs[$i];
+		select -add $newObj[0];
+		delete `pointConstraint -n pppp`;
+		delete `orientConstraint -n oooo`;
+		if ($mode == 1) parent $newObj $objs[$i];
+		else {
+			delete $objs[$i];
+			parent $newObj[0] (`textField -q -text craCurveTxt` + "Grp");
+		}
+	}
+}
+
+global proc craSpreadOnCurveDoIt(int $num){
+	
+	if (size(`ls -sl`) != 2) error "Select a curve and then an object.";
+	
+	string $sel[] = `ls -sl`;
+	string $shapeNode[] = `listRelatives -s $sel[0]`;
+	if (`nodeType $shapeNode[0]` == "nurbsCurve") {
+		
+		string $curve[] = `ls -sl`;
+		float $minUparam = `getAttr ($curve[0] + ".min")`; 
+		float $maxUparam = `getAttr ($curve[0] + ".max")`;
+		
+		if(!`objExists ($sel[0] + "Grp")`)
+			group -em -n ($sel[0] + "Grp"); 
+		
+	
+		for( $i=0; $i<$num ;$i++ ){
+			
+			string $curveLocator[] = `spaceLocator`;
+			string $locatorName = `rename $curveLocator[0] curveLocator1`;
+			
+			
+			select -cl;
+			select $curve[0];
+			select -add $locatorName;
+			
+			string $motionPathName = `pathAnimation -f 1`;
+			int $craWUT;
+			if(`optionMenuGrp -q -sl craWorldUpOM` == 1)
+				$craWUT = 0;
+			else
+				$craWUT = 4;
+			
+			setAttr ($motionPathName + ".worldUpType") $craWUT;
+			setAttr ($motionPathName + ".inverseUp") `checkBox -q -v consInverseUpCB`;
+			setAttr ($motionPathName + ".inverseFront") `checkBox -q -v consInverseFrontCB`;
+			setAttr ($motionPathName + ".frontAxis") (`optionMenuGrp -q -sl craFrontAxisOM` - 1);
+			setAttr ($motionPathName + ".upAxis") (`optionMenuGrp -q -sl craUpAxisOM` - 1);
+			
+			delete ($motionPathName + "_uValue");
+			
+			setAttr  -l 1 -k 0 ($locatorName + ".tx");
+			setAttr  -l 1 -k 0 ($locatorName + ".ty");
+			setAttr  -l 1 -k 0 ($locatorName + ".tz");
+			
+			setAttr  -l 1 -k 0 ($locatorName + ".rx");
+			setAttr  -l 1 -k 0 ($locatorName + ".ry");
+			setAttr  -l 1 -k 0 ($locatorName + ".rz");
+			
+			float $spacing = $maxUparam/($num-1);
+			addAttr -at "float" -ln uValue -min 0 -max $maxUparam -k 1 -h 0 -dv ($spacing*$i) $locatorName;
+			
+			connectAttr  ($locatorName + ".uValue") ($motionPathName +".u");
+			
+			select -cl;
+			
+			select $locatorName;
+			select -add $sel[1];
+			craCopyOnObject `checkBox -q -v consToCurveCB`;
+			if(`checkBox -q -v consToCurveCB`)
+				parent $locatorName ($sel[0] + "Grp");
+		}
+		
+	}	
+}
+
+global proc craSpreadOnCurve(){
+	
+	if (`window -exists craSpreadOnCurveWindow`)
+		deleteUI craSpreadOnCurveWindow;
+	
+	window -t (" Spread Object On Curve") -tlb 1 -mnb 0 -mxb 0 -s 0 craSpreadOnCurveWindow;
+	
+	
+	frameLayout -mw 5 -lv 0 -w 170 -bs "etchedIn"; 
+	
+	columnLayout -columnWidth 170 -rowSpacing 10;
+	rowLayout -nc 2 -cw2 130 15;
+	textField -text " ------------ CURVE -----------"  -w 130 craCurveTxt;
+	button -l "Get Crv" -ann "Use selected curve" -c "craGetCurveXform" craGetCurveBtn;
+	setParent ..;
+	rowLayout -nc 2 -cw2 130 15;
+	textField -text " ----------- OBJECT ------------" -w 130 craObjectTxt;
+	button -ann "Use selected object" -l "Get Obj" -c "if(size(`ls-sl`)) textField -e -text `ls -sl -type transform` craObjectTxt; else error \"Select an object.\"" craGetObjectBtn;
+	setParent ..;
+	rowLayout -nc 2 -cw2 100 50;
+	text -l "Number of Copies";
+	intField -v 1 -w 50 craCopyNumIF;
+	popupMenu;
+	for( $i=0; $i<=10 ;$i++ ){
+		menuItem -l $i -c ("intField -e -v " + $i + " craCopyNumIF;");
+	}
+	for( $i=20; $i<=100 ;$i+=10 ){
+		menuItem -l $i -c ("intField -e -v " + $i + " craCopyNumIF;");
+	}
+	setParent ..;
+	checkBox -label "Constrain objects to Curve?" -v 1 consToCurveCB;
+	checkBox -l "Copy objects as instances?" -ann "Make instances of the source object" cra_instancesOnCurveCB;
+	frameLayout -w 175 -l "MotionPath options" -cll 1 -cl 1 -lv 1 -ec "window -e -wh 200 345 craSpreadOnCurveWindow;" -cc "window -e -wh 200 245 craSpreadOnCurveWindow;" craMotionPathOptions;
+	columnLayout;
+	optionMenuGrp -label " World Up Type" -columnWidth2 85 80 craWorldUpOM;
+		menuItem -l "Scene Up";
+		menuItem -l "Normal";
+		optionMenuGrp -e -sl 1 craWorldUpOM;
+	separator -style "none" -h 5;
+	
+	columnLayout;
+	rowLayout -nc 2 -cw2 80 50; 
+	checkBox -label "Inverse Up" -v 0 consInverseUpCB;
+	checkBox -label "Inverse Front" -v 0 consInverseFrontCB;
+	setParent ..;
+	setParent ..;
+	separator -style "none" -h 5;
+	optionMenuGrp -label " Front Axis" -columnWidth2 82 80 craFrontAxisOM;
+		menuItem -l "X";
+		menuItem -l "Y";
+		menuItem -l "Z";
+		optionMenuGrp -e -sl 2 craFrontAxisOM;
+	
+	optionMenuGrp -label " Up Axis" -columnWidth2 82 80 craUpAxisOM;
+		menuItem -l "X";
+		menuItem -l "Y";
+		menuItem -l "Z";
+	optionMenuGrp -e -sl 3 craUpAxisOM;
+		
+	setParent ..;
+	setParent ..;
+	
+	button -l "SPREAD OBJECTS" -w 175 -c "select `textField -q -text craCurveTxt`;select -add `textField -q -text craObjectTxt`;craSpreadOnCurveDoIt `intField -q -value craCopyNumIF`";
+	window -e -wh 200 245 craSpreadOnCurveWindow;
+	showWindow craSpreadOnCurveWindow;
+	
+}
+
+global proc craGetCurveXform(){
+	
+	string $mySel[] = `ls -sl`;
+	if(!size($mySel))
+		error "Select a curve.";
+	string $shapes[] = `listRelatives -s $mySel[0]`;
+	if (size(`ls -type "nurbsCurve" $shapes[0]`))
+		textField -e -text $mySel[0] craCurveTxt;
+	else
+		error ($mySel[0] + " is not a curve.");
+	
+	
+}

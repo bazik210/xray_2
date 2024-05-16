@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<user>
+  <fullName>Alexander Maniluk</fullName>
+  <properties>
+    <hudson.model.MyViewsProperty>
+      <primaryViewName>All</primaryViewName>
+      <views>
+        <hudson.model.AllView>
+          <owner class="hudson.model.MyViewsProperty" reference="../../.."/>
+          <name>All</name>
+        </hudson.model.AllView>
+      </views>
+    </hudson.model.MyViewsProperty>
+    <hudson.plugins.jabber.user.JabberUserProperty/>
+    <hudson.security.HudsonPrivateSecurityRealm_-Details>
+      <passwordHash>vRHagd:176ea31d8768c3eeb819c766bc4599e3352872dda77fc2deb1c3d377681faeb5</passwordHash>
+    </hudson.security.HudsonPrivateSecurityRealm_-Details>
+    <hudson.tasks.Mailer_-UserProperty>
+      <emailAddress>loopzilla@gsc-game.kiev.ua</emailAddress>
+    </hudson.tasks.Mailer_-UserProperty>
+  </properties>
+</user>

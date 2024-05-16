@@ -1,0 +1,295 @@
+global proc splitEdge()
+{
+createSet tmpSplitEdges;
+string $objSel[] = `ls -sl -o`;
+ConvertSelectionToVertices;
+ConvertSelectionToFaces;
+$faces = sel();
+ConvertSelectionToVertices;
+selectSimpleNotBorderVertices;
+ConvertSelectionToFaces;
+select (stringIntersect($faces, sel()));
+if (sizeSel() > 0)
+	{
+	triangulateAdv;
+	createSet tmpTriangEdges;
+	}
+select tmpSplitEdges;
+delete tmpSplitEdges;
+$split = sel();
+$splitVert = conv($split, "v");
+ConvertSelectionToVertices;
+ConvertSelectionToEdges;
+select -d $split;
+$merge = sel();
+
+string $bordEdgesRemove[] = {};
+for ($edge in $merge)
+	{
+	if (edgeBordness($edge))
+		$bordEdgesRemove[`size $bordEdgesRemove`] = $edge;
+	}
+$merge = stringArrayRemove($bordEdgesRemove, $merge);
+//removing border edges //select $merge
+select $merge;
+
+string $sets[] = splitEdgeSeparatedSets();
+
+string $set;
+string $facesSets[] = {};
+for ($set in $sets)
+	{
+//$set = $sets[0];
+	$faces = conv (stringToStringArray($set, " "), "f");
+	$facesSets[`size $facesSets`] = stringArrayToString ($faces, " ");
+	}
+//creating lists of faces that will be merge
+
+polySplitVertex $splitVert;
+for ($set in $facesSets)
+	{
+	polyMergeVertex -d 0.0001 (stringToStringArray($set, " "));
+	polyMergeUV -d 0.0001 (conv(stringToStringArray($set, " "), "u"));
+	}
+if (`objExists tmpTriangEdges`)
+	{
+	select tmpTriangEdges;
+	delete;
+	delete tmpTriangEdges;
+	}
+delete -ch $objSel;
+select -cl;
+selectionMode($objSel[0], "edge");
+}
+
+global proc string[] splitEdgeSeparatedSets()
+{
+if (whatIsSel() != "e" || sizeSel() == 0)
+	return {};
+string $edges[] = sel();
+string $edgesCheckMain[] = $edges;
+string $edgesSets[] = {};
+
+for (;;)
+	{
+	if (`size $edgesCheckMain` == 0)
+		break;
+	string $edgesCheck[] = $edgesCheckMain;
+	string $edgesSet[] = {};
+	for (;;)
+		{
+		if (`size $edgesCheck` == 0)
+			break;
+		//select $edgesCheck[0];
+		$edgesSet[`size $edgesSet`] = $edgesCheck[0];
+		$edgesCheck = stringArrayRemove (conv (conv (conv (conv ({$edgesCheck[0]}, "f"), "v"), "f"), "e"), $edgesCheck);
+		//select $edgesCheck;
+		}
+	//select $edgesSet;
+	$edgesSets[`size $edgesSets`] = stringArrayToString($edgesSet, " ");
+	$edgesCheckMain = stringArrayRemove($edgesSet, $edgesCheckMain);
+	}
+/* selecting sets
+$count = 0;
+select (stringToStringArray($edgesSets[$count], " "));
+$count++;
+*/
+return $edgesSets;
+}
+
+global proc string[] conv(string $itemsForConv[], string $mode)
+{
+$itemsForConv = `ls -fl $itemsForConv`;
+
+string $converted[] = {};
+if ($mode == "v")
+	$converted = `polyListComponentConversion -tv $itemsForConv`;
+else if ($mode == "e")
+	$converted = `polyListComponentConversion -te $itemsForConv`;
+else if ($mode == "f")
+	$converted = `polyListComponentConversion -tf $itemsForConv`;
+else if ($mode == "u")
+	$converted = `polyListComponentConversion -tuv $itemsForConv`;
+else if ($mode == "vf")
+	$converted = `polyListComponentConversion -tvf $itemsForConv`;
+
+else if ($mode == "vi")
+	$converted = `polyListComponentConversion -tv -in $itemsForConv`;
+else if ($mode == "ei")
+	$converted = `polyListComponentConversion -te -in $itemsForConv`;
+else if ($mode == "fi")
+	$converted = `polyListComponentConversion -tf -in $itemsForConv`;
+else if ($mode == "ui")
+	$converted = `polyListComponentConversion -tuv -in $itemsForConv`;
+else if ($mode == "vfi")
+	$converted = `polyListComponentConversion -tvf -in $itemsForConv`;
+else
+	print "wrong argument";
+$converted = `ls -fl $converted`;
+return $converted;
+}
+
+
+global proc createSet(string $name)
+{
+if (`objExists $name`)
+	delete $name;
+sets -name $name;
+}
+
+
+global proc int edgeBordness(string $edge)
+{
+if (`size (conv({$edge}, "f"))` == 1)
+	return 1;
+else
+	return 0;
+}
+
+
+global proc string[] sel()
+{
+return `ls -sl -fl`;
+}
+
+
+global proc selectionMode(string $item, string $mask)
+{
+/*masks real
+pv
+pe
+pfe
+pf
+puv
+pvf
+
+masks simple
+v
+e
+f
+u
+vf
+*/
+if ($mask == "v")
+	$mask = "pv";
+if ($mask == "e")
+	$mask = "pe";
+if ($mask == "f")
+	$mask = "pf";
+if ($mask == "u")
+	$mask = "puv";
+if ($mask == "vf")
+	$mask = "pvf";
+
+string $selectCmd;
+if (`selectMode -q -object`)
+	{
+	hilite $item;
+	selectType -ocm -alc false;
+	$selectCmd = "selectType -ocm -" + $mask + " true;";
+	}
+else
+	{
+	selectType -ocm -alc false;
+	$selectCmd = "selectType -" + $mask + " true;";
+	if (!`selectMode -q -preset`)
+		$selectCmd = $selectCmd + "hilite " + $item + ";";
+	}
+eval $selectCmd;
+}
+
+
+global proc selectSimpleNotBorderVertices()
+{
+string $vertices[] = conv(`ls -sl`, "v");
+string $objSel[] = `ls -sl -o`;
+string $vertex;
+string $simpleVertices[];
+for ($vertex in $vertices)
+	{
+//$vertex = $vertices[0];
+	$edges = conv({$vertex}, "e");
+	$faces = conv({$vertex}, "f");
+	if (`size $edges` <= 2 && `size $faces` > 1)
+		$simpleVertices[`size $simpleVertices`] = $vertex;
+	}
+select $simpleVertices;
+selectionMode($objSel[0], "v");
+}
+
+
+global proc int sizeSel()
+{
+$size = (size (`ls -sl -fl`));
+return $size;
+}
+
+
+
+global proc string[] stringIntersect(string $string1[], string $string2[])
+{
+/*
+$string1 = {"1", "2", "3"};
+$string2 = {"2", "3", "4"};
+*/
+string $string1no[] = stringArrayRemove($string2, $string1);
+string $string2no[] = stringArrayRemove($string1, $string2);
+
+string $string1yes[] = stringArrayRemove($string1no, $string1);
+string $string2yes[] = stringArrayRemove($string2no, $string2);
+
+return $string1yes;
+}
+
+
+global proc triangulateAdv()
+{
+$sel = sel();
+ConvertSelectionToFaces;
+createSet tmpTrianFaces;
+PolySelectConvert 2;
+createSet tmpTrianEdges;
+select tmpTrianFaces;
+polyTriangulate -ch 1;
+PolySelectConvert 2;
+select -d tmpTrianEdges;
+delete tmpTrianFaces;
+delete tmpTrianEdges;
+selectionMode($sel[0], "edge");
+}
+
+
+global proc string whatIsSel ()
+{
+string $allSel[] = `ls -sl -fl`;
+string $sel = $allSel[0];
+
+if (`size $sel` == 0)
+	return "0";
+int $counter = 1;
+for ($counter = 1; $counter < `size $sel`; $counter++)
+	{
+
+	if (`substring $sel $counter $counter` == "[")
+		{
+		break;
+		}
+	}
+
+if (`size $sel` == $counter)
+		return "o";
+else
+	{
+	if (`substring $sel ($counter - 1) ($counter - 1)` == "x")
+		return "v";
+	else if (`substring $sel ($counter - 1) ($counter - 1)` == "e")
+		return "e";
+	else if (`substring $sel ($counter - 1) ($counter - 1)` == "f")
+		return "f";
+	else if (`substring $sel ($counter - 1) ($counter - 1)` == "p")
+		return "u";
+	else
+		return "";
+	}
+return "";
+}

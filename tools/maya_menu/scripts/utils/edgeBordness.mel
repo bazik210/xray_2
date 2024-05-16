@@ -1,0 +1,7 @@
+global proc int edgeBordness(string $edge)
+{
+if (`size (conv({$edge}, "f"))` == 1)
+	return 1;
+else
+	return 0;
+}

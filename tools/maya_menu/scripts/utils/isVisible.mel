@@ -1,0 +1,36 @@
+global proc int isVisible(string $object)
+{
+//$object = sel1();
+string $layer = objectLayer ($object);
+if ($layer != "defaultLayer")
+	{
+	int $layerVis = `getAttr ($layer + ".v")`;
+	if (!$layerVis)
+		return 0;
+	}
+int $visible = 1;
+string $parent;
+string $currObj = $object;
+int $count = 0;
+for (;;)
+	{
+	int $visCurr = `getAttr ($currObj + ".v")`;
+	if (!$visCurr)
+		{
+		$visible = 0;
+		break;
+		}
+	$parent = stringSingle(`listRelatives -p $currObj`);
+	if ($parent == "")
+		break;
+	else
+		$currObj = $parent;
+	$count++;
+	if ($count > 1000)
+		{
+		warning "LOOP";
+		break;
+		}
+	}
+return $visible;
+}

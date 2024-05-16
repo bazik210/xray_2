@@ -1,0 +1,121 @@
+
+global proc SetColorToControlInd(int $colIndex)
+{
+// =================================================//
+// if $colIndex == -1 than Reset all color settings //
+// ================================================ //
+if ($colIndex == -1)
+{
+	polyColorSet -delete;
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+		string $ControllerShape[] = `listRelatives -shapes`;
+		string $shape;
+		for ($shape in $ControllerShape)
+		{
+	     		setAttr ($shape + ".overrideEnabled") 0;
+			setAttr ($shape + ".displayColors") 0;
+		}
+	}
+}
+else
+{
+// =================================================//
+// if $colIndex == 0 than Set all color randomly    //
+// ================================================ //
+if ($colIndex == 0)
+{
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+		string $ControllerShape[] = `listRelatives -shapes`;
+		if (!`objectType -isType "mesh" $ControllerShape[0]`)
+		{
+			string $shape;
+			for ($shape in $ControllerShape)
+			{
+				int $RandIndex = rand(1,31);
+	     			setAttr ($shape + ".overrideEnabled") 1;
+	     			setAttr ($shape + ".overrideColor") $RandIndex;
+			}
+	    	}	
+	    	else
+	    	{
+			int $RandIndex = rand(1,31);
+			float $tmpColArr[] = `colorIndex -q $RandIndex`;
+			polyColorPerVertex -r $tmpColArr[0] -g $tmpColArr[1] -b $tmpColArr[2] -a 1 -cdo;
+		}
+	}
+	select -cl;
+}
+// ================================================ //
+else
+{
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+		string $ControllerShape[] = `listRelatives -shapes`;
+		if (!`objectType -isType "mesh" $ControllerShape[0]`)
+		{
+			string $shape;
+			for ($shape in $ControllerShape)
+			{
+	     			setAttr ($shape + ".overrideEnabled") 1;
+	     			setAttr ($shape + ".overrideColor") $colIndex;
+			}
+	    	}	
+	    	else
+	    	{
+			float $tmpColArr[] = `colorIndex -q $colIndex`;
+			polyColorPerVertex -r $tmpColArr[0] -g $tmpColArr[1] -b $tmpColArr[2] -a 1 -cdo;
+		}
+	}
+}
+}
+select -cl;
+}
+
+global proc SetCustomOverrideColor()
+{
+// Create Window //
+string $myWindow = "SetCustomOverrideColor";
+if (`window -ex $myWindow`)
+        deleteUI $myWindow;
+window $myWindow;
+// Color index value is outside valid range of [1,31] //
+// ================================================== //
+columnLayout mainLayout;
+rowColumnLayout -nc 32 	-cw 1 25 -cw 2 25 -cw 3 25 -cw 4 25 -cw 5 25 -cw 6 25 -cw 7 25 -cw 8 25  -cw 9 25 
+				-cw 10 25 -cw 11 25 -cw 12 25 -cw 13 25 -cw 14 25 -cw 15 25 -cw 16 25 -cw 17 25 -cw 18 25 -cw 19 25 
+				-cw 20 25 -cw 21 25 -cw 22 25 -cw 23 25 -cw 24 25 -cw 25 25 -cw 26 25 -cw 27 25 -cw 28 25 -cw 29 25 
+				-cw 30 25 -cw 31 50 -cw 32 50;
+
+for ( $j = 0; $j < 30; $j++ )
+{
+	int $i= $j + 1;
+	float $tmpColArr[] = `colorIndex -q $i`;
+	button -w 15 -l "" -bgc $tmpColArr[0] $tmpColArr[1] $tmpColArr[2] -c ("SetColorToControlInd " + $i);
+
+}
+
+	button -w 15 -l "Rand" -c "SetColorToControlInd(0);";
+	button -w 15 -l "Reset" -c "SetColorToControlInd(-1);";
+
+setParent mainLayout;
+window -tlb true -title "Set Color To Control" -s 0 -e -wh 858 50 $myWindow;
+showWindow $myWindow;
+};
+
+
+
+

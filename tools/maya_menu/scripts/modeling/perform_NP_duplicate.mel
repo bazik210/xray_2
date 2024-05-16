@@ -1,0 +1,1805 @@
+//
+//  Nicolas Pastrana Script File
+//  site: http://n.pastrana.free.fr
+//  help: http://n.pastrana.free.fr/mel/
+//  mail: n.pastrana@free.fr
+//
+// I DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+// INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+// EVENT SHALL I BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+// CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+// DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+// TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+// PERFORMANCE OF THIS SOFTWARE.                  
+//
+//  Creation Date:  October, 2004
+//  
+//  Description:
+//  	This script add in the standard duplicate options:
+//  	
+//  		- duplicate total transform:
+//  		duplicate a single DAG object on a 1, 2 or 3 dimensional array with the 3
+//		simple space description: "cubic", "cylindrical" and "spherical".
+//  		
+//  		- duplicate along curves:
+//  		duplicate a single DAG object on a ensemble of selected nurbs curves.
+//  		
+//  		- duplicate along nurbs surfaces:
+//  		duplicate a single DAG object on a ensemble of selected nurbs surfaces.
+//  	
+//  	If the "Custom Attributes" option is set on, a collection of attributes is created on 
+//	the Parent Group to control and animate the result "Extended Duplication" object.
+//  
+//  
+//  Updates:  
+//		December, 2004
+//  		- the "Enable Extended Duplicate Options" is now on the top of the options window.
+//  		- the "Total Transform duplicate mode" is now avaible.
+//  		- the scene can now be saved, opened and keep the attributes update working.
+//  		- the scene can now be rendered with animation.
+//  		- the customs attributes for the constraints are now reported on the parent group.
+//		December, 2006
+//			the help is unavaible on Maya 8.0 to correct a bug.
+//  
+//  
+//  Instalation:
+//  
+//  	Put the 4 files:
+//  		- perform_NP_duplicate.mel 
+//  		- perform_NP_duplicateAlongCurve.mel
+//  		- perform_NP_duplicateAlongSurface.mel
+//  		- perform_NP_duplicateTotalTransform.mel
+//  	
+//  	that you find on the "_NP_duplicate.1.0.rar" on your mel scripts folder:
+//  	
+//  		(Windows)	 drive:\Documents and Settings\username\My Documents\maya\scripts
+//  		(Mac OS X)	 Users/username/Library/Preferences/Alias/maya/6.0/scripts
+//  		(IRIX and Linux) ~username/maya/scripts
+//  	
+//  	and restart maya (or source them)...
+//  	
+//  	To have the options window with the Extended Duplicate Options on, use the command: 
+//
+//
+//
+//  	perform_NP_duplicate(1);
+//
+//  	
+//
+//  	tip: you can assign it to a shortkey or put it on your shell.
+//  
+//  warning: DON'T CHANGE THE NAMES AND THE HIERARCHY !
+//
+//  more informations on: http://n.pastrana.free.fr/mel/
+//
+//  MODIFY THIS AT YOUR OWN RISK
+//
+proc string _NP_duplicateHelp()
+{
+	return 
+	"  Command: _NP_duplicate - create a copy of selected objects.\n" +
+	"Selection: objects.";
+}
+
+proc setOptionVars (int $forceFactorySettings)
+{
+	source performNormalConstraint;
+	source performAimConstraint;
+	source performPathAnimation;
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformEnable`) {
+		optionVar -intValue _NP_duplicateTotalTransformEnable 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformGeometryType`) {
+		optionVar -intValue _NP_duplicateTotalTransformGeometryType 1;
+	}
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformNumber`) {
+		optionVar -intValue _NP_duplicateTotalTransformNumber 0;
+		optionVar -intValueAppend _NP_duplicateTotalTransformNumber 0;
+		optionVar -intValueAppend _NP_duplicateTotalTransformNumber 0;
+	}
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformPositionMode1`) {
+		optionVar -intValue _NP_duplicateTotalTransformPositionMode1 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformPositionMode2 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformPositionMode3 1;
+	}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformDim`) {
+			optionVar -floatValue _NP_duplicateTotalTransformDim 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformDim 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformDim 0;
+		}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformDimMax`) {
+			optionVar -floatValue _NP_duplicateTotalTransformDimMax 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformDimMax 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformDimMax 0;
+		}
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformRotMode1`) {
+		optionVar -intValue _NP_duplicateTotalTransformRotMode1 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotMode1 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotMode1 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformRotIncAxes`) {
+		optionVar -intValue _NP_duplicateTotalTransformRotIncAxes 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotIncAxes 2;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotIncAxes 3;
+	}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformRot`) {
+			optionVar -floatValue _NP_duplicateTotalTransformRot 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformRot 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformRot 0;
+		}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformRotMax`) {
+			optionVar -floatValue _NP_duplicateTotalTransformRotMax 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformRotMax 0;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformRotMax 0;
+		}
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformScaleMode1`) {
+		optionVar -intValue _NP_duplicateTotalTransformScaleMode1 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleMode1 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleMode1 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformScaleIncAxes`) {
+		optionVar -intValue _NP_duplicateTotalTransformScaleIncAxes 1;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleIncAxes 2;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleIncAxes 3;
+	}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformScale`) {
+			optionVar -floatValue _NP_duplicateTotalTransformScale 1;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformScale 1;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformScale 1;
+		}
+		if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformScaleMax`) {
+			optionVar -floatValue _NP_duplicateTotalTransformScaleMax 1;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformScaleMax 1;
+			optionVar -floatValueAppend _NP_duplicateTotalTransformScaleMax 1;
+		}
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformDuplicateMode`) {
+		optionVar -intValue _NP_duplicateTotalTransformDuplicateMode 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateTotalTransformAttibutes`) {
+		optionVar -intValue _NP_duplicateTotalTransformAttibutes 1;
+	}
+
+//-------------------------------------------------------------------------------------------------
+//	Along Curves
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesEnable`) {
+		optionVar -intValue _NP_duplicateAlongCurvesEnable 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesNumber`) {
+		optionVar -intValue _NP_duplicateAlongCurvesNumber 30;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesDistance`) {
+		optionVar -floatValue _NP_duplicateAlongCurvesDistance 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesOffsetDistance`) {
+		optionVar -floatValue _NP_duplicateAlongCurvesOffsetDistance 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesCountMethod`) {
+		optionVar -intValue _NP_duplicateAlongCurvesCountMethod 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesTolerance`) {
+		optionVar -floatValue _NP_duplicateAlongCurvesTolerance 0.1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesMesh`) {
+		optionVar -intValue _NP_duplicateAlongCurvesMesh 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesKeyTwist`) {
+		optionVar -intValue _NP_duplicateAlongCurvesKeyTwist 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesKeyScale`) {
+		optionVar -intValue _NP_duplicateAlongCurvesKeyScale 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongCurvesAttibutes`) {
+		optionVar -intValue _NP_duplicateAlongCurvesAttibutes 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists snapshotForceUpdate`) {
+		optionVar -intValue snapshotForceUpdate 1;
+	}
+
+//-------------------------------------------------------------------------------------------------
+//	Along Surfaces
+
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesEnable`) {
+		optionVar -intValue _NP_duplicateAlongSurfacesEnable 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_DuplicateAlongSurfacesNumberUV`) {
+		optionVar -intValue _NP_DuplicateAlongSurfacesNumberUV 2;
+		optionVar -intValueAppend _NP_DuplicateAlongSurfacesNumberUV 2;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesOffsetU`) {
+		optionVar -floatValue _NP_duplicateAlongSurfacesOffsetU 0;
+		optionVar -floatValueAppend _NP_duplicateAlongSurfacesOffsetU 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesOffsetV`) {
+		optionVar -floatValue _NP_duplicateAlongSurfacesOffsetV 0;
+		optionVar -floatValueAppend _NP_duplicateAlongSurfacesOffsetV 0;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesConstraint`) {
+		optionVar -intValue _NP_duplicateAlongSurfacesConstraint 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesDuplicateMode`) {
+		optionVar -intValue _NP_duplicateAlongSurfacesDuplicateMode 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesConstraintMode`) {
+		optionVar -intValue _NP_duplicateAlongSurfacesConstraintMode 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists normalConstraintNormalVectorB`) {
+		optionVar -intValue normalConstraintNormalVectorB 2;
+		optionVar -intValue normalConstraintPrevNormalVectorB 2;
+	}
+	if ($forceFactorySettings || !`optionVar -exists normalConstraintUVectorB`) {
+		optionVar -intValue normalConstraintUVectorB 1;
+		optionVar -intValue normalConstraintPrevUVectorB 1;
+	}
+	if ($forceFactorySettings || !`optionVar -exists _NP_duplicateAlongSurfacesAttibutes`) {
+		optionVar -intValue _NP_duplicateAlongSurfacesAttibutes 1;
+	}
+}
+
+global proc _NP_duplicateSetup (string $parent, int $forceFactorySettings)
+{
+	setParent $parent;
+
+	setOptionVars ($forceFactorySettings);
+
+	normalConstraintSetup ($parent, $forceFactorySettings);
+	aimConstraintSetup ($parent, $forceFactorySettings);
+	pathAnimationSetup ($parent, $forceFactorySettings);
+	
+	radioButtonGrp -e -sl `optionVar -query _NP_duplicateAlongCurvesEnable` 
+		_NP_duplicateAlongCurvesEnable;
+	floatFieldGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesDistance` 
+		_NP_duplicateAlongCurvesDistance;
+	floatFieldGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesOffsetDistance` 
+		_NP_duplicateAlongCurvesOffsetDistance;
+	intFieldGrp -e -value1 `optionVar -query _NP_duplicateAlongCurvesNumber`
+		_NP_duplicateAlongCurvesNumber;
+	radioButtonGrp -e -select (`optionVar -query _NP_duplicateAlongCurvesCountMethod`)
+		 _NP_duplicateAlongCurvesCountMethod;
+	floatFieldGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesTolerance` 
+		_NP_duplicateAlongCurvesTolerance;
+	checkBoxGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesMesh` 
+		_NP_duplicateAlongCurvesMesh;
+	checkBoxGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesKeyTwist` 
+		_NP_duplicateAlongCurvesKeyTwist;
+	checkBoxGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesKeyScale` 
+		_NP_duplicateAlongCurvesKeyScale;
+	checkBoxGrp -e -value1 `optionVar -q _NP_duplicateAlongCurvesAttibutes` 
+		_NP_duplicateAlongCurvesAttibutes;
+
+
+	radioButtonGrp -e -sl `optionVar -query _NP_duplicateAlongSurfacesEnable` 
+		_NP_duplicateAlongSurfacesEnable;
+	int $numberUV[] = `optionVar -query _NP_DuplicateAlongSurfacesNumberUV`;
+	intFieldGrp -e -value1 $numberUV[0] -value2 $numberUV[1]
+		_NP_DuplicateAlongSurfacesNumberUV;
+	float $offset[] = `optionVar -query _NP_duplicateAlongSurfacesOffsetU`;
+	floatFieldGrp -e -v1 $offset[0] -v2 $offset[1]
+		_NP_DuplicateAlongSurfacesOffsetU;
+	$offset = `optionVar -query _NP_duplicateAlongSurfacesOffsetV`;
+	floatFieldGrp -e -v1 $offset[0] -v2 $offset[1]
+		_NP_duplicateAlongSurfacesOffsetV;
+	checkBoxGrp -e -v1 `optionVar -q _NP_duplicateAlongSurfacesConstraint` 
+		_NP_duplicateAlongSurfacesConstraint;
+	optionMenuGrp -e -sl `optionVar -q _NP_duplicateAlongSurfacesConstraintMode` 
+		_NP_duplicateAlongSurfacesConstraintMode;
+	optionMenuGrp -e -sl `optionVar -q normalConstraintNormalVectorB` 
+		normalConstraintNormalVectorB;
+	optionMenuGrp -e -sl `optionVar -q normalConstraintUVectorB`
+		normalConstraintUVectorB;
+	radioButtonGrp -e -sl (`optionVar -query _NP_duplicateAlongSurfacesDuplicateMode`)
+		 _NP_duplicateAlongSurfacesDuplicateMode;
+	checkBoxGrp -e -v1 `optionVar -query _NP_duplicateAlongSurfacesAttibutes` 
+		_NP_duplicateAlongSurfacesAttibutes;
+
+
+	floatFieldGrp -e -value1 `optionVar -q snapshotByTime` snapshotByTime;
+	int $forceUpdate = `optionVar -query snapshotForceUpdate`;
+	if (0 == $forceUpdate) {
+		radioButtonGrp -e -sl 1 animCurveSnapshotUpdate;
+	} else if (1 == $forceUpdate) {
+		radioButtonGrp -e -sl 1 forceSnapshotUpdate;		
+	} else {
+		radioButtonGrp -e -sl 1 demandSnapshotUpdate;
+	}
+
+
+	radioButtonGrp -e -sl `optionVar -query _NP_duplicateTotalTransformEnable` 
+		_NP_duplicateTotalTransformCheck;
+	radioButtonGrp -e -sl (`optionVar -query _NP_duplicateTotalTransformGeometryType`) 
+		_NP_duplicateTotalTransformGeometryType;
+
+	vector $posMode = `optionVar -query _NP_duplicateTotalTransformPositionMode1`;
+	optionMenu -e -sl ($posMode.x) _NP_duplicateTotalTransformPositionMode1;
+	optionMenu -e -sl ($posMode.y) _NP_duplicateTotalTransformPositionMode2;
+	optionMenu -e -sl ($posMode.z) _NP_duplicateTotalTransformPositionMode3;
+
+	vector $num = `optionVar -query _NP_duplicateTotalTransformNumber`;
+	intFieldGrp -e -v1 ($num.x) -v2 ($num.y) -v3 ($num.z) _NP_duplicateTotalTransformNumber;
+	vector $pos = `optionVar -query _NP_duplicateTotalTransformDim`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) _NP_duplicateTotalTransformDimension;
+	$pos = `optionVar -query _NP_duplicateTotalTransformDimMax`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) _NP_duplicateTotalTransformDimensionEnd;
+	$pos = `optionVar -query _NP_duplicateTotalTransformRot`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) RotateMin;
+	$pos = `optionVar -query _NP_duplicateTotalTransformRotMax`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) RotateMax;
+	$pos = `optionVar -query _NP_duplicateTotalTransformScale`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) ScaleMin;
+	$pos = `optionVar -query _NP_duplicateTotalTransformScaleMax`;
+	floatFieldGrp -e -v1 ($pos.x) -v2 ($pos.y) -v3 ($pos.z) ScaleMax;
+
+	$pos = `optionVar -query _NP_duplicateTotalTransformRotMode1`;
+	optionMenu -e -sl ($pos.x) _NP_duplicateTotalTransformRotMode1;
+	optionMenu -e -sl ($pos.y) _NP_duplicateTotalTransformRotMode2;
+	optionMenu -e -sl ($pos.z) _NP_duplicateTotalTransformRotMode3;
+	$pos = `optionVar -query _NP_duplicateTotalTransformRotIncAxes`;
+	optionMenu -e -sl ($pos.x) _NP_duplicateTotalTransformRotIncAxes1;
+	optionMenu -e -sl ($pos.y) _NP_duplicateTotalTransformRotIncAxes2;
+	optionMenu -e -sl ($pos.z) _NP_duplicateTotalTransformRotIncAxes3;
+
+	$pos = `optionVar -query _NP_duplicateTotalTransformScaleMode1`;
+	optionMenu -e -sl ($pos.x) _NP_duplicateTotalTransformScaleMode1;
+	optionMenu -e -sl ($pos.y) _NP_duplicateTotalTransformScaleMode2;
+	optionMenu -e -sl ($pos.z) _NP_duplicateTotalTransformScaleMode3;
+	$pos = `optionVar -query _NP_duplicateTotalTransformScaleIncAxes`;
+	optionMenu -e -sl ($pos.x) _NP_duplicateTotalTransformScaleIncAxes1;
+	optionMenu -e -sl ($pos.y) _NP_duplicateTotalTransformScaleIncAxes2;
+	optionMenu -e -sl ($pos.z) _NP_duplicateTotalTransformScaleIncAxes3;
+
+	radioButtonGrp -e -sl (`optionVar -query _NP_duplicateTotalTransformDuplicateMode`)
+		 _NP_duplicateTotalTransformDuplicateMode;
+	checkBoxGrp -e -value1 `optionVar -q _NP_duplicateTotalTransformAttibutes` 
+		_NP_duplicateTotalTransformAttibutes;
+	_NP_initTotalTrans($parent);
+	aimConstraintEnabling ($parent);
+	
+	_NP_duplicateOptionsUpdateEnableState($parent);
+	
+	for ($i=1; $i<=8; $i++) {
+	eval ("_NP_pathAnimEnabling " + $parent + " " + $i);
+	}
+}
+
+global proc _NP_duplicateOptionsUpdateEnableState(string $parent)
+{
+	int $smartTransform, $makeInstance, $groupParent, $simpleCopy, $upstreamGraph, $inputConnections, $instanceLeaf;
+	int $numberOfDuplicates, $enableSmartTransform, $enableTRSFields, $enableDuplicateAlongCurves;
+	int $enableDuplicateAlongSurfaces, $enableDuplicateTotalTransform;
+
+	setParent $parent;
+	$enableDuplicateAlongCurves = `radioButtonGrp -q -select _NP_duplicateAlongCurvesEnable`;
+	$enableDuplicateAlongSurfaces = `radioButtonGrp -q -select _NP_duplicateAlongSurfacesEnable`;
+	$enableDuplicateTotalTransform = `radioButtonGrp -q -select _NP_duplicateTotalTransformCheck`;
+
+	frameLayout -e -cl (!$enableDuplicateTotalTransform) -en ($enableDuplicateTotalTransform) frameLayoutTotalTransform;
+	frameLayout -e -cl (!$enableDuplicateAlongCurves) -en ($enableDuplicateAlongCurves) frameLayoutDuplicateAlongCurves;
+	frameLayout -e -cl (!$enableDuplicateAlongSurfaces) -en ($enableDuplicateAlongSurfaces) frameLayoutDuplicateAlongSurfaces;
+
+	tabLayout -e -en ($enableDuplicateAlongCurves) tabsDuplicateAlongCurves;
+
+	if ($enableDuplicateAlongSurfaces) 
+	{
+		_NP_normalConstraintEnabling($parent, 0);
+	}
+	if ($enableDuplicateAlongCurves) 
+	{
+		radioButtonGrp -e -en $enableDuplicateAlongCurves _NP_duplicateAlongCurvesCountMethod;
+		int $enablePathAnimParametricLength = true;
+		if (`radioButtonGrp -q -select _NP_duplicateAlongCurvesCountMethod` == 3) {
+			checkBoxGrp -e -value1 0 pathAnimParametricLengthCB;
+			$enablePathAnimParametricLength = false;
+		}
+		checkBoxGrp -e -en $enablePathAnimParametricLength pathAnimParametricLengthCB;
+
+
+		for ($i=1; $i<=8; $i++) {
+		eval ("_NP_pathAnimEnabling " + $parent + " " + $i);
+		}
+	}
+	if ($enableDuplicateTotalTransform) 
+	{
+		int $numDim1 = `intFieldGrp -q -v1 _NP_duplicateTotalTransformNumber`;
+		int $numDim2 = `intFieldGrp -q -v2 _NP_duplicateTotalTransformNumber`;
+		int $numDim3 = `intFieldGrp -q -v3 _NP_duplicateTotalTransformNumber`;
+		int $geomType = `radioButtonGrp -q -select _NP_duplicateTotalTransformGeometryType`;
+		int $dim1end=1;
+		int $dim2end=1;
+		int $dim3end=1;
+		if ($numDim1<=1){
+			$numDim1=1;
+			$dim1end=0;
+		}
+		if ($numDim2<=1){
+			$numDim2=1;
+			$dim2end=0;
+		}
+		if ($numDim3<=1){
+			$numDim3=1;
+			$dim3end=0;
+		}
+		intFieldGrp -e -v1 $numDim1 -v2 $numDim2 -v3 $numDim3 _NP_duplicateTotalTransformNumber;
+		floatFieldGrp -e -en1 $dim1end -en2 $dim2end -en3 $dim3end _NP_duplicateTotalTransformDimensionEnd;
+
+		int $trueValue1 = 1;int $trueValue2 = 1;int $trueValue3 = 1;
+		if ($geomType==1) $trueValue1 = $trueValue2 = $trueValue2 = 2;
+		
+		int $dim1;
+		if ($numDim1<$trueValue1) {$dim1 = 0;} else {$dim1 = 1;}
+		int $dim2;
+		if ($numDim2<$trueValue2) {$dim2 = 0;} else {$dim2 = 1;}
+		int $dim3;
+		if ($numDim3<$trueValue2) {$dim3 = 0;} else {$dim3 = 1;}
+		
+		optionMenu -e -en $dim1 _NP_duplicateTotalTransformPositionMode1;
+		optionMenu -e -en $dim2 _NP_duplicateTotalTransformPositionMode2;
+		optionMenu -e -en $dim3 _NP_duplicateTotalTransformPositionMode3;
+		
+		int $rotScaleEn=0;
+		if (($dim1 == 1)||($dim1 == 1)||($dim1 == 1))$rotScaleEn=1;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleMode1;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleMode2;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleMode3;
+		 
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleIncAxes1;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleIncAxes2;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformScaleIncAxes3;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotMode1;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotMode2;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotMode3;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotIncAxes1;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotIncAxes2;
+		optionMenu -e -en $rotScaleEn _NP_duplicateTotalTransformRotIncAxes3;
+		
+		int $dim1end=$dim1=$rotScaleEn;
+		int $dim2end=$dim2=$rotScaleEn;
+		int $dim3end=$dim3=$rotScaleEn;
+		floatFieldGrp -e -en $rotScaleEn ScaleMin;
+		floatFieldGrp -e -en $rotScaleEn ScaleMax;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode1`==3) $dim1=$dim1end=0;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode2`==3) $dim2=$dim2end=0;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode3`==3) $dim3=$dim3end=0;
+		floatFieldGrp -e -en1 $dim1 -en2 $dim2 -en3 $dim3 RotateMin;
+		floatFieldGrp -e -en1 $dim1end -en2 $dim2end -en3 $dim3end RotateMax;
+
+
+		int $enableTabAimConstraint=0;
+		int $enableAxesConstraint=0;
+		int $enableRotIncAxes1=0;
+		int $enableRotIncAxes2=0;
+		int $enableRotIncAxes3=0;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode1`==3) $enableTabAimConstraint=$enableRotIncAxes1=1;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode2`==3) $enableTabAimConstraint=$enableRotIncAxes2=1;
+		if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode3`==3) $enableTabAimConstraint=$enableRotIncAxes3=1; 
+		optionMenu -e -en (!$enableRotIncAxes1) _NP_duplicateTotalTransformRotIncAxes1;
+		optionMenu -e -en (!$enableRotIncAxes2) _NP_duplicateTotalTransformRotIncAxes2;
+		optionMenu -e -en (!$enableRotIncAxes3) _NP_duplicateTotalTransformRotIncAxes3;
+		
+		if ((`optionMenu -q -sl _NP_duplicateTotalTransformRotMode1`==3)&&(`optionMenu -q -sl _NP_duplicateTotalTransformRotMode2`==3)&&(`optionMenu -q -sl _NP_duplicateTotalTransformRotMode3`==3))
+		{
+			checkBoxGrp -e -v1 1 axesAll;
+			checkBoxGrp -e -v1 0 -v2 0 -v3 0 axesXYZ;
+		}
+
+		columnLayout -e -en $enableTabAimConstraint tabAimConstraint;
+		if ($enableTabAimConstraint)
+		{
+			aimConstraintEnabling($parent);
+		
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode1`==3)
+			{
+				checkBoxGrp -e -v1 0 axesAll;
+				checkBoxGrp -e -v1 1 axesXYZ;
+			}
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode2`==3)
+			{
+				checkBoxGrp -e -v1 0 axesAll;
+				checkBoxGrp -e -v2 1 axesXYZ;
+			}
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformRotMode3`==3)
+			{
+				checkBoxGrp -e -v1 0 axesAll;
+				checkBoxGrp -e -v3 1 axesXYZ;
+			}
+			if ((`optionMenu -q -sl _NP_duplicateTotalTransformRotMode1`==3)&&(`optionMenu -q -sl _NP_duplicateTotalTransformRotMode2`==3)&&(`optionMenu -q -sl _NP_duplicateTotalTransformRotMode3`==3))
+			{
+				checkBoxGrp -e -v1 1 axesAll;
+				checkBoxGrp -e -v1 0 -v2 0 -v3 0 axesXYZ;
+			}
+		}
+	}
+}
+
+
+global proc _NP_initTotalTrans(string $parent)
+{
+	int $geometryType = `radioButtonGrp -q -select _NP_duplicateTotalTransformGeometryType`;
+	string $name1[]={"TranslateX","TranslateY","TranslateZ"};
+	string $name2[]={"Radius","Height","Angle"};
+	string $name3[]={"Radius","Longitude","Lattitude"};
+	string $name[];
+	
+	if ($geometryType == 1) $name = $name1;
+	if ($geometryType == 2) $name = $name2;
+	if ($geometryType == 3) $name = $name3;
+
+	text -e -l $name[0] _NP_duplicateTotalTransformDimensionName1;
+	text -e -l $name[1] _NP_duplicateTotalTransformDimensionName2;
+	text -e -l $name[2] _NP_duplicateTotalTransformDimensionName3;
+
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformRotIncAxes1Item1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformRotIncAxes1Item2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformRotIncAxes1Item3;
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformRotIncAxes2Item1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformRotIncAxes2Item2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformRotIncAxes2Item3;
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformRotIncAxes3Item1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformRotIncAxes3Item2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformRotIncAxes3Item3;
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformScaleIncAxesItem1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformScaleIncAxesItem2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformScaleIncAxesItem3;
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformScaleIncAxes2Item1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformScaleIncAxes2Item2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformScaleIncAxes2Item3;
+	menuItem -e -l $name[0] _NP_duplicateTotalTransformScaleIncAxes3Item1;
+	menuItem -e -l $name[1] _NP_duplicateTotalTransformScaleIncAxes3Item2;
+	menuItem -e -l $name[2] _NP_duplicateTotalTransformScaleIncAxes3Item3;
+
+	_NP_duplicateOptionsUpdateEnableState ($parent);
+}
+
+global proc _NP_initScaleValue(int $witch)
+{
+	switch($witch)
+	{
+		case 1:
+			int $value=1;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode1`==2) $value=0;
+			floatFieldGrp -e -v1 $value ScaleMin;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode1`==2) $value=1;
+			floatFieldGrp -e -v1 $value ScaleMax;
+			break;
+		case 2:
+			int $value=1;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode2`==2) $value=0;
+			floatFieldGrp -e -v2 $value ScaleMin;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode2`==2) $value=1;
+			floatFieldGrp -e -v2 $value ScaleMax;
+			break;
+		case 3:
+			int $value=1;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode3`==2) $value=0;
+			floatFieldGrp -e -v3 $value ScaleMin;
+			if (`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode3`==2) $value=1;
+			floatFieldGrp -e -v3 $value ScaleMax;
+			break;
+	}
+}
+
+global proc _NP_pathAnimEnabling(string $parent, int $widget)
+{
+	setParent $parent;
+	pathAnimEnabling($parent, $widget);
+	switch($widget)
+	{
+		case 1: // Update the Start/End display
+			int $state = `radioButtonGrp -query -select _NP_duplicateAlongCurvesCountMethod`;
+			switch ($state)
+			{
+				case 1:	// "Number"
+					frameLayout -e -en true number;
+					frameLayout -e -en false StartEnd;
+					frameLayout -e -en false incrementDistance;
+					
+					break;
+				case 2: // "Start/End"
+					frameLayout -e -en false number;
+					frameLayout -e -en true StartEnd;
+					frameLayout -e -en false incrementDistance;
+					break;
+				case 3: // "Distance"
+					frameLayout -e -en false number;
+					frameLayout -e -en false StartEnd;
+					frameLayout -e -en true incrementDistance;
+					break;
+			}
+			break;
+		case 7: // Number Editing
+			float $tempTime = `intFieldGrp -query -value1 _NP_duplicateAlongCurvesNumber`;
+			if ($tempTime<2) {$tempTime = 2; intFieldGrp -e -value1 2 _NP_duplicateAlongCurvesNumber;}
+
+			floatFieldGrp -e -value1 1 -value2 $tempTime pathAnimStartEndTime;
+			floatFieldGrp -e -value1 1 -value2 $tempTime snapshotStartEndTime;
+			floatFieldGrp -e -value1 1 snapshotByTime;
+			break;
+		case 8: // Frames Editing
+			float $snapshottemp[];
+			$snapshottemp[0] = `floatFieldGrp -query -value1 snapshotStartEndTime`;
+			$snapshottemp[1] = `floatFieldGrp -query -value2 snapshotStartEndTime`;
+			float $increment = `floatFieldGrp -query -value1 snapshotByTime`;
+			float $numberValue = (($snapshottemp[1]-$snapshottemp[0])/$increment);
+			intFieldGrp -e -value1 (trunc($numberValue)+1) _NP_duplicateAlongCurvesNumber;
+			break;
+	}
+}
+
+
+global proc _NP_normalConstraintEnabling(string $parent, int $axes)
+{
+	setParent $parent;
+	int $enable = `checkBoxGrp -q -v1 _NP_duplicateAlongSurfacesConstraint`;
+	columnLayout -e -en $enable contraint;
+	if ($enable)
+	{
+		int $mode = `optionMenuGrp -q -sl _NP_duplicateAlongSurfacesConstraintMode`;
+		int $surface=0;
+		int $normal=0;
+		if ($mode == 1) {$surface = 1;} else {$normal = 1;}
+		columnLayout -e -en $surface surfaceContraintLayout;
+		columnLayout -e -en $normal normalContraintLayout;
+		if ($normal) normalConstraintEnabling($parent);
+		if ($surface)
+		{
+			int $axeNormal = `optionMenuGrp -q -sl normalConstraintNormalVectorB`;
+			int $axeU = `optionMenuGrp -q -sl normalConstraintUVectorB`;
+			if ($axes==1)
+			{
+				if($axeNormal == $axeU)
+				{
+					int $prevNormal = `optionVar -query normalConstraintPrevNormalVectorB`;
+					optionMenuGrp -e -sl $prevNormal normalConstraintUVectorB;
+					optionVar -intValue normalConstraintPrevUVectorB $prevNormal;
+				}
+			optionVar -intValue normalConstraintPrevNormalVectorB $axeNormal;
+			}
+			if ($axes==2)
+			{
+				if ($axeNormal == $axeU)
+				{
+					int $prevU = `optionVar -query normalConstraintPrevUVectorB`;
+					optionMenuGrp -e -sl $prevU normalConstraintNormalVectorB;
+					optionVar -intValue normalConstraintPrevNormalVectorB $prevU;
+				}
+			optionVar -intValue normalConstraintPrevUVectorB $axeU;
+			}
+		}
+	}
+}
+
+
+global proc _NP_duplicateCallback (string $parent, int $doIt)
+{
+	setParent $parent;
+
+	$enableDuplicateAlongCurves = `radioButtonGrp -q -select _NP_duplicateAlongCurvesEnable`;
+	$enableDuplicateAlongSurfaces = `radioButtonGrp -q -select _NP_duplicateAlongSurfacesEnable`;
+	$enableDuplicateTotalTransform = `radioButtonGrp -q -select _NP_duplicateTotalTransformCheck`;
+
+		optionVar -intValue _NP_duplicateAlongCurvesEnable $enableDuplicateAlongCurves;
+	optionVar -intValue _NP_duplicateAlongSurfacesEnable $enableDuplicateAlongSurfaces;
+	optionVar -intValue _NP_duplicateTotalTransformEnable $enableDuplicateTotalTransform;
+	
+	if ($enableDuplicateAlongCurves)
+	{
+		optionVar -intValue pathAnimParametricLengthCB
+			`checkBoxGrp -query -v1 pathAnimParametricLengthCB`;
+		optionVar -intValue pathAnimFollowCB
+			`checkBoxGrp -query -v1 pathAnimFollowCB`;
+		optionVar -intValue pathAnimFrontAxisRB
+			`radioButtonGrp -query -select pathAnimFrontAxisRB`;
+		optionVar -intValue pathAnimUpAxisRB
+			`radioButtonGrp -query -select pathAnimUpAxisRB`;
+	
+		int $state = `optionMenuGrp -query -select pathAnimWorldUpTypeOM`;
+		switch ( $state )
+		{
+		case 1:
+			optionVar -stringValue pathAnimWorldUpTypeOM "scene";
+			break;
+		case 2:
+			optionVar -stringValue pathAnimWorldUpTypeOM "object";
+			break;
+		case 3:
+			optionVar -stringValue pathAnimWorldUpTypeOM "objectrotation";
+			break;
+		case 4:
+			optionVar -stringValue pathAnimWorldUpTypeOM "vector";
+			break;
+		case 5:
+			optionVar -stringValue pathAnimWorldUpTypeOM "normal";
+			break;
+		}
+		optionVar -floatValue pathAnimWorldUpVectorFF
+			`floatFieldGrp -query -value1 pathAnimWorldUpVectorFF`
+			-floatValueAppend pathAnimWorldUpVectorFF
+			`floatFieldGrp -query -value2 pathAnimWorldUpVectorFF`
+			-floatValueAppend pathAnimWorldUpVectorFF
+			`floatFieldGrp -query -value3 pathAnimWorldUpVectorFF`;
+		optionVar -stringValue pathAnimWorldUpObjectTF
+			`textFieldGrp -query -text pathAnimWorldUpObjectTF`;
+		optionVar -intValue pathAnimInverseUpCB
+			`checkBoxGrp -query -v1 pathAnimInverseUpCB`;
+		optionVar -intValue pathAnimInverseFrontCB
+			`checkBoxGrp -query -v1 pathAnimInverseFrontCB`;
+		optionVar -intValue pathAnimBankCB
+			`checkBoxGrp -query -v1 pathAnimBankCB`;
+		optionVar -floatValue pathAnimBankScaleSG
+			`floatSliderGrp -query -v pathAnimBankScaleSG`;
+		optionVar -floatValue pathAnimBankMaxSG
+			`floatSliderGrp -query -v pathAnimBankMaxSG`;
+		optionVar -floatValue pathAnimStartTimeSG
+			`floatFieldGrp -query -v1 pathAnimStartEndTime`;
+		optionVar -floatValue pathAnimEndTimeSG
+			`floatFieldGrp -query -v2 pathAnimStartEndTime`;
+
+		int $mode = `radioButtonGrp -query -select _NP_duplicateAlongCurvesCountMethod`;
+		optionVar -intValue _NP_duplicateAlongCurvesCountMethod $mode;
+
+		switch ($mode)
+		{
+			case 1: 
+				optionVar -intValue _NP_duplicateAlongCurvesNumber
+					`intFieldGrp -query -v1 _NP_duplicateAlongCurvesNumber`;
+			break;
+			case 2:
+				optionVar -floatValue pathAnimStartTimeSG
+					`floatFieldGrp -query -v1 pathAnimStartEndTime`;
+				optionVar -floatValue pathAnimEndTimeSG
+					`floatFieldGrp -query -v2 pathAnimStartEndTime`;
+				optionVar -floatValue snapshotStartTime
+					`floatFieldGrp -query -value1 snapshotStartEndTime`;
+				optionVar -floatValue snapshotEndTime
+					`floatFieldGrp -query -value2 snapshotStartEndTime`;
+				optionVar -floatValue snapshotByTime
+					`floatFieldGrp -query -value1 snapshotByTime`;
+			break;
+			case 3:
+				optionVar -floatValue _NP_duplicateAlongCurvesDistance 
+					`floatFieldGrp -q -value1 _NP_duplicateAlongCurvesDistance`;
+				optionVar -floatValue _NP_duplicateAlongCurvesOffsetDistance 
+					`floatFieldGrp -q -value1 _NP_duplicateAlongCurvesOffsetDistance`;
+				optionVar -floatValue _NP_duplicateAlongCurvesTolerance
+					`floatFieldGrp -query -v1 _NP_duplicateAlongCurvesTolerance`;
+			break;
+		}
+		if (`radioButtonGrp -q -sl forceSnapshotUpdate`) {
+			optionVar -intValue snapshotForceUpdate 1;
+		} else if (`radioButtonGrp -q -sl demandSnapshotUpdate`) {
+			optionVar -intValue snapshotForceUpdate 2;		
+		} else {
+			optionVar -intValue snapshotForceUpdate 0;
+		}
+
+		optionVar -intValue _NP_duplicateAlongCurvesMesh
+			`checkBoxGrp -query -v1 _NP_duplicateAlongCurvesMesh`;
+		optionVar -intValue _NP_duplicateAlongCurvesKeyTwist
+			`checkBoxGrp -query -v1 _NP_duplicateAlongCurvesKeyTwist`;
+		optionVar -intValue _NP_duplicateAlongCurvesKeyScale
+			`checkBoxGrp -query -v1 _NP_duplicateAlongCurvesKeyScale`;
+		optionVar -intValue _NP_duplicateAlongCurvesAttibutes
+			`checkBoxGrp -query -v1 _NP_duplicateAlongCurvesAttibutes`;
+	}
+	if ($enableDuplicateAlongSurfaces) {
+
+		optionVar -clearArray _NP_DuplicateAlongSurfacesNumberUV;
+		optionVar -intValue _NP_DuplicateAlongSurfacesNumberUV
+			`intFieldGrp -q -v1 _NP_DuplicateAlongSurfacesNumberUV`;
+		optionVar -intValueAppend _NP_DuplicateAlongSurfacesNumberUV
+			`intFieldGrp -q -v2 _NP_DuplicateAlongSurfacesNumberUV`;
+		
+		optionVar -clearArray _NP_duplicateAlongSurfacesOffsetU;
+		optionVar -floatValue  _NP_duplicateAlongSurfacesOffsetU
+			`floatFieldGrp -q -v1 _NP_DuplicateAlongSurfacesOffsetU`;
+		optionVar -floatValueAppend  _NP_duplicateAlongSurfacesOffsetU
+			`floatFieldGrp -q -v2 _NP_DuplicateAlongSurfacesOffsetU`;
+		
+		optionVar -clearArray _NP_duplicateAlongSurfacesOffsetV;
+		optionVar -floatValue  _NP_duplicateAlongSurfacesOffsetV
+			`floatFieldGrp -q -v1 _NP_duplicateAlongSurfacesOffsetV`;
+		optionVar -floatValueAppend _NP_duplicateAlongSurfacesOffsetV
+			`floatFieldGrp -q -v2 _NP_duplicateAlongSurfacesOffsetV`;
+
+		optionVar -intValue _NP_duplicateAlongSurfacesConstraint
+			`checkBoxGrp -q -v1 _NP_duplicateAlongSurfacesConstraint`;
+		optionVar -intValue _NP_duplicateAlongSurfacesAttibutes
+			`checkBoxGrp -q -v1 _NP_duplicateAlongSurfacesAttibutes`;
+		optionVar -intValue _NP_duplicateAlongSurfacesDuplicateMode
+			`radioButtonGrp -q -sl _NP_duplicateAlongSurfacesDuplicateMode`;
+
+		int $duplicateAlongSurfacesConstraintMode = 
+			`optionMenuGrp -q -sl _NP_duplicateAlongSurfacesConstraintMode`;
+		optionVar -intValue _NP_duplicateAlongSurfacesConstraint
+			`checkBoxGrp -q -v1 _NP_duplicateAlongSurfacesConstraint` ;
+		optionVar -intValue _NP_duplicateAlongSurfacesConstraintMode
+			$duplicateAlongSurfacesConstraintMode;
+		if ($duplicateAlongSurfacesConstraintMode==1) 
+		{
+			optionVar -intValue normalConstraintNormalVectorB
+				`optionMenuGrp -q -sl normalConstraintNormalVectorB`;
+			optionVar -intValue normalConstraintUVectorB
+				`optionMenuGrp -q -sl normalConstraintUVectorB`;
+		} else {
+			normalConstraintCallback ($parent, 0);
+		}
+	}
+	if ($enableDuplicateTotalTransform)
+	{
+		aimConstraintCallback ($parent, 0);
+		optionVar -intValue _NP_duplicateTotalTransformGeometryType
+			`radioButtonGrp -q -sl _NP_duplicateTotalTransformGeometryType`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformNumber;
+		optionVar -intValue _NP_duplicateTotalTransformNumber
+			`intFieldGrp -query -value1 _NP_duplicateTotalTransformNumber`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformNumber
+			`intFieldGrp -query -value2 _NP_duplicateTotalTransformNumber`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformNumber
+			`intFieldGrp -query -value3 _NP_duplicateTotalTransformNumber`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformPositionMode1;
+		optionVar -intValue _NP_duplicateTotalTransformPositionMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformPositionMode1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformPositionMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformPositionMode2`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformPositionMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformPositionMode3`;
+
+
+		optionVar -clearArray _NP_duplicateTotalTransformDim;
+		optionVar -floatValue _NP_duplicateTotalTransformDim
+			`floatFieldGrp -query -value1 _NP_duplicateTotalTransformDimension`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformDim
+			`floatFieldGrp -query -value2 _NP_duplicateTotalTransformDimension`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformDim
+			`floatFieldGrp -query -value3 _NP_duplicateTotalTransformDimension`;
+		
+		optionVar -clearArray _NP_duplicateTotalTransformDimMax;
+		optionVar -floatValue _NP_duplicateTotalTransformDimMax
+			`floatFieldGrp -query -value1 _NP_duplicateTotalTransformDimensionEnd`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformDimMax
+			`floatFieldGrp -query -value2 _NP_duplicateTotalTransformDimensionEnd`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformDimMax
+			`floatFieldGrp -query -value3 _NP_duplicateTotalTransformDimensionEnd`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformRotMode1;
+		optionVar -intValue _NP_duplicateTotalTransformRotMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformRotMode1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformRotMode2`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformRotMode3`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformRotIncAxes;
+		optionVar -intValue _NP_duplicateTotalTransformRotIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformRotIncAxes1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformRotIncAxes2`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformRotIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformRotIncAxes3`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformRot;
+		optionVar -floatValue _NP_duplicateTotalTransformRot
+			`floatFieldGrp -query -value1 RotateMin`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformRot
+			`floatFieldGrp -query -value2 RotateMin`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformRot
+			`floatFieldGrp -query -value3 RotateMin`;
+		
+		optionVar -clearArray _NP_duplicateTotalTransformRotMax;
+		optionVar -floatValue _NP_duplicateTotalTransformRotMax
+			`floatFieldGrp -query -value1 RotateMax`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformRotMax
+			`floatFieldGrp -query -value2 RotateMax`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformRotMax
+			`floatFieldGrp -query -value3 RotateMax`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformScaleMode1;
+		optionVar -intValue _NP_duplicateTotalTransformScaleMode1
+			`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleMode1
+			`optionMenu -q -sl _NP_duplicateTotalTransformScaleMode1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleMode1
+			`optionMenu -query -sl _NP_duplicateTotalTransformScaleMode3`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformScaleIncAxes;
+		optionVar -intValue _NP_duplicateTotalTransformScaleIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformScaleIncAxes1`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformScaleIncAxes2`;
+		optionVar -intValueAppend _NP_duplicateTotalTransformScaleIncAxes
+			`optionMenu -q -sl _NP_duplicateTotalTransformScaleIncAxes3`;
+
+		optionVar -clearArray _NP_duplicateTotalTransformScale;
+		optionVar -floatValue _NP_duplicateTotalTransformScale
+			`floatFieldGrp -query -value1 ScaleMin`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformScale
+			`floatFieldGrp -query -value2 ScaleMin`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformScale
+			`floatFieldGrp -query -value3 ScaleMin`;
+		
+		optionVar -clearArray _NP_duplicateTotalTransformScaleMax;
+		optionVar -floatValue _NP_duplicateTotalTransformScaleMax
+			`floatFieldGrp -query -value1 ScaleMax`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformScaleMax
+			`floatFieldGrp -query -value2 ScaleMax`;
+		optionVar -floatValueAppend _NP_duplicateTotalTransformScaleMax
+			`floatFieldGrp -query -value3 ScaleMax`;
+		
+		optionVar -intValue _NP_duplicateTotalTransformDuplicateMode 
+			`radioButtonGrp -q -sl _NP_duplicateTotalTransformDuplicateMode`;
+		optionVar -intValue _NP_duplicateTotalTransformAttibutes
+			`checkBoxGrp -query -v1 _NP_duplicateTotalTransformAttibutes`;
+
+	}
+	if ($doIt) {
+		perform_NP_duplicate 0; 
+		addToRecentCommandQueue "perform_NP_duplicate 0" "_NP_duplicate";
+	}
+}
+
+proc _NP_duplicateOptions()
+{
+	string $commandName = "_NP_duplicate";
+	string $callback = ($commandName + "Callback");
+	string $setup = ($commandName + "Setup");
+	string $layout = getOptionBox();
+	setParent $layout;
+	setOptionBoxCommandName($commandName);
+	setUITemplate -pushTemplate DefaultTemplate;
+	waitCursor -state on;
+	tabLayout -tv false -scr true;
+
+	string $parent = `columnLayout -adjustableColumn 1`;
+
+	radioButtonGrp -numberOfRadioButtons 1
+		-label1 "Total Transform"
+		-changeCommand1 ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+		_NP_duplicateTotalTransformCheck;
+	radioButtonGrp -numberOfRadioButtons 1
+		-label1 "Duplicate Along Curves"
+		-changeCommand1 ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+		-shareCollection _NP_duplicateTotalTransformCheck
+		_NP_duplicateAlongCurvesEnable;
+	radioButtonGrp -numberOfRadioButtons 1
+		-label1 "Duplicate Along Nurbs Surfaces"
+		-changeCommand1 ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+		-shareCollection _NP_duplicateTotalTransformCheck
+		_NP_duplicateAlongSurfacesEnable;
+
+//------------------------------------------------------------------------------------------------------
+//
+	frameLayout 
+		-label "Total Transform"
+		-labelAlign "bottom"
+		-borderStyle "in"
+		-collapsable 1
+		-cl 1
+		frameLayoutTotalTransform;
+		columnLayout -adjustableColumn 1;
+ 			string $tabsDuplicateTotalTransform = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5 tabsDuplicateTotalTransform`;
+  				string $child_1 = `columnLayout -adjustableColumn 1`;
+					frameLayout -bv no -lv no -collapsable yes -cl no -en true number;
+					    columnLayout -adjustableColumn true;
+					   	radioButtonGrp -numberOfRadioButtons 3
+							-label "Geometrical Array Type"
+							-select `optionVar -q _NP_duplicateTotalTransformGeometryType`
+							-cc ("_NP_initTotalTrans " + $parent + ";")
+						       	-label1 "Cubic" 
+						       	-label2 "Cylindrical"
+						       	-label3 "Spherical" 
+							_NP_duplicateTotalTransformGeometryType;
+
+						separator -style "in";
+
+			    			intFieldGrp -numberOfFields 3 
+							-label "Numbers" 
+							-extraLabel ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";")
+							_NP_duplicateTotalTransformNumber;
+
+						rowLayout -numberOfColumns 4;
+							text -label "Array World Position" -fn boldLabelFont;
+							text -label ""  -fn boldLabelFont
+								_NP_duplicateTotalTransformDimensionName1;
+							text -label ""  -fn boldLabelFont
+								_NP_duplicateTotalTransformDimensionName2;
+							text -label ""  -fn boldLabelFont
+								_NP_duplicateTotalTransformDimensionName3;
+							setParent ..;
+							
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Min / Increment" 
+							-extraLabel ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";")
+							_NP_duplicateTotalTransformDimension;
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Max / Offset" 
+							-extraLabel "" 
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";")
+							_NP_duplicateTotalTransformDimensionEnd;
+
+						rowLayout -numberOfColumns 4 poscolumn;
+							setParent ..;
+						text -label "Total / Incremental" -p poscolumn;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p poscolumn
+							_NP_duplicateTotalTransformPositionMode1;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p poscolumn
+							_NP_duplicateTotalTransformPositionMode2;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						optionMenu
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p poscolumn
+							_NP_duplicateTotalTransformPositionMode3;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						
+						separator -style "in";
+						rowLayout -numberOfColumns 4;
+							text -label "Local Rotate" -fn boldLabelFont;text -label "";text -label "";text -label "";
+							setParent ..;
+
+						rowLayout -numberOfColumns 4 rotAxescolumn;
+							setParent ..;
+						text -label "Array Increment Dimension" -p rotAxescolumn;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotAxescolumn
+							_NP_duplicateTotalTransformRotIncAxes1;
+							menuItem -l "X" 
+							_NP_duplicateTotalTransformRotIncAxes1Item1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformRotIncAxes1Item2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformRotIncAxes1Item3;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotAxescolumn
+							_NP_duplicateTotalTransformRotIncAxes2;
+							menuItem -l "X"
+							_NP_duplicateTotalTransformRotIncAxes2Item1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformRotIncAxes2Item2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformRotIncAxes2Item3;
+						optionMenu
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotAxescolumn
+							_NP_duplicateTotalTransformRotIncAxes3;
+							menuItem -l "X"
+							_NP_duplicateTotalTransformRotIncAxes3Item1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformRotIncAxes3Item2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformRotIncAxes3Item3;
+
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Min / Increment" 
+							-extraLabel "" 
+							RotateMin;
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Max / Offset" 
+							-extraLabel "" 
+							RotateMax;
+
+						rowLayout -numberOfColumns 4 rotcolumn;
+							setParent ..;
+						text -label "Total / Incremental" -p rotcolumn;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotcolumn
+							_NP_duplicateTotalTransformRotMode1;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+							menuItem -l "Aim Constraint";
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotcolumn
+							_NP_duplicateTotalTransformRotMode2;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+							menuItem -l "Aim Constraint";
+						optionMenu
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p rotcolumn
+							_NP_duplicateTotalTransformRotMode3;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+							menuItem -l "Aim Constraint";
+						
+						separator -style "in";
+
+						rowLayout -numberOfColumns 4;
+							text -label "Local Scale" -fn boldLabelFont;text -label "";text -label "";text -label "";
+							setParent ..;
+
+						rowLayout -numberOfColumns 4 scaleAxescolumn;
+							setParent ..;
+						text -label "Array Increment Dimension" -p scaleAxescolumn;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p scaleAxescolumn
+							_NP_duplicateTotalTransformScaleIncAxes1;
+							menuItem -l "X"
+							_NP_duplicateTotalTransformScaleIncAxesItem1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformScaleIncAxesItem2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformScaleIncAxesItem3;
+						optionMenu 
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p scaleAxescolumn
+							_NP_duplicateTotalTransformScaleIncAxes2;
+							menuItem -l "X"
+							_NP_duplicateTotalTransformScaleIncAxes2Item1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformScaleIncAxes2Item2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformScaleIncAxes2Item3;
+						optionMenu
+							-l ""
+							-cc ("_NP_duplicateOptionsUpdateEnableState " + $parent + ";") 
+							-p scaleAxescolumn
+							_NP_duplicateTotalTransformScaleIncAxes3;
+							menuItem -l "X"
+							_NP_duplicateTotalTransformScaleIncAxes3Item1;
+							menuItem -l "Y"
+							_NP_duplicateTotalTransformScaleIncAxes3Item2;
+							menuItem -l "Z"
+							_NP_duplicateTotalTransformScaleIncAxes3Item3;
+
+
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Min / Increment" 
+							-extraLabel "" 
+							ScaleMin;
+			    			floatFieldGrp -numberOfFields 3 
+							-label "Max / Offset" 
+							-extraLabel "" 
+							ScaleMax;
+
+						rowLayout -numberOfColumns 4 scalecolumn;
+							setParent ..;
+						text -label "Total / Incremental" -p scalecolumn;
+						optionMenu 
+							-l ""
+							-cc ("_NP_initScaleValue(1);") 
+							-p scalecolumn
+							_NP_duplicateTotalTransformScaleMode1;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						optionMenu 
+							-l ""
+							-cc ("_NP_initScaleValue(2);") 
+							-p scalecolumn
+							_NP_duplicateTotalTransformScaleMode2;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						optionMenu
+							-l ""
+							-cc ("_NP_initScaleValue(3);") 
+							-p scalecolumn
+							_NP_duplicateTotalTransformScaleMode3;
+							menuItem -l "Total";
+							menuItem -l "Incremental";
+						setParent ..;
+					setParent ..;
+				setParent ..;
+
+				string $child_2 = `columnLayout -adjustableColumn 1 tabAimConstraint`;
+					checkBoxGrp
+						-label "Maintain Offset"
+						-label1 " "
+						-annotation "Preserve the initial offset between the object and the target(s)"
+						-numberOfCheckBoxes 1
+						-cc ("floatFieldGrp -edit -enable (! #1) offsetField;")
+						aimConstraintMaintainWidget;
+					floatFieldGrp -label "Offset"
+						-numberOfFields 3
+						offsetField;
+					
+					separator;
+				
+					floatFieldGrp -label "Aim Vector"
+						-numberOfFields 3
+						aimConstraintAimVector;
+					floatFieldGrp -label "Up Vector"
+						-numberOfFields 3
+						aimConstraintUpVector;
+					optionMenuGrp -l "World Up Type"
+						-cc ("aimConstraintEnabling " + $parent)
+						aimConstraintWorldUpType;
+						menuItem -l "Scene Up"           aimConstraintUpDirMI1;
+						menuItem -l "Object Up"          aimConstraintUpDirMI2;
+						menuItem -l "Object Rotation Up" aimConstraintUpDirMI3;
+						menuItem -l "Vector"             aimConstraintUpDirMI4;
+						menuItem -l "None"               aimConstraintUpDirMI5;
+					floatFieldGrp -l "World Up Vector" -nf 3 aimConstraintWorldUpVector;
+					textFieldGrp -l "World Up Object" aimConstraintWorldUpObject;
+				
+					separator;
+
+					checkBoxGrp -numberOfCheckBoxes 1 -label "Constraint Axes"
+						-label1 "All"
+						-vis 0
+						-onCommand ("checkBoxGrp -edit " +
+									"-value1 false " +
+									"-value2 false " +
+									"-value3 false " +
+									"axesXYZ")
+						axesAll;
+					checkBoxGrp -numberOfCheckBoxes 3
+						-label1 "X"
+						-label2 "Y"
+						-label3 "Z"
+						-vis 0
+						-onCommand ("checkBoxGrp -edit " +
+									"-value1 false " +
+									"axesAll;")
+						axesXYZ;
+				
+					//separator;
+					
+					floatSliderGrp -label "Weight"
+						-field true -min 0.0 -max 10.0 
+						aimConstraintWeight;
+	  				setParent ..;
+
+				string $child_3 = `columnLayout -adjustableColumn 1`;
+					radioButtonGrp
+						-label "Geometry Type"
+						-numberOfRadioButtons 2 -label1 "Copy" -label2 "Instance"
+						-changeCommand ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+						_NP_duplicateTotalTransformDuplicateMode;
+// 					radioButtonGrp
+// 						-label "Dependency Graph"
+// 						-numberOfRadioButtons 3 -label1 "Normal" -label2 "Graph" -label3 "Connections"
+// 						-changeCommand ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+// 						_NP_duplicateTotalTransformDuplicateGraphMode;
+					checkBoxGrp -ncb 1
+						-l "Custom Attributes"
+						_NP_duplicateTotalTransformAttibutes;
+	  				setParent ..;
+  				tabLayout -e 
+  					-tabLabel $child_1 "Number and Transform" 
+  					-tabLabel $child_2 "Aim Constraint Options" 
+  					-tabLabel $child_3 "Options" 
+		  			$tabsDuplicateTotalTransform;
+					setParent ..;
+			setParent ..;
+		setParent ..;
+
+//------------------------------------------------------------------------------------------------------
+//
+
+	frameLayout 
+		-label "Duplicate Along Curves"
+		-labelAlign "bottom"
+		-borderStyle "in"
+		-collapsable 1
+		-cl 1
+		frameLayoutDuplicateAlongCurves;
+		columnLayout -adjustableColumn 1;
+ 			string $tabsDuplicateAlongCurves = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5 tabsDuplicateAlongCurves`;
+  				string $child1 = `columnLayout -adjustableColumn 1`;
+				   	radioButtonGrp -numberOfRadioButtons 3
+						-label "Count Method"
+						-select `optionVar -q _NP_duplicateAlongCurvesCountMethod`
+						-cc ("_NP_pathAnimEnabling " + $parent + " 1; _NP_duplicateOptionsUpdateEnableState " + $parent + ";")
+					       	-label1 "Number" 
+					       	-label2 "Start/End"
+					       	-label3 "Distance" 
+						_NP_duplicateAlongCurvesCountMethod;
+					frameLayout -bv no -lv no -collapsable yes -cl no -en true number;
+					    columnLayout -adjustableColumn true;
+							intFieldGrp -l "Number" 
+								-cc ("_NP_pathAnimEnabling " + $parent + " 7")
+								_NP_duplicateAlongCurvesNumber;
+						setParent ..;
+					setParent ..;
+					frameLayout -bv no -lv no -collapsable yes -cl no -en true StartEnd;
+						columnLayout -adjustableColumn 1;
+							floatFieldGrp -numberOfFields 2 
+								-label "Path Animation: Start/End" 
+								-extraLabel "Frame" 
+								pathAnimStartEndTime;
+							floatFieldGrp -numberOfFields 2 
+								-label "Animation Snapshot: Start/End" 
+								-extraLabel "Frame" 
+								-cc ("_NP_pathAnimEnabling " + $parent + " 8")
+								snapshotStartEndTime;
+							floatFieldGrp 
+								-label "Increment" 
+								-extraLabel "Frame" 
+								-cc ("_NP_pathAnimEnabling " + $parent + " 8")
+								snapshotByTime;
+						setParent ..;	
+					setParent ..;
+					frameLayout -bv no -lv no -collapsable yes -cl no -en true incrementDistance;
+						columnLayout -adjustableColumn 1;
+							floatFieldGrp 
+								-label "Incremental Distance" 
+								-extraLabel (`currentUnit -query -linear`) 
+								_NP_duplicateAlongCurvesDistance;
+							floatFieldGrp 
+								-label "Offset" 
+								-extraLabel (`currentUnit -query -linear`) 
+								_NP_duplicateAlongCurvesOffsetDistance;
+							floatFieldGrp 
+								-label "Tolerance" 
+								-extraLabel (`currentUnit -query -linear`) 
+								_NP_duplicateAlongCurvesTolerance;
+						setParent ..;	
+					setParent ..;
+				setParent ..;
+
+				string $child2 = `columnLayout -adjustableColumn 1`;
+				   	radioButtonGrp -numberOfRadioButtons 3
+				   		-vis 0
+						-label "Time Range"
+						-select 1
+						-cc ("pathAnimEnabling " + $parent + " 1")
+				       	-label1 "Time Slider" -columnWidth 2 100
+				       	-label2 "Start"
+				       	-label3 "Start/End"
+						pathAnimFrameRangeRB;
+				
+				    frameLayout -bv no -lv no -collapsable yes -collapse no -enable true startFrame;
+				        columnLayout -adjustableColumn true;
+							floatFieldGrp -l "Start Time"-vis 0 pathAnimStartTimeSG;
+						setParent ..;
+					setParent ..;
+				
+				    frameLayout -bv no -lv no -collapsable yes -collapse no -enable false endFrame;
+				        columnLayout -adjustableColumn true;
+							floatFieldGrp -l "End Time"-vis 0 pathAnimEndTimeSG;
+						setParent ..;
+					setParent ..;
+				
+					checkBoxGrp -l "Parametric Length" -ncb 1 -l1 " " -v1 false
+						pathAnimParametricLengthCB;
+				
+					checkBoxGrp -l "Follow" -ncb 1 -l1 " " -v1 false
+						-cc ("pathAnimEnabling " + $parent + " 2; pathAnimEnabling " + $parent + " 3; pathAnimEnabling " + $parent + " 6")
+						pathAnimFollowCB;
+				
+					frameLayout -bv no -lv no 
+						-collapsable true 
+						-collapse no 
+						-enable false
+						pathAnimationFollowFrame;
+				
+						columnLayout -adjustableColumn true;
+							radioButtonGrp -nrb 3 
+								-l "Front Axis"
+								-onc ("pathAnimEnabling " + $parent + " 4")
+								-l1 "X" -l2 "Y" -l3 "Z" 
+								pathAnimFrontAxisRB;
+				
+							radioButtonGrp -nrb 3 
+								-l "Up Axis"
+								-onc ("pathAnimEnabling " + $parent + " 5")
+								-l1 "X" -l2 "Y" -l3 "Z" 
+								pathAnimUpAxisRB;
+				
+							optionMenuGrp -l "World Up Type"
+								-cc ("pathAnimEnabling " + $parent + " 6")
+								pathAnimWorldUpTypeOM;
+								menuItem -l "Scene Up"           pathAnimUpDirMI1;
+								menuItem -l "Object Up"          pathAnimUpDirMI2;
+								menuItem -l "Object Rotation Up" pathAnimUpDirMI3;
+								menuItem -l "Vector"             pathAnimUpDirMI4;
+								menuItem -l "Normal"             pathAnimUpDirMI5;
+				
+							floatFieldGrp -l "World Up Vector" -nf 3 pathAnimWorldUpVectorFF;
+				
+							textFieldGrp -l "World Up Object" pathAnimWorldUpObjectTF;
+				
+							checkBoxGrp -ncb 1 -l "" 
+								-l1 "Inverse Up" -v1 false
+								pathAnimInverseUpCB;
+				
+							checkBoxGrp -ncb 1 -l "" 
+								-l1 "Inverse Front" -v1 false
+								pathAnimInverseFrontCB;
+						
+							checkBoxGrp -ncb 1 -l "" 
+								-l1 "Bank" 
+								-v1 false
+								-cc ("pathAnimEnabling " + $parent + " 3")
+								pathAnimBankCB;
+				
+							frameLayout -bv no -lv no 
+								-collapsable true 
+								-enable false 
+								-collapse false
+								pathAnimBankFrame;
+				
+								columnLayout -adjustableColumn true;
+									floatSliderGrp -l "Bank Scale"
+										-field true 
+										-min -10.0 -max 10.0 
+										-v 1.0
+										-s 0.1 
+										pathAnimBankScaleSG;
+									floatSliderGrp -l "Bank Limit"
+										-field true 
+										-min -179 -max 179 
+										-v 90
+										-s 1 
+										pathAnimBankMaxSG;
+								setParent ..;
+							setParent ..; // pathAnimBankFrame
+				
+						setParent ..; //
+					setParent ..; // pathAnimationFollowFrame
+				setParent ..;
+
+
+
+				string $child3 = `columnLayout -adjustableColumn 1`;
+					checkBoxGrp -ncb 1
+						-l "Connect In/Output Meshes"
+						-l1 "(could make some stranges results)"
+						_NP_duplicateAlongCurvesMesh;
+					checkBoxGrp -ncb 1
+						-l "Key Scale"
+						_NP_duplicateAlongCurvesKeyScale;
+					checkBoxGrp -ncb 1
+						-l "Key Front/Up/Side Twist"
+						_NP_duplicateAlongCurvesKeyTwist;
+					checkBoxGrp -ncb 1
+						-l "Custom Attributes"
+						_NP_duplicateAlongCurvesAttibutes;
+					radioButtonGrp -numberOfRadioButtons 1
+						-label "Update"
+						-label1 "On Demand"
+						demandSnapshotUpdate;
+					radioButtonGrp -numberOfRadioButtons 1
+						-label1 "Fast (Update Only When Keyframes Change)"
+						-shareCollection demandSnapshotUpdate
+						animCurveSnapshotUpdate;
+					radioButtonGrp -numberOfRadioButtons 1
+						-label1 "Slow (Always Update)"
+						-shareCollection demandSnapshotUpdate
+						forceSnapshotUpdate;
+	  				setParent ..;
+  				tabLayout -e 
+  					-tabLabel $child1 "Number" 
+  					-tabLabel $child2 "Path animation" 
+  					-tabLabel $child3 "Options" 
+		  			$tabsDuplicateAlongCurves;
+					setParent ..;
+			setParent ..;
+		setParent ..;
+
+//------------------------------------------------------------------------------------------------------
+//
+
+	frameLayout 
+		-label "Duplicate Along Surfaces"
+		-labelAlign "bottom"
+		-borderStyle "in"
+		-collapsable 1
+		-cl 1
+		frameLayoutDuplicateAlongSurfaces;
+			columnLayout -adjustableColumn 1;
+	string $tabsDuplicateAlongSurfaces = `tabLayout -innerMarginWidth 5 -innerMarginHeight 5 tabsDuplicateAlongSurfaces`;
+		string $child_1 = `columnLayout -adjustableColumn 1`;
+			intFieldGrp -numberOfFields 2 
+				-label "Number U/V" 
+				-cc "if (`intFieldGrp -q -v1 _NP_DuplicateAlongSurfacesNumberUV`<2) intFieldGrp -e -v1 2 _NP_DuplicateAlongSurfacesNumberUV;if (`intFieldGrp -q -v2 _NP_DuplicateAlongSurfacesNumberUV`<2) intFieldGrp -e -value2 2 _NP_DuplicateAlongSurfacesNumberUV;"
+				_NP_DuplicateAlongSurfacesNumberUV;
+			floatFieldGrp -numberOfFields 2 
+				-label "Offset U" 
+				-extraLabel "start/end ( % )" 
+				_NP_DuplicateAlongSurfacesOffsetU;
+			floatFieldGrp -numberOfFields 2 
+				-label "Offset V" 
+				-extraLabel "start/end ( % )" 
+				_NP_duplicateAlongSurfacesOffsetV;
+			setParent ..;
+		string $child_2 = `columnLayout -adjustableColumn 1`;
+			checkBoxGrp -ncb 1
+				-l "Enable"
+				-cc ("_NP_normalConstraintEnabling " + ($parent) + " 0") 
+				_NP_duplicateAlongSurfacesConstraint;
+			separator;
+			columnLayout -adjustableColumn 1 contraint;
+				optionMenuGrp -l "Mode" 
+					-cc ("_NP_normalConstraintEnabling " + ($parent) + " 0") 
+					_NP_duplicateAlongSurfacesConstraintMode;
+					menuItem -l "Surface" _NP_duplicateAlongSurfacesConstraintMode1;
+					menuItem -l "Normal" _NP_duplicateAlongSurfacesConstraintMode2;
+				floatSliderGrp -label "Weight"
+					-field true -min 0.0 -max 10.0 
+					normalConstraintWeight;
+				separator;
+				columnLayout -adjustableColumn 1 surfaceContraintLayout;
+					optionMenuGrp -l "Normal Vector" 
+						-cc ("_NP_normalConstraintEnabling " + ($parent) + " 1") 
+						normalConstraintNormalVectorB;
+						menuItem -l "X" normalConstraintNormalVectorB1;
+						menuItem -l "Y" normalConstraintNormalVectorB2;
+						menuItem -l "Z" normalConstraintNormalVectorB3;
+
+					optionMenuGrp -l "U Vector" 
+						-cc ("_NP_normalConstraintEnabling " + ($parent) + " 2") 
+						normalConstraintUVectorB;
+						menuItem -l "X" normalConstraintUVectorB1;
+						menuItem -l "Y" normalConstraintUVectorB2;
+						menuItem -l "Z" normalConstraintUVectorB3;
+				setParent ..;
+				separator;
+
+				columnLayout -adjustableColumn 1 normalContraintLayout;
+					floatFieldGrp -label "Aim Vector" 
+						-numberOfFields 3
+						normalConstraintAimVector;
+				
+					floatFieldGrp -label "Up Vector" 
+						-numberOfFields 3
+						normalConstraintUpVector;
+				
+					optionMenuGrp -l "World Up Type" 
+						-cc ("_NP_normalConstraintEnabling " + ($parent) + " 0") 
+						normalConstraintWorldUpType;
+						menuItem -l "Scene Up"           normalConstraintUpDirMI1;
+						menuItem -l "Object Up"          normalConstraintUpDirMI2;
+						menuItem -l "Object Rotation Up" normalConstraintUpDirMI3;
+						menuItem -l "Vector"             normalConstraintUpDirMI4;
+						menuItem -l "None"               normalConstraintUpDirMI5;
+				
+					floatFieldGrp -l "World Up Vector" -nf 3 normalConstraintWorldUpVector;
+				
+					textFieldGrp -l "World Up Object" normalConstraintWorldUpObject;
+					setParent ..;
+				setParent ..;
+			setParent ..;
+			
+		string $child_3 = `columnLayout -adjustableColumn 1`;
+			radioButtonGrp
+				-label "Geometry Type"
+				-numberOfRadioButtons 2 -label1 "Copy" -label2 "Instance"
+				-changeCommand ("_NP_duplicateOptionsUpdateEnableState " + $parent)
+				_NP_duplicateAlongSurfacesDuplicateMode;
+			checkBoxGrp -ncb 1
+				-l "Custom Attributes"
+				_NP_duplicateAlongSurfacesAttibutes;
+			setParent ..;
+			
+		tabLayout -e 
+			-tabLabel $child_1 "Number" 
+			-tabLabel $child_2 "Normal Contraint" 
+			-tabLabel $child_3 "Options" 
+			$tabsDuplicateAlongSurfaces;
+		setParent ..;
+	setParent ..;
+
+	setUITemplate -popTemplate;
+	string $applyBtn = getOptionBoxApplyBtn();
+	button -e
+		-label "ExtendedDuplicate"
+		-command ($callback + " " + $parent + " " + 1)
+		$applyBtn;
+	dimWhen -false "SomethingSelected" $applyBtn;
+	string $saveBtn = getOptionBoxSaveBtn();
+	button -e 
+		-command ($callback + " " + $parent + " " + 0 + "; hideOptionBox")
+		$saveBtn;
+	string $resetBtn = getOptionBoxResetBtn();
+	button -e 
+		-command ($setup + " " + $parent + " " + 1)
+		$resetBtn;
+	setOptionBoxTitle("Extended Duplicate Options");
+	
+	string $helpArg = "-a \"http://n.pastrana.free.fr/mel/\"";
+	if (getApplicationVersionAsFloat() >= 8.0)
+		$helpArg = "";
+	setOptionBoxHelpTag($helpArg);
+
+	eval (($setup + " " + $parent + " " + 0));	
+	showOptionBox();
+	waitCursor -state off;
+}
+
+proc string assembleCmd()
+{
+	string $cmd;
+
+	setOptionVars(false);
+	$cmd = "perform_NP_duplicate";
+	int $enableDuplicateAlongCurves = `optionVar -query _NP_duplicateAlongCurvesEnable`;
+	int $enableDuplicateAlongSurfaces = `optionVar -query _NP_duplicateAlongSurfacesEnable`;
+	int $enableDuplicateTotalTransform = `optionVar -query _NP_duplicateTotalTransformEnable`;
+	if ($enableDuplicateAlongCurves) {
+		$cmd = ($cmd + "AlongCurve ()");
+	} else 
+	if ($enableDuplicateAlongSurfaces) {
+		$cmd = ($cmd + "AlongSurface (0)");
+	} else 
+	if ($enableDuplicateTotalTransform) {
+		$cmd = ($cmd + "TotalTransform (1)");
+	}
+	return $cmd;
+}
+
+//
+//  Procedure Name:
+//      perform_NP_duplicate
+//
+//  Description:
+//		Perform the '_NP_duplicate' command using the corresponding 
+//		option values.  This procedure will also show the option box
+//		window if necessary as well as construct the command string
+//		that will invoke the '_NP_duplicate' command with the current 
+//		option box values.
+//
+//  Input Arguments:
+//      0 - Execute the command.
+//      1 - Show the option box dialog.
+//      2 - Return the command.
+//
+//  Return Value:
+//      None.
+//
+global proc string perform_NP_duplicate(int $action)
+{
+	string $cmd = "";
+
+	switch ($action) {
+		case 0:
+			setOptionVars(false);
+			$cmd = `assembleCmd`;
+			evalEcho($cmd);
+			break;
+
+		case 1:
+			_NP_duplicateOptions;
+			break;
+
+		case 2:
+			setOptionVars (false);
+
+			$cmd = `assembleCmd`;
+			break;
+	}
+	return $cmd;
+}
+
+proc addCommand ()
+{
+	string $runTimeCommand;
+	if (!`exists ExtendedDuplicate`)
+	{
+		nameCommand
+			-annotation "Extended Duplicate"
+			-command ("ExtendedDuplicate")
+			ExtendedDuplicateNameCommand;
+
+		$runTimeCommand = "runTimeCommand ";
+		if (`runTimeCommand -q -ex "ExtendedDuplicate"`)
+			$runTimeCommand += "-e ";
+		$runTimeCommand += "-annotation \"Extended Duplicate\" ";
+		$runTimeCommand += "-category \"Edit\" ";
+		$runTimeCommand += "-command (\"perform_NP_duplicate(0)\") ";
+		$runTimeCommand += "ExtendedDuplicate;";
+		eval $runTimeCommand;
+	}
+	if (!`exists ExtendedDuplicateOptions`)
+	{
+		nameCommand
+			-annotation "Open the Extended Duplicate Options"
+			-command ("ExtendedDuplicateOptions")
+			ExtendedDuplicateOptionsNameCommand;
+		
+		string $runTimeCommand = "runTimeCommand ";
+		if (`runTimeCommand -q -ex "ExtendedDuplicateOptions"`)
+			$runTimeCommand += "-e ";
+		$runTimeCommand += "-annotation \"Open the Extended Duplicate Options\" ";
+		$runTimeCommand += "-category \"Edit\" ";
+		$runTimeCommand += "-command (\"perform_NP_duplicate(1)\") ";
+		$runTimeCommand += "ExtendedDuplicateOptions;";
+		eval $runTimeCommand;
+	}	
+}
+
+proc addHotKeys ()
+{
+	string $d = `hotkey -q -name -alt -ctl d`;
+	if ($d == "")
+	{
+		hotkey -k "d" -ctl -alt -name ("ExtendedDuplicateNameCommand");
+		print "\"alt + ctrl + d\" assigned to Extended Duplicate\n";
+	}
+	string $D = `hotkey -q -name -alt -ctl D`;
+	if ($D == "")
+	{
+		hotkey -k "D" -ctl -alt -name ("ExtendedDuplicateOptionsNameCommand");
+		print "\"alt + ctrl + D\" assigned to Extended Duplicate Options\n";
+	}
+	savePrefs -hotkeys;
+}
+
+proc addMenuItem (string $keys)
+{
+	global string $gMainEditMenu;
+	string $menuItems[] = `menu -q -ia $gMainEditMenu`;
+	if (stringArrayCount("NPduplicateItem", $menuItems)==0)
+	{
+		setParent -menu $gMainEditMenu;
+		string $menuItem;
+		int $i = 0;
+		for ($menuItem in $menuItems)
+		{
+			if ($menuItem == "smartDupItem") break;
+			$i ++;
+		}
+	string $d = `hotkey -q -name -alt -ctl d`;
+	if ($d == "ExtendedDuplicateNameCommand") $keys = "Yes";
+		string $menuItem = "menuItem -label \"Extended Duplicate\" ";
+				$menuItem += "-annotation \"perform Extended Duplicate\" ";
+				$menuItem += "-command (\"perform_NP_duplicate(0)\") ";
+				$menuItem += "-dragMenuCommand (\"perform_NP_duplicate(2)\") ";
+				$menuItem += "-dragDoubleClickCommand (\"perform_NP_duplicate(1)\") ";
+				$menuItem += ("-ia "+$menuItems[$i]+" ");
+				$menuItem += "-ecr true ";
+		if ($keys == "Yes")
+				$menuItem += "-ke \"d\" -alt true -ctl true ";
+				$menuItem += "NPduplicateItem;";
+		eval $menuItem;
+		$menuItem = "menuItem -optionBox true ";
+		$menuItem += "-annotation \"Extended Duplicate Options";
+		if ($keys == "Yes")
+			$menuItem += " (Ctrl+Alt+D)";
+		$menuItem += "\" ";
+		$menuItem += "-command (\"perform_NP_duplicate(1)\") ";
+		$menuItem += "-ia NPduplicateItem ";
+		$menuItem += "NPduplicateOptions;";
+		eval $menuItem;
+	setParent -m ..;
+	}
+}
+
+proc setup ()
+{
+	addCommand;
+	string $d = `hotkey -q -name -alt -ctl d`;
+	string $keys = "No";
+	if ($d == "")
+	{
+		$keys = `confirmDialog 
+						-title "Confirm" 
+						-message "Want you add HotKeys to Extended Duplicate and Extended Duplicate Options?\n\"alt + ctrl + d\" and \"alt + ctrl + D\" must be free"
+				 		-button "Yes" -button "No" 
+				 		-defaultButton "Yes" -cancelButton "No" -dismissString "No"`;
+		if ($keys == "Yes") addHotKeys;
+	}
+	addMenuItem($keys);
+}
+
+setup ();

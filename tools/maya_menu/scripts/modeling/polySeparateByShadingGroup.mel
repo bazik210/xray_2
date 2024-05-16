@@ -1,0 +1,350 @@
+//==============================================================================
+//Name:
+//  polySeparateByShadingGroup.mel
+//==============================================================================
+//Purpose:
+//  Polygons separate by shading group.
+//==============================================================================
+//Usage:
+//  1. Save the polySeparateByShadingGroup.mel to your scripts directory.
+//  2. Start Maya. In the command line type polySeparateByShadingGroup();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+
+// polySeparateByShadingGroup.mel  v1.0  (17 Oct 2000)
+//
+// MEL script for Maya
+//
+// by Bryan Ewert
+//    http://www.ewertb.com
+//    bryan@ewertb.com
+//
+//    H2O Entertainment Corporation
+//    Vancouver, Canada
+//    http://www.h2oent.com
+
+// Description: Separates all selected polymesh objects into shells
+//  where each shell corresponds to the Shading Group to which it is
+//  assigned.  Each shell becomes its own polymesh object.  The objects
+//  are named corresponding to the assigned Shading Group; e.g.
+//
+//     poly_initialShadingGroup
+//     poly_grassyKnollSG
+
+// //////////////////////////////////////////////////////////////////////
+//  shortName
+//
+// Description: Returns the shortest possible name that is unique to
+//  the specified node.
+//
+//  $reallyShort - if TRUE, strip leading '|' character as well
+
+proc string shortName( string $node, int $reallyShort )
+{
+        string $shortName = "";
+
+        string $bloodyArray[] = `ls -shortNames $node`;
+        $shortName = $bloodyArray[0];
+
+        if ( $reallyShort )
+                $shortName = `match "[^|]*$" $shortName`;
+
+        return $shortName;
+}
+
+// ////////////////////////////////////////////////////////////////
+//  rootNode
+//
+// Description: Strips the dot-suffix of the specified string.
+//  e.g. "object.attribute" is returned as "object"
+
+proc string rootNode( string $object )
+{
+        string $buffer[];
+        tokenize $object "." $buffer;
+        return $buffer[0];
+}
+
+proc int isFacet( string $facet )
+{
+        int $isFacet = 0;
+
+        if ( "mesh" == `nodeType $facet` )
+        {
+                if ( `gmatch $facet "*.f*"` )
+                        $isFacet = 1;
+        }
+        return $isFacet;
+
+}
+
+// //////////////////////////////////////////////////////////////////////
+//  componentRange
+//
+// Description: Parses the provided selection item (presumably with a
+//  component factor (e.g. "pSphere.vtx[0:25]") and returns the
+//  start and end for the selection range.
+//
+// Example: If vertices 3 through 5 of a model are selected, Maya
+//  lists this as 'polyModel.vtx[3:5]'; in this case, componentRange()
+//  will return the array { 3, 5 }.  If only a single vertex is selected,
+//  Maya lists this as, e.g., 'polyMode.vtx[12]'; in this case,
+//  componentRange() will return the array { 12, 12 }.
+
+proc int[] componentRange( string $select )
+{
+        string $buffer[];
+        int $i, $tokens;
+        int $elements[2] = { 0, 0 };
+
+        $tokens = `tokenize $select "[:]" $buffer`;
+
+        $elements[0] = $elements[1] = int($buffer[1]);
+
+        if ( $tokens > 2 )
+                $elements[1] = int($buffer[2]);
+
+        return $elements;
+}
+
+proc string getTransform( string $shape )
+{
+        string $transform = $shape;
+
+        if ( "transform" != `nodeType $shape` )
+        // If given node is already a transform, just pass on through
+        {
+                string $parents[] = `listRelatives -fullPath -parent $shape`;
+                $transform = $parents[0];
+        }
+
+        return $transform;
+}
+
+proc string getShape( string $xform )
+{
+        string $shapes[];
+
+        $shapes[0] = $xform;
+
+        if ( "transform" == `nodeType $xform` )
+        // If given node is not a transform, assume it is a shape
+        // and pass it through
+        {
+                $shapes = `listRelatives -fullPath -shapes $xform`;
+        }
+
+        return $shapes[0];
+}
+
+// //////////////////////////////////////////////////////////////////////
+//  getRelavantMembersOfSG
+//
+// Description: Queries the membership of $shadingGroup and loops through
+//  this list and checks that each set item is a member of the $control
+//  array.  If $rootOnly is TRUE then the resulting items will be the parent
+//  transforms of the Shading Group items.  (After a polySeparate the
+//  per-facet shells are all individual polymesh nodes -- the script needs
+//  to know these parent nodes for the polyUnite function.)
+
+proc string[] getRelevantMembersOfSG( string $control[], string $shadingGroup, int $rootOnly )
+{
+        string $membersOfSG[];
+
+        int $i;
+
+        // For each SG, if component of selected mesh is a member
+        // of the set, add to membership string.
+        string $shaded[] = `sets -q $shadingGroup`;
+
+        for ( $item in $shaded )
+        {
+                if ( isFacet( $item ) || ( $rootOnly && `nodeType $item` == "mesh" ) )                // only interested in facet components
+                {
+                        // now see if it belongs to any of the selectedNodes
+                        for ( $node in $control )
+                        {
+                                if ( $rootOnly )
+                                        $item = getTransform( rootNode( $item ) );
+
+                                if ( rootNode( $node) == shortName( rootNode( $item ), true ) )
+                                {
+                                        $membersOfSG[ size( $membersOfSG ) ] = $item ;
+                                }
+                        }
+                }
+        }
+
+        return $membersOfSG;
+}
+
+proc string parentToWorld( string $toWorld )
+{
+        // first assert this isn't a world node already
+        string $parent[] = `listRelatives -parent $toWorld`;
+        if ( size( $parent ) )
+        {
+                parent -world $toWorld;
+                // of course, `ls -tail 1` doesn't work with other flags <sigh>
+                string $assemblies[] = `ls -assemblies`;
+                $toWorld = $assemblies[ size( $assemblies ) - 1 ];
+        }
+
+        return $toWorld;
+}
+
+global proc polySeparateByShadingGroup()
+{
+        string $nodes[] = `selectedNodes`;
+        string $meshes[], $newMeshes[];
+        string $membersOfSG[];
+        string $shape;
+        string $polyShadingGroup;
+        int $numPolygonsA[], $numPolygons;
+        int $numShellsA[], $numShells;
+        int $count;
+
+        // Get list of selected polymesh nodes
+        for ( $node in $nodes )
+        {
+                $shape = getShape( $node );
+                if ( `nodeType $shape` == "mesh" )
+                {
+                        // Construction History is irrelevant now
+                        delete -ch $shape;
+
+                        $meshes[ size( $meshes ) ] = shortName( getTransform( $shape ), true );
+                }
+        }
+
+        string $shadingGroups[] = `ls -type "shadingEngine"`;
+
+        // For each SG, find relevant members (those part of initial selection)
+        // and, for each disparate mesh node, select components and perform polyChipOff.
+        //
+        // Of course, each polyChipOff reorders the meshes component structure.
+        // Thus, for each pass we must re-evaluate the mesh and pull out all the
+        // assigned facet members for the Shading Group.
+
+        for ( $sg in $shadingGroups )
+        {
+                $membersOfSG = getRelevantMembersOfSG( $meshes, $sg, false );
+
+                select -clear;
+
+                for ( $i = 0; $i < size( $membersOfSG ); $i++ )                // possible that this SG has no members
+                {
+                        // If this mesh is completely mapped to a single SG, it is
+                        // already separated by Shading Group and may be ignored.
+                        $numPolygonsA = `polyEvaluate -f $membersOfSG[$i]`;
+                        $numPolygons = $numPolygonsA[0];                // rather an annoyance..
+
+                        $numPolygonsA = componentRange( $membersOfSG[$i] );
+
+                        if ( $numPolygonsA[0] == 0 && ( $numPolygons == ( $numPolygonsA[1] + 1 ) ) )
+                        {
+                                warning ( " : Mesh " + $membersOfSG[$i] + " skipped -- entirely assigned to a single Shading Group : " );
+                                continue;
+                        }
+
+                        select -add $membersOfSG[$i];
+
+                        // If the next root object of this component is different than this one,
+                        // perform the Extract
+                        if ( rootNode( $membersOfSG[$i] ) != rootNode( $membersOfSG[$i+1] ) )
+                        {
+                                // WARNING!  This reorders component numbering!
+                                polyChipOff -keepFacetTogether true -duplicate false;
+
+                                select -clear;
+                        }
+                }
+        }
+
+        // Now select each object in turn and Separate
+        // (necessarily an individual step because the command only
+        // supports performing a Separate on only object at a time)
+        for ( $mesh in $meshes )
+        {
+                // No sense splitting a mesh that is only a single shell
+                // (likely because it is assigned only a single Shading Group)
+                $numShellsA = `polyEvaluate -shell $mesh`;
+                $numShells = $numShellsA[0];
+                if ( $numShells == 1 )
+                {
+                                warning ( " : Mesh " + $mesh + " skipped -- entirely assigned to a single Shading Group : " );
+                                // But still consider it for combining with other meshes with same Shading Group
+                                $newMeshes[ size( $newMeshes ) ] = $mesh;
+
+                                continue;
+                }
+
+                waitCursor -state on;                // this can take a while...
+                string $separated[] = `polySeparate $mesh`;
+                waitCursor -state off;
+
+                // And delete history -- to preserve SG assignment
+                // when the original mesh group is deleted.
+                delete -ch $separated;
+
+                // After the separation, a new heirarchy of objects is created.
+                // Add these to our new control group (to determine which items
+                // are part of our original selection).
+                for ( $node in $separated )
+                {
+                                if ( `objExists $node` && `nodeType $node` != "polySeparate" )
+                                $newMeshes[ size( $newMeshes ) ] = $node;
+                }
+
+        }
+
+        // Now, again determine which of the current nodes are derived from
+        // the original selection (and you thought this was easy??) and
+        // re-combine each set into appropriate shells.
+
+        for ( $sg in $shadingGroups )
+        {
+                $membersOfSG = getRelevantMembersOfSG( $newMeshes, $sg, true );
+
+                $polyShadingGroup = ( "poly_" + $sg );
+
+                string $command = ( "polyUnite -n " + $polyShadingGroup );
+                $count = 0;
+
+                for ( $i = 0; $i < size( $membersOfSG ); $i++ )                // possible that this SG has no members
+                {
+                        $command = ( $command + " " + $membersOfSG[$i] );
+                        $count++;
+                }
+
+                if ( $count )
+                {
+                        // If there's only one relevant object, just rename it
+                        if ( $count == 1 )
+                        {
+                                // Make sure it's parented to the world first,
+                                // else it gets deleted with the "polyUnite junk"
+                                string $toWorld = parentToWorld( $membersOfSG[0] );
+                                rename $toWorld $polyShadingGroup;
+                        }
+                        else
+                        {
+                                string $polyUnite[] = `evalEcho $command`;
+                                delete -ch $polyUnite;
+                        }
+                }
+
+        }
+
+        // And finally, the polyUnite function leaves lots of garbage behind...
+        // let's try and clean that up.
+        for ( $mesh in $meshes )
+        {
+                if ( `objExists $mesh` )                // If item was not separated (i.e. just renamed) it will have a different name now
+                evalEcho ( "delete " + $mesh );
+        }
+
+        // Whew.  And it seemed so straight-forward in theory, didn't it?
+
+}

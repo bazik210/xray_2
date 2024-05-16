@@ -1,0 +1,1 @@
+global proc string currCam(){string $camera = `getPanel -wf`;$camera = `modelPanel -q -camera $camera`;return $camera;}

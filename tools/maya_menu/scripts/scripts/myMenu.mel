@@ -1,0 +1,207 @@
+//----------------------------------------------------------------------------
+// userMenu.mel - MEL Script
+//----------------------------------------------------------------------------
+// Copyright ©2006 Negrobov Yuriy All Rights Reserved
+// DESCRIPTION:
+// REQUIRES:
+// AUTHORS:
+//      Negrobov Yuriy - negrobov@gsc-game.com
+//----------------------------------------------------------------------------
+global string $gMainWindow;     // defined elsewhere by Maya
+// --------------------------------------------------------------------------
+    // Get rid of existing menu in case it exists already...
+    //
+if (`menu -q -exists userMenu`)
+    {
+    menu -e -dai userMenu;
+    }
+else
+    {
+        setParent $gMainWindow ;
+    menu -l "S.t.a.l.k.e.r." -p MayaWindow -to true userMenu ;
+    }
+
+setParent -menu userMenu ;
+
+menuItem -l "Animation" -sm true -to true ;
+    menuItem -l ("autoTangent") -c ("autoTangent(); ") -ann ("autoTangent.") -image "ICO_AUTOTANGENT.BMP" ;
+    menuItem -l ("cometSaveWeights") -c ("cometSaveWeights(); ") -ann ("cometSaveWeights.") -image "ICO_WEIGHT.BMP" ;
+    menuItem -l ("DoraSkinWeightImpExp") -c ("DoraSkinWeightImpExp(); ") -ann ("DoraSkinWeightImpExp.") -image "ICO_WEIGHT.BMP" ;
+    menuItem -l ("cometSkinWeight") -c ("cometSkinWeight(); ") -ann ("cometSkinWeight.") -image "ICO_COMETSKINWEIGHT.BMP" ;
+    menuItem -l ("componentEditorSlider") -c ("componentEditorSlider(); ") -ann ("componentEditorSlider.") -image "ICO_COMETSKINWEIGHT.BMP" ;
+    menuItem -l ("toggleDisplayJointsLabelName") -c ("toggleDisplayJointsLabelName(); ") -ann ("toggleDisplayJointsLabelName.") -image "ICO_SHOW.BMP" ;
+    menuItem -l ("jpAnimWriter") -c ("jpAnimWriter(); ") -ann ("jpAnimWriter.") -image "ICO_ANIMWRITE.BMP" ;
+    menuItem -l ("showAffectedVert") -c ("showAffectedVert(); ") -ann ("showAffectedVert.") -image "ICO_SHOW.BMP" ;
+    menuItem -l ("sceleton_FBXImport_separate") -c ("sceleton_FBXImport_separate(); ") -ann ("sceleton_FBXImport_separate.") -image "ICO_WEIGHT.BMP" ;
+    menuItem -l ("sceleton_FBXImport_combine") -c ("sceleton_FBXImport_combine(); ") -ann ("sceleton_FBXImport_combine.") -image "ICO_WEIGHT.BMP" ;
+    menuItem -l ("poseLib") -c ("poseLib(); ") -ann ("poseLib.") -image "save_pose.png";
+    setParent -menu ".." ;
+
+menuItem -l "Display" -sm true -to true ;
+    menuItem -l ("clipping Expression") -c ("source \"clipping.mel\"; clippingExpression(); ") -ann ("clipping.") -image "ICO_CAMERA.BMP" ;
+    menuItem -l ("clipping Expression off") -c ("source \"clipping.mel\"; deleteExpression(); clippingDefault(); ") -ann ("deleteExpression.") -image "ICO_CAMERA.BMP";
+    menuItem -l ("distanceMeasure") -c ("distanceMeasure(); ") -ann ("distanceMeasure.") -image "ICO_DIMENSION.BMP" ;
+    menuItem -l ("ShelfResizer") -c ("source \"ktShelfResizer.mel\"; ") -ann ("ktShelfResizer.") -image "" ;
+    menuItem -l ("showDimension") -c ("showDimension (!int(`showDimension -q`)); ") -ann ("showDimension.") -image "ICO_DIMENSION.BMP" ;
+    menuItem -l ("views") -c ("views(); ") -ann ("views.") -image "ICO_CAMERA.BMP" ;
+    setParent -menu ".." ;
+
+menuItem -l "Export" -sm true -to true ;
+    menuItem -l ("exportXRayObject") -c ("python(\"import exportXRayUIMesh; m_meshWindow = exportXRayUIMesh.m_meshWin()\"); ") -ann ("exportXRayObject.") -image "ICO_SAVE.BMP" ;
+    menuItem -l ("exportXRaySkeleton") -c ("python(\"import exportXRayUIActor; m_animWindow = exportXRayUIActor.m_actorWin( 'Skeleton' )\"); ") -ann ("exportXRaySkeleton.") -image "ICO_SAVE.BMP" ;
+    menuItem -l ("exportXRaySkin") -c ("python(\"import exportXRayUIActor; m_animWindow = exportXRayUIActor.m_actorWin( 'Skin' )\"); ") -ann ("exportXRaySkin.") -image "ICO_SAVE.BMP" ;
+    menuItem -l ("exportXRaySkinMotion") -c ("python(\"import exportXRayUIActor; m_animWindow = exportXRayUIActor.m_actorWin( 'Animation' )\"); ") -ann ("exportXRaySkinMotion.") -image "ICO_SAVE.BMP" ;
+    menuItem -l ("exportXRayCameraMotion") -c ("exportXRayCameraMotionAdvance(); ") -ann ("exportXRayCameraMotion.") -image "ICO_SAVE.BMP" ;
+    setParent -menu ".." ;
+
+menuItem -l "Instance" -sm true -to true ;
+    menuItem -l ("Create Asset") -c ("python(\"import AssetManagment; AssetManagment.createAssetFromSelection()\");") -ann ("Create Asset from Selection") -image "references/ref_createAsset.png" ;
+    menuItem -l ("Export Assets") -c ("python(\"import AssetManagment; AssetManagment.exportSelectedAssets()\");") -ann ("Export Assets from Selection") -image "references/ref_exportAsset.png" ;
+    menuItem -l ("Copy Reference") -c ("python(\"import referenceCopyDel; referenceCopyDel.copyTransformWithReferences()\");") -ann ("create copy of selected transforms, understand referenced files") -image "references/ref_copyReference.png" ;
+    menuItem -l ("Remove Reference") -c ("python(\"import referenceCopyDel; referenceCopyDel.deleteTransformWithReferences()\");") -ann ("remove selected transform, understand referenced files") -image "references/ref_removeReference.png" ;
+    menuItem -l ("Replace Reference") -c ("python(\"import referenceReplace; m_replaceRefWindow = referenceReplace.m_replaceRefWin()\");") -ann ("replace selected objects to referenced Asset") -image "references/ref_replaceReference.png" ;
+    menuItem -l ("Select References") -c ("python(\"import referenceCopyDel; referenceCopyDel.SelectAssetsBySelection()\")") -ann ("if a selected node is a Asset and from referenced file - Select all nodes like this") -image "references/ref_selectReferences.png" ;
+    menuItem -l ("Transform to Instance") -c ("python(\"import transformToInstance; transformToInstance.transformToInstanceMain()\");") -ann ("Replace selected transforms to instance") -image "" ;
+    menuItem -l ("Select Instances") -c ("python(\"import isInstanced; isInstanced.isInstanced()\");") -ann ("if a node is instanced - Select all instances") -image "" ;
+    setParent -menu ".." ;
+
+menuItem -l "Material" -sm true -to true ;
+    menuItem -l ("assignMat") -c ("assignMat(); ") -ann ("assignMaterial.") -image "ICO_MATERIAL.BMP" ;
+    menuItem -l ("Bake AO") -c ("BakeAOUI(); ") -ann ("BakeAOUI.") -image "" ;
+    menuItem -l ("Change Material") -c ("changeMaterial(); ") -ann ("change material type nodes.") -image "ICO_XRAYSHELF2.BMP" ;
+    menuItem -l ("Color Curves") -c ("ttColorCurves(); ") -ann ("select ShadingNode with outColor Attribute to color correct using the curves") -image "colorCurves.xpm" ;
+    menuItem -l ("Delete Dublicate Material") -c ("deleteDublicMaterial(); ") -ann ("delete Dublicate Material.") -image "ICO_DELETEDUBLICMATERIAL.BMP" ;
+    menuItem -l ("Optimize Shading Network") -c ("optimizeShadingNetwork(); ") -ann ("optimize Shading Network.") -image "ICO_DELETEDUBLICMATERIAL.BMP" ;
+    menuItem -l ("File Texture Manager") -c ("FileTextureManager(); ") -ann ("FileTextureManager.") -image "ICO_PT.BMP" ;
+    menuItem -l ("fix Default Textures List") -c ("fixDefaultTexturesList(); ") -ann ("fix Default Textures List.") -image "ICO_AZ_SEPARATESHADERFIX.BMP" ;
+    menuItem -l ("Get Component Shader") -c ("GetComponentShaderAdvanced(); ") -ann ("GetComponentShader.") -image "" ;
+    menuItem -l ("Get Component Shader Python") -c ("python(\"import getComponentShader; getComponentShader.getComponentShader()\");") -ann ("GetComponentShader.") -image "" ;
+    menuItem -l ("Hardware Texturing Color On") -c ("source \"HardwareTexturingColorOn.mel\"; ") -ann ("HardwareTexturingColorOn.") -image "ICO_HWCOLOR_ON.BMP" ;    
+	menuItem -l ("Material Renamer") -c ("python(\"import MaterialRenamer; MaterialRenamer.MaterialRenamer()\");") -ann ("MaterialRenamer.") -image "ICO_MATERIALRENAMER.BMP" ;	
+    menuItem -l ("DoraTex Rename") -c ("DoraTexRename(); ") -ann ("DoraTexRename.") -image "ICO_RELOADTEXTURES.BMP" ;
+    menuItem -l ("DoraTex Reload") -c ("DoraTexReload(); ") -ann ("Reload textures of selected objects or polygons. Reload all textures in scene if nothing is selected.") -image "ICO_RELOADTEXTURES.BMP" ;
+    menuItem -l ("Reload Textures") -c ("ReloadTextures(); ") -ann ("Reload textures of selected objects or polygons. Reload all textures in scene if nothing is selected.") -image "ICO_RELOADTEXTURES.BMP" ;
+    menuItem -l ("Rename File Extension") -c ("RenameFileExtension(); ") -ann ("RenameFileExtension.") -image "ICO_RENAMEFILEEXTENSION.BMP" ;
+    menuItem -l ("Swap Shaders") -c ("SwapShaders(); ") -ann ("SwapShaders.") -image "ICO_AISWAPSHADERS.BMP" ;
+    menuItem -l ("Set Custom Override Color") -c ("SetCustomOverrideColor(); ") -ann ("Set Custom Override Color") -image "ICO_RANDOMCOLOR.BMP" ;
+    menuItem -l ("XRay Shaders") -c ("XRayShaders(); ") -ann ("XRayShaders.") -image "ICO_XRAY_SHADERS.BMP" ;
+    menuItem -l ("XRay Shaders List") -c ("XRayShadersList(); ") -ann ("Multipl Assign XRayShaders.") -image "ICO_XRAY_SHADERS.BMP" ;
+    setParent -menu ".." ;
+
+menuItem -l "Modeling" -sm true -to true ;
+    menuItem -l ("actionFacesAdvanced (Copy, Move)") -c ("actionFacesAdvanced(); ") -ann ("Copy, Move Polygon and Combine.") -image "polyDuplicateFacet.xpm" ;
+    menuItem -l ("AdvanceObjectCleaner") -c ("AdvanceObjectCleaner(); ") -ann ("AdvanceObjectCleaner.") -image "ICO_DELETHISTORY.BMP" ;
+    menuItem -l ("AdvanceObjectCleaner options") -c ("AdvanceObjectCleanerOptionBox(); ") -ann ("AdvanceObjectCleaner.") -image "ICO_DELETHISTORY.BMP" ;
+    menuItem -l ("Align Object by 3DMax style") -c ("ali(); ") -ann ("Align Object by 3DMax style.") -image "" ;
+    menuItem -l ("autoWeld") -c ("autoWeld(); ") -ann ("Target Weld two selected vertex.") -image "ICO_AUTOWELD.BMP" ;
+    menuItem -l ("autoWeld options") -c ("weldOptions(); ") -ann ("weldOptions.") -image "ICO_AUTOWELD_OPTIONS.BMP" ;
+    menuItem -l ("cbBuildEnd") -c ("cbBuildEnd();") -ann ("This script will automatically build geometry to create a quad-ending to two parallel edgeloops.") -image "cbBuildEndTransparentShelfIcon.bmp" ;
+    menuItem -l ("combineAdvance") -c ("combineAdvance(); ") -ann ("combineAdvance.") -image "ICO_COMBINE.BMP" ;
+    menuItem -l ("correctShapeName") -c ("correctShapeName(); ") -ann ("correctShapeName.") -image "ICO_CORRECTSHAPENAME.BMP" ;
+    menuItem -l ("correctTreesShapeName") -c ("correctTreesShapeName(); ") -ann ("correctTreesShapeName.") -image "ICO_CORRECTSHAPENAME.BMP" ;
+    menuItem -l ("craSpreadOnCurve") -c ("craSpreadOnCurve();") -ann ("Duplicate a source object over a curve. It uses motionPath nodes to achieve that") -image "" ;
+    menuItem -l ("crackMe") -c ("crackMe(); ") -ann ("create_crack.") -image "" ;
+    menuItem -l ("create_convex_hull") -c ("create_convex_hull(); ") -ann ("create_convex_hull.") -image "" ;
+    menuItem -l ("CreateCurveFromEdges") -c ("CreateCurveFromEdges(); ") -ann ("CreateCurveFromEdges.") -image "" ;
+    menuItem -l ("createTube") -c ("createTube(); ") -ann ("createTube.") -image "ICO_PIPE.BMP" ;
+    menuItem -l ("deleteUnknownNodes") -c ("deleteUnknownNodes(); ") -ann ("deleteUnknownNodes.") -image "" ;
+    menuItem -l ("delSelInput") -c ("delSelInput(); ") -ann ("delSelInput.") -image "ICO_DELSELINPUT.BMP" ;
+    menuItem -l ("duplicate Alonge Curve") -c ("perform_NP_duplicate(1);") -ann ("create a copy of selected objects alonge curve") -image "" ;
+	menuItem -l ("Voronoi shatter") -c ("dg_voro_py_UI();") -ann ("Voronoi shatter") -image "" ;		
+    menuItem -l ("ewc_Array") -c ("ewc_Array(); ") -ann ("Create Array like 3Dsmax style") -image "" ;
+    menuItem -l ("HKRotateExtrude") -c ("HKRotateExtrude();") -ann ("HKRotateExtrude.") -image "ICO_ROTATEEXTRUDEICON.BMP" ;
+    menuItem -l ("killOppositeAttr") -c ("killOppositeAttr(); ") -ann ("killOppositeAttr.") -image "ICO_FLIPNORMALS.BMP" ;
+    menuItem -l ("makePlanar") -c ("makePlanar(); ") -ann ("makePlanar selected component.") -image "" ;
+    menuItem -l ("multiBool") -c ("multiBool(); ") -ann ("multiBool.") -image "" ;
+    menuItem -l ("objectAutoWeld") -c ("objectAutoWeld(); ") -ann ("objectAutoWeld.") -image "" ;
+    menuItem -l ("performPolySoftEdge") -c ("PolygonSoftenHardenOptions(); ") -ann ("performPolySoftEdge.") -image "ICO_SOFTEMHARDEN.BMP" ;
+    menuItem -l ("planarate") -c ("planarate 1 0; ") -ann ("planarate.") -image "ICO_PLANARATE.BMP" ;
+    menuItem -l ("planarPoints") -c ("planarPoints(); ") -ann ("planarPoints.") -image "ICO_PLANARATE.BMP" ;
+    menuItem -l ("polyCounter") -c ("polyCounter(); ") -ann ("polyCounter.") -image "ICO_POLYCOUNTER.BMP" ;
+    menuItem -l ("PolySeparateByShadingGroup") -c ("polySeparateByShadingGroup(); ") -ann ("polySeparateByShadingGroup.") -image "ICO_SPLITPOLY.BMP" ;
+    menuItem -l ("Randomiser") -c ("Randomiser(); ") -ann ("Randomiser.") -image "" ;
+    menuItem -l ("renameSeq") -c ("renameSeq(); ") -ann ("renameSeq.") -image "ICO_RENAMER.BMP" ;
+    menuItem -l ("snapToClosestVert") -c ("snapToClosestVert(); ") -ann ("snapToClosestVert.") -image "ICO_SNAP_TO_CLOSESTVERT.BMP" ;
+    menuItem -l ("spSplitEdges") -c ("splitEdge(); ") -ann ("spSplitEdges.") -image "ICO_SPLITEDGE.BMP" ;
+    menuItem -l ("splitObjectsByHardEdges") -c ("splitObjectsByHardEdges(); ") -ann ("splitObjectsByHardEdges.") -image "ICO_SPLITEDGE.BMP" ;
+    menuItem -l ("spPaint3d") -c ("spPaint3d();") -ann ("spPaint3d is an object placement tool, very similar to geometryPaint from Maya") -image "sp3dpaint.bmp" ;
+    menuItem -l ("targetMultiplyVertexSnap") -c ("targetMultiplyVertexSnap(); ") -ann ("targetMultiplyVertexSnap.") -image "" ;
+    menuItem -l ("XRay Object Renamer") -c ("XRayObjectRenamer(); ") -ann ("XRayObjectRenamer.") -image "ICO_XRAY_SHADERS.BMP" ;	
+    setParent -menu ".." ;
+
+menuItem -l "Pivot" -sm true -to true ;
+    menuItem -l ("reset Pivot To Local") -c ("resetPivotToLocal(); ") -ann ("resetPivotToLocal.") -image "" ;
+    menuItem -l ("reset Pivot Of Ref Object") -c ("resetPivotOfRefObject(); ") -ann ("resetPivotOfRefObject.") -image "" ;
+    menuItem -l ("Pivot Local Tools") -c ("HKLocalToolsAction(); ") -dragDoubleClickCommand "HKLTOptionBox" -ann ("PivotLocalTools") -image "ICO_3POINT_ORIENT_AXIS.BMP" ;
+    menuItem -l ("3 points SetRotation") -c ("gt3ptSetRotation(); ") -ann ("3 points SetRotation.") -image ICO_3POINT_ORIENT_AXIS.BMP"" ;
+        setParent -menu ".." ;
+
+menuItem -l "Skining" -sm true -to true ;
+    menuItem -l ("Paint Skin Weight Tool") -c ("AS_Skinny(); ") -ann ("Paint Skin Weight Tool") -image "" ;
+    menuItem -l ("Go To Bind Pose") -c ("BindPose(); ") -ann ("Go To Bind Pose. Ctrl - go to bind pose and disable all constaints, expressions, ik's. To Enables all back - select nothing and run script again.") -image "" ;
+    menuItem -l ("Skin File Load") -c ("skinFile load; ") -ann ("Load skining-information from maya\\x.0\\presets\\skinData.txt.") -image "" ;
+    menuItem -l ("Skin File Save") -c ("skinFile save; ") -ann ("Save skining-information to maya\\x.0\\presets\\skinData.txt.") -image "" ;
+    menuItem -l ("skin Edit") -c ("skinEdit(); ") -ann ("Quick editing skinned geometry without losing skin-information.") -image "" ;
+    setParent -menu ".." ;
+
+menuItem -l "Select" -sm true -to true ;
+    menuItem -l ("invertCompSelection") -c ("invertCompSelection(); ") -ann ("invertCompSelection.") -image "" ;
+    menuItem -l ("selectFacesOutline") -c ("selectFacesOutline(); ") -ann ("selectFacesOutline.") -image "" ;
+    menuItem -l ("select_FaceBorder") -c ("select_FaceBorder(); ") -ann ("select_FaceBorder.") -image "" ;
+    menuItem -l ("select_HardEdges") -c ("select_HardEdges(); ") -ann ("select_HardEdges.") -image "" ;
+    menuItem -l ("select_ObjectRandom") -c ("select_ObjectRandom(); ") -ann ("select_ObjectRandom.") -image "" ;
+    setParent -menu ".." ;
+
+menuItem -l "Utilites" -sm true -to true ;
+    menuItem -l ("melPlus") -c ("mlPlus(); ") -ann ("melPlus.") -image "" ;
+    menuItem -l ("pinLiner") -c ("pinLiner(); ") -ann ("pinLiner advansed outliner.") -image "ICO_ZLINER_SHELF.BMP" ;
+    menuItem -l ("tima_attributeeditor") -c ("source \"tima_attributeeditor.mel\"; ") -ann ("tima_attributeeditor.") -image "" ;
+    menuItem -l ("tima_scriptjobmgr") -c ("source \"tima_scriptjobmgr.mel\"; ") -ann ("tima_scriptjobmgr.") -image "";
+    menuItem -l ("clearUndo") -c ("clearUndo(); ") -ann ("clearUndo.") -image "" ;
+    menuItem -l ("Anim Controllers") -c ("kk_controllers(); ") -ann ("Create anim controllers window") -image "" ;
+	menuItem -l ("Group to Locator") -c ("grp2loc();") -ann ("select groups to convert to locators")  -image "";
+	menuItem -l ("Import Measure Body") -c ("importMeasureBody()") -ann ("import human measure body")  -image "";
+    setParent -menu ".." ;
+
+menuItem -l "UVW" -sm true -to true ;
+    menuItem -l ("autoUVRelax") -c ("autoUVRelax(); ") -ann ("autoUVRelax.") -image "ICO_SPLITCORECT.BMP" ;
+    menuItem -l ("planarMappingAdvance") -c ("planarMappingAdvance(); ") -ann ("Planar Mapping, with face ratio. // Press Ctrl - Camera Align Planar Mapping, with face ratio.") -image "ICO_PLANPROJECT.BMP" ;
+    menuItem -l ("planarMappingTriming") -c ("planarMappingTriming(); ") -ann ("By face Planar Mapping, with face ratio. // Press Ctrl - By face Planar Mapping, Face stretch to square.") -image "ICO_TRIMUV.BMP" ;
+    menuItem -l ("scaleUVS Shell by ratio") -c ("scaleUV(); ") -ann ("scaleUVS Shell by ratio.") -image "ICO_SCALE_UV.BMP" ;
+    menuItem -l ("UnfoldSimple") -c ("UnfoldSimple(); ") -ann ("UnfoldSimple.") -image "" ;
+    menuItem -l ("uvsShellsUnhookUV") -c ("uvsShellsUnhookUV(); ") -ann ("uvsShellsUnhookUV.") -image "ICO_UVS_SHELLS_UNHOOK_UV.BMP" ;
+    menuItem -l ("uvsShellsRotate") -c ("uvsShellsRotate(); ") -ann ("uvsShellsRotate.") -image "uvsShellsRotate.BMP" ;
+    menuItem -l ("uvsShellsAlignRotate") -c ("uvsShellsAlignRotate(); ") -ann ("uvsShellsAlignRotate.") -image "" ;
+    menuItem -l ("uvsShellsArangeByCenter") -c ("uvsShellsArangeByCenter 0; ") -ann ("uvsShellsArangeByCenter.") -image "uvsShellsArangeByCenter.BMP" ;
+    menuItem -l ("uvsShellsArangeByGrid") -c ("uvsShellsArangeByGrid(); ") -ann ("uvsShellsArangeByGrid.") -image "" ;
+    menuItem -l ("uvsShellsMove3D") -c ("uvsShellsMove3D(); ") -ann ("Move uv in 3d-view without using Uv Texture Editor.") -image "" ;
+    menuItem -l ("uvsShellsScaleByTexel") -c ("uvsShellsScaleByTexel(); ") -ann ("uvsShellsScaleByTexel.") -image "ICO_SCALE_UVS_TEXEL.BMP" ;
+    menuItem -l ("uvsStretchTest") -c ("uvsStretchTest(); ") -ann ("uvsStretchTest, with press Ctrl - On/Off vertex color.") -image "" ;
+    menuItem -l ("UVtile") -c ("UVtile(); ") -ann ("UV Tile.") -image "ICO_UVTILE.BMP" ;
+    menuItem -l ("UnwrapUVTool") -c ("bt_autoUnwrapUVTool(); ") -ann ("Different UnwrapUV methods") -image "" ;
+    setParent -menu ".." ;
+
+menuItem -divider true ;
+
+menuItem -l "For_HotKey" -sm true -to true ;
+    menuItem -l ("extrude_Face_Or_Edge") -c ("extrude_Face_Or_Edge;") -ann ("extrude_Face_Or_Edge.") -image "" ;
+    menuItem -l ("Move_Polygons") -c ("actionFaces 0 0;") -ann ("Move_Polygons.") -image "" ;
+    menuItem -l ("SelectPolyBorder") -c ("polySelectConstraint -bo true -sh false;") -ann ("SelectPolyBorder.") -image "" ;
+    menuItem -l ("SelectPolyShell") -c ("polySelectConstraint -bo false -sh true;") -ann ("SelectPolyShell.") -image "" ;
+    menuItem -l ("SelectPolyReset") -c ("polySelectConstraint -bo false -sh false;") -ann ("SelectPolyReset.") -image "" ;
+    menuItem -l ("toggleIsolateOnSelected") -c ("toggleIsolateOnSelected(); ") -ann ("toggleIsolateOnSelected.") -image "" ;
+        menuItem -l ("toggleNodeLockOnSelected") -c ("toggleNodeLockOnSelected(); ") -ann ("toggleNodeLockOnSelected.") -image "" ;
+        menuItem -l ("toggleSoftHardEdge") -c ("toggleSoftHardEdge(); ") -ann ("toggleSoftHardEdge.") -image "" ;
+        menuItem -l ("toggleWireframeOnShaded") -c ("toggleWireframeOnShaded(); ") -ann ("toggleWireframeOnShaded.") -image "" ;
+        menuItem -l ("toggleXrayOnSelected") -c ("toggleXrayOnSelected(); ") -ann ("toggleXrayOnSelected.") -image "" ;
+    menuItem -l ("polyCutContext") -c ("tool polyCutContext;(); ") -ann ("polyCutContext.") -image "" ;
+    menuItem -l ("WeldSmartPress") -c ("WeldSmartPress(); ") -ann ("WeldSmartPress.") -image "" ;
+    menuItem -l ("WeldSmart") -c ("WeldSmart(); ") -ann ("WeldSmartRelise.") -image "" ;
+    setParent -menu ".." ;
+
+menuItem -divider true ;
+//    menuItem -l ("Reload menu") -c ("source \"myMenu.mel\";  ") -ann ("reload menu.") -image "" ;
+    menuItem -l ("AutoSave options") -c ("ajrAutoSave();") -ann ("AutoSave options.") -image "" ;
+// --------------------------------------------------------------------------
+
+

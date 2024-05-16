@@ -1,0 +1,42 @@
+global proc exportXRaySkinObjectAdvance()
+{
+string $export[]=`ls -sl`; //-geometry
+
+//Disable IK
+doEnableNodeItems false all;
+
+trace ("\n"+"================================================================");
+trace ("=== XRay_Skin_Export ===========================================");
+trace ("=== Disable IK =================================================");
+trace ("================================================================");
+print "\n";
+print ("================================================================" + "\n");
+print ("=== XRay_Skin_Export ===========================================" + "\n");
+print ("================================================================" + "\n");
+print ("Object for Export: " + "\n");
+print "\n";
+print $export;
+print ("----------------------------------------------------------------" + "\n");
+print ("Result: " + "\n");
+print "\n";
+
+        int $i;
+                for ($i = 0; $i< size($export); $i++)
+                {
+                select $export[$i];
+                string $name = "x:/import/" + "/" + $export[$i];
+				//sysFile -md "C:/papka";
+                file -es -type "XRay_Skin_Export" $name;
+
+                print ($name + "\n");
+                }
+                print ("================================================================" + "\n");
+				trace ("================================================================");
+				trace ("=== Enable IK ==================================================");
+                print ("================================================================" + "\n");
+                print "\n";
+                print ("Summary: " + size($export)+" file export" + "\n");
+
+//Enable IK
+doEnableNodeItems true all;
+}

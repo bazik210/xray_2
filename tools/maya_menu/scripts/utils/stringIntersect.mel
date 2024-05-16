@@ -1,0 +1,14 @@
+global proc string[] stringIntersect(string $string1[], string $string2[])
+{
+/*
+$string1 = {"1", "2", "3"};
+$string2 = {"2", "3", "4"};
+*/
+string $string1no[] = stringArrayRemove($string2, $string1);
+string $string2no[] = stringArrayRemove($string1, $string2);
+
+string $string1yes[] = stringArrayRemove($string1no, $string1);
+//string $string2yes[] = stringArrayRemove($string2no, $string2);
+
+return $string1yes;
+}

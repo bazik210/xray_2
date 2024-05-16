@@ -1,0 +1,14 @@
+global proc int forInNumFloat(float $item, float $array[])
+{
+//$item = 1.0;
+//$array = {1.0, 2.0, 3.0};
+$c = 0;
+for (; $c < `size $array`; $c++)
+	{
+	if ($array[$c] == $item)
+		break;
+	}
+if ($c == `size $array`)
+	return -1;
+return $c;
+}

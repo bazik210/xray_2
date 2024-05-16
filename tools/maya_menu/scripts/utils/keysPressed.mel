@@ -1,0 +1,26 @@
+global proc string keysPressed()
+{
+int $mods = `getModifiers`;
+string $keys = "";
+if (($mods / 1) % 2)
+        {
+        if ($keys == "")         $keys += ("Shift");
+        else                        $keys += (" Shift");
+        }
+if (($mods / 2) % 2)
+        {
+        if ($keys == "")         $keys += ("CapsLock");
+        else                        $keys += (" CapsLock");
+        }
+if (($mods / 4) % 2)
+        {
+        if ($keys == "")         $keys += ("Ctrl");
+        else                        $keys += (" Ctrl");
+        }
+if (($mods / 8) % 2)
+        {
+        if ($keys == "")         $keys += ("Alt");
+        else                        $keys += (" Alt");
+        }
+return $keys;
+}

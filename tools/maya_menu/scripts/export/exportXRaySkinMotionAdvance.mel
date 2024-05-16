@@ -1,0 +1,295 @@
+// Name: exportXRaySkinMotionAdvance.mel
+// Auth: Scott Easley
+// Date: 9/20/04
+// Desc: A movie clip list editor for a sequence of moves
+global proc MoveLister_setFrameRange( int $ML_min_time, int $ML_max_time )
+{
+	playbackOptions -e -min $ML_min_time;
+	playbackOptions -e -max $ML_max_time;
+}
+
+global proc MoveLister_exportFrameRange( int $ML_min_time, int $ML_max_time, string $ML_SeqName, string $ML_LocatorName)
+{
+string $XRayImportDirPath = "x:/import/";
+
+playbackOptions -e -min $ML_min_time;
+playbackOptions -e -max $ML_max_time;
+
+string $export[]=`ls -sl`; //-geometry
+	if(`size($export)` != 1)
+		error "Selected One objects for export animation";
+
+              else
+             	{
+        int $i;
+		for ($i = 0; $i< size($export); $i++)
+              {
+              select $export[$i];
+		string $name = $XRayImportDirPath + $ML_SeqName;
+        string $options ="";
+        if(size($ML_LocatorName))
+			$options	+= "locator="+$ML_LocatorName+";";
+        file -es -options $options -type "XRay_Skin_Motion_Export" $name;
+		print ("================================================================" + "\n");
+              print ("XRay Animation export:" + "\n");
+            	}
+			print ("================================================================" + "\n");
+        		print "\n";
+	              print ("Animation export: " + $ML_SeqName + "\n");
+			}
+}
+
+// TS procedure adds items to the window
+global proc MoveLister_addItem(string $node, int $moveID)
+{
+  $nodeprefix = $node + ".move" + $moveID;
+  // Get attributes from node
+	string $seqName = `getAttr ($nodeprefix + "Name")`;
+	int $checked = `getAttr ($nodeprefix + "Chk")`;
+	int $minTime = `getAttr ($nodeprefix + "Min")`;
+	int $maxTime = `getAttr ($nodeprefix + "Max")`;
+	string $locName = `getAttr ($nodeprefix + "LocatorName")`;
+
+	// Set up layout for controls
+  setParent MoveListerCol;
+  //separator -height 1 -width 425;
+//.	rowLayout -columnWidth6 55 200 33 33 42 42 -height 18 -numberOfColumns 7 -width 448;
+	rowLayout -cw 1 55 -cw 2 200 -cw 3 33 -cw 4 33 -cw 5 100 -cw 6 42 -cw 7 42 -height 18 -numberOfColumns 7 -width 448;
+
+	// Create editable controls
+	string $ML_Checked, $ML_SeqName, $ML_LocName, $ML_Mintime, $ML_Maxtime, $ML_SetFrameExportCMD;
+	$ML_Checked = `checkBox -height 28 -label "Select" -width 55 -v $checked -ann $node cb`;
+	$ML_SeqName = `textField -height 22 -width 200 -tx $seqName -ann $node tf`;
+	$ML_Mintime = `intField -height 22 -width 33 -v $minTime -ann $node minT`;
+	$ML_Maxtime = `intField -height 22 -width 33 -v $maxTime -ann $node maxT`;
+	$ML_LocName = `textField -height 22 -width 100 -tx $locName -ann $node ln`;
+
+	// Link controls to MoveLister node
+	checkBox  -e -cc ("setAttr " + $nodeprefix + "Chk `checkBox -q -v " + $ML_Checked + "`") $ML_Checked;
+	textField -e -cc ("setAttr -type \"string\" " + $nodeprefix + "Name `textField -q -tx " + $ML_SeqName + "`") $ML_SeqName;
+	intField  -e -cc ("setAttr " + $nodeprefix + "Min `intField -q -v " + $ML_Mintime + "`") $ML_Mintime;
+	intField  -e -cc ("setAttr " + $nodeprefix + "Max `intField -q -v " + $ML_Maxtime + "`") $ML_Maxtime;
+	textField -e -cc ("setAttr -type \"string\" " + $nodeprefix + "LocatorName `textField -q -tx " + $ML_LocName + "`") $ML_LocName;
+
+	// Add button to set current frame range
+	string $ML_SetFrameCMD;
+	$ML_SetFrameCMD = "MoveLister_setFrameRange  `intField -q -v " + $ML_Mintime + " ` ` intField -q -v " + $ML_Maxtime + "` ";
+	$ML_SetFrameExportCMD= "MoveLister_exportFrameRange  `intField -q -v " + $ML_Mintime + " ` ` intField -q -v " + $ML_Maxtime + "` `textField -q -tx " + $ML_SeqName+ "` `textField -q -tx " + $ML_LocName + "` ";
+
+	button -height 28 -label "Set" -width 42 -c $ML_SetFrameCMD;
+	button -height 28 -label "Export" -width 42 -c $ML_SetFrameExportCMD;
+
+}
+
+global proc AddMoveNode( string $nodename, int $currID )
+{
+    string $nameStr = "move" + $currID + "Name";
+    string $minStr = "move" + $currID + "Min";
+    string $maxStr = "move" + $currID + "Max";
+    string $chkStr = "move" + $currID + "Chk";
+    string $locatorStr = "move" + $currID + "LocatorName";
+
+    addAttr -longName ($nameStr) -dt "string";
+    addAttr -longName ($minStr) -at long;
+    addAttr -longName ($maxStr) -at long;
+    addAttr -longName ($chkStr) -at bool;
+    addAttr -longName ($locatorStr) -dt "string";
+
+    $nameStr = $nodename + ".move" + $currID + "Name";
+    $minStr = $nodename + ".move" + $currID + "Min";
+    $maxStr = $nodename + ".move" + $currID + "Max";
+    $chkStr = $nodename + ".move" + $currID + "Chk";
+    $locatorStr = $nodename + ".move" + $currID + "LocatorName";
+
+    setAttr ($nameStr) -type "string" "";
+    setAttr ($minStr) `playbackOptions -q -min`;
+    setAttr ($maxStr) `playbackOptions -q -max`;
+    setAttr ($chkStr) false;
+    setAttr ($locatorStr) -type "string" "";
+}
+
+global proc MoveIncremID( string $nodename, string $counterAttr ){
+    string $countAttr = $nodename + "." + $counterAttr;
+    int $currID = `getAttr $countAttr`;
+    $currID++;
+    setAttr ($countAttr) $currID;
+}
+
+global proc AddNodeCountAttr( string $nodename, string $attributeName, int $initVal )
+{
+    string $tempname = $nodename + "." + $attributeName;
+    addAttr -longName $attributeName -at long;
+    setAttr $tempname 0;
+}
+
+// TS procedure creates a new item
+global proc MoveLister_createItem()
+{
+  $nodename = "MoveLister";
+  string $nodecheck[] = `ls ($nodename)`;
+  if(size($nodecheck) == 0){
+    createNode "script" -n "MoveLister";
+    AddNodeCountAttr($nodename, "totalMoves", 0);
+  }
+
+  select $nodename;
+
+  //get the number of moves we currently have, tS will become
+  //new move-group's ID number as they are zero-indexed
+  string $countAttr = $nodename + ".totalMoves";
+  int $newItemID = `getAttr $countAttr`;
+
+  string $selectedStuff[] = `ls -sl`;
+
+  //add new group of move attributes, add UI item, increment total moves
+  AddMoveNode($nodename, $newItemID);
+  MoveLister_addItem($nodename, $newItemID);
+  MoveIncremID($nodename, "totalMoves");
+
+  select $selectedStuff;
+}
+
+// update the list by deleting items whose check marks are "on"
+global proc MoveLister_updateList()
+{
+	string $MoveListerColItems[] = `columnLayout -q -ca MoveListerCol`;
+
+  for ($i=4; $i<size($MoveListerColItems); $i++)
+  {
+    // check the state of the checkbox
+    string $currentRC = "MoveListerWin|MoveListerCol|" + $MoveListerColItems[$i];
+    string $currentCB = $currentRC + "|cb";
+    string $delStr;
+    if (`checkBox -q -v $currentCB`){
+      $deletedItem[($i-4)] = true;
+      string $seqNode = `checkBox -q -ann $currentCB`;
+      deleteUI ($currentRC);
+      $delStr = "MoveLister.move" + ($i - 4) + "Name";
+      deleteAttr $delStr;
+      $delStr = "MoveLister.move" + ($i - 4) + "Min";
+      deleteAttr $delStr;
+      $delStr = "MoveLister.move" + ($i - 4) + "Max";
+      deleteAttr $delStr;
+      $delStr = "MoveLister.move" + ($i - 4) + "Chk";
+      deleteAttr $delStr;
+      $delStr = "MoveLister.move" + ($i - 4) + "LocatorName";
+      deleteAttr $delStr;
+    }
+  }
+
+  //Decrement the counter of total moves stored in MoveLister node
+  string $newColItems[] = `columnLayout -q -ca MoveListerCol`;
+  setAttr "MoveLister.totalMoves" (size($newColItems)-4);
+
+  //For each group of move-attributes, cycle through the dynamic attributes
+  //of the MoveLister node and rename each in order from 0 to n
+ 	string $seqAttr[] = `deleteAttr -q MoveLister`;
+ 	$i = 1;
+ 	$index = 0;
+ 	int $subTo;
+  while($i<size($seqAttr)){
+    $numAfter = `substring $seqAttr[$i] 6 6`;
+
+    if(isValidString($numAfter,"([0-9])")){
+      $subTo = 6;
+    }else{
+      $subTo = 5;
+    }
+    string $num = `substring $seqAttr[$i] 5 $subTo`;
+    //print($num); print("\n");
+    if($num != $index){
+        $oldStr = "MoveLister.move" + $num + "Name";
+        $newStr = "move" + $index + "Name";
+        //print($oldStr); print("\n"); print($newStr);
+        renameAttr $oldStr $newStr;
+        $oldStr = "MoveLister.move" + $num + "Min";
+        $newStr = "move" + $index + "Min";
+        renameAttr $oldStr $newStr;
+        $oldStr = "MoveLister.move" + $num + "Max";
+        $newStr = "move" + $index + "Max";
+        renameAttr $oldStr $newStr;
+        $oldStr = "MoveLister.move" + $num + "Chk";
+        $newStr = "move" + $index + "Chk";
+        renameAttr $oldStr $newStr;
+
+        $oldStr = "MoveLister.move" + $num + "LocatorName";
+        $newStr = "move" + $index + "LocatorName";
+        renameAttr $oldStr $newStr;
+    }
+    $i += 4;
+    $index++;
+  }
+
+  //update on-change commands of UI elements
+  for($i=4; $i<size($newColItems); $i++){
+    $nodeprefix = "MoveLister.move" + ($i-4);
+    string $currentRC = "MoveListerWin|MoveListerCol|" + $newColItems[$i];
+    string $currentCB = $currentRC + "|cb";
+    string $currentNM = $currentRC + "|tf";
+    string $currentMIN = $currentRC + "|minT";
+    string $currentMAX = $currentRC + "|maxT";
+    string $currentNLM = $currentRC + "|ln";
+
+   	// Link controls to MoveLister node
+  	checkBox  -e -cc ("setAttr " + $nodeprefix + "Chk `checkBox -q -v " + $currentCB + "`") $currentCB;
+  	textField -e -cc ("setAttr -type \"string\" " + $nodeprefix + "Name `textField -q -tx " + $currentNM + "`") $currentNM;
+  	intField  -e -cc ("setAttr " + $nodeprefix + "Min `intField -q -v " + $currentMIN + "`") $currentMIN;
+  	intField  -e -cc ("setAttr " + $nodeprefix + "Max `intField -q -v " + $currentMAX + "`") $currentMAX;
+  	textField -e -cc ("setAttr -type \"string\" " + $nodeprefix + "LocatorName `textField -q -tx " + $currentNLM + "`") $currentNLM;
+  }
+
+  if(`getAttr MoveLister.totalMoves` < 1){
+      delete MoveLister;
+  }
+
+}
+
+// TS procedure creates the window and populates the list
+global proc exportXRaySkinMotionAdvance()
+{
+  // delete any pre-existing windows and start fresh
+  if (`window -exists MoveListerWin`)
+    deleteUI MoveListerWin;
+
+  // create the main to do window
+  window -t "MoveLister" -rtf true -w 200 -h 200 MoveListerWin;
+
+                columnLayout -adj true MoveListerCol;
+
+                rowLayout -nc 3 -adj 1 -cw3 40 65 85
+                        -ct3 "left" "left" "both"
+			-cl3 "left" "center" "center"
+                        btnRow;
+                        button -height 20 -label "Add" -width 50 -bgc .5 .7 .5  -c "MoveLister_createItem()";
+                        button -height 20 -label "Delete" -width 65 -bgc .7 .5 .5 -c  "MoveLister_updateList()";
+                        button -height 20 -label "Close" -width 70 -bgc .9 .9 .9 -c "deleteUI MoveListerWin";
+                        setParent ..;
+
+                separator -w 100 -style "double";
+                rowLayout -nc 5 -cw5 65 200 33 33 100 txtRow;
+                
+			text -height 17 -label "" -width 100;
+            text -height 17 -label "Move" -width 100;
+			text -height 17 -al "left" -label "Start" -width 33;
+			text -height 17 -label "End" -width 33;
+			text -height 17 -label "Locator" -width 100;
+                        setParent ..;
+
+                separator -w 100 -style "out";
+
+        showWindow MoveListerWin;
+
+  // Populate the list by going through existing nodes in the scene
+  string $nodecheck[] = `ls ("MoveLister")`;
+  if( (size($nodecheck) > 0) && ($nodecheck[0] == "MoveLister") ){
+    int $totalMoves = `getAttr "MoveLister.totalMoves"`;
+    for($i=0; $i<$totalMoves; $i++){
+		  MoveLister_addItem("MoveLister", $i);
+    }
+  }else{
+
+  }
+}
+
+
+

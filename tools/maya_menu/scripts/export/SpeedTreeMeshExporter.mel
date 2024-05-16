@@ -1,0 +1,122 @@
+///////////////////////////////////////////////////////////////////////  
+//	SpeedTree Mesh Exporter - Maya Version
+//
+//	For exporting an object for use in SpeedTreeCAD
+//
+//
+//	*** INTERACTIVE DATA VISUALIZATION (IDV) PROPRIETARY INFORMATION ***
+//
+//	This software is supplied under the terms of a license agreement or
+//	nondisclosure agreement with Interactive Data Visualization and may
+//	not be copied or disclosed except in accordance with the terms of
+//	that agreement.
+//
+//      Copyright (c) 2003-2007 IDV, Inc.
+//      All Rights Reserved.
+//
+//		IDV, Inc.
+//		5446 Sunset Blvd, Suite 201
+//		Lexington, SC 29072
+//		Voice: (803) 356-1999
+//		Fax:   (803) 356-2129
+//		Web:   http://www.speedtree.com
+/////////////////////////////////////////////////////////////////////////////
+// MultMatrix
+proc float[] MultMatrix(float $afMatrix[], float $afPos[])
+{
+	float $afOut[3];
+	$afOut[0] = $afMatrix[0] * $afPos[0]  +  $afMatrix[4] * $afPos[1]  +  $afMatrix[ 8] * $afPos[2]  +  $afMatrix[12];
+	$afOut[1] = $afMatrix[1] * $afPos[0]  +  $afMatrix[5] * $afPos[1]  +  $afMatrix[ 9] * $afPos[2]  +  $afMatrix[13];
+	$afOut[2] = $afMatrix[2] * $afPos[0]  +  $afMatrix[6] * $afPos[1]  +  $afMatrix[10] * $afPos[2]  +  $afMatrix[14];
+	return $afOut; 
+}
+/////////////////////////////////////////////////////////////////////////////
+// MultMatrixNormal
+proc float[] MultMatrixNormal(float $afMatrix[], float $afNormal[])
+{
+	float $afOut[3];
+	$afOut[0] = $afMatrix[0] * $afNormal[0]  +  $afMatrix[4] * $afNormal[1]  +  $afMatrix[ 8] * $afNormal[2];
+	$afOut[1] = $afMatrix[1] * $afNormal[0]  +  $afMatrix[5] * $afNormal[1]  +  $afMatrix[ 9] * $afNormal[2];
+	$afOut[2] = $afMatrix[2] * $afNormal[0]  +  $afMatrix[6] * $afNormal[1]  +  $afMatrix[10] * $afNormal[2];
+	return $afOut; 
+}
+/////////////////////////////////////////////////////////////////////////////
+// WriteToSTMFile
+proc WriteToSTMFile(string $strFilename, string $strFileType)
+{
+	$fileId = `fopen $strFilename "w"`;
+	string $acNodes[] = `ls`;
+	for ($cNode in $acNodes)
+	{
+		if (`objectType $cNode` == "mesh")
+		{
+			select -r $cNode;
+			string $astrTransform[] = `listRelatives -p $cNode`;
+			float $afMatrix[] = `xform -q -ws -m $astrTransform[0]`;
+			int $aiFaceCount[] = `polyEvaluate -f`;
+			
+			// find number of triangles
+			int $iNumTriangles = 0;
+			for ($i = 0; $i < $aiFaceCount[0]; $i++)
+			{
+				select -r ($astrTransform[0] + ".f["+$i+"]");
+				string $astrInds[] = `polyInfo -fv`;
+				string $astrSplit[];
+				tokenize $astrInds[0] $astrSplit;
+				$iNumTriangles += size($astrSplit) - 4;
+			}
+			fprint $fileId ($iNumTriangles + "\n");
+			
+			// find vertices
+			for ($i = 0; $i < $aiFaceCount[0]; $i++)
+			{
+				select -r ($astrTransform[0] + ".f["+$i+"]");
+				string $astrInds[] = `polyInfo -fv`;
+				string $astrSplit[];
+				tokenize $astrInds[0] $astrSplit;
+				
+				for ($j = 4; $j < size($astrSplit); $j++)
+				{
+					for ($k = 0; $k < 3; $k++)
+					{
+						$iIndex = 2;
+						if ($k == 1)
+							$iIndex = $j - 1;
+						if ($k == 2)
+							$iIndex = $j;
+					
+						// position (change up vector from y to z)
+						float $afPos[] = `getAttr ($cNode + ".vt["+$astrSplit[$iIndex]+"]")`;
+						float $afOffset[] = `getAttr ($cNode + ".pt["+$astrSplit[$iIndex]+"]")`;
+						$afPos[0] += $afOffset[0];		
+						$afPos[1] += $afOffset[1];
+						$afPos[2] += $afOffset[2];
+						$afPos = `MultMatrix $afMatrix $afPos`;
+						fprint $fileId ((-$afPos[0]) + " " + (-$afPos[2]) + " " + ($afPos[1]) + " ");
+						
+						// normals (change up vector from y to z)
+						select -r ($astrTransform[0] + ".vtxFace["+$astrSplit[$iIndex]+"]["+$i+"]");
+						float $afNormal[] = `polyNormalPerVertex -q -xyz`;
+						$afNormal = `MultMatrixNormal $afMatrix $afNormal`;
+						fprint $fileId ((-$afNormal[0]) + " " + (-$afNormal[2]) + " " + ($afNormal[1]) + " ");
+						
+						// texcoords
+						string $astrTinds[] = `polyListComponentConversion -fvf -tuv ($astrTransform[0] + ".vtxFace["+$astrSplit[$iIndex]+"]["+$i+"]")`;
+						$astrTinds[0] = `substitute ".map" $astrTinds[0] ".uv"`;
+						float $afUVs[] = `getAttr $astrTinds[0]`;
+						fprint $fileId (($afUVs[0]) + " " + ($afUVs[1]) + "\n");
+					}
+				}
+			}
+			break;
+		}
+	}
+	
+	fclose $fileId;
+};
+/////////////////////////////////////////////////////////////////////////////
+// exportSTMFile
+global proc exportSTMFile( )
+{
+	fileBrowserDialog -m 1 -ds 2 -fc "WriteToSTMFile" -an "Save" -fl "SpeedTree Mesh File (*.stm),*.stm" -ft "SpeedTree Mesh File (*.stm)";
+};

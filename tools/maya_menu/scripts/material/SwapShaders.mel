@@ -1,0 +1,101 @@
+//==============================================================================
+//Name:
+//  SwapShaders.mel
+//==============================================================================
+//Purpose:
+//  Swap two selected shaders.
+//==============================================================================
+//Usage:
+//  1. Save the aiSwapShaders.mel to your scripts directory.
+//  2. Start Maya. In the command line type aiSwapShaders();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+/*  This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: aiSwapShaders v0.1
+''    Author: Jakob Steffensen
+''    Last Updated: May 9, 2004
+''    Update/Change this file at:
+''    http://www.highend3d.com/maya/mel/?section=rendering#2917
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+
+//        Script                        :SwapShaders();
+// Created by            : Jakob Steffensen
+// Contact                        : jakob@hjemmeerbedst.dk
+// Web                                : www.anim.dk
+// Version                        : 0.1
+// Creation Date        : 22/12/03
+//
+//        Description:
+//        Select two shaders in the hypershade and execute the function. The script will
+//  swap the shaders of all objects that have the two shaders assigned and reselect
+//        the two shaders so you can easily swap back by running the function again.
+
+// Please report any bugs to me.
+
+global proc SwapShaders(){
+
+        string $firstshader;
+        string $secondshader;
+
+        // Get current selection (should be the two shaders)
+        $selshaders = `ls -sl`;
+
+        // Simple error checking.
+        if (`size $selshaders`==2){
+
+                // Get the Shading Group for the first.
+                $sel = `listConnections -source false -destination true $selshaders[0]`;
+
+                for ($curSel in $sel) {
+                        $selType = `objectType $curSel`;
+                        if ($selType == "shadingEngine"){
+                                $firstshader = $curSel;
+                        }
+                }
+                // Get the Shading Group for the second.
+                $sel = `listConnections -source false -destination true $selshaders[1]`;
+
+                for ($curSel in $sel) {
+                        $selType = `objectType $curSel`;
+                        if ($selType == "shadingEngine"){
+                                $secondshader = $curSel;
+                        }
+                }
+
+                // Get objects with first shader assigned and put in an array.
+                 hyperShade -objects $selshaders[0];
+                $firstObjects = `ls -sl`;
+
+                // Get objects with second shader assigned and assign first shader.
+                hyperShade -objects $selshaders[1];
+                sets -e -forceElement $firstshader;
+
+                // Now select all the objects from the array.
+                select -cl;
+                for ($curObj in $firstObjects){
+                        select -tgl $curObj;
+                }
+                // And assign the second shader.
+                sets -e -forceElement $secondshader;
+
+                // Now restore the shader selection in case the user wishes to do it again.
+                select -cl;
+                select -tgl  $selshaders[0];
+                select -tgl  $selshaders[1];
+
+                // Tell user that things are done.
+                print ("Shaders " + $selshaders[0] + " and " + $selshaders[0] + " were swapped");
+        } else {
+                print "You must select exactly two shaders.";
+        }
+
+
+}

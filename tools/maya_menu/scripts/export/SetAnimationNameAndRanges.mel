@@ -1,0 +1,261 @@
+global proc jpSetSceneRanges()
+{
+
+int $jpSSRnumOfScenes = `optionVar -q "jpSSRnumOfScenes"`;
+string $jpSSRprojName = `optionVar -q "jpSSRprojName"`;
+string $animationName = `optionVar -q "jpSSRprojName"`;
+
+string $winName = "setSceneRangesWin";
+if (`window -exists $winName`) deleteUI $winName;
+window
+	-t "Set Animation Name and Ranges"
+	-wh 300 600
+	-rtf 1
+	-mnb 1
+	-mxb 0
+	-menuBar 1
+	$winName
+	;
+
+menu -l "File" jpSSRfileMenu;
+	menuItem -l "Load motion list..." -p jpSSRfileMenu -c "jpSSRreadDialog();jpSetSceneRanges();" jpSSRreadMenuItem;
+	menuItem -l "Save motion list..." -en 1 -p jpSSRfileMenu -c "jpSSRwriteDialog()" jpSSRwriteMenuItem;
+	menuItem -l "Refresh" -p jpSSRfileMenu -c "jpSetSceneRanges()" jpSSRrefreshMenuItem;
+
+columnLayout -w 300;
+
+	rowColumnLayout -nc 3 -cw 1 100 -cw 2 100 -cw 3 100;
+		button -h 25 -w 40 -bgc 0.9 0.9 0.9 -en 1 -al "center" -l ("Load") -c ("jpSSRreadDialog()");
+		button -h 25 -w 40 -bgc 0.9 0.9 0.9 -en 1 -al "center" -l ("Save") -c ("jpSSRwriteDialog()");
+		button -h 25 -w 40 -bgc 0.9 0.9 0.9 -en 1 -al "center" -l ("Refresh") -c ("jpSetSceneRanges()");
+
+	setParent ..;
+
+separator -w 300 -h 10;
+
+	button -h 25 -w 300 -bgc 0.68 0.74 0.81 -al "center" -l "Range All" -c "jpSSRRangeAll()";
+	setParent ..;
+
+separator -w 300 -h 10;
+
+text -fn "boldLabelFont" -al "right" -l "Animation Range and Name:";
+separator -w 300 -h 20;
+
+	rowColumnLayout -nc 2 -cw 1 80 -cw 2 220;
+		text -l "Num of Scenes:";
+		intFieldGrp -h 25 -w 220 -en 1 -nf 1 -cal 1 "right" -v1 $jpSSRnumOfScenes -cc ("jpSSRUpdateNumOfScenes()") numOfScenesGrp;
+	setParent ..;
+
+	textFieldGrp -cw 1 80 -cw 2 220 -tx $jpSSRprojName -l "Object Name:" -cc ("optionVar -sv \"jpSSRprojName\" `textFieldGrp -q -tx projNameGrp`") projNameGrp;
+
+separator -w 300 -h 20;
+
+
+int $numOfScenes;
+if($jpSSRnumOfScenes != 0)
+{
+	$numOfScenes = $jpSSRnumOfScenes;
+}//end if
+else
+{
+	$numOfScenes = 1;
+}//end else
+
+int $start;
+int $end;
+for($scene=1; $scene <= $numOfScenes; $scene++)
+{
+	string $padScene = jpPadNumber($scene, 2);
+	rowColumnLayout -nc 4 -cw 1 30 -cw 2 50 -cw 3 140 -cw 4 80;
+		button -h 25 -w 20 -bgc 0.74 0.88 0.81 -en 1 -al "center" -l ("set") -c ("jpSetRange(`intFieldGrp -q -v1 " + ("scene" + $padScene + "RangeGrp") + "`,`intFieldGrp -q -v2 " + ("scene" + $padScene + "RangeGrp")  + "`,`intFieldGrp -q -v2 " + ("scene" + $padScene + "RangeGrp") + "`)");
+		button -h 25 -w 40 -bgc 0.54 0.68 0.81 -en 1 -al "center" -l ("export") -c ("jpSetRange(`intFieldGrp -q -v1 " + ("scene" + $padScene + "RangeGrp") + "`,`intFieldGrp -q -v2 " + ("scene" + $padScene + "RangeGrp")  + "`,`intFieldGrp -q -v2 " + ("scene" + $padScene + "RangeGrp") + "`)");
+
+		textFieldGrp -text  "animation Name";
+
+		intFieldGrp -h 25 -w 300 -en 1 -nf 2
+			-cal 1 "right"
+			-cw 1 40
+			-cal 2 "right"
+			-cw 2 40
+
+			("scene" + $padScene + "RangeGrp");
+	setParent ..;
+}//end for
+
+
+
+
+string $jpSSRrangeFile = `optionVar -q "jpSSRrangeFile"`;
+if($jpSSRrangeFile != 0)
+{
+	jpSSRread($jpSSRrangeFile, "txt");
+}//end if
+
+
+window -tlb true -te 30 -title "Set Animation Name and Ranges" -s 0 -e -wh 308 604 $winName;
+showWindow $winName;
+}//end proc jpSetSceneRanges
+
+
+global proc jpSSRUpdateNumOfScenes()
+{
+	int $newNumOfScenes = `intFieldGrp -q -v1 numOfScenesGrp`;
+	optionVar -iv "jpSSRnumOfScenes" $newNumOfScenes;
+	jpSetSceneRanges();
+}//end proc jpSSRUpdateNumOfScenes
+
+
+
+global proc jpSetRange(int $start, int $end)
+{
+	if($start != 0 && $end != 0)
+	{
+		playbackOptions -min $start;
+		playbackOptions -ast $start;
+		playbackOptions -aet $end;
+		playbackOptions -max $end;
+	}//end if
+}//end proc jpSetRange
+
+global proc jpSSRRangeAll()
+{
+	string $padScene = jpPadNumber(1, 2);
+	int $newNumOfScenes = `intFieldGrp -q -v1 numOfScenesGrp`;
+	int $min = `intFieldGrp -q -v1 ("scene" + $padScene + "RangeGrp")`;
+	string $padScene = jpPadNumber($newNumOfScenes, 2);
+	int $max = `intFieldGrp -q -v2 ("scene" + $padScene + "RangeGrp")`;
+	jpSetRange($min, $max);
+}//end proc jpSetAllRange
+
+
+
+global proc jpSSRreadDialog()
+{
+	global string $jpSSRreadFile;
+	fileBrowserDialog -m 0 -fc "jpSSRread" -an "PickFile";
+}//end proc jpVCsetPathDialog
+
+global proc jpSSRread(string $fileName, string $fileType)
+{
+	global string $jpSSRreadFile;
+
+	string $scenes[] = jpReadLines($fileName);
+	int $numOfScenes = int($scenes[0]);
+	//intFieldGrp -e -v1 $numOfScenes numOfScenesGrp;
+	optionVar -iv "jpSSRnumOfScenes" $numOfScenes;
+
+	string $projName = $scenes[2];
+	textFieldGrp -e -tx $projName projNameGrp;
+	optionVar -sv "jpSSRprojName" $projName;
+
+	for($scene = 1; $scene <= $numOfScenes; $scene++)
+	{
+		string $padScene = jpPadNumber($scene, 2);
+		string $startEnd[];
+		tokenize $scenes[$scene + 2] ":" $startEnd;
+
+		int $start = int($startEnd[0]);
+		int $end = int($startEnd[1]);
+		string $animation = $startEnd[2];
+		int $foo = 1;
+		intFieldGrp -e -v1 $start ("scene" + $padScene + "RangeGrp");
+		intFieldGrp -e -v2 $end ("scene" + $padScene + "RangeGrp");
+//		textFieldGrp -e -tx $animation ("scene" + $padScene + "RangeGrp");
+//		intFieldGrp -e -v2 $foo ("scene" + $padScene + "RangeGrp");
+	}//end for
+
+	optionVar -sv "jpSSRrangeFile" $fileName;
+
+}//end proc jpSSRread
+
+
+
+
+/////////////////////
+//Read lines from file
+/////////////////////
+global proc string[] jpReadLines(string $file)
+{
+string $lines[];
+
+if(!`filetest -r $file`)
+{
+	warning ("File Not Found: " + $file);
+}//end if
+int $fileID = `fopen $file r`;
+string $nextLine = `fgetline $fileID`;
+
+int $i = 0;
+while ( size( $nextLine ) > 0 )
+{
+	string $tokContents[];
+	int $tokNumber = `tokenize $nextLine "\n" $tokContents`;
+	if($tokNumber > 0)
+	{
+		$lines[$i] = $tokContents[0];
+		$i++;
+	}//end if
+
+	//$scenes[$i] = $nextLine;
+	$nextLine = `fgetline $fileID`;
+	//$i++;
+}//end while
+fclose $fileID;
+
+return $lines;
+}//end proc
+
+
+global proc jpSSRwriteDialog()
+{
+	global string $jpSSRreadFile;
+	fileBrowserDialog -m 1 -fc "jpSSRwriteRanges" -an "SaveRanges";
+}//end proc jpVCsetPathDialog
+
+global proc jpSSRwriteRanges(string $file, string $fileType)
+{
+	int $fileID = `fopen $file w`;
+	int $numOfScenes = `intFieldGrp -q -v1 numOfScenesGrp`;
+	fprint $fileID ($numOfScenes + "\n");
+	string $projName = `textFieldGrp -q -tx projNameGrp`;
+	fprint $fileID ($projName + "\n");
+
+	int $start;
+	int $end;
+	string $animation;
+	for($scene = 1; $scene <= $numOfScenes; $scene++)
+	{
+		string $padScene = jpPadNumber($scene, 2);
+		$start = `intFieldGrp -q -v1 ("scene" + $padScene + "RangeGrp")`;
+		$end = `intFieldGrp -q -v2 ("scene" + $padScene + "RangeGrp")`;
+		$animation = `textFieldGrp -q -v3 ("scene" + $padScene + "RangeGrp")`;
+		fprint $fileID ($start + ":" + $end + ":" + $animation + "\n");
+	}//end for
+	fclose $fileID;
+}//end proc
+
+
+global proc string jpPadNumber(int $number, int $padding)
+{
+	int $curSize = `size(string($number))`;
+	if($curSize > $padding)
+		error ("Number too large. Need more, at least" + $curSize + ", padding.");
+	int $neededZeros = $padding - $curSize;
+
+	string $paddedNumber = string($number);
+	for($i = $neededZeros; $i > 0; $i--)
+	{
+		$paddedNumber = ("0" + $paddedNumber);
+		//print ($paddedNumber + "\n");
+	}
+
+	return $paddedNumber;
+}//end proc jpPadNumber
+
+
+jpSetSceneRanges;
+
+
+
+
+

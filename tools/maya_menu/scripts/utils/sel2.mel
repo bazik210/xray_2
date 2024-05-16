@@ -1,0 +1,1 @@
+global proc string sel2(){string $sel[] = `ls -sl -fl`;return $sel[1];}

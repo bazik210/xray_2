@@ -1,0 +1,28 @@
+//==============================================================================
+//Name:
+//  clearUndo.mel
+//==============================================================================
+//Purpose:
+//  clear Undo
+//==============================================================================
+//Usage:
+//  1. Save the clearUndo.mel to your scripts directory.
+//  2. Start Maya. In the command line type clearUndo(); - run script.
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+
+global proc clearUndo()
+{
+if (keysPressed() != "Ctrl")
+{
+undoInfo -state off;
+undoInfo -state on;
+print "Undo state ON";
+}
+else
+{
+undoInfo -state off;
+print "Undo state OFF";
+}
+}

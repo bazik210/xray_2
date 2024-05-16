@@ -1,0 +1,2 @@
+global proc int intSingle(int $array[])
+{return $array[0];}

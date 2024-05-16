@@ -1,0 +1,83 @@
+/* This file downloaded from Highend3d.com
+''  
+''  Highend3d.com File Information:
+''  
+''    Script Name: ttColorCurves
+''    Author: Tylney 
+''    Last Updated: Feb 04, 2007
+''    Update/Change this file at:
+''    http://Highend3d.com/maya/downloads/mel_scripts/rendering/misc/1073.html
+''  
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+//////////////////////////////////////////////////////////////////
+//
+//	ttColorCurves 
+//
+//	written by Tylney Taylor, some time early 2003
+//
+//	copyright bold vfx pty ltd. 2003-2007
+//
+//	instructions:	select ShadingNode with outColor Attribute to color correct using the curves
+//	
+//	limitations: currently the script only works on shading nodes with outColor attributes,
+//							 but the concept of using Set Drive Keys works anyway, so you can color correct
+//							 and connect anything else.  I used this as a good example in my Maya Trainer training
+//							 examination.
+// 
+//	version History: (should work on all platforms and all versions of maya)
+//
+//	version 1.0 - base script been around for 3 years now and makes for excellent pre-comp color
+//								control in real-time
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+global proc ttColorCurves()
+{
+	string $selectedNode[] = `ls -sl`;
+
+	if (`attributeExists "outColor" $selectedNode[0]`) {
+		string $colorOutConnections[] = `listConnections -d 1 -s 0 -p 1 ($selectedNode[0] + ".outColor")`;
+		string $rampNode = `createNode ramp`;
+		// clean the ramp
+		removeMultiInstance -break true ($rampNode + ".colorEntryList[1]");
+		removeMultiInstance -break true ($rampNode + ".colorEntryList[2]");
+		setAttr ($rampNode + ".colorEntryList[0].color") -type double3 1 1 1 ;
+
+		if (!`size $colorOutConnections`){
+			$colorOutConnections[0] = `listConnections -d 1 -s 0 -p 1 ($selectedNode[0] + ".outColorR")`;
+			$colorOutConnections[1] = `listConnections -d 1 -s 0 -p 1 ($selectedNode[0] + ".outColorG")`;
+			$colorOutConnections[2] = `listConnections -d 1 -s 0 -p 1 ($selectedNode[0] + ".outColorB")`;
+
+			if (`size $colorOutConnections`){
+
+				// first lets replace the original outColor connection with the ramp.outcolor connection
+				//
+				connectAttr -f ($rampNode + ".outColorR") $colorOutConnections[0];
+				connectAttr -f ($rampNode + ".outColorG") $colorOutConnections[1];
+				connectAttr -f ($rampNode + ".outColorB") $colorOutConnections[2];
+			}
+
+
+		} else {
+			// first lets replace the original outColor connection with the ramp.outcolor connection
+			//
+			connectAttr -f ($rampNode + ".outColor") $colorOutConnections[0];
+		}
+
+		//now lets create the setDriveKey relationship between the original outColorRGB and the ramps colorGain chanels
+		//
+		setDrivenKeyframe -dv 0.0 -v 0.0 -cd ($selectedNode[0] + ".outColorR") ($rampNode + ".colorGainR");
+		setDrivenKeyframe -dv 1.0 -v 1.0 -cd ($selectedNode[0] + ".outColorR") ($rampNode + ".colorGainR");
+		setDrivenKeyframe -dv 0.0 -v 0.0 -cd ($selectedNode[0] + ".outColorG") ($rampNode + ".colorGainG");
+		setDrivenKeyframe -dv 1.0 -v 1.0 -cd ($selectedNode[0] + ".outColorG") ($rampNode + ".colorGainG");
+		setDrivenKeyframe -dv 0.0 -v 0.0 -cd ($selectedNode[0] + ".outColorB") ($rampNode + ".colorGainB");
+		setDrivenKeyframe -dv 1.0 -v 1.0 -cd ($selectedNode[0] + ".outColorB") ($rampNode + ".colorGainB");
+
+   	   } else {
+       	warning "no outputColors on node, aborting\n";
+   	}
+
+}

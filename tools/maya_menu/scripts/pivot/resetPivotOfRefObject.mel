@@ -1,0 +1,42 @@
+//==============================================================================
+//Name:
+//  resetPivotOfRefObject.mel
+//==============================================================================
+//Purpose:
+//  resetPivotOfRefObject
+//==============================================================================
+//Usage:
+//  1. Save the resetPivotOfRefObject.mel to your scripts directory.
+//  2. Start Maya. In the command line type resetPivotOfRefObject(); - run script.
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+// by Seb.r
+// Mail  : ourouk@3dvf.net
+// Web    : http://ourouk.3dvf.net
+
+global proc resetPivotOfRefObject()
+{
+        string $P2P_list[] = `ls -sl`;
+        int $i;
+
+        if (size($P2P_list) < 2)
+        {
+                error "select at least 2 objects";
+        }
+        else
+        {
+                int $P2P_size = size($P2P_list) - 1;
+                string $P2P_string = $P2P_list[$P2P_size] + ".rotatePivot";
+                vector $P2P_infos = `xform -worldSpace -query -translation $P2P_string`;
+
+                select -cl;
+
+                for ($i=0;$i<$P2P_size;$i++)
+                {
+
+                        move ($P2P_infos.x) ($P2P_infos.y) ($P2P_infos.z) ($P2P_list[$i] + ".rotatePivot");
+                        select -add $P2P_list[$i];
+                }
+        }
+}

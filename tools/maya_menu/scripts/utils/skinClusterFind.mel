@@ -1,0 +1,71 @@
+global proc string skinClusterFind(string $node)
+{
+//$sel = `ls -l -sl`;
+//$node = $sel[0];
+//$node = "|polySurface1|polySurfaceShape2";
+$objectType = `objectType $node`;
+string $skinCluster = "";
+string $shape;
+int $meshDetected = 0;
+
+if ($objectType == "mesh")
+	{
+	$shape = $node;
+	$meshDetected = 1;
+	}
+else if ($objectType == "transform")
+	{
+	string $shapes[] = `listRelatives -f -s $node`;
+	if (`size $shapes` > 0)
+		{
+		$shape = $shapes[0];
+		$meshDetected = 1;
+		}
+	else
+		$shape = $node;
+	}
+
+//print $meshDetected
+if ($meshDetected)
+	{
+	string $skinClusters[] = `ls -type skinCluster`;
+	string $skin;
+	for ($skin in $skinClusters)
+		{
+	//$skin = $skinClusters[0];
+		string $geometryes[] = `skinCluster -q -g $skin`;
+		$geometryes = `ls -l $geometryes`;
+		for ($geometry in $geometryes)
+			if ($geometry == $shape)
+				$skinCluster = $skin;
+		}
+	}
+else
+	{
+	string $skinClusters[] = `ls -type skinCluster`;
+	string $skin;
+	for ($skin in $skinClusters)
+		{
+	//$skin = $skinClusters[0];
+		$numInList = forInNum($skin, $skinClusters);
+		string $geometryes[] = `skinCluster -q -g $skin`;
+		string $objectSkinned = stringSingle(`listRelatives -p $geometryes[0]`);
+		int $visible = isVisible($objectSkinned);
+		$infs = `skinCluster -q -inf $skin`;
+		$infs = `ls -l $infs`;
+		int $num = forInNum($node, $infs);
+		if ($num != -1 && $visible)
+			{
+			$skinCluster = $skin;
+			break;
+			}
+		else if ($num != -1 && $numInList == (`size $skinClusters` - 1))
+			{
+			$skinCluster = $skin;
+			break;
+			}
+		}
+	}
+//print $skinCluster;
+return $skinCluster;
+}

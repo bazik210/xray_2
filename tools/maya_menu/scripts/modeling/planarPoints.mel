@@ -1,0 +1,97 @@
+//==============================================================================
+//Name:
+//  planarPoints.mel
+//==============================================================================
+//Purpose:
+//  Swap two selected shaders.
+//==============================================================================
+//Usage:
+//  1. Save the planarPoints.mel to your scripts directory.
+//  2. Start Maya. In the command line type planarPoints();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+// Select three CVs first as pins
+// any other cvs selected after the first two will be moved 
+// onto the plane defined by the pins
+// useful for smoothing corners where patches meet 
+// by Matthew Gidney 2000 
+//
+//updated by Mihai Militaru (mihai.militaru@gmail.com)-> added GUI, first select 3 points, get plane that lasts all session, then select all and apply :)
+//now works on all types of points: verts, subdiv verts, transforms, and mabye more :)
+
+global proc planarPoints() {
+	if ( `window -exists planSel` == true )
+	{
+		deleteUI planSel;
+	}
+	window -s 0 -toolbox true -t " PlanarPoints" -tb 1 planSel;
+	columnLayout -adj 1;
+	textField -ed 0 -tx "...first define plane, select 3 points and apply" planText;
+	button -w 20 -h 18 -bgc 0.68 0.74 0.80 -l "Get Plane" -c "getPlane";
+	separator -w 300 -h 3 -style "in";	
+	button -w 20 -h 18 -bgc 0.74 0.82 0.78 -l "Apply Planarize" -c "applyPlanarize";
+//	separator -w 300 -h 3 -style "in";	
+//	separator -w 300 -h 5 -style "in";	
+//	button -w 20 -h 16 -bgc 0.70 0.76 0.78 -l "Close" -c "deleteUI planSel;" closeButton;
+	showWindow planSel;
+	window -e -w 260 -h 86 -te 70 -le 700 planSel;
+	}
+		
+global proc getPlane()
+		{
+        string $parents[] = `ls -sl -fl`;
+        int $numberOfCvs = `size $parents`;
+        
+        if ( $numberOfCvs != 3) {
+                error("planarPoints(): You must pick only 3 Cv's \n");
+                return;
+        }       
+        global float $CVPin1[3];
+        global float $CVPin2[3];
+        global float $CVPin3[3];
+        $CVPin1 = `xform -q -worldSpace -t $parents[0]`;
+        $CVPin2 = `xform -q -worldSpace -t $parents[1]`;
+        $CVPin3 = `xform -q -worldSpace -t $parents[2]`;
+        
+        // first define the plane by its normal
+        
+        vector $pin1To2 = <<($CVPin1[0]-$CVPin2[0]),($CVPin1[1]-$CVPin2[1]),($CVPin1[2]-$CVPin2[2])>>;
+        vector $pin1To3 = <<($CVPin1[0]-$CVPin3[0]),($CVPin1[1]-$CVPin3[1]),($CVPin1[2]-$CVPin3[2])>>; 
+        global vector $normal;
+        global float $magNormal;
+        global vector $unitNormal;
+        $normal = cross ($pin1To2,$pin1To3);
+        $magNormal = mag ($normal);
+        $unitNormal = unit ($normal);
+		}
+ 
+global proc applyPlanarize()
+	{
+		$startTime=`timerX`;
+		global vector $normal;
+        global float $magNormal;
+        global vector $unitNormal;
+        global float $CVPin1[3];
+        global float $CVPin2[3];
+        global float $CVPin3[3];
+        string $parents[] = `ls -sl -fl`;
+        int $numberOfCvs = `size $parents`;
+        
+        // next resolve the points onto the plane via the normal
+        
+
+        for ($cnt = 0; $cnt < ($numberOfCvs); $cnt++) {
+                float $point[3] = `xform -q -worldSpace -t $parents[$cnt]`;
+                vector $pointToPin1 = <<($point[0]-$CVPin1[0]),($point[1]-$CVPin1[1]),($point[2]-$CVPin1[2])>>;
+                float $magPointToPin1 = mag ($pointToPin1);
+                float $dotProduct = dot ( $normal,$pointToPin1);
+                vector $moveVectorRel = -1.0 * $unitNormal * ($dotProduct / $magNormal);
+                
+                xform -worldSpace -r -t ($moveVectorRel.x) ($moveVectorRel.y) ($moveVectorRel.z) $parents[$cnt];
+        }
+		$totalTime=`timerX -startTime $startTime`;
+		print ($numberOfCvs+" items processed in "+$totalTime+" seconds");
+	}
+
+planarPoints;

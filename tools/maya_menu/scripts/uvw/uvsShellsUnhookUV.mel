@@ -1,0 +1,89 @@
+// Copyright (C) 1997-2006 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+
+// UrUnhookUV;
+
+//For Maya 8.*.
+
+// Author:             Ursus Kie(Yury Rohach).
+
+//Скрипт выравнивает криволинейные UV-Shell-ы относительно сплошного выделения линии ребер, которое после
+//применения скрипта должно иметь прямолинейный вид. Выделение остова (хребта) Shell-а должно быть от края до края
+//UV-Shell-а. Обязателен для этого инструмент "Select Shortest Edge Path Tool".
+//Возможны баги, если область выделения "хребта" проходит через разрезанные заранее UV-Shell-ы.
+//Огромная благодарность: Yurus (Yury Ruskevich), за подсказку в создании инструмента и выявление ошибок...
+
+
+global proc uvsShellsUnhookUV()
+{
+	string $pointHord[];
+	string $selHord[];
+	string $baseShellPoints[2];
+	string $finalShellPoints[2];
+	string $shellUVHord[];
+	string $shellUVWork[];
+	string $shellUVAll[];
+	float $bbox[4];
+	float $pivotBase[2];
+	float $pivot[2];
+	float $uvMapPos0[2];
+	float $uvMapPos1[2];
+	float $uvMapPos2[2];
+	float $uvMapPos3[2];
+	float $uvmapDist0;
+	float $uvmapDist1;
+	float $uvdistFactor;
+
+	$selHord = `ls -sl`;
+	$pointHord = `filterExpand -sm 35 $selHord`;
+	$selHord = `filterExpand -sm 32 $selHord`;
+	select $pointHord[0];
+	polySelectBorderShell 0;
+	$shellUVWork = `ls -sl -fl`;
+	select $selHord[0];
+	PolySelectConvert 4;
+	polySelectBorderShell 0;
+	select -d $shellUVWork;
+	$shellUVAll = `ls -sl -fl`;
+	select $selHord[0];
+	PolySelectConvert 4;
+	select -d $shellUVAll;
+	$baseShellPoints = `ls -sl -fl`;
+	$uvMapPos0 = `polyEditUV -q $baseShellPoints[0]`;
+	$uvMapPos1 = `polyEditUV -q $baseShellPoints[1]`;
+	polySelectBorderShell 0;
+	$bbox = `polyEvaluate -bc2`;
+	$pivotBase[0] = ($bbox[1] + $bbox[0]) / 2.0;
+	$pivotBase[1] = ($bbox[3] + $bbox[2]) / 2.0;
+	select $selHord;
+	polyMapCut;
+	PolySelectConvert 4;
+	select -d $shellUVAll;
+	polyStraightenUVBorder -bo 0 -pl 1 -c 0 -gt 0 -ch 1;
+	polyMergeUV -d 0.0001;
+	$shellUVHord = `ls -sl -fl`;
+	polySelectBorderShell 0;
+	select -d $shellUVHord;
+	unfold -i 5000 -ss 0.001 -gb 0 -gmb 0.5 -pub 0 -ps  0 -us off;
+	select $selHord[0];
+	PolySelectConvert 4;
+	select -d $shellUVAll;
+	$finalShellPoints = `ls -sl -fl`;
+	$uvMapPos2 = `polyEditUV -q $finalShellPoints[0]`;
+	$uvMapPos3 = `polyEditUV -q $finalShellPoints[1]`;
+	polySelectBorderShell 0;
+	$bbox = `polyEvaluate -bc2`;
+	$pivot[0] = ($bbox[1] + $bbox[0]) / 2.0;
+	$pivot[1] = ($bbox[3] + $bbox[2]) / 2.0;
+	$uvmapDist0 = sqrt(pow(($uvMapPos0[0] - $uvMapPos1[0]),2) + pow(($uvMapPos0[1] - $uvMapPos1[1]),2));
+	$uvmapDist1 = sqrt(pow(($uvMapPos2[0] - $uvMapPos3[0]),2) + pow(($uvMapPos2[1] - $uvMapPos3[1]),2));
+	$uvdistFactor = $uvmapDist0 / $uvmapDist1;
+	polyEditUV -pu $pivot[0] -pv $pivot[1] -su $uvdistFactor -sv $uvdistFactor ;
+	polyLayoutUV -lm 0 -sc 0 -se 0 -rbf 2 -fr 0 -ps 0.2 -l 2 -ch 1;
+	PolySelectConvert 4;
+	$bbox = `polyEvaluate -bc2`;
+	$pivot[0] = ($bbox[1] + $bbox[0]) / 2.0;
+	$pivot[1] = ($bbox[3] + $bbox[2]) / 2.0;
+	polyEditUV -pu $pivot[0] -pv $pivot[1] -a 90.0 ;
+	polyEditUV -u ($pivotBase[0] - $pivot[0]) -v ($pivotBase[1] - $pivot[1]);
+}

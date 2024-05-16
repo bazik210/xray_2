@@ -1,0 +1,5 @@
+global proc vector floatToVector(float $float[])
+{
+return <<$float[0], $float[1], $float[2]>>;
+}
+

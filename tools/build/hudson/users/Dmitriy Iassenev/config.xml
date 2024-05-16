@@ -1,0 +1,23 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<user>
+  <fullName>Dmitriy Iassenev</fullName>
+  <description></description>
+  <properties>
+    <hudson.security.HudsonPrivateSecurityRealm_-Details>
+      <passwordHash>Ditlmu:d5cfb4b2c43c1cf7101d747e287b091dd8dfc631709f64bff7394376250f9ffe</passwordHash>
+    </hudson.security.HudsonPrivateSecurityRealm_-Details>
+    <hudson.model.MyViewsProperty>
+      <primaryViewName>All</primaryViewName>
+      <views>
+        <hudson.model.AllView>
+          <owner class="hudson.model.MyViewsProperty" reference="../../.."/>
+          <name>All</name>
+        </hudson.model.AllView>
+      </views>
+    </hudson.model.MyViewsProperty>
+    <hudson.tasks.Mailer_-UserProperty>
+      <emailAddress>iassenev@gsc-game.kiev.ua</emailAddress>
+    </hudson.tasks.Mailer_-UserProperty>
+    <hudson.plugins.jabber.user.JabberUserProperty/>
+  </properties>
+</user>

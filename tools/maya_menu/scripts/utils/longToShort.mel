@@ -1,0 +1,12 @@
+global proc string longToShort(string $long)
+{
+//$long = "joint2|joint3";
+$sizeLong = `size $long`;
+$count = $sizeLong;
+for (; $count != 0; $count--)
+	{
+	if (`substring $long $count $count` == "|")
+		break;
+	}
+return `substring $long ($count + 1) $sizeLong`;
+}

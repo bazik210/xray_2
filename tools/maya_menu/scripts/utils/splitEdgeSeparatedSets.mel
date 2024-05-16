@@ -1,0 +1,34 @@
+global proc string[] splitEdgeSeparatedSets()
+{
+if (whatIsSel() != "e" || sizeSel() == 0)
+	return {};
+string $edges[] = sel();
+string $edgesCheckMain[] = $edges;
+string $edgesSets[] = {};
+
+for (;;)
+	{
+	if (`size $edgesCheckMain` == 0)
+		break;
+	string $edgesCheck[] = $edgesCheckMain;
+	string $edgesSet[] = {};
+	for (;;)
+		{
+		if (`size $edgesCheck` == 0)
+			break;
+		//select $edgesCheck[0];
+		$edgesSet[`size $edgesSet`] = $edgesCheck[0];
+		$edgesCheck = stringArrayRemove (conv (conv (conv (conv ({$edgesCheck[0]}, "f"), "v"), "f"), "e"), $edgesCheck);
+		//select $edgesCheck;
+		}
+	//select $edgesSet;
+	$edgesSets[`size $edgesSets`] = stringArrayToString($edgesSet, " ");
+	$edgesCheckMain = stringArrayRemove($edgesSet, $edgesCheckMain);
+	}
+/* selecting sets
+$count = 0;
+select (stringToStringArray($edgesSets[$count], " "));
+$count++;
+*/
+return $edgesSets;
+}

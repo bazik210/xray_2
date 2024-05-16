@@ -1,0 +1,150 @@
+//==============================================================================
+//Name:
+//  snapToClosestVert.mel
+//==============================================================================
+//Purpose:
+//  This script snaps a vertex to the closest vertex on a reference mesh.
+//==============================================================================
+//Usage:
+//  1. Save the snapToClosestVert.mel to your scripts directory.
+//  2. Start Maya. In the command line type snapToClosestVert();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+
+ //written by Ben Bathen March 11, 2006
+ //www.benbathen.com
+
+
+
+ global proc snapToClosestVert ()
+ {
+
+        global string $snapToClosestVertWindow;
+        global string $sTCVtextFieldName;
+        global string $sTCVfloatFieldGrp;
+        global string $textFieldString;
+
+        if (`window -ex $snapToClosestVertWindow`)
+                {
+                        deleteUI -window $snapToClosestVertWindow;
+                }
+
+
+        $snapToClosestVertWindow = `window  -title "VR_snapToClosestVert" -width 275 -height 107 -s 0`;
+
+        columnLayout -cal "center" ;
+        text -label "enter a maximum distance";
+        $sTCVfloatFieldGrp = `floatFieldGrp -w 50  -v1 .1`;
+
+        text -label "load the mesh to use as a reference";
+        $sTCVtextFieldName = `textFieldButtonGrp -tx $textFieldString -bl load -bc loadRefMesh`;
+
+        setParent ..;
+
+        rowLayout -nc 2 -cw2 135 135 -ct2 "both" "both" -cl2 "center" "center" ;
+        string $runButton = `button -label Run  -command captureUIInfo`;
+        string $cancelButton = `button -label Cancel  -command ("deleteUI -window " + $snapToClosestVertWindow)`;
+
+        //make sure the window is the right size
+
+        window -e -width 275 -height 130 -s 0 $snapToClosestVertWindow;
+        showWindow $snapToClosestVertWindow;
+}
+
+
+//This procedure runs when you hit the load button
+global proc loadRefMesh ()
+{
+
+global string $sTCVtextFieldName;
+global string $textFieldString;
+
+string $sel[] = `ls -sl`;
+
+textFieldButtonGrp -e -tx $sel[0] $sTCVtextFieldName;
+$textFieldString = $sel[0];
+}
+
+
+
+//This procedure snaps a vertex on one model to the closest vertex on another model.
+global proc captureUIInfo ()
+{
+global string $sTCVtextFieldName;
+
+string $vertices[] = `ls -sl -fl`;
+
+string $refObject = `textFieldGrp -q -tx $sTCVtextFieldName`;
+
+for ($each in $vertices)
+        {
+        runSnapToClosestVert $each $refObject;
+        }
+
+}
+
+
+global proc runSnapToClosestVert (string $vertex, string $refObject)
+{
+
+global string $sTCVfloatFieldGrp;
+
+//find the world space position of the vertex.
+float $vertPosition[] = `pointPosition -w $vertex`;
+
+//find out how many verts are in the reference object;
+
+int $refVertCount[] = `polyEvaluate -v $refObject`;
+
+
+//find the shape of the reference model.
+string $refShape[] = `listRelatives -f -s $refObject `;
+
+int $i;
+
+
+float $tolerance = `floatFieldGrp -q  -v1 $sTCVfloatFieldGrp`;
+
+float $closestDistance = 10000;
+string $closestVert;
+float $closestPosition[];
+
+        //for each vertex in the reference model.
+        for ($i = 0; $i < $refVertCount[0]; $i++)
+                {
+                //find the world space position of the vert on the reference model;
+                float $refVertPos[] = `pointPosition -w ($refShape[0] + ".vtx[" + $i + "]")`;
+
+                //find the difference between the two positions.
+
+                float $xValue = $vertPosition[0] - $refVertPos[0];
+
+                float $yValue = $vertPosition[1] - $refVertPos[1];
+
+                float $zValue = $vertPosition[2] - $refVertPos[2];
+
+                vector $difference = <<$xValue, $yValue, $zValue>>;
+
+                //find the distance between the two points
+                float $distance = `mag $difference`;
+
+                //if the distance between the verts is lower than the distance between the previous vert.
+                if ($distance < $closestDistance)
+                        {
+                        //store the closest distance so far.
+                        $closestDistance = $distance;
+                        //store the name of the closest vertex so far
+                        $closestVert = ($refShape[0] + ".vtx[" + $i + "]");
+                        //store the closest position so far.
+                        $closestPosition = $refVertPos;
+                        }
+                }
+
+if ($closestDistance < $tolerance)
+        {
+                move -ws  $closestPosition[0] $closestPosition[1] $closestPosition[2] $vertex;
+                refresh;
+        }
+
+}

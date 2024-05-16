@@ -1,0 +1,202 @@
+//James Parks
+//10-21-2005
+
+//blendStoredPose procedure for jpAnimWriter
+
+
+global proc jpBlendStoredPose(string $name)
+{
+
+global string $aWriterVerNum;
+string $project = `workspace -q -fn`;
+string $currentFolder = jpGetCheckedFolder();
+string $selsPath = ($project + "/data\/SELS\/" + $currentFolder);
+string $posesPath = ($project + "/data\/POSES\/" + $currentFolder);
+string $animsPath = ($project + "/data\/ANIMS\/" + $currentFolder);
+
+string $selFile[] = `textScrollList -q -si writerFileList`;
+//string $fullname = ("\"" + $posesPath + $name + "\"");
+string $fullname = ($posesPath + $selFile[0]);
+
+////////////////////
+//parse file before applying
+////////////////////
+int $fileID = `fopen $fullname r`;
+string $nextLine = `fgetline $fileID`;
+
+string $objects[];
+int $i = 0;
+while ( size( $nextLine ) > 0 ) 
+{
+	string $tokContents[];
+	int $tokNumber = `tokenize $nextLine "\"" $tokContents`;
+	if($tokNumber > 0)
+	{
+		$objects[$i] = $tokContents[1];
+		$i++;
+	}//end if
+	$nextLine = `fgetline $fileID`;
+}//end while
+fclose $fileID;
+
+$objsString = stringArrayToString($objects, ":");
+string $noWhiteSpaceObjects[];
+tokenize $objsString ":" $noWhiteSpaceObjects;
+
+
+//seperate the objects from the channels
+//	DAMNIT Maya, give me multi-dimensional string arrays!!!
+//	Is that really so much to ask? Python can do it.
+string $channels[];
+string $strippedObjs[];
+int $objIndices[];
+int $i = 0;
+int $j = 0;
+int $k = 0;
+int $l = 0;
+//for($obj in $noWhiteSpaceObjects)
+for($i=0; $i<(`size($noWhiteSpaceObjects)` - 1); $i++)
+{
+	if(`substring $noWhiteSpaceObjects[$i] 1 1` == ".")
+	{
+		$channels[$j] = $noWhiteSpaceObjects[$i];
+		$j++;
+	}//end if
+	else
+	{
+		$strippedObjs[$k] = $noWhiteSpaceObjects[$i];
+		$k++;
+		$objIndices[$l] = $i;
+		$l++;
+	}//end else
+}//end for
+
+print $noWhiteSpaceObjects;
+
+
+//get current pose
+/*string $safeBlend[];
+float $curValue[];
+$j = 0;
+//for($index in $objIndices)
+for($i=0; $i<(`size($objIndices)` - 1); $i++)
+{
+	$obj = $noWhiteSpaceObjects[$i];
+	
+	for($channel in $noWhiteSpaceObjects)
+	{
+		if(`substring $channel 1 1` != ".")
+		{
+			$j++;
+			continue;
+		}//end if
+		else
+		{
+			//$startChannels[$i + $j] = `getAttr ($obj + $channel)`;
+			$curValue[$j] = `getAttr ($obj + $channel)`;
+
+			$safeBlend[$j] = ($obj + $channel + " = " + $curValue[$j] + " (");
+			$j++;
+		}//end else
+	}//end for
+}//end for
+*/
+
+$i=0;
+$j=0;
+string $safeBlend[];
+float $startValue[];
+string $obj;
+while($i < `size($noWhiteSpaceObjects)`)
+{
+	if(`substring $noWhiteSpaceObjects[$i] 1 1` != ".")
+	{
+		$obj = $noWhiteSpaceObjects[$i];
+		$i++;
+	}//end if
+	print ($obj + $noWhiteSpaceObjects[$i] + " : ");
+	$startValue[$j] = `getAttr($obj + $noWhiteSpaceObjects[$i])`;
+	print ($startValue[$j] + "\n");
+	//$safeBlend[$j] = ($obj + $noWhiteSpaceObjects[$i] + " = " + $startValue[$j] + " + (");
+	$safeBlend[$j] = ("catch(`setAttr " + $obj + $noWhiteSpaceObjects[$i] + " (" + $startValue[$j] + " + (");
+	$i++;
+	$j++;
+}//end while
+
+
+
+//apply and get stored pose
+evalEcho("source \"" + $fullname + "\"");
+
+
+
+$i=0;
+$j=0;
+string $safeBlend[];
+float $poseValue[];
+string $obj;
+while($i < `size($noWhiteSpaceObjects)`)
+{
+	if(`substring $noWhiteSpaceObjects[$i] 1 1` != ".")
+	{
+		$obj = $noWhiteSpaceObjects[$i];
+		$i++;
+	}//end if
+	$poseValue[$j] = `getAttr($obj + $noWhiteSpaceObjects[$i])`;
+	$poseDelta[$j] = $poseValue[$j] - $startValue[$j];
+
+	string $poseDeltaString = $poseDelta[$j];
+	//$safeBlend[$j] = ($safeBlend[$j] + $poseDeltaString + " * $percentBlend);\n");
+	$safeBlend[$j] = ($safeBlend[$j] + $poseDeltaString + " * $percentBlend))`);\n");
+	$i++;
+	$j++;
+}//end while
+
+
+
+
+/*
+//for($index in $objIndices)
+$j = 0;
+for($i=0; $i<(`size($objIndices)` - 1); $i++)
+{
+	$obj = $noWhiteSpaceObjects[$i];
+	
+	for($channel in $noWhiteSpaceObjects)
+	{
+		if(`substring $channel 1 1` != ".")
+		{
+			$j++;
+			continue;
+		}//end if
+		else
+		{
+			//$startChannels[$i + $j] = `getAttr ($obj + $channel)`;
+			$poseValue[$j] = `getAttr ($obj + $channel)`;
+			$poseDelta[$j] = $poseValue[$j] - $curValue[$j];
+
+			string $poseDeltaString = $poseDelta[$j];
+			$safeBlend[$j] = ($safeBlend[$j] + $poseDeltaString + " * $percentBlend);\n");
+			print $safeBlend[$j];
+			$j++;
+		}//end else
+	}//end for
+}//end for
+*/
+
+//create expression
+string $safeExpression = ("//Temporary Blend Expression\n//created by jpAnimWriter v"+ $aWriterVerNum + "\n");
+$safeExpression = ($safeExpression + "$percentBlend = `floatSliderGrp -q -v blendStoredPoseSliderGrp`;");
+
+$j = 0;
+for($line in $safeBlend)
+{
+	$safeExpression = ($safeExpression + $line);
+}
+
+jpBlendStoredPoseWin($name);
+print $safeExpression;
+expression -n "jpBlendPoseEXPR" -string $safeExpression;
+
+
+}//end proc jpBlendStoredPose

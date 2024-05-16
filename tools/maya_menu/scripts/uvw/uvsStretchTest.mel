@@ -1,0 +1,123 @@
+//==============================================================================
+//Name:
+//  uvsStretchTest.mel
+//==============================================================================
+//Purpose:
+//uvsStretchTest; 						//Uvs stretching detection.
+//uvsStretchTest; with press "Ctrl" 	//only switching on/off vertex color display.
+//==============================================================================
+//Usage:
+//  1. Save the uvsStretchTest.mel to your scripts directory.
+//  2. Start Maya. In the command line type uvsStretchTest();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc uvsStretchTest()
+{
+//PARAMETRS:
+float $badQuality = 0.3;
+//best quality is 0, bad is 1.  if $badQuality = 0.7  at the script will select faces with 0.7 - 1  quality.
+int $refresh = 1;
+//refresh view during generating or not. Refreshing may take near 3% of time, but it very nice :).
+
+
+timerstart;
+string $object = sel1();
+string $shape = stringSingle(`listRelatives -s $object`);
+if (keysPressed() == "Ctrl")
+        {
+        setAttr ($shape + ".displayColors") (!`getAttr ($shape + ".displayColors")`);
+        print "for generating press Ctrl+Shelf_Button";
+        }
+else
+{
+setAttr ($shape + ".displayColors") 1;
+int $facesCount = intSingle(`polyEvaluate -f $object`);
+string $faces[] = conv({$object}, "f");
+string $face;
+int $count = 0;
+int $faceNum = 0;
+float $quality;
+float $color[];
+
+progressBegin uvsStretch;
+
+string $badFaces[] = {};
+for ($face in $faces)
+{
+//$face = $faces[0];
+//$face = sel1();
+string $verts[] = conv({$face}, "v");
+string $uvsFace[] = conv({$face}, "u");
+string $uvs[] = {};
+string $vert;
+for ($vert in $verts)
+        $uvs[`size $uvs`] = stringSingle(stringIntersect(conv({$vert}, "u"), $uvsFace));
+string $checkedVerts[] = {};
+float $texels[] = {};
+string $vert2;
+float $texel;
+for ($vert in $verts)
+        {
+//$vert = $verts[0];
+        for ($vert2 in $verts)
+                {
+        //$vert2 = $verts[1];
+                int $isChecked = forInNum($vert2, $checkedVerts);
+                if ($vert != $vert2 && $isChecked == -1)
+                        {
+                        int $vertNum = forInNum($vert, $verts);
+                        int $vert2Num = forInNum($vert2, $verts);
+                        float $distUv = twoUVsDistance($uvs[$vertNum], $uvs[$vert2Num]);
+                        if ($distUv == 0)
+                                $distUv = 0.0001;
+                        $texel = twoVerticesDistance($vert, $vert2) / $distUv;
+                        $texels[`size $texels`] = $texel;
+                        }
+                }
+        $checkedVerts[`size $checkedVerts`] = $vert;
+        }
+//print $texels;
+float $quality = minOf($texels) / (maxOf($texels) / 100);
+$quality = 1 - $quality / 100;
+//polyColorPerVertex -rgb $quality 0 0 (conv({$face}, "vf"));
+$color = {$quality,$quality*$quality,$quality*$quality};
+if ($quality >= $badQuality)
+        $badFaces[`size $badFaces`] = $face;
+string $info[] = `polyInfo -fv $face`;
+string $infoS[] = stringCut(2,"end",stringToStringArray($info[0], " :\n"));
+int $vertNums[] = stringArrayToIntArray($infoS);
+int $vertNum;
+for ($vertNum in $vertNums)
+        {
+//$vertNum = $vertNums[0];
+        setAttr ($object + ".vclr[" + $vertNum + "].vfcl[" + $faceNum + "].frgb")
+                $color[0] $color[1] $color[2];
+        }
+$faceNum++;
+if ($faceNum % 10 == 0)
+        {
+        progressText ("generating " + $faceNum + " / " + $facesCount + ".   " + floatToInt((intToFloat(`size $badFaces`) / `size $faces` * 100)) + "% bad faces.");
+        progressValue (intToFloat($faceNum) / $facesCount * 100);
+        if ($refresh)
+                refresh -cv;
+        }
+if (progressEsc())
+        break;
+}
+progressEnd;
+if (`size $badFaces` > 0)
+        {
+        select $badFaces;
+        print ("time: " + timerquery() + " seconds.     " + floatToInt(intToFloat(`size $badFaces`) / `size $faces` * 100) + "% bad faces.");
+        }
+else
+        print ("time: " + timerquery());
+}
+}
+
+
+
+
+
+

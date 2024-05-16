@@ -1,0 +1,118 @@
+global proc views()
+{
+//PARAMETRS
+//if $switchDisplayModes = 1 - remember last display mode and set last displayed mode on this camera
+//(defaultLight/NoLights/UseLights, wireframe/flat/shaded, textureOn/textureOff)
+int $switchDisplayModes = 1;
+//if $orthoDisplayModeUnion = 1 - front,top and side views will have unioned display type.
+int $orthoDisplayModeUnion = 1;
+
+//$oldCam = "persp";
+//$oldCam = "side";
+string $oldCam = currCam();
+string $newCam = "";
+if ($oldCam == "persp")
+{
+float $vector[] = vectorToFloat(rotationToVector($oldCam, <<0,0,-1>>));
+float $vectorAbs[] = {abs($vector[0]),abs($vector[1]),abs($vector[2])};
+int $axis = forInNumFloat(maxOf ($vectorAbs), $vectorAbs);
+string $up = `upAxis -q -axis`;
+if ($axis == 0)
+	$newCam = "side";
+else if ($axis == 1 && $up == "y")
+	$newCam = "top";
+else if ($axis == 1 && $up == "z")
+	$newCam = "front";
+else if ($axis == 2 && $up == "y")
+	$newCam = "front";
+else if ($axis == 2 && $up == "z")
+	$newCam = "top";
+//detect what ortorgraphic camera we need
+
+$posCon = `pointConstraint -offset 0 0 0 -weight 1 $oldCam $newCam`;
+$oriCon = `orientConstraint -offset 0 0 0 -weight 1 $oldCam $newCam`;
+delete $posCon $oriCon;
+
+float $rx = `getAttr ($newCam + ".rx")`;
+float $ry = `getAttr ($newCam + ".ry")`;
+float $rz = `getAttr ($newCam + ".rz")`;
+$rx = intToFloat(floatToInt($rx / 90 + ($rx >= 0 ? 0.5 : -0.5))) * 90;
+$ry = intToFloat(floatToInt($ry / 90 + ($ry >= 0 ? 0.5 : -0.5))) * 90;
+$rz = intToFloat(floatToInt($rz / 90 + ($rz >= 0 ? 0.5 : -0.5))) * 90;
+setAttr -type double3 ($newCam + ".r") $rx $ry $rz;
+//constraint, delete constraint, fit ortographic view angle.
+
+float $coi = `getAttr ($oldCam + ".centerOfInterest")`;
+string $newCamShape = stringSingle(`listRelatives -s $newCam`);
+setAttr ($newCamShape + ".orthographicWidth") $coi;
+
+float $camPos[] = `xform -q -ws -t $oldCam`;
+float $vector[] = vectorToFloat(rotationToVector($oldCam, <<0,0,-1>>));
+float $targetPos[] = vectorToFloat(floatToVector($camPos) + (floatToVector($vector) * $coi));
+float $vectorAbs[] = {abs($vector[0]),abs($vector[1]),abs($vector[2])};
+float $max = maxOf($vectorAbs);
+int $numIn = forInNumFloat($max, $vectorAbs);
+float $x = $targetPos[0] + ($coi * ($camPos[0] > $targetPos[0] ? 1 : -1));
+float $y = $targetPos[1] + ($coi * ($camPos[1] > $targetPos[1] ? 1 : -1));
+float $z = $targetPos[2] + ($coi * ($camPos[2] > $targetPos[2] ? 1 : -1));
+if ($numIn == 0)
+	move -a $x $targetPos[1] $targetPos[2] $newCam;
+else if ($numIn == 1)
+	move -a $targetPos[0] $y $targetPos[2] $newCam;
+else if ($numIn == 2)
+	move -a $targetPos[0] $targetPos[1] $z $newCam;
+}
+else
+{
+$newCam = "persp";
+$posCon = `pointConstraint -offset 0 0 0 -weight 1 $oldCam $newCam`;
+$oriCon = `orientConstraint -offset 0 0 0 -weight 1 $oldCam $newCam`;
+delete $posCon $oriCon;
+float $orthoWidth = `getAttr ($oldCam + ".orthographicWidth")`;
+float $coi = `getAttr ($newCam + ".centerOfInterest")`;
+float $vector[] = vectorToFloat(rotationToVector($newCam, <<0,0,-1>>));
+float $move[] = vectorToFloat(floatToVector($vector) * ($coi - $orthoWidth));
+move -r $move[0] $move[1] $move[2] $newCam;
+setAttr ($newCam + ".centerOfInterest") $orthoWidth;
+setAttr ($newCam + "Shape" + ".orthographic") 0;
+}
+
+string $panel = `getPanel -wf`;
+if (`getApplicationVersionAsFloat` == 6)
+	lookThroughModelPanel $newCam $panel;
+else
+	switchModelView $newCam;
+
+if ($switchDisplayModes)
+	{
+	//set for next display
+	string $da = `modelEditor -q -da $panel`;
+	string $dl = `modelEditor -q -dl $panel`;
+	string $dtx = `modelEditor -q -dtx $panel`;
+	if ($orthoDisplayModeUnion && ($oldCam == "front" || $oldCam == "side" || $oldCam == "top"))
+		{
+		if (!`attributeExists displayLastTime "front"`)
+			addAttr -ln displayLastTime -dt stringArray "front";
+		if (!`attributeExists displayLastTime "side"`)
+			addAttr -ln displayLastTime -dt stringArray "side";
+		if (!`attributeExists displayLastTime "top"`)
+			addAttr -ln displayLastTime -dt stringArray "top";
+		setAttr ("front" + ".displayLastTime") -type stringArray 3 $da $dl $dtx;
+		setAttr ("side" + ".displayLastTime") -type stringArray 3 $da $dl $dtx;
+		setAttr ("top" + ".displayLastTime") -type stringArray 3 $da $dl $dtx;
+		}
+	else
+		{
+		if (!`attributeExists displayLastTime $oldCam`)
+			addAttr -ln displayLastTime -dt stringArray $oldCam;
+		setAttr ($oldCam + ".displayLastTime") -type stringArray 3 $da $dl $dtx;
+		}
+
+	//restore from last display
+	if (`attributeExists displayLastTime $newCam`)
+		{
+		string $modes[] = `getAttr ($newCam + ".displayLastTime")`;
+		modelEditor -edit -da $modes[0] -dl $modes[1] -dtx (stringToInt($modes[2])) $panel;
+		}
+	}
+}

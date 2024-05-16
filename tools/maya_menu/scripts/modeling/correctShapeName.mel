@@ -1,0 +1,55 @@
+//Used in TinyTools.mel
+global proc correctShapeName()
+{
+	string $CSN_liste[] = `ls -l -g`;
+	string $CSN_objects;
+	int $progressMax = size($CSN_liste);
+
+	if($progressMax != 0)
+		{
+		progressBar
+			-edit
+			-beginProgress
+			-isInterruptable true
+			-status "Calculation ..."
+			-maxValue $progressMax mainProgressBar;
+
+		print ($progressMax+"\n");
+
+		for ($CSN_objects in $CSN_liste)
+			{
+	 		if(`progressBar -query -isCancelled mainProgressBar`)
+			break;
+			progressBar -edit -step 1 mainProgressBar;
+
+			string $CSN_intermedAttr = $CSN_objects + ".intermediateObject";
+			int $CSN_intermedAttrValue = `getAttr $CSN_intermedAttr`;
+			if ($CSN_intermedAttrValue == 0)
+				{
+		        print ($CSN_intermedAttr + "==" + $CSN_intermedAttrValue + "\n");
+	    	    string $CSN_transform[] = `pickWalk -d up $CSN_objects`;
+	            string $CSN_transformShort = `SR_simplifyLongName($CSN_transform[0])`;
+		        string $CSN_objectNewName = $CSN_transformShort + "Shape";
+		        rename $CSN_objects $CSN_objectNewName;
+				}
+			else
+				print ($CSN_objects + " is a ghost shape - skipped \n");
+			}
+			progressBar -edit -endProgress mainProgressBar;
+			//select -cl;
+			print ("SHAPE NAME : All Shapes renamed according to their transform \n");
+		}
+}
+
+global proc string SR_simplifyLongName(string $SLN_longName)
+{
+	string	$SLN_tokenArray[];
+	tokenize $SLN_longName "|" $SLN_tokenArray;
+	if( size($SLN_tokenArray) == 0 )
+		return $SLN_longName;
+	return $SLN_tokenArray[size($SLN_tokenArray)-1];
+}
+
+
+
+

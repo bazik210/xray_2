@@ -1,0 +1,31 @@
+//////////////////////////////
+//Collect information on a specified key
+//////////////////////////////
+global proc string[] jpGetInfoOnAKey(string $obj, string $attr, int $keyIndex)
+{
+	float $keyTime_FL[] = `keyframe -in $keyIndex -q -tc ($obj + "." + $attr)`;
+	float $keyValue_FL[] = `keyframe -in $keyIndex -q -vc ($obj + "." + $attr)`;
+	string $inTangentType[] = `keyTangent -in $keyIndex -q -itt ($obj + "."+  $attr)`;
+	string $outTangentType[] = `keyTangent -in $keyIndex -q -ott ($obj + "." + $attr)`;
+	float $inWeight_FL[] = `keyTangent -in $keyIndex -q -iw ($obj + "." + $attr)`;
+	float $outWeight_FL[] = `keyTangent -in $keyIndex -q -ow ($obj + "." + $attr)`;
+	float $inAngle_FL[] = `keyTangent -in $keyIndex -q -ia ($obj + "." + $attr)`;
+	float $outAngle_FL[] = `keyTangent -in $keyIndex -q -oa ($obj + "." + $attr)`;
+	int $weightedTangents_FL[] = `keyTangent -in $keyIndex -q -wt ($obj + "." + $attr)`;
+	int $lockTangents_FL[] = `keyTangent -in $keyIndex -q -l ($obj + "." + $attr)`;
+
+	//make all collected values strings, because maya refuses to let me return a mixed type array
+	//I hate type re-casting. That's one of the features I love about Python, you don't have this problem
+	string $keyTime = $keyTime_FL[0];
+	string $keyValue = $keyValue_FL[0];
+	string $inWeight = $inWeight_FL[0];
+	string $outWeight = $outWeight_FL[0];
+	string $inAngle = $inAngle_FL[0];
+	string $outAngle = $outAngle_FL[0];
+	string $weightedTangents = $weightedTangents_FL[0];
+	string $lockTangents = $lockTangents_FL[0];
+
+	string $keyInfo[] = {$keyTime, $keyValue, $inTangentType[0], $outTangentType[0], $inWeight, $outWeight, $inAngle, $outAngle, $weightedTangents, $lockTangents};
+
+	return $keyInfo;
+}//end proc jpGetInfoOnAKey

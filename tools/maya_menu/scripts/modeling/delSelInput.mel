@@ -1,0 +1,65 @@
+/*
+ all rights and lefts reserved and deserved : D
+ use this code in your own risk.
+I dont care if something bad happens.but I am currently using it
+
+DESCRIPTION
+
+select some input nodes in channelbox to delete.and execute delSelInput command.
+it deletes currently selected input node safely (I think so).
+like polyCut,polySmooth nodes... 
+
+so you dont have to write individually delete polyCut1 or something like this
+
+in another stand Point; if you select on channelbox
+non DAG nodes like polyCut,makeNurbsCube1 etc.
+so you dont need to write small delete line.
+
+small but handy for me.and uharing with you
+
+please feedback by mail if you improve something or some errors you find.
+I will recode it by directions of all you.
+
+==|Sharing Knowledge|==
+
+thanks
+
+kursatturkay@hotmail.com
+www.ddmel.com
+2006.August
+version : 0.0.0.1.beta
+
+
+*/
+global proc delSelInput()
+{
+$sels=`ls -sl`;
+string $type = `objectType $sels[0]`;
+
+switch ($type) {
+			case "subdiv":
+
+			case "mesh":
+			case 	"polymesh":
+			case "subdivMeshEdge":
+			case "particle":
+			case "subdivMeshFace":
+			case "controlVertex":
+			case "subdivMeshPoint":
+			case "vertex":
+			case "edge":
+			case "mesh":
+			case "facet":
+			case "nurbsSurface":
+			case "subdiv":			
+			case "transform":							
+				error "it is not a valid input selection in channelbox.Select something like makeNurbsSphere or cutPoly";
+				break;
+						
+			default:
+			print ($sels[0] + " deleted");
+					delete $sels[0];
+					break;
+				
+				};
+}

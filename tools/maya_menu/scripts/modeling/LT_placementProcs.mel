@@ -1,0 +1,1044 @@
+// Copyright (C) 1997-2010 Autodesk, Inc., and/or its licensors.
+// All rights reserved.
+//
+// The coded instructions, statements, computer programs, and/or related
+// material (collectively the "Data") in these files contain unpublished
+// information proprietary to Autodesk, Inc. ("Autodesk") and/or its licensors,
+// which is protected by U.S. and Canadian federal copyright law and by
+// international treaties.
+//
+// The Data is provided for use exclusively by You. You have the right to use,
+// modify, and incorporate this Data into other products for purposes authorized 
+// by the Autodesk software license agreement, without fee.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. AUTODESK
+// DOES NOT MAKE AND HEREBY DISCLAIMS ANY EXPRESS OR IMPLIED WARRANTIES
+// INCLUDING, BUT NOT LIMITED TO, THE WARRANTIES OF NON-INFRINGEMENT,
+// MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR ARISING FROM A COURSE 
+// OF DEALING, USAGE, OR TRADE PRACTICE. IN NO EVENT WILL AUTODESK AND/OR ITS
+// LICENSORS BE LIABLE FOR ANY LOST REVENUES, DATA, OR PROFITS, OR SPECIAL,
+// DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES, EVEN IF AUTODESK AND/OR ITS
+// LICENSORS HAS BEEN ADVISED OF THE POSSIBILITY OR PROBABILITY OF SUCH DAMAGES.
+
+
+//
+// LT_placementProcs.mel
+//
+// Contains all procs used by LT_UI.mel for Placement tab in LayoutToolsUI
+//
+// Author:		Steven T. L. Roselle
+// email:		Steven.Roselle@autodesk.com
+//
+// Feel free to email with problems/issues that you may encounter.  
+// I may not be able to reply right away, but I will try to investigate  
+// the problem as soon as I can.
+//                     
+//
+// Creation Date:      ( 04/04/03 )
+// Last Update:        ( 09/25/10 )
+//
+// Version:		LayoutTools 2011  (formerly LevelTools)
+
+
+global proc LT_placementProcs()
+{
+	// Force loading of all LayoutTools placement procs
+}
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//	                    Dragger Context Procs - Click Drag Placement
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+global proc LT_buildMoveContextPress()
+{
+	//Move selected object with cursor
+	//
+
+	float  $pressPosition[] = `draggerContext -query   -anchorPoint buildMoveContext`;
+	string $modifier   = `draggerContext -query   -modifier buildMoveContext`;
+	string $message;
+	string $unit;
+	string $tmp;
+	
+	string $Obj[] = `ls -sl -type transform`;
+
+
+
+	$size = `size $Obj`;
+	$lastObj = $Obj[$size-1];
+	
+	$absX = `getAttr ($lastObj+".tx")`;
+	$absY = `getAttr ($lastObj+".ty")`;
+	$absZ = `getAttr ($lastObj+".tz")`;
+	
+	//convert value from cm to current units because draggerContext always returns cm
+	$unit = `currentUnit -q -linear`;
+	if ($unit != "cm") 
+		{
+		$tmp = $pressPosition[0];
+		$pressPosition[0] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $pressPosition[1];
+		$pressPosition[1] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $pressPosition[2];
+		$pressPosition[2] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		}
+		
+	if (`snapMode -q -point` || `snapMode -q -grid`)
+		{
+		//Move selected object with cursor along view plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $pressPosition[0]` + "  ty: "+`LT_swFloatToNiceString $pressPosition[1]` + " tz: "+`LT_swFloatToNiceString $pressPosition[2]`);
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;
+			move $pressPosition[0] $pressPosition[1] $pressPosition[2];
+			}
+		else 
+			move -relative ($pressPosition[0] - $absX) ($pressPosition[1] - $absY) ($pressPosition[2] - $absZ);
+		}
+	else if ($modifier == "ctrl")
+		{
+		//Contrain translate to y axis
+		string $message = ("    tx: LOCKED ty: "+`LT_swFloatToNiceString $pressPosition[1]` +  "  tz: LOCKED");
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;				
+			move -y $pressPosition[1];
+			}
+		else 
+			move -y -relative ($pressPosition[1] - $absY);
+		}
+	else
+		{
+		//Contrain translate to XZ plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $pressPosition[0]` +  "  ty: LOCKED  tz: "+`LT_swFloatToNiceString $pressPosition[2]`);
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;
+
+            //first make sure xforms are zero'd out
+            xform -ws -wd -a -t 0 0 0;
+		    xform -ws -wd -a -rt 0 0 0;
+            xform -ws -wd -a -st 0 0 0;
+            //then move to position
+			xform -ws -a -t ($pressPosition[0]) `getAttr ($lastObj+".ty")` ($pressPosition[2]);				}
+		else 
+			move -xz -relative ($pressPosition[0] - $absX) ($pressPosition[2] - $absZ);	
+
+
+
+			
+		}
+
+	refresh -currentView;
+}
+
+
+global proc LT_buildMoveContextHold()
+{
+	//Print current location in HUD
+	//
+
+	float  $pressPosition[] = `draggerContext -query   -anchorPoint buildMoveContext`;
+	string $modifier   = `draggerContext -query   -modifier buildMoveContext`;
+	string $message;
+	string $unit;
+	string $tmp;
+
+	string $Obj[] = `ls -sl -type transform`;
+
+	$size = `size $Obj`;
+	$lastObj = $Obj[$size-1];
+	
+	$absX = `getAttr ($lastObj+".tx")`;
+	$absY = `getAttr ($lastObj+".ty")`;
+	$absZ = `getAttr ($lastObj+".tz")`;
+	
+		
+	if ($size > 1)
+		return;
+		
+	//convert value from cm to current units because draggerContext always returns cm
+	$unit = `currentUnit -q -linear`;
+	if ($unit != "cm") 
+		{
+		$tmp = $pressPosition[0];
+		$pressPosition[0] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $pressPosition[1];
+		$pressPosition[1] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $pressPosition[2];
+		$pressPosition[2] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		}
+		
+	if (`snapMode -q -point` || `snapMode -q -grid`)
+		{
+		//Move selected object with cursor along view plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $pressPosition[0]` + "  ty: "+`LT_swFloatToNiceString $pressPosition[1]` + " tz: "+`LT_swFloatToNiceString $pressPosition[2]`);
+		draggerContext -edit -drawString $message buildMoveContext;
+		}
+	else if ($modifier == "ctrl")
+		{
+		//Contrain translate to y axis
+		string $message = ("    tx: LOCKED ty: "+`LT_swFloatToNiceString $pressPosition[1]` +  "  tz: LOCKED");
+		draggerContext -edit -drawString $message buildMoveContext;
+		}
+	else
+		{
+		//Contrain translate to XZ plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $pressPosition[0]` +  "  ty: LOCKED  tz: "+`LT_swFloatToNiceString $pressPosition[2]`);
+		draggerContext -edit -drawString $message buildMoveContext;
+		}
+
+	//refresh -currentView;
+}
+
+
+global proc LT_buildMoveContextDrag()
+{
+	//Move selected object with cursor
+	//
+
+	float  $dragPosition[] = `draggerContext -query   -dragPoint buildMoveContext`;
+	string $modifier   = `draggerContext -query   -modifier buildMoveContext`;
+	string $message;
+	string $unit;
+	string $tmp;		
+
+	string $Obj[] = `ls -sl -type transform`;
+
+	$size = `size $Obj`;
+	$lastObj = $Obj[$size-1];
+	
+	$absX = `getAttr ($lastObj+".tx")`;
+	$absY = `getAttr ($lastObj+".ty")`;
+	$absZ = `getAttr ($lastObj+".tz")`;
+			
+	//convert value from cm to current units because draggerContext always returns cm
+	$unit = `currentUnit -q -linear`;
+	if ($unit != "cm") 
+		{
+		$tmp = $dragPosition[0];
+		$dragPosition[0] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $dragPosition[1];
+		$dragPosition[1] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $dragPosition[2];
+		$dragPosition[2] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		}
+
+	if (`snapMode -q -point` || `snapMode -q -grid`)
+		{
+		//Move selected object with cursor along view plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $dragPosition[0]` + "  ty: "+`LT_swFloatToNiceString $dragPosition[1]` + " tz: "+`LT_swFloatToNiceString $dragPosition[2]`);
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;
+			move $dragPosition[0] $dragPosition[1] $dragPosition[2];
+			}	
+		else 
+			move -relative ($dragPosition[0] - $absX) ($dragPosition[1] - $absY) ($dragPosition[2] - $absZ);
+		}
+	else if ($modifier == "ctrl")
+		{
+		//Contrain translate to y axis
+		string $message = ("    tx: LOCKED ty: "+`LT_swFloatToNiceString $dragPosition[1]` +  "  tz: LOCKED");
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;
+			move -y $dragPosition[1];
+			}
+		else 
+			move -y -relative ($dragPosition[1] - $absY);			
+		}
+	else
+		{
+		//Contrain translate to XZ plane
+		string $message = ("    tx: "+`LT_swFloatToNiceString $dragPosition[0]` +  "  ty: LOCKED  tz: "+`LT_swFloatToNiceString $dragPosition[2]`);
+		if ($size == 1)
+			{
+			draggerContext -edit -drawString $message buildMoveContext;
+			move -xz $dragPosition[0] $dragPosition[2];
+			}
+			
+		else 
+			move -xz -relative ($dragPosition[0] - $absX) ($dragPosition[2] - $absZ);
+			
+	
+		}
+
+	refresh -currentView;
+}
+
+
+global proc LT_buildMoveContextRelease()
+{
+
+	//Print location of object at release point
+	//
+
+	global string $LT_setGroundFloatName;
+
+	string $Obj[] = `ls -sl -type transform`;
+
+	
+	float $releasePosition[] = `draggerContext -query   -dragPoint buildMoveContext`;
+	string $modifier   = `draggerContext -query   -modifier buildMoveContext`;
+	string $unit;
+	string $tmp;	
+	
+	$size = `size $Obj`;
+	$lastObj = $Obj[$size-1];
+	
+	$absX = `getAttr ($lastObj+".tx")`;
+	$absY = `getAttr ($lastObj+".ty")`;
+	$absZ = `getAttr ($lastObj+".tz")`;		
+
+	if ($size > 1)
+		{
+		print ("Multiple objects dragged in relative mode.\n");
+		return;
+		}
+		
+			
+	/*
+	//convert value from cm to current units because draggerContext always returns cm
+	$unit = `currentUnit -q -linear`;
+	if ($unit != "cm") 
+		{
+		$tmp = $releasePosition[0];
+		$releasePosition[0] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $releasePosition[1];
+		$releasePosition[1] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $releasePosition[2];
+		$releasePosition[2] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		}
+			select -r $Obj;
+	*/
+			
+	$releasePosition[0] = getAttr ($lastObj+".tx");	
+	$releasePosition[1] = getAttr ($lastObj+".ty");	
+	$releasePosition[2] = getAttr ($lastObj+".tz");	
+	
+	print ($lastObj +" is now located at: " + `LT_swFloatToNiceString $releasePosition[0]` + " " + `LT_swFloatToNiceString $releasePosition[1]` + " " + `LT_swFloatToNiceString $releasePosition[2]` + "\n");
+
+	if ($modifier == "ctrl")
+		{
+		//Update ground plane to new Y value
+		optionVar -floatValue LT_groundValue $releasePosition[1]; 
+		floatField -e -v $releasePosition[1] $LT_setGroundFloatName;
+		}
+		
+
+	if (`snapMode -q -point` || `snapMode -q -grid`)
+		{
+		//Update ground plane to new Y value
+		optionVar -floatValue LT_groundValue $releasePosition[1]; 
+		floatField -e -v $releasePosition[1] $LT_setGroundFloatName;
+		}
+
+}
+
+
+global proc LT_clickDragObj()
+{
+
+	//Create and enable the dragger context 
+	//for interactively placing new or imported object
+	//
+
+	global string $LT_buildMoveContextName;
+	global string $LT_currentObj;
+	global string $LT_objects[];
+	global string $gSelect;
+
+	
+	$LT_objects = `ls -sl -type transform`;
+	
+	if (`size $LT_objects` == 0)
+		{
+		setToolTo $gSelect;
+		warning ("No transform selected to drag");
+		return;
+		}
+	//else if (`size $LT_objects` > 1)
+	//	{
+		//setToolTo $gSelect;
+	//	warning ("Multiple objects will be dragged in relative mode.");
+	//	}
+	else
+		//$LT_currentObj = $LT_objects[0];
+
+
+	if ( `draggerContext -exists $LT_buildMoveContextName` )
+	{
+		deleteUI $LT_buildMoveContextName;
+	}
+
+		$LT_buildMoveContextName  = `draggerContext  -snp 1
+				-pressCommand  (" LT_buildMoveContextPress()")
+				-holdCommand  (" LT_buildMoveContextHold()")
+				-dragCommand  ("undoInfo -swf 0; LT_buildMoveContextDrag(); undoInfo -swf 1")   // turn off undo first & turn on undo after
+				-releaseCommand (" LT_buildMoveContextRelease()")
+				-cursor	 "crossHair"
+				-space world
+				buildMoveContext`;
+
+	// set the current tool to the dragger context
+	setToolTo buildMoveContext;
+	
+	headsUpMessage -time 6.0 "Click drag in the viewport to drag selected object(s) around on the ground plane.  CTRL click to drag vertically along Y.";
+
+
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+//	                    Spin Dragger Context Procs - Click Drag Rotation
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+global proc LT_buildSpinContextDrag()
+{
+	//Rotate selected objects with cursor
+	//
+
+	float  $dragPosition[] = `draggerContext -query   -dragPoint buildSpinContext`;
+	float  $startPosition[] = `draggerContext -query   -anchorPoint buildSpinContext`;
+	float  $dragDirection[];
+	string $modifier   = `draggerContext -query   -modifier buildSpinContext`;
+	string $message;
+	string $unit;
+	string $tmp;	
+    float $xcenter;
+    float $ycenter;
+    float $zcenter;
+	float $boundingBox[];	
+	
+	string $Objects[] = `ls -sl -type transform`;
+	string $Obj;
+	
+	$dragDirection[0] = $dragPosition[0] - $startPosition[0];
+
+	$size = `size $Objects`;
+	$lastObj = $Objects[$size-1];
+	
+	$absX = `getAttr ($lastObj+".tx")`;
+	$absY = `getAttr ($lastObj+".ty")`;
+	$absZ = `getAttr ($lastObj+".tz")`;
+			
+	//convert value from cm to current units because draggerContext always returns cm
+	$unit = `currentUnit -q -linear`;
+	if ($unit != "cm") 
+		{
+		$tmp = $dragPosition[0];
+		$dragPosition[0] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $dragPosition[1];
+		$dragPosition[1] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		$tmp = $dragPosition[2];
+		$dragPosition[2] = `convertUnit -fromUnit "cm" -toUnit $unit $tmp`;
+		}
+
+	if ( $modifier == "ctrl")
+		{
+		//Rotate around last object
+		$boundingBox = `exactWorldBoundingBox $lastObj`;
+    	$xcenter = (($boundingBox[0] + $boundingBox[3]) / 2);
+    	$ycenter = (($boundingBox[1] + $boundingBox[4]) / 2);
+    	$zcenter = (($boundingBox[2] + $boundingBox[5]) / 2);
+    	
+        rotate -r -ws -pivot $xcenter $ycenter $zcenter  -x 0 -y ($dragDirection[0]/7) -z 0;
+		}
+	else if ($modifier == "shift")
+		{
+		for ($Obj in $Objects)
+		    {
+    		//Rotate around center of bounding box for each object independantly
+    	    $boundingBox = `exactWorldBoundingBox $Obj`;
+        	$xcenter = (($boundingBox[0] + $boundingBox[3]) / 2);
+        	$ycenter = (($boundingBox[1] + $boundingBox[4]) / 2);
+        	$zcenter = (($boundingBox[2] + $boundingBox[5]) / 2);
+        	 
+        	rotate -r -ws -pivot $xcenter $ycenter $zcenter  -x 0 -y ($dragDirection[0]/7) -z 0 $Obj;
+        	}
+		}
+	else
+		{
+		//Rotate around center of bounding box for all selected objects
+	    $boundingBox = `exactWorldBoundingBox`;
+    	$xcenter = (($boundingBox[0] + $boundingBox[3]) / 2);
+    	$ycenter = (($boundingBox[1] + $boundingBox[4]) / 2);
+    	$zcenter = (($boundingBox[2] + $boundingBox[5]) / 2);
+
+        rotate -r -ws -pivot $xcenter $ycenter $zcenter -x 0 -y ($dragDirection[0]/7) -z 0;	
+		}
+
+	refresh -currentView;
+}
+
+
+global proc LT_clickSpinObj()
+{
+
+	//Create and enable the Spin dragger Context for interactively rotating objects
+	//
+
+	global string $LT_buildSpinContextName;
+	global string $LT_currentObj;
+	global string $LT_objects[];
+	global string $gSelect;
+
+	
+	$LT_objects = `ls -sl -type transform`;
+	
+	if (`size $LT_objects` == 0)
+		{
+		setToolTo $gSelect;
+		warning ("No objects selected to spin");
+		return;
+		}
+
+
+	if ( `draggerContext -exists $LT_buildSpinContextName` )
+	{
+		deleteUI $LT_buildSpinContextName;
+	}
+
+    $LT_buildSpinContextName  = `draggerContext  -snp 1
+	        -pressCommand "rotate -r 0 0 0"  //only needed for undoing
+			-dragCommand  ("undoInfo -swf 0; LT_buildSpinContextDrag(); undoInfo -swf 1")   // turn off undo first & turn on undo after
+			-cursor	 "tumble"
+			-space world
+			buildSpinContext`;
+
+	// set the current tool to the Spin dragger Context
+	setToolTo buildSpinContext;
+	
+	headsUpMessage -time 6.0 "Click drag in the viewport to spin selected object(s) around an shared center.  CTRL click to spin all around last object's center.  SHIFT click to spin each object independantly.  ";
+
+
+}
+
+
+//////////////////////////////////////////////////
+
+
+global proc LT_setGroundToObj()
+{
+	global string $LT_setGroundFloatName;
+	float $translate[];
+	
+	$selected = `ls -sl`;
+	if (`size $selected` != 1)
+		error "Select a single object or poly component";
+	
+	$mesh = `filterExpand -sm 12`;
+	if (`size $mesh` == 1)
+		{	
+		$translate = `xform -q -ws -t  $selected[0]`;
+		}
+	else 
+		{
+		$components = `filterExpand -sm 31 -sm 32 -sm 34`;
+		if (`size $components` > 0)
+			{
+			select -r `polyListComponentConversion -ff -fe -fvf -fv -tv`;
+			string $verts[] = `filterExpand -sm 31`;
+			$translate = `LT_getCenter $verts`;
+			}	
+		else
+			error "Select a single object or poly component";			
+		}
+		
+	optionVar -fv LT_groundValue $translate[1];
+	floatField -e -v $translate[1] $LT_setGroundFloatName;
+
+	select -r $selected;
+}
+
+
+//////////////////////////////////////////////
+//	XForm Procs
+//////////////////////////////////////////////
+
+global proc LT_snapToVirtualGrid(float $snapVal, int $axis)
+{
+	//Creates a virtual grid of a given subdivision interval 
+	//and snaps selected object to nearest virtual point
+	//
+
+	string $sel_items[] = `ls -sl` ;
+	int $sel_size = `size( $sel_items )` ;
+
+	int $c;
+	for( $c = 0; $c < $sel_size; $c ++ )
+	{
+		float $tx, $ty, $tz;
+
+		string $obj = $sel_items[$c];
+
+		$tx = floor( float((`getAttr ($obj + ".tx")` / $snapVal) + 0.5) ) * $snapVal;
+		$ty = floor( float((`getAttr ($obj + ".ty")` / $snapVal) + 0.5) ) * $snapVal;
+		$tz = floor( float((`getAttr ($obj + ".tz")` / $snapVal) + 0.5) ) * $snapVal;
+
+		if ($axis == 1 || $axis == 0)
+			{
+			setAttr ($obj + ".tx") $tx ;	
+			print ($obj+".tx : snapped to "+$tx+"\n");			
+			}
+		if ($axis == 2 || $axis == 0)
+			{
+			setAttr ($obj + ".ty") $ty ; 
+			print ($obj+".ty : snapped to "+$ty+"\n");			
+			}
+		if ($axis == 3 || $axis == 0)
+			{
+			setAttr ($obj + ".tz") $tz ;
+			print ($obj+".tz : snapped to "+$tz+"\n");			
+			}
+		if ($axis == -1)
+			{
+			setAttr ($obj + ".ty") 0; //ground plane snap
+			print ($obj+".ty : snapped to ground plane\n");			
+			}
+	
+	}
+}
+
+
+global proc LT_setCustomAxis () 
+	
+{
+	string $axisSetting = `optionVar -q LT_moveSpace`;
+	string $dummyList[];
+
+		
+	$selected = `ls -sl`;
+	//$firstSelected = $selected[0];
+	
+	string $dummyList[];
+		
+	switch ($axisSetting)
+		{
+		case "-edge" : 
+			print edge;
+			//check first selection for edge
+			//$edgeCheck = `filterExpand -sm 32 $firstSelected`;
+			$edgeCheck = `filterExpand -sm 32 $selected`;
+			if (`size $edgeCheck` != 1)
+				{
+				//optionVar -sv LT_moveSpace "-edge"; //reset to previous
+				warning "Include one and only polygonal edge in selection.";			
+				}	
+			else
+				{
+				manipMoveAlignHandleWith($edgeCheck[0], $dummyList);
+				manipMoveContext -e -mode 6 Move;
+				select -r $selected;
+				}
+				break;
+		case "-normal" :
+			print face;
+			//check first selection for edge
+			//$faceCheck = `filterExpand -sm 34 $firstSelected`;
+			$faceCheck = `filterExpand -sm 34 $selected`;
+			if (`size $faceCheck` != 1)
+				{
+				//optionVar -sv LT_moveSpace "-normal";  //reset to previous
+				warning "Include one and only polygonal face in selection.";			
+				}
+			else
+				{
+				manipMoveAlignHandleWith($faceCheck[0], $dummyList);
+				manipMoveContext -e -mode 6 Move;
+				select -r $selected;
+				}
+			break;
+		case "-os" :
+			print object;
+			break;
+		case "-ws" :
+			print world;
+			break;
+		}
+		
+}
+
+global proc LT_moveAlongEdge( float $offset ){
+
+	// Last update : 11/17/2004
+	// Author : Hiroyuki Haga ( hhaga@alias.com )
+	// Modified : Steven Roselle 
+	
+	string $selectionList[];
+	$selectionList = `ls -sl`;
+	int $listSize;
+	$listSize = `size $selectionList`;
+	
+	if ($listSize < 2)
+		error "Select a target edge to move parallel to, followed by 1 or more objects and/or components that you wish to offset.";
+
+	string $directionalEdge;
+	$directionalEdge = $selectionList[0];
+	
+	//print $directionalEdge;
+	
+	//check first selection for edge
+	$edgeCheck = `filterExpand -sm 32 $directionalEdge`;
+	if (`size $edgeCheck` != 1)
+		{
+		$directionalEdge = $selectionList[$listSize-1]; //check last selection for edge
+		$edgeCheck = `filterExpand -sm 32 $directionalEdge`;
+		if (`size $edgeCheck` != 1)
+			error "First or last selection must be a polygonal edge.";
+		}	
+
+
+	string $attachedVertices[];
+	string $directionalVertex[];
+
+	$attachedVertices= `polyListComponentConversion -ff -fe -fuv -fvf -tv $directionalEdge`;
+
+	$directionalVertex = `filterExpand -sm 31 $attachedVertices`;
+
+	float $vertexPosition1[];
+	float $vertexPosition2[];
+	//calculate vector
+	 $vertexPosition1 = `pointPosition $directionalVertex[0]`;
+	 $vertexPosition2 = `pointPosition $directionalVertex[1]`;
+
+	float $floatMoveDirection[3];
+	for ( $i = 0; $i < 3; $i++ ){
+		  $floatMoveDirection[$i] = $vertexPosition1[$i] - $vertexPosition2[$i];
+	 }
+
+	//Normalize
+	normalize( $floatMoveDirection );
+	vector $moveDirection;
+	$moveDirection = $floatMoveDirection;
+
+	//move component
+	select -replace $selectionList;
+	select -deselect $directionalEdge;
+	$moveObjs = `ls -sl`;
+
+	$moveDirection *= $offset;
+	float $moveLength[3];
+	$moveLength = $moveDirection;
+	print $moveDirection;
+
+	move -r -worldSpace ($moveLength[0]) ($moveLength[1]) ($moveLength[2]);
+
+	
+	//Update Move Manip with custom axis oriented to last selected edge	
+	manipMoveContext -e -mode 6 Move;
+	manipMoveAlignHandleWith($directionalEdge, $moveObjs);
+	
+	select $selectionList;
+
+
+
+}
+
+	
+global proc LT_moveAlongNormal( float $offset ){
+
+	// Author : Hiroyuki Haga
+	// Modified : Steven Roselle
+	
+	string $selectionList[];
+	$selectionList = `ls -sl`;
+	int $listSize;
+	$listSize = `size $selectionList`;
+	
+	if ($listSize < 2)
+		error "Select a target face to move perpendicular to, followed by 1 or more objects and/or components that you wish to offset.";
+
+	string $targetFace;
+	$targetFace = $selectionList[0];
+	
+	//print $targetFace;
+
+	//check first selection for normal
+	$faceCheck = `filterExpand -sm 34 $targetFace`;
+	if (`size $faceCheck` != 1)
+		{
+		$targetFace = $selectionList[$listSize-1]; //check last selection for face
+		$faceCheck = `filterExpand -sm 34 $targetFace`;
+		if (`size $faceCheck` != 1)
+			error "First or last selection must be a polygonal face.";
+		}	
+	
+	
+	select -r  $targetFace;
+	string $faceInfo[] = `polyInfo -faceNormals`;
+	string $stringNormal[];
+	tokenize $faceInfo[0] " " $stringNormal;
+	float $faceNormal[3] = {
+		(float)$stringNormal[2],
+		(float)$stringNormal[3],
+		(float)$stringNormal[4]
+	};
+	
+	//Get Worldspace
+	float $tMat[16] = `xform -q -ws -matrix`;
+	float $worldNorm[] = `pointMatrixMult $faceNormal $tMat`;
+	
+	//Normalize
+	//normalize( $floatMoveDirection );
+	//vector $moveDirection;
+	//$moveDirection = $floatMoveDirection;
+
+	normalize( $worldNorm );
+	vector $moveDirection;
+	$moveDirection = $worldNorm;
+	
+	//move component
+	select -replace $selectionList;
+	select -deselect $targetFace;
+	$moveObjs = `ls -sl`;
+
+	$moveDirection *= $offset;
+	float $moveLength[3];
+	$moveLength = $moveDirection;
+	print $moveDirection;
+
+	move -r -worldSpace ($moveLength[0]) ($moveLength[1]) ($moveLength[2]);
+
+	//Update Move Manip with custom axis oriented to last selected edge	
+	manipMoveContext -e -mode 6 Move;
+	manipMoveAlignHandleWith($targetFace, $moveObjs);
+	
+	select $selectionList;
+}
+
+
+global proc LT_moveOffset (float $value, int $axis, string $space)
+{
+	global string $gSelect;
+	global string $gMove;
+	
+	if (($space == "-os") || ($space == "-ws"))
+		{
+		setToolTo $gMove; 
+		if ($axis == 1)
+			move  -r -wd $space $value 0 0;
+		else if ($axis == 2)
+			move  -r -wd $space 0 $value 0;
+		else if ($axis == 3)
+			move  -r -wd $space 0 0 $value;
+		else 
+			warning ("No axis defined for move");
+		}
+	else if ($space == "-edge")
+	{
+		setToolTo $gSelect; 
+		LT_moveAlongEdge ($value);
+	}
+	else if ($space == "-normal")
+	{
+		setToolTo $gSelect; 
+		LT_moveAlongNormal ($value);
+	}	
+}
+
+
+global proc LT_rotateOffset (float $value, int $axis, string $space)
+{
+
+global string $gRotate;
+global string $gSelect;
+
+if ($space == "-bb")
+	{
+	float $boundingBox[] = `exactWorldBoundingBox`;
+
+	$xcenter = (($boundingBox[0] + $boundingBox[3]) / 2);
+	$ycenter = (($boundingBox[1] + $boundingBox[4]) / 2);
+	$zcenter = (($boundingBox[2] + $boundingBox[5]) / 2);
+
+	print ("Rotated " + $value + " degrees around center of world bounding box for all selected objects\n");
+
+	setToolTo $gSelect;
+
+	if ($axis == 1)
+		rotate -r -ws -pivot $xcenter $ycenter $zcenter -x $value -y 0 -z 0;
+	else if ($axis == 2)
+		rotate -r -ws -pivot $xcenter $ycenter $zcenter -x 0 -y $value -z 0;
+	else if ($axis == 3)
+		rotate -r -ws -pivot $xcenter $ycenter $zcenter -x 0 -y 0 -z $value;
+	else 
+		warning ("No axis defined for rotation");
+
+	}
+else
+	{
+	print ("Rotated " + $value + " degrees around " + $axis + " axis for each selected objects\n");
+
+	setToolTo $gRotate;
+
+	if ($axis == 1)
+		rotate  -r $space $value 0 0;
+	else if ($axis == 2)
+		rotate  -r $space 0 $value 0;
+	else if ($axis == 3)
+		rotate  -r $space 0 0 $value;
+	else 
+		warning ("No axis defined for rotation");
+	}
+}
+
+
+global proc LT_rotateSnap (float $snapVal, string $axis)
+{
+	//Snap rotate value of selected object to given interval 
+	//and normalize between -360 and 360 degrees
+	//
+
+	string $attr;
+
+	if ($axis == 1)
+		$attr = ".rx";
+	if ($axis == 2)
+		$attr = ".ry";
+	if ($axis == 3)
+		$attr = ".rz";
+
+	string $sel_items[] = `ls -sl` ;
+
+	int $sel_size = `size( $sel_items )` ;
+
+	int $c;
+	for( $c = 0; $c < $sel_size; $c ++ )
+	{
+		float $rot;
+
+		string $obj = $sel_items[$c];
+
+		//get lower snap point
+		$r1 = floor( float( `getAttr ($obj + $attr)` / $snapVal ) ) * $snapVal ;
+		if( $r1 > 360.0 )
+			$r1 -= 360.0 ;
+
+		//get upper snap point
+		$r2 = floor( float( `getAttr ($obj + $attr)` / $snapVal ) ) * $snapVal + $snapVal;
+		if( $r2 > 360.0 )
+			$r2 -= 360.0 ;
+		
+		//snap down
+		if ((`getAttr ($obj + $attr)` - $r1) < ($r2 - `getAttr ($obj + $attr)`))
+			{
+			setAttr ($obj + $attr) $r1 ;
+			print ($obj+" "+ $attr +" : snapped to "+$r1+"\n");
+			}			
+		//snap up
+		else
+			{
+			setAttr ($obj + $attr) $r2 ;
+			print ($obj+" "+ $attr +" : snapped to "+$r2+"\n");			
+			}
+
+	}
+}
+
+
+global proc LT_scaleAll (string $mode, int $x, int $y, int $z, float $value)
+
+{
+	
+	float $xval;
+	float $yval;
+	float $zval;
+
+	if ($x == 0)
+		$xval = 1;
+	else 
+		$xval = $value / 100;
+	if ($y == 0)
+		$yval = 1;
+	else 
+		$yval = $value / 100;
+	if ($z == 0)
+		$zval = 1;
+	else 
+		$zval = $value / 100;
+
+	if ($mode == 1)
+		scale -r $xval $yval $zval;
+	if ($mode == 2)
+		scale -a $xval $yval $zval;
+
+}
+
+///////////////////////////
+// Random transform procs
+
+global proc LT_randomRotate (float $min, float $max)
+
+{
+    string $mode = "-r";
+    string $meshSelection[] = `ls -sl`;
+
+    float $LTrotationValueX;
+    float $LTrotationValueY;
+    float $LTrotationValueZ;
+
+    for ($i=0; $i<size($meshSelection); $i++) {
+	$LTrotationValueX = rand($min ,$max);	
+	$LTrotationValueY = rand($min ,$max);
+	$LTrotationValueZ = rand($min ,$max);
+	select -r $meshSelection[$i];
+       rotate -os $mode -x ($LTrotationValueX * `optionVar -q LT_randomOffsetX`);  //multiply by zero if X axis toggle is off
+       rotate -os $mode -y ($LTrotationValueY * `optionVar -q LT_randomOffsetY`);  //multiply by zero if Y axis toggle is off
+       rotate -os $mode -z ($LTrotationValueZ * `optionVar -q LT_randomOffsetZ`);  //multiply by zero if Z axis toggle is off
+    }               
+    select -r $meshSelection;            
+}
+
+
+
+global proc LT_randomScale (float $min, float $max)
+
+{
+    string $mode = "-r";
+    string $meshSelection[] = `ls -sl`;
+
+    float $LTscaleValue;  // keep uniform if all selected
+
+    for ($i=0; $i<size($meshSelection); $i++) {
+	$LTscaleValue = rand($min ,$max);	
+	select -r $meshSelection[$i];
+	if (`optionVar -q LT_randomOffsetX`)
+	       scale $mode -x ($LTscaleValue / 100);  //convert from % to decimal
+	if (`optionVar -q LT_randomOffsetY`)	
+		scale $mode -y ($LTscaleValue / 100);  //convert from % to decimal
+ 	if (`optionVar -q LT_randomOffsetZ`)
+		scale $mode -z ($LTscaleValue / 100);  //convert from % to decimal
+    }   
+
+    select -r $meshSelection;            
+}
+
+
+global proc LT_randomMove (float $min, float $max)
+{
+    string $mode = "-r";
+    string $meshSelection[] = `ls -sl`;
+
+    float $LTmoveValueX;
+    float $LTmoveValueY;
+    float $LTmoveValueZ;
+
+    for ($i=0; $i<size($meshSelection); $i++) {
+	$LTmoveValueX = rand($min ,$max);	
+	$LTmoveValueY = rand($min ,$max);
+	$LTmoveValueZ = rand($min ,$max);
+	select -r $meshSelection[$i];
+       move $mode -x ($LTmoveValueX * `optionVar -q LT_randomOffsetX`);  //multiply by zero if X axis toggle is off
+       move $mode -y ($LTmoveValueY * `optionVar -q LT_randomOffsetY`);  //multiply by zero if Y axis toggle is off
+       move $mode -z ($LTmoveValueZ * `optionVar -q LT_randomOffsetZ`);  //multiply by zero if Z axis toggle is off
+    }   
+
+    select -r $meshSelection;            
+}
+
+
+

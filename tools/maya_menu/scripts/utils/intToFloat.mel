@@ -1,0 +1,1 @@
+global proc float intToFloat(int $int){float $float = $int;return $float;}

@@ -1,0 +1,17 @@
+sources\!entry_point.cpp
+!
+
+sources\!library_linkage.cpp
+core
+
+sources\+pch.cpp
+core
+
+sources\+pch.h
+core
+
+sources\!application.h
+application
+
+sources\!application.cpp
+application

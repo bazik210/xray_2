@@ -1,0 +1,254 @@
+//==============================================================================
+//Name:
+//  changeMaterial.mel
+//==============================================================================
+//Purpose:
+//  Пакетное изменение типов материала
+//==============================================================================
+//Usage:
+//  1. Save the changeMaterial.mel to your scripts directory.
+//  2. Start Maya. In the command line type changeMaterial();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc copyAllShaderParameters (string $oldMatName, string $newMatName) {
+  string $oldMatType = `objectType $oldMatName`;
+  string $newMatType = `objectType $newMatName`;
+  string $cmd;
+
+
+  // do the common attributes
+  string $commonShaderAttributes[] =  {"colorR", "colorG", "colorB",
+                "transparencyR", "transparencyG", "transparencyB"
+                                                        };
+
+
+  for ($attribute in $commonShaderAttributes)  {
+    $cmd = "getAttr " + $oldMatName + "." + $attribute;
+    float $oldAttr = eval ($cmd);
+    //print $attribute; print " - "; print $oldAttr; print "\n";
+    $cmd = "setAttr " + $newMatName + "." + $attribute + " " + $oldAttr;
+    //print $cmd; print "\n";
+    eval($cmd);
+  }
+
+
+  // do the specular attributes
+
+
+ }
+
+
+global proc copyAllShaderConnections (string $oldMatName, string $newMatName) {
+  string $oldMatType = `objectType $oldMatName`;
+  string $newMatType = `objectType $newMatName`;
+  string $cmd;
+
+
+  // do the common attributes
+
+
+  string $commonShaderConnections[] =  {"color", "transparency"
+                                              };
+
+
+  for ($attribute in $commonShaderConnections)  {
+    $cmd = "connectionInfo -sfd " + $oldMatName + "." + $attribute;
+    print ($cmd + "\n");
+    string $oldConnection = eval ($cmd);
+    print ($oldConnection + "\n");
+    print "Size:"; print (size($oldConnection)); print "\n";
+    $cmd = "connectAttr " + $oldConnection + " " + $newMatName + "." + $attribute;
+    print $cmd; print "\n";
+    if ((`size($oldConnection)`) != 0 ) {
+      eval($cmd);
+      }
+    }
+
+
+print "XRAY outColor\n";
+print ($newMatType + "   <---\n");
+ if ($newMatType == "xray_shader")
+{
+$cmd = "connectionInfo -sfd " + $oldMatName + "." + "outColor";
+    print ($cmd + "\n");
+    string $oldConnection = eval ($cmd);
+    $cmd = "connectAttr " + $oldConnection + " " + $newMatName + "." + "outColor";
+//    select -r $newMatName;
+    print $cmd; print "\n";
+    if ((`size($oldConnection)`) != 0 ) {
+      eval($cmd);
+      }
+}
+
+
+}//endproc
+
+
+// Change material type
+
+global proc changeMaterialType(int $newMat) {
+  string $mtl_selected;
+  string $cmd;
+  string $buffer[];
+  string $oldMatName = "";
+
+  // get current selected sg/material
+//  string $multiListerSelection[];
+//  $multiListerSelection = `listerEditor -q -hl multiListerPanel1TopTab1`;
+
+  string $multiListerSelection[];
+  $multiListerSelection = `ls -sl`;
+
+  print "Multilister Selection: "; print $multiListerSelection[0]; print "\n";
+print $multiListerSelection[1]; print "\n";
+
+  //select -r $multiListerSelection[0];
+  for ($mtl_selected in $multiListerSelection)
+ {
+   print ("Selected: "+$mtl_selected+"\n");
+
+
+// get material via selection
+
+
+//  string $selected[] = `ls -sl`;
+  //string $selected[] = $multiListerSelection;
+  if ((!(size($multiListerSelection))) == 1) {
+    confirmDialog -message "Please highlight just one material."
+    -button "Ok" -cancelButton "Ok" -dismissString "Ok";
+  }
+ if ((`objectType $mtl_selected`) == "shadingEngine") {
+    print "Shading Group Selected"; print "\n";
+    $cmd = "connectionInfo -sfd " + $mtl_selected + ".surfaceShader";
+    string $shadingGroupShader = eval($cmd);
+    $numTokens = `tokenize $shadingGroupShader "." $buffer`;
+    $mtl_selected = $buffer[0];
+    }
+
+
+  //$oldMatName = $selected[0];
+  $oldMatName = $mtl_selected;
+  print $oldMatName; print "\n";
+  $cmd  = "connectionInfo -dfs " + $oldMatName + ".outColor";
+  $buffer = eval($cmd);
+  string $oldSGPath = $buffer[0];
+  clear $buffer;
+  $numTokens = `tokenize $oldSGPath "." $buffer`;
+  $oldSGName = $buffer[0];
+  print $oldSGName; print "\n";
+  string $oldMatType = `objectType $oldMatName`;
+  print $oldMatType; print "\n";
+
+
+string $newMatName;
+string $newMatType;
+
+
+switch ($newMat) {
+  case 0: $newMatType = "lambert"; break;
+  case 1: $newMatType = "blinn"; break;
+  case 2: $newMatType = "phong"; break;
+  case 3: $newMatType = "phongE"; break;
+  case 4: $newMatType = "xray_shader"; break;
+}
+
+
+// determine attribute values
+// create new material
+$cmd = "shadingNode -asShader " + $newMatType;
+string $newMatName = eval ($cmd);
+
+
+// modify new materials attributes
+copyAllShaderParameters ($oldMatName, $newMatName);
+
+
+// copy the texture map connections
+string $textureCheckStatus = `checkBox -q -v changeMaterialWindow|cl1|cl2|textureCheckBox`;
+print $textureCheckStatus; print "\n";
+if ($textureCheckStatus) {
+  copyAllShaderConnections ($oldMatName, $newMatName);
+  print "Linking Texture Maps\n";
+  }
+
+
+// apply new material to old material
+$cmd = "connectAttr -f " + $newMatName + ".outColor " + $oldSGName + ".surfaceShader";
+print $cmd; print "\n";
+eval ($cmd);
+
+
+// delete old material if checked
+print "Check Delete Status\n";
+string $deleteCheckStatus = `checkBox -q -v changeMaterialWindow|cl1|cl2|deleteCheckBox`;
+//print $deleteCheckStatus; print "\n";
+if ($deleteCheckStatus) {
+  delete $oldMatName;
+  print "deleted old shader\n";
+  }
+
+
+// select the new material so you can do it again if you want
+print $newMat; print "\n";
+//listerEditor -e -chl  multiListerPanel1TopTab1;
+//listerEditor -e -hl  $newMatName multiListerPanel1TopTab1;
+//select -r $newMatName;
+
+
+// rename new material if checked
+string $renameCheckStatus = `checkBox -q -v changeMaterialWindow|cl1|cl2|renameCheckBox`;
+print $renameCheckStatus; print "\n";
+if ($renameCheckStatus) {
+  rename $newMatName $oldMatName;
+  print "Renaming new material\n";
+      }
+   }
+}
+
+
+proc buildChangeMaterialWindow ( string $window){
+  window -title "Change Material - Oct 18 2005" -s 0 -mnb off -mxb off $window;
+  columnLayout cl1;
+    rowColumnLayout -nc 10
+      -cw 1 32
+      -cw 2 54
+      -cw 3 32
+      -cw 4 54
+      -cw 5 32
+      -cw 6 54
+      -cw 7 32
+      -cw 8 54
+      -cw 9 32
+      -cw 10 54 rcl1;
+      picture -image "render_lambert.xpm" pictCntl1;
+      button -label "Lambert" -w 50 -h 32 -c "changeMaterialType(0)" lambertButton;
+      picture -image "render_blinn.xpm" pictCntl2;
+      button -label "Blinn" -w 50 -h 32 -c "changeMaterialType(1)" blinnButton;
+      picture -image "render_phong.xpm" pictCntl3;
+      button -label "Phong" -w 50 -h 32  -c "changeMaterialType(2)" phongButton;
+      picture -image "render_phongE.xpm" pictCntl4;
+      button -label "PhongE" -w 50 -h 32  -c "changeMaterialType(3)" phongEButton;
+      picture -image "render_lambert.xpm" pictCntl5;
+      button -label "Xray" -w 50 -h 32  -c "changeMaterialType(4)" xrayButton;
+      setParent ..;
+    columnLayout -width 260 cl2;
+      checkBox -l "Delete old material" -v 1
+      deleteCheckBox;
+      checkBox -l "Keep old name" -v 1
+      renameCheckBox;
+      checkBox -l "Keep texture maps" -v 1
+      textureCheckBox;
+
+  window  -tlb true -e -width 440 -height 115 $window;
+}
+
+
+global proc changeMaterial () {
+  print "changeMaterial";print "\n";
+  string $window = "changeMaterialWindow";
+  if (`window -exists $window`)
+    deleteUI -wnd $window;
+    buildChangeMaterialWindow ($window);
+  showWindow $window;
+}

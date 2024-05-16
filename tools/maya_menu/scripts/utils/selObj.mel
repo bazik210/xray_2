@@ -1,0 +1,1 @@
+global proc string selObj(){string $objs[] = `ls -sl -o`;return $objs[0];}

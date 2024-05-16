@@ -1,0 +1,95 @@
+//makePlanar
+//alignment vertex like 3dsmax
+//author Tagincev Vlad (Fiend3d)
+
+global proc vector fNormalVector(float $normals[])
+{
+	vector $vector;
+
+	int $size = size($normals);
+	int $i;
+	for ($i=0; $i<$size; )
+	{
+		$vector = <<($vector.x) + $normals[$i], $vector.y, $vector.z>>; $i++;
+		$vector = <<$vector.x, ($vector.y) + $normals[$i], $vector.z>>; $i++;
+		$vector = <<$vector.x, $vector.y, ($vector.z) + $normals[$i]>>; $i++;
+	}
+	$vector = $vector / ($size/3);
+	$vector = fNormalize( $vector );
+	return $vector;
+}
+
+global proc vector fNormalize( vector $vector )
+{
+	float $dist = mag ($vector);
+	$vector /= $dist;
+	return $vector;
+}
+
+global proc float[] fMiddleVector(float $floats[])
+{
+	int $size = size($floats);
+	float $result[3];
+
+	int $i;
+	for (; $i <= $size; )
+	{
+		if ($i == $size) return 
+					{$result[0]/($size/3), 
+					$result[1]/($size/3),
+					$result[2]/($size/3)};
+		$result[0] += $floats[$i]; $i++;
+		$result[1] += $floats[$i]; $i++;
+		$result[2] += $floats[$i]; $i++;
+	}
+	return $floats;
+}
+
+global proc makePlanar() //main
+{
+	string $start[] = `ls -sl`;
+	
+	string $tr[] = `ls -sl -fl -o`;
+	if (size($tr) != 1) error "Select One Shape";
+	select $tr;
+	pickWalk -d up;
+	string $tr[] = `ls -sl -fl`;
+	float $matrix[16] = `getAttr ($tr[0] + ".worldMatrix")`;
+	
+	select $start;
+	hilite `ls -o $start`;
+	
+	ConvertSelectionToVertexFaces;
+	float $normals[] = `polyNormalPerVertex -q -xyz`;
+	ConvertSelectionToVertices;
+	string $sel[] = `ls -sl -fl`;
+	
+	vector $nrml = fNormalVector($normals);
+	$nrml = pointMatrixMult($nrml, $matrix);
+	
+	float $pos[] = `xform -q -t -ws $start`;
+	$pos = fMiddleVector($pos);
+	float $nrml4 = -dot($nrml, << $pos[0], $pos[1], $pos[2] >>);
+
+	int $i;
+	for ($i = 0; $i < size ($sel); $i++)
+	{
+		float $p[] = `xform -q -t -ws $sel[$i]`;
+		float $dist = -(dot($nrml, << $p[0], $p[1], $p[2] >>) + $nrml4);
+		move -r  (($nrml.x)*$dist) (($nrml.y)*$dist) (($nrml.z)*$dist) $sel[$i];
+	}
+	select $start;
+}
+
+//add menu item (maya 8.5 or better)
+global proc makePlanarAddMenuItem()
+{
+	string $menu = "mainPolygonsEditMeshMenu";
+
+	if (!`menu -q -ni $menu`)
+		PolygonsBuildMenu $menu;
+
+	menuItem -divider 1 -p $menu fMakePlanarDividerItem;
+	menuItem  -p $menu -l "Make Planar" -c "makePlanar" fMakePlanarItem;
+
+}

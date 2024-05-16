@@ -1,0 +1,922 @@
+//
+//  Nicolas Pastrana Script File
+//  site: http://n.pastrana.free.fr
+//  help: http://n.pastrana.free.fr/mel/
+//  mail: n.pastrana@free.fr
+//
+// I DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+// INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+// EVENT SHALL I BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+// CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE,
+// DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER
+// TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+// PERFORMANCE OF THIS SOFTWARE.                  
+//
+//
+//  more informations on: http://n.pastrana.free.fr/mel/
+//
+//  MODIFY THIS AT YOUR OWN RISK
+//
+proc vector currentPos(int $newTotalTrans, vector $currentIndex)
+{
+	int $geomType;
+	vector $num, $posMode, $pos, $posEnd, $rotIncAxes, $scaleIncAxes;
+	string $ParentGroup;
+	
+	if ($newTotalTrans)
+	{
+		$geomType = `optionVar -q _NP_duplicateTotalTransformGeometryType`;
+		$num = `optionVar -q _NP_duplicateTotalTransformNumber`;
+		$pos = `optionVar -q _NP_duplicateTotalTransformDim`;
+		$posMode = `optionVar -q _NP_duplicateTotalTransformPositionMode1`;
+		$posEnd = `optionVar -q _NP_duplicateTotalTransformDimMax`;
+	} else {
+		string $temp[];
+		$temp = `ls -sl`;
+		$ParentGroup = $temp[0];
+		$geomType = `getAttr ($ParentGroup + ".geomTypeEnum")`;
+		$geomType += 1;
+		$num = `getAttr ($ParentGroup + ".numbers")`;
+		$posMode = `getAttr ($ParentGroup + ".positionMode")`;
+		$pos = `getAttr ($ParentGroup + ".position")`;
+		$posEnd = `getAttr ($ParentGroup + ".positionEnd")`;
+	
+	}
+	float $incDis1=$pos.x;
+	float $incDis2=$pos.y;
+	float $incDis3=$pos.z;
+	int $numDim1 = $num.x;
+	int $numDim2 = $num.y;
+	int $numDim3 = $num.z;
+	vector $currentPos;
+	float $tempX;
+	float $tempY;
+	float $tempZ;
+	if (($posMode.x) == 1)
+	{
+		if ($num.x>1) {$incDis1 = ($posEnd.x-$pos.x)/($num.x-1);}else{$incDis1 = $pos.x;}
+		$tempX = ($pos.x+$incDis1*$currentIndex.x);
+	}
+	if (($posMode.y) == 1)
+	{
+		
+		if ($num.y>1) {$incDis2 = ($posEnd.y-$pos.y)/($num.y-1);}else{$incDis2 = $pos.y;}
+		if (($geomType==3)&&(($posEnd.y-$pos.y)%360==0)) 
+			$incDis2 = (($posEnd.y-$incDis2)-$pos.y)/($num.y-1);
+		$tempY = ($pos.y+$incDis2*$currentIndex.y);
+	}
+	if (($posMode.z) == 1)
+	{
+		if ($num.z>1) {$incDis3 = ($posEnd.z-$pos.z)/($num.z-1);}else{$incDis2 = $pos.y;}
+		if (($geomType==2)&&(($posEnd.z-$pos.z)%360==0)) 
+			$incDis3 = (($posEnd.z-$incDis3)-$pos.z)/($num.z-1);
+		if (($geomType==3)&&(($posEnd.z-$pos.z)%180==0)) 
+			$incDis3 = (($posEnd.z-$incDis3)-$pos.z)/($num.z-1);
+		$tempZ = ($pos.z+$incDis3*$currentIndex.z);
+	}
+
+	if (($posMode.x) == 2)
+	{
+		$incDis1 = ($pos.x);
+		if ($numDim1==1&&$geomType>1) $posEnd = <<$pos.x,$posEnd.y,$posEnd.z>>;
+		$tempX = ($posEnd.x+$incDis1*$currentIndex.x);
+	}
+	if (($posMode.y) == 2)
+	{
+		$incDis2 = ($pos.y);
+		if (($geomType==3)&&(($posEnd.y-$pos.y)%360==0)) 
+			$incDis2 = ($posEnd.y-$incDis2);
+		$tempY = ($posEnd.y+$incDis2*$currentIndex.y);
+	}
+	if (($posMode.z) == 2)
+	{
+		$incDis3 = ($pos.z);
+		if (($geomType==2)&&(($posEnd.z-$pos.z)%360==0)) 
+			$incDis3 = ($posEnd.z-$incDis3);
+		$tempZ = ($posEnd.z+$incDis3*$currentIndex.z);
+	}
+
+	$currentPos = <<$tempX,$tempY,$tempZ>>;
+	switch ($geomType)
+	{
+		case 2://Cylindrical
+			$currentPos = <<$currentPos.x,$currentPos.y,deg_to_rad($currentPos.z)>>;
+			float $tempx=$currentPos.x * sin ($currentPos.z);
+			float $tempz=$currentPos.x * cos ($currentPos.z);
+			$currentPos = <<$tempx,$currentPos.y,$tempz>>;
+			break;
+		case 3://Spheric
+			$currentPos = <<$currentPos.x,deg_to_rad($currentPos.y),deg_to_rad($currentPos.z)>>;
+			float $tempx=($currentPos.x * sin($currentPos.z) * cos($currentPos.y));
+			float $tempy=($currentPos.x * sin($currentPos.z) * sin($currentPos.y));
+			float $tempz=($currentPos.x * cos($currentPos.z));
+			$currentPos = <<$tempy,$tempz,$tempx>>;
+			break;
+	}
+	return $currentPos;
+}
+
+
+proc vector currentAngle(int $newTotalTrans, vector $currentIndex)
+{
+	string $ParentGroup;
+	vector $rotMode, $rot, $num, $rotEnd, $rotIncAxes;
+	int $geomType;
+	if ($newTotalTrans)
+	{
+		$num = `optionVar -q _NP_duplicateTotalTransformNumber`;
+		$geomType = `optionVar -q _NP_duplicateTotalTransformGeometryType`;
+		$rotMode = `optionVar -q _NP_duplicateTotalTransformRotMode1`;
+		$rot = `optionVar -q _NP_duplicateTotalTransformRot`;
+		$rotEnd = `optionVar -q _NP_duplicateTotalTransformRotMax`;
+		$rotIncAxes = `optionVar -q _NP_duplicateTotalTransformRotIncAxes`;
+	} else {
+		string $temp[];
+		$temp = `ls -sl`;
+		$ParentGroup = $temp[0];
+		$geomType = `getAttr ($ParentGroup + ".geomTypeEnum")`;
+		$geomType += 1;
+		$num = `getAttr ($ParentGroup + ".numbers")`;
+		$rot = `getAttr ($ParentGroup + ".localRotate")`;
+		$rotEnd = `getAttr ($ParentGroup + ".localRotateEnd")`;
+		$rotMode = `getAttr ($ParentGroup + ".localRotateMode")`;
+		$rotIncAxes = `getAttr ($ParentGroup + ".rotateArrayVector")`;
+	}
+	float $tempX = $currentIndex.x;
+	float $tempY = $currentIndex.y;
+	float $tempZ = $currentIndex.z;
+	if (($rotIncAxes.x)==2) 
+	{
+		$tempX = $currentIndex.y;
+		$num = <<$num.y, $num.y, $num.z>>;
+	}
+	if (($rotIncAxes.x)==3) 
+	{
+		$tempX = $currentIndex.z;
+		$num = <<$num.z, $num.y, $num.z>>;
+	}
+	
+	if (($rotIncAxes.y)==1) 
+	{
+		$tempY = $currentIndex.x;
+		$num = <<$num.x, $num.x, $num.z>>;
+	}
+	
+	if (($rotIncAxes.y)==3) 
+	{
+		$tempY = $currentIndex.z;
+		$num = <<$num.x, $num.z, $num.z>>;
+	}
+	
+	if (($rotIncAxes.z)==1) 
+	{
+		$tempZ = $currentIndex.x;
+		$num = <<$num.x, $num.y, $num.x>>;
+	}
+	
+	if (($rotIncAxes.z)==2) 
+	{
+		$tempZ = $currentIndex.y;
+		$num = <<$num.x, $num.y, $num.y>>;
+	}
+	$currentIndex = <<$tempX,$tempY,$tempZ>>;
+	
+	float $incDis1, $incDis2, $incDis3;
+	vector $currentRot;
+	
+	if (($rotMode.x) == 1)
+	{
+		if ($num.x>1) {$incDis1 = ($rotEnd.x-$rot.x)/($num.x-1);}else{$incDis1 = $rot.x;}
+		$tempX = ($rot.x+$incDis1*$currentIndex.x);
+	}
+	if (($rotMode.y) == 1)
+	{
+		if ($num.y>1) {$incDis2 = ($rotEnd.y-$rot.y)/($num.y-1);}else{$incDis2 = $rot.y;}
+		$tempY = ($rot.y+$incDis2*$currentIndex.y);
+	}
+	if (($rotMode.z) == 1)
+	{
+		if ($num.z>1) {$incDis3 = ($rotEnd.z-$rot.z)/($num.z-1);}else{$incDis2 = $rot.z;}
+		$tempZ = ($rot.z+$incDis3*$currentIndex.z);
+	}
+	
+	if (($rotMode.x) == 2)
+	{
+		$incDis1 = ($rot.x);
+		$tempX = ($rotEnd.x+$incDis1*$currentIndex.x);
+	}
+	if (($rotMode.y) == 2)
+	{
+		$incDis2 = ($rot.y);
+		$tempY = ($rotEnd.y+$incDis2*$currentIndex.y);
+	}
+	if (($rotMode.z) == 2)
+	{
+		$incDis3 = ($rot.z);
+		$tempZ = ($rotEnd.z+$incDis3*$currentIndex.z);
+	}
+
+	$currentRot = <<$tempX,$tempY,$tempZ>>;
+	return $currentRot;
+}
+
+
+proc vector currentScale(int $newTotalTrans, vector $currentIndex)
+{
+	string $ParentGroup;
+	vector $num, $scaleMode, $scaleIncAxes, $scale, $scaleEnd;
+	int $geomType;
+	if ($newTotalTrans)
+	{
+		$geomType = `optionVar -q _NP_duplicateTotalTransformGeometryType`;
+		$num = `optionVar -q _NP_duplicateTotalTransformNumber`;
+		$scaleMode = `optionVar -q _NP_duplicateTotalTransformScaleMode1`;
+		$scale = `optionVar -q _NP_duplicateTotalTransformScale`;
+		$scaleEnd = `optionVar -q _NP_duplicateTotalTransformScaleMax`;
+		$scaleIncAxes = `optionVar -q _NP_duplicateTotalTransformScaleIncAxes`;
+	} else {
+		string $temp[];
+		$temp = `ls -sl`;
+		$ParentGroup = $temp[0];
+		$geomType = `getAttr ($ParentGroup + ".geomTypeEnum")`;
+		$geomType += 1;
+		$num = `getAttr ($ParentGroup + ".numbers")`;
+		$scale = `getAttr ($ParentGroup + ".localScale")`;
+		$scaleEnd = `getAttr ($ParentGroup + ".localScaleEnd")`;
+		$scaleMode = `getAttr ($ParentGroup + ".scaleMode")`;
+		$scaleIncAxes = `getAttr ($ParentGroup + ".scaleArrayVector")`;
+	}
+	
+	if (($scaleIncAxes.x)==2) 
+	{
+		$currentIndex=<<$currentIndex.y, $currentIndex.y,  $currentIndex.z>>;
+		$num = <<$num.y, $num.y, $num.z>>;
+	}
+	if (($scaleIncAxes.x)==3) 
+	{
+		$currentIndex=<<$currentIndex.z, $currentIndex.y,  $currentIndex.z>>;
+		$num = <<$num.z, $num.y, $num.z>>;
+	}
+	
+	if (($scaleIncAxes.y)==1) 
+	{
+		$currentIndex=<<$currentIndex.x, $currentIndex.x,  $currentIndex.z>>;
+		$num = <<$num.x, $num.x, $num.z>>;
+	}
+	
+	if (($scaleIncAxes.y)==3) 
+	{
+		$currentIndex=<<$currentIndex.x, $currentIndex.z,  $currentIndex.z>>;
+		$num = <<$num.x, $num.z, $num.z>>;
+	}
+	
+	if (($scaleIncAxes.z)==1) 
+	{
+		$currentIndex=<<$currentIndex.x, $currentIndex.y,  $currentIndex.x>>;
+		$num = <<$num.x, $num.y, $num.x>>;
+	}
+	
+	if (($scaleIncAxes.z)==2) 
+	{
+		$currentIndex=<<$currentIndex.x, $currentIndex.y,  $currentIndex.y>>;
+		$num = <<$num.x, $num.y, $num.y>>;
+	}
+
+	float $incDis1, $incDis2, $incDis3;
+	vector $currentScale;
+
+	float $tempX, $tempY, $tempZ;
+	if (($scaleMode.x) == 1)
+	{
+		if ($num.x>1) {$incDis1 = ($scaleEnd.x-$scale.x)/($num.x-1);}else{$incDis1 = $scale.x;}
+		$tempX = ($scale.x+$incDis1*$currentIndex.x);
+	}
+	if (($scaleMode.y) == 1)
+	{
+		
+		if ($num.y>1) {$incDis2 = ($scaleEnd.y-$scale.y)/($num.y-1);}else{$incDis2 = $scale.y;}
+		$tempY = ($scale.y+$incDis2*$currentIndex.y);
+	}
+	if (($scaleMode.z) == 1)
+	{
+		if ($num.z>1) {$incDis3 = ($scaleEnd.z-$scale.z)/($num.z-1);}else{$incDis2 = $scale.y;}
+		$tempZ = ($scale.z+$incDis3*$currentIndex.z);
+	}
+
+	if (($scaleMode.x) == 2)
+	{
+		$incDis1 = ($scale.x);
+		$tempX = ($scaleEnd.x+$incDis1*$currentIndex.x);
+	}
+	if (($scaleMode.y) == 2)
+	{
+		$incDis2 = ($scale.y);
+		$tempY = ($scaleEnd.y+$incDis2*$currentIndex.y);
+	}
+	if (($scaleMode.z) == 2)
+	{
+		$incDis3 = ($scale.z);
+		$tempZ = ($scaleEnd.z+$incDis3*$currentIndex.z);
+	}
+
+	$currentScale = <<$tempX,$tempY,$tempZ>>;
+	return $currentScale;
+}
+
+
+proc string doAimConstraint()
+{
+	string $cmd = "aimConstraint";
+
+	if (`optionVar -query aimConstMaintainOffset`) {
+		$cmd = ($cmd + " -mo");
+	} else {
+		//	Translate values
+		//
+		float $tx = `optionVar -q aimConstOffsetX`;
+		float $ty = `optionVar -q aimConstOffsetY`;
+		float $tz = `optionVar -q aimConstOffsetZ`;
+		$cmd = ($cmd + " -offset " + $tx + " " + $ty + " " + $tz );
+	}
+	
+	float $aimVector[] = `optionVar -q aimConstraintAimVector`;
+	float $upVector[] = `optionVar -q aimConstraintUpVector`;
+
+	$cmd = ($cmd 
+			+ " -weight " + `optionVar -q aimConstraintWeight`
+			+ " -aimVector " 
+			+ $aimVector[0] + " " + $aimVector[1] + " " + $aimVector[2]
+			+ " -upVector " 
+			+ $upVector[0] + " " + $upVector[1] + " " + $upVector[2]
+		);
+
+	// world up related options
+	
+	string $worldUpType = `optionVar -q aimConstraintWorldUpType`;
+	$cmd = ($cmd  + " -worldUpType " + "\"" + $worldUpType + "\"" );
+	switch ( $worldUpType )
+	{
+	case "scene":
+	case "none":
+		break;
+	case "object":
+		string $worldUpObject = `optionVar -q aimConstraintWorldUpObject`;
+		$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+		break;
+	case "objectrotation":
+		float $worldUpVector[] = `optionVar -q aimConstraintWorldUpVector`;
+		$cmd = ($cmd  + " -worldUpVector " 
+				+ $worldUpVector[0] + " "
+				+ $worldUpVector[1] + " "
+				+ $worldUpVector[2]);
+		string $worldUpObject = `optionVar -q aimConstraintWorldUpObject`;
+		$cmd = ($cmd  + " -worldUpObject " + $worldUpObject);
+		break;
+	case "vector":
+		float $worldUpVector[] = `optionVar -q aimConstraintWorldUpVector`;
+		$cmd = ($cmd  + " -worldUpVector " 
+				+ $worldUpVector[0] + " "
+				+ $worldUpVector[1] + " "
+				+ $worldUpVector[2]);
+		break;
+	}
+
+	// Axis values
+	//
+
+	// The axis values are inverted so that they represent
+	// which axes to *skip* as opposed to which axes are on.
+	int $axisX = !`optionVar -q aimConstraintAxisX`;
+	int $axisY = !`optionVar -q aimConstraintAxisY`;
+	int $axisZ = !`optionVar -q aimConstraintAxisZ`;
+
+	// If any of these values is true, that means that one
+	// or more axes are to be skipped.
+	if ($axisX)
+		$cmd = ($cmd + " -skip x");
+	if ($axisY)
+		$cmd = ($cmd + " -skip y");
+	if ($axisZ)
+		$cmd = ($cmd + " -skip z");
+
+	return $cmd;
+}
+
+
+global proc perform_NP_duplicateTotalTransform(int $newTotalTrans)
+{
+string $selected[] = `ls -sl`;
+waitCursor -state on;
+if (size($selected)!=0)
+{
+	int $geomType;
+	string $ParentGroup, $duplicated[];
+	vector $num, $pos, $posEnd, $posMode, $rotIncAxes, $scaleIncAxes, $positionArray[], $indexArray[];
+	int $duplicateMode = `optionVar -q _NP_duplicateTotalTransformDuplicateMode`;
+	int $customAttributes = `optionVar -q _NP_duplicateTotalTransformAttibutes`;
+	
+	
+	if ($newTotalTrans)
+	{	
+		//waitCursor -state on;
+		$geomType = `optionVar -q _NP_duplicateTotalTransformGeometryType`;
+		$num = `optionVar -q _NP_duplicateTotalTransformNumber`;
+		$pos = `optionVar -q _NP_duplicateTotalTransformDim`;
+		$posMode = `optionVar -q _NP_duplicateTotalTransformPositionMode1`;
+		$rotIncAxes = `optionVar -q _NP_duplicateTotalTransformRotIncAxes`;
+		$scaleIncAxes = `optionVar -q _NP_duplicateTotalTransformScaleIncAxes`;
+		vector $rotMode = `optionVar -q _NP_duplicateTotalTransformRotMode1`;
+		vector $scaleMode = `optionVar -q _NP_duplicateTotalTransformScaleMode1`;
+
+		
+		int $numDim1 = $num.x;
+		int $numDim2 = $num.y;
+		int $numDim3 = $num.z;
+
+		int $exist, $n;
+		vector $currentIndex, $currentPos;
+		
+		int $i, $j, $k;
+		int $m=0;
+		for ($i=0;$i<$numDim1;$i++)
+		{
+		for ($j=0;$j<$numDim2;$j++)
+		{
+		for ($k=0;$k<$numDim3;$k++)
+		{
+			$exist=0;
+			$currentIndex = <<$i,$j,$k>>;
+			$currentPos = currentPos($newTotalTrans, $currentIndex);
+			
+			for ($n=0;$n<size($positionArray);$n++)
+			{
+				vector $tempVector = $positionArray[$n];
+				if (equivalent(($currentPos.x), ($tempVector.x)) && equivalent(($currentPos.y), ($tempVector.y)) && equivalent(($currentPos.z), ($tempVector.z)))
+				{
+					$exist=1;
+					break;
+				}
+			}
+			if ($exist!=1)
+			{
+				$positionArray[$m]=$currentPos;
+				$indexArray[$m]=$currentIndex;
+				$m += 1;
+			}
+		}
+		$k=0;
+		}
+		$j=0;
+		}
+		
+		$ParentGroup = `group -name ("DuplicateTotalTransform") -empty`;
+	
+		if ($customAttributes)
+		{
+			select -cl;
+			select -r $ParentGroup;
+			int $scriptJobArray[];
+			$pos = `optionVar -q _NP_duplicateTotalTransformDim`;
+			$posEnd = `optionVar -q _NP_duplicateTotalTransformDimMax`;
+	
+			addAttr -ln referenceObject -sn refObj -dataType "string" -h 1 -k 0;
+			setAttr -type "string" ($ParentGroup + ".referenceObject") $selected[0];
+			addAttr -ln geomTypeEnum -sn geo -at enum  -en "cubic:cylindric:spheric:" -h 1 -k 0 $ParentGroup;
+			setAttr ($ParentGroup + ".geomTypeEnum") ($geomType-1);
+
+			string $stringNameArray;
+			string $script = "perform_NP_duplicateTotalTransform(0);";
+			if ($geomType == 1) $stringNameArray = "X (1) | Y (2) | Z (3)";
+			if ($geomType == 2) $stringNameArray = "Radius (1) | Height (2) | Angle (3)";
+			if ($geomType == 3) $stringNameArray = "Radius (1) | Longitude (2) | Lattitude (3)";
+			addAttr -ln ArrayDimension -dt "string" $ParentGroup;
+			setAttr -k 0 -l 1 -type "string" ($ParentGroup + ".ArrayDimension") $stringNameArray;
+	
+			addAttr -ln numbers -sn nb -at double3 -h 1 -k 0 $ParentGroup;
+			addAttr -ln numbersX -sn nbX -at double -h 1 -k 0 -p numbers $ParentGroup;
+			addAttr -ln numbersY -sn nbY -at double -h 1 -k 0 -p numbers $ParentGroup;
+			addAttr -ln numbersZ -sn nbZ -at double -h 1 -k 0 -p numbers $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".numbers") ($num.x) ($num.y) ($num.z);
+
+
+			addAttr -ln positionMode -sn posMode -at short3 -k 1 $ParentGroup;
+			addAttr -ln positionModeX -sn posModeX -at short -k 1 -p positionMode $ParentGroup;
+			addAttr -ln positionModeY -sn posModeY -at short -k 1 -p positionMode $ParentGroup;
+			addAttr -ln positionModeZ -sn posModeZ -at short -k 1 -p positionMode $ParentGroup;
+			setAttr -type short3 ($ParentGroup + ".positionMode") ($posMode.x) ($posMode.y) ($posMode.z);
+			$scriptJobArray[0] = `scriptJob -kws -ac ($ParentGroup + ".positionMode") $script`;
+
+			addAttr -ln position -sn pos -at double3 -k 1 $ParentGroup;
+			addAttr -ln positionX -sn pX -at double -k 1 -p position $ParentGroup;
+			addAttr -ln positionY -sn pY -at double -k 1 -p position $ParentGroup;
+			addAttr -ln positionZ -sn pZ -at double -k 1 -p position $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".position") ($pos.x) ($pos.y) ($pos.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".position") $script`;
+	
+			addAttr -ln positionEnd -sn pE -at double3 -k 1 $ParentGroup;
+			addAttr -ln positionEndX -sn pEx -at double -k 1 -p positionEnd $ParentGroup;
+			addAttr -ln positionEndY -sn pEy -at double -k 1 -p positionEnd $ParentGroup;
+			addAttr -ln positionEndZ -sn pEz -at double -k 1 -p positionEnd $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".positionEnd") ($posEnd.x) ($posEnd.y) ($posEnd.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".positionEnd") $script`;
+
+
+			addAttr -ln localRotateMode -sn rotMode -at short3 -k 1 $ParentGroup;
+			addAttr -ln localRotateModeX -sn rotModeX -at short -k 1 -p localRotateMode $ParentGroup;
+			addAttr -ln localRotateModeY -sn rotModeY -at short -k 1 -p localRotateMode $ParentGroup;
+			addAttr -ln localRotateModeZ -sn rotModeZ -at short -k 1 -p localRotateMode $ParentGroup;
+			setAttr -type short3 ($ParentGroup + ".localRotateMode") ($rotMode.x) ($rotMode.y) ($rotMode.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".localRotateMode") "update_NP_duplicateTotalTransformRotateMode();"`;
+
+			vector $rot = `optionVar -q _NP_duplicateTotalTransformRot`;
+			int $enableRotX = 0;if ($rotMode.x == 3) $enableRotX = 1;
+			int $enableRotY = 0;if ($rotMode.y == 3) $enableRotY = 1;
+			int $enableRotZ = 0;if ($rotMode.z == 3) $enableRotZ = 1;
+			
+			addAttr -ln rotateArrayVector -sn rotIncDim -at short3 -k 1 $ParentGroup;
+			addAttr -ln rotateArrayVectorX -sn rotDimX -at short -k 1 -p rotateArrayVector $ParentGroup;
+			addAttr -ln rotateArrayVectorY -sn rotDimY -at short -k 1 -p rotateArrayVector $ParentGroup;
+			addAttr -ln rotateArrayVectorZ -sn rotDimZ -at short -k 1 -p rotateArrayVector $ParentGroup;
+			setAttr -type short3 ($ParentGroup + ".rotateArrayVector") ($rotIncAxes.x) ($rotIncAxes.y) ($rotIncAxes.z);
+			setAttr -l $enableRotX ($ParentGroup + ".rotateArrayVectorX");
+			setAttr -l $enableRotY ($ParentGroup + ".rotateArrayVectorY");
+			setAttr -l $enableRotZ ($ParentGroup + ".rotateArrayVectorZ");
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".rotateArrayVector") $script`;
+			
+			addAttr -ln localRotate -sn "rot" -at double3 -k 1 $ParentGroup;
+			addAttr -ln localRotateX -sn rotX -at double -k 1 -p localRotate $ParentGroup;
+			addAttr -ln localRotateY -sn rotY -at double -k 1 -p localRotate $ParentGroup;
+			addAttr -ln localRotateZ -sn rotZ -at double -k 1 -p localRotate $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".localRotate") ($rot.x) ($rot.y) ($rot.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".localRotate") $script`;
+			
+			vector $rotMax = `optionVar -q _NP_duplicateTotalTransformRotMax`;
+			addAttr -ln localRotateEnd -sn rotE -at double3 -k 1 $ParentGroup;
+			addAttr -ln localRotateEndX -sn rotEx -at double -k 1 -p localRotateEnd $ParentGroup;
+			addAttr -ln localRotateEndY -sn rotEy -at double -k 1 -p localRotateEnd $ParentGroup;
+			addAttr -ln localRotateEndZ -sn rotEz -at double -k 1 -p localRotateEnd $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".localRotateEnd") ($rotMax.x) ($rotMax.y) ($rotMax.z);
+			setAttr -l $enableRotX ($ParentGroup + ".localRotateEndX");
+			setAttr -l $enableRotY ($ParentGroup + ".localRotateEndY");
+			setAttr -l $enableRotZ ($ParentGroup + ".localRotateEndZ");
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".localRotateEnd") $script`;
+
+			int $enableRotX = 0;if ($rotMode.x == 3) $enableRotX = 1;
+			int $enableRotY = 0;if ($rotMode.y == 3) $enableRotY = 1;
+			int $enableRotZ = 0;if ($rotMode.z == 3) $enableRotZ = 1;
+			setAttr -l $enableRotX ($ParentGroup + ".rotateArrayVectorX");
+			setAttr -l $enableRotY ($ParentGroup + ".rotateArrayVectorY");
+			setAttr -l $enableRotZ ($ParentGroup + ".rotateArrayVectorZ");
+			setAttr -l $enableRotX ($ParentGroup + ".localRotateEndX");
+			setAttr -l $enableRotY ($ParentGroup + ".localRotateEndY");
+			setAttr -l $enableRotZ ($ParentGroup + ".localRotateEndZ");
+			setAttr -l $enableRotX ($ParentGroup + ".localRotateX");
+			setAttr -l $enableRotY ($ParentGroup + ".localRotateY");
+			setAttr -l $enableRotZ ($ParentGroup + ".localRotateZ");
+
+			addAttr -ln scaleMode -sn scaleMode -at short3 -k 1 $ParentGroup;
+			addAttr -ln scaleModeX -sn scaleModeX -at short -k 1 -p scaleMode $ParentGroup;
+			addAttr -ln scaleModeY -sn scaleModeY -at short -k 1 -p scaleMode $ParentGroup;
+			addAttr -ln scaleModeZ -sn scaleModeZ -at short -k 1 -p scaleMode $ParentGroup;
+			setAttr -type short3 ($ParentGroup + ".scaleMode") ($scaleMode.x) ($scaleMode.y) ($scaleMode.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".scaleMode") $script`;
+			
+			addAttr -ln scaleArrayVector -sn scaleIncDim -at short3 -k 1 $ParentGroup;
+			addAttr -ln scaleArrayVectorX -sn scaleIncDimX -at short -k 1 -p scaleArrayVector $ParentGroup;
+			addAttr -ln scaleArrayVectorY -sn scaleIncDimY -at short -k 1 -p scaleArrayVector $ParentGroup;
+			addAttr -ln scaleArrayVectorZ -sn scaleIncDimZ -at short -k 1 -p scaleArrayVector $ParentGroup;
+			setAttr -type short3 ($ParentGroup + ".scaleArrayVector") ($scaleIncAxes.x) ($scaleIncAxes.y) ($scaleIncAxes.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".scaleArrayVector") $script`;
+
+			vector $scale = `optionVar -q _NP_duplicateTotalTransformScale`;
+			addAttr -ln localScale -sn sca -at double3 -k 1 $ParentGroup;
+			addAttr -ln localScaleX -sn scaX -at double -k 1 -p localScale $ParentGroup;
+			addAttr -ln localScaleY -sn scaY -at double -k 1 -p localScale $ParentGroup;
+			addAttr -ln localScaleZ -sn scaZ -at double -k 1 -p localScale$ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".localScale") ($scale.x) ($scale.y) ($scale.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".localScale") $script`;
+	
+			vector $scaleMax = `optionVar -q _NP_duplicateTotalTransformScaleMax`;
+			addAttr -ln localScaleEnd -sn scaE -at double3 -k 1 $ParentGroup;
+			addAttr -ln localScaleEndX -sn scaEx -at double -k 1 -p localScaleEnd $ParentGroup;
+			addAttr -ln localScaleEndY -sn scaEy -at double -k 1 -p localScaleEnd $ParentGroup;
+			addAttr -ln localScaleEndZ -sn scaEz -at double -k 1 -p localScaleEnd $ParentGroup;
+			setAttr -type double3 ($ParentGroup + ".localScaleEnd") ($scaleMax.x) ($scaleMax.y) ($scaleMax.z);
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac ($ParentGroup + ".localScaleEnd") $script`;
+
+
+			addAttr -ln update -at enum  -en "always:once:" -k 0 $ParentGroup;
+			setAttr ($ParentGroup + ".update") 1;
+
+			if (($rotMode.x==3)||($rotMode.y==3)||($rotMode.z==3))
+			{
+				addAttr -ln "aimOffset" -sn "Off" -at double3 -k 1 $ParentGroup;
+					addAttr -ln "aimOffsetX" -sn "Ox" -at double -k 1 -p "aimOffset";
+					addAttr -ln "aimOffsetY" -sn "Oy" -at double -k 1 -p "aimOffset";
+					addAttr -ln "aimOffsetZ" -sn "Oz" -at double -k 1 -p "aimOffset";
+				float $tx = `optionVar -q aimConstOffsetX`;
+				float $ty = `optionVar -q aimConstOffsetY`;
+				float $tz = `optionVar -q aimConstOffsetZ`;
+				setAttr ($ParentGroup + ".aimOffset") $tx $ty $tz;
+
+				addAttr -ln "aimVector" -sn "Nv" -at double3 -k 1 $ParentGroup;
+					addAttr -ln "aimVectorX" -sn "NvX" -at double -k 1 -p "aimVector";
+					addAttr -ln "aimVectorY" -sn "NvY" -at double -k 1 -p "aimVector";
+					addAttr -ln "aimVectorZ" -sn "NvZ" -at double -k 1 -p "aimVector";
+				float $aimVector[] = `optionVar -q aimConstraintAimVector`;
+				setAttr ($ParentGroup + ".aimVector") $aimVector[0] $aimVector[1] $aimVector[2];
+
+				addAttr -ln "aimUpVector" -sn "Uv" -at double3 -k 1 $ParentGroup;
+					addAttr -ln "aimUpVectorX" -sn "UvX" -at double -k 1 -p "aimUpVector";
+					addAttr -ln "aimUpVectorY" -sn "UvY" -at double -k 1 -p "aimUpVector";
+					addAttr -ln "aimUpVectorZ" -sn "UvZ" -at double -k 1 -p "aimUpVector";
+				float $upVector[] = `optionVar -q aimConstraintUpVector`;
+				setAttr ($ParentGroup + ".aimUpVector") $upVector[0] $upVector[1] $upVector[2];
+			}
+			
+			//Update Maya (scriptNode)
+			//
+			string $script = "select "+$ParentGroup+";perform_NP_duplicateTotalTransform(0);";
+			string $nodeRender = `scriptNode -st 5 -n "scriptUpdateMaya" -bs $script`;
+			
+			//Update Render scriptNode
+			$script = "if (`getAttr "+$ParentGroup+".update`==0){string $selected[] = `ls -sl`;" + $script +"select $selected;}";
+			string $nodeUpdate = `scriptNode -st 7 -n "scriptUpdateRender" -bs $script`;
+	
+			string $nodeUpdateNode = `scriptNode -st 1 -n "scriptScriptJobs"`;
+			
+			//Remove ScriptNodes (scriptJob)
+			//
+			$script = "if( `objExists " + $ParentGroup + "`==0 ) {select -r " + $nodeUpdate + " " + $nodeRender +" " + $nodeUpdateNode + ";delete;}";
+			$scriptJobArray[size($scriptJobArray)] = `scriptJob -ro 1 -ad ($ParentGroup + ".numbers") $script`;
+	
+			//Remove ScriptJobs (scriptNode)
+			//
+			int $scriptJobID;
+			string $tempArrayID = "{";
+			for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray)-1; $scriptJobID ++)
+			{
+				$tempArrayID += $scriptJobArray[$scriptJobID];
+				if ($scriptJobID<(size($scriptJobArray)-2)) $tempArrayID += ", ";
+			}
+			$tempArrayID +="}";
+			string $script = "int $scriptJobArray[] = " + $tempArrayID + ";\nint $scriptJob;\nfor ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}";
+			scriptNode -e -as $script $nodeUpdateNode;
+			
+			//Create ScriptJobs (scriptNode)
+			$script = "string $script = \"perform_NP_duplicateTotalTransform(0)\";\nint $scriptJobArray[];\n";
+			$script += "$scriptJobArray[0] = `scriptJob -kws -ac \""+$ParentGroup+".positionMode\" $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".position $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".positionEnd $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".localRotate $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".localRotateEnd $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".localRotateMode \"update_NP_duplicateTotalTransformRotateMode();\"`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".rotateArrayVector $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".localScale $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".localScaleEnd $script`;\n\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".scaleMode $script`;\n";
+			$script += "$scriptJobArray[size($scriptJobArray)] = `scriptJob -kws -ac "+$ParentGroup+".scaleArrayVector $script`;\n\n";
+			$script += "int $scriptJobID;\nstring $tempArrayID = \"{\";\n";
+			$script += "for ($scriptJobID = 0; $scriptJobID < size($scriptJobArray); $scriptJobID ++)\n{\n\t";
+			$script += "$tempArrayID += $scriptJobArray[$scriptJobID];\n\t";
+			$script += "if ($scriptJobID<(size($scriptJobArray)-1)) $tempArrayID += \", \";\n}\n";
+			$script += "$tempArrayID +=\"}\";\n";
+			$script += "string $script = \"int $scriptJobArray[] = \"+$tempArrayID+\";int $scriptJob;for ($scriptJob in $scriptJobArray) {scriptJob -kill $scriptJob -force;}\";\n";
+			$script += "scriptNode -e -as $script " + $nodeUpdateNode + ";\n";
+			$script += "$script = \"if (`objExists \\\"" + $ParentGroup + "\\\"`==0 ) {select -r " + $nodeUpdate + " " + $nodeRender + " " + $nodeUpdateNode + ";delete;}\";\n";
+			$script += "scriptJob -ro 1 -ad " + $ParentGroup + ".numbers $script;";
+			scriptNode -e -bs $script $nodeUpdateNode;
+
+			select -r $selected[0];
+		}
+		string $aimConstraintArray[];
+		if (($rotMode.x==3)||($rotMode.y==3)||($rotMode.z==3))
+		{
+			
+			if (`objExists ($aimConstraintArray[0])`==0)
+			{
+				$aimConstraintArray = `spaceLocator -p 0 0 0 -n aimConstraintLocator`;
+				parent $aimConstraintArray[0] $ParentGroup;
+			}
+		}
+		int $index;
+		for ($index=0; $index < size($indexArray);$index++)
+		{
+			vector $tempIndex = $indexArray[$index];
+			vector $tempPos = $positionArray[$index];
+			
+			if ($duplicateMode==1)
+			{
+				$duplicated = `duplicate $selected[0]`;
+			} else
+			{
+				$duplicated = `instance $selected[0]`;
+			}
+			if ($customAttributes)
+			{
+				addAttr -ln objectId -sn id -at long3 -h 1 -k 0 $duplicated[0];
+				addAttr -ln objectIdX -sn idX -at long -h 1 -k 0 -p objectId $duplicated[0];
+				addAttr -ln objectIdY -sn idY -at long -h 1 -k 0 -p objectId $duplicated[0];
+				addAttr -ln objectIdZ -sn idZ -at long -h 1 -k 0 -p objectId $duplicated[0];
+				setAttr -type long3 -l 1 ($duplicated[0] + ".objectId") ($tempIndex.x) ($tempIndex.y) ($tempIndex.z);
+			}
+			parent $duplicated[0] $ParentGroup;
+			move ($tempPos.x) ($tempPos.y) ($tempPos.z) $duplicated[0];
+		
+			vector $currentScale = currentScale($newTotalTrans, $tempIndex);
+			scale -r ($currentScale.x) ($currentScale.y) ($currentScale.z) $duplicated[0];
+		
+			if (($rotMode.x==3)||($rotMode.y==3)||($rotMode.z==3))
+			{
+				string $aimConstraintArray[];
+				$aimConstraintArray[0] = ($ParentGroup + "|aimConstraintLocator");
+				if (`objExists ($aimConstraintArray[0])`==0)
+				{
+					$aimConstraintArray = `spaceLocator -p 0 0 0 -n aimConstraintLocator`;
+					parent $aimConstraintArray[0] $ParentGroup;
+				}
+				
+				select -cl;
+				select -r $aimConstraintArray[0] $duplicated[0];
+				cycleCheck -e off;
+				string $aimConstrainArray[] = `eval (doAimConstraint())`;
+				string $aimConstrain = $aimConstrainArray[0];
+				if ($customAttributes) 
+				{
+					connectAttr -f ($ParentGroup + "." + "aimOffset") ($aimConstrain+".offset");
+					connectAttr -f ($ParentGroup + "." + "aimVector") ($aimConstrain+".aimVector");
+					connectAttr -f ($ParentGroup + "." + "aimUpVector") ($aimConstrain+".upVector");
+				}
+
+			}
+			vector $currentAngle = currentAngle($newTotalTrans, $tempIndex);
+			rotate -a -os ($currentAngle.x) ($currentAngle.y) ($currentAngle.z) $duplicated[0];
+			
+		}
+
+		select -r $ParentGroup;
+	} else {
+		$ParentGroup = $selected[0];
+		vector $rotMode = `getAttr ($ParentGroup + ".localRotateMode")`;
+		int $enableRotX = 0;if ($rotMode.x == 3) $enableRotX = 1;
+		int $enableRotY = 0;if ($rotMode.y == 3) $enableRotY = 1;
+		int $enableRotZ = 0;if ($rotMode.z == 3) $enableRotZ = 1;
+
+		$duplicated = `ls -dag -ap -type transform -sl`;
+		select -hi;
+		string $duplicatedAimConstraint[] = `ls -ap -type aimConstraint -sl`;
+		string $aimConstraintLocator[] = `ls -ap -type locator -sl`;
+		select -r $aimConstraintLocator;
+		select -hi;
+		$aimConstraintLocator = `ls -sl`;
+		
+		$duplicated = stringArrayRemove ($duplicatedAimConstraint, $duplicated);
+		$duplicated = stringArrayRemove ($aimConstraintLocator, $duplicated);
+		string $tempParent[];
+		$tempParent[0] = $ParentGroup;
+		$duplicated = stringArrayRemove ($tempParent, $duplicated);
+		
+		select -r $ParentGroup;
+		string $object;
+		for ($object in $duplicated)
+		{
+			if (`attributeExists "objectId" $object`)
+			{
+				$currentIndex = `getAttr ($object+".objectId")`;
+				select -r $ParentGroup;
+				vector $temp = currentPos(0,$currentIndex);
+				
+				move -a -ls ($temp.x) ($temp.y) ($temp.z) $object;
+				$temp = currentAngle(0, $currentIndex);
+				if ($rotMode.x!=3) setAttr ($object+".rotateX") ($temp.x);
+				if ($rotMode.y!=3) setAttr ($object+".rotateY") ($temp.y);
+				if ($rotMode.z!=3) setAttr ($object+".rotateZ") ($temp.z);
+
+				$temp = currentScale(0, $currentIndex);
+				scale -a ($temp.x) ($temp.y) ($temp.z) $object;
+			}
+		}
+		
+	}select -r $ParentGroup;
+}
+waitCursor -state off;
+}
+
+
+
+global proc update_NP_duplicateTotalTransformRotateMode()
+{
+waitCursor -state on;
+string $selected[] = `ls -selection`;
+string $ParentGroup = $selected[0];
+vector $rotMode = `getAttr ($ParentGroup + ".localRotateMode")`;
+
+int $enableRotX = 0;if ($rotMode.x == 3) $enableRotX = 1;
+int $enableRotY = 0;if ($rotMode.y == 3) $enableRotY = 1;
+int $enableRotZ = 0;if ($rotMode.z == 3) $enableRotZ = 1;
+setAttr -l $enableRotX ($ParentGroup + ".rotateArrayVectorX");
+setAttr -l $enableRotX ($ParentGroup + ".localRotateEndX");
+setAttr -l $enableRotX ($ParentGroup + ".localRotateX");
+setAttr -l $enableRotY ($ParentGroup + ".rotateArrayVectorY");
+setAttr -l $enableRotY ($ParentGroup + ".localRotateEndY");
+setAttr -l $enableRotY ($ParentGroup + ".localRotateY");
+setAttr -l $enableRotZ ($ParentGroup + ".rotateArrayVectorZ");
+setAttr -l $enableRotZ ($ParentGroup + ".localRotateEndZ");
+setAttr -l $enableRotZ ($ParentGroup + ".localRotateZ");
+
+if (($enableRotX == 1) || ($enableRotY == 1) || ($enableRotZ == 1))
+{
+	select -hi;
+	string $duplicated[] = `ls -dag -ap -type transform -sl`;
+	string $duplicatedAimConstraint[] = `ls -ap -type aimConstraint -sl`;
+	string $aimConstraintLocator[] = `ls -ap -type locator -sl`;
+	$duplicated = stringArrayRemove ($aimConstraintLocator, $duplicated);
+	
+	select -r $aimConstraintLocator;
+	select -hi;
+	$aimConstraintLocator = `ls -sl`;
+	$duplicated = stringArrayRemove ($duplicatedAimConstraint, $duplicated);
+	
+	string $tempParent[];
+	$tempParent[0] = $ParentGroup;
+	$duplicated = stringArrayRemove ($tempParent, $duplicated);
+	
+	if ((size ($duplicatedAimConstraint)!=0) && (size ($aimConstraintLocator)!=0))
+	{
+		string $object;
+		int $i = 0;
+		for ($object in $duplicated)
+		{
+			if (`attributeExists "objectId" $object`)
+			{
+				if ($rotMode.x!=3) {if (`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateX") ($ParentGroup + "|" + $object + ".rotateX")`) disconnectAttr ($duplicatedAimConstraint[$i] + ".constraintRotateX") ($ParentGroup + "|" + $object+".rotateX");} else {if (!`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateX") ($ParentGroup + "|" + $object + ".rotateX")`) connectAttr -f ($duplicatedAimConstraint[$i] + ".constraintRotateX") ($ParentGroup + "|" + $object + ".rotateX");}
+				if ($rotMode.y!=3) {if (`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateY") ($ParentGroup + "|" + $object + ".rotateY")`) disconnectAttr ($duplicatedAimConstraint[$i] + ".constraintRotateY") ($ParentGroup + "|" + $object+".rotateY");} else {if (!`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateY") ($ParentGroup + "|" + $object + ".rotateY")`) connectAttr -f ($duplicatedAimConstraint[$i] + ".constraintRotateY") ($ParentGroup + "|" + $object + ".rotateY");}
+				if ($rotMode.z!=3) {if (`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateZ") ($ParentGroup + "|" + $object + ".rotateZ")`) disconnectAttr ($duplicatedAimConstraint[$i] + ".constraintRotateZ") ($ParentGroup + "|" + $object+".rotateZ");} else {if (!`isConnected ($duplicatedAimConstraint[$i] + ".constraintRotateZ") ($ParentGroup + "|" + $object + ".rotateZ")`) connectAttr -f ($duplicatedAimConstraint[$i] + ".constraintRotateZ") ($ParentGroup + "|" + $object + ".rotateZ");}
+			}
+			$i ++;
+		}
+	} else {
+			
+		if (size($aimConstraintLocator)==0)
+		{
+			$aimConstraintLocator = `spaceLocator -p 0 0 0 -n aimConstraintLocator`;
+			parent $aimConstraintLocator[0] $ParentGroup;
+		}
+		cycleCheck -e off;
+	
+		int $axes=0; if ($rotMode.x==3) $axes=1;
+			optionVar -intValue aimConstraintAxisX $axes;
+		$axes=0; if ($rotMode.y==3) $axes=1;
+			optionVar -intValue aimConstraintAxisY $axes;
+		$axes=0; if ($rotMode.z==3) $axes=1;
+			optionVar -intValue aimConstraintAxisZ $axes;
+		
+		string $aimConstrain;
+		if (!`attributeExists "AimOffset" $ParentGroup`) 
+		{
+			select -r $ParentGroup;
+			addAttr -ln "aimOffset" -sn "Off" -at double3 -k 1 $ParentGroup;
+				addAttr -ln "aimOffsetX" -sn "Ox" -at double -k 1 -p "aimOffset";
+				addAttr -ln "aimOffsetY" -sn "Oy" -at double -k 1 -p "aimOffset";
+				addAttr -ln "aimOffsetZ" -sn "Oz" -at double -k 1 -p "aimOffset";
+			float $tx = `optionVar -q aimConstOffsetX`;
+			float $ty = `optionVar -q aimConstOffsetY`;
+			float $tz = `optionVar -q aimConstOffsetZ`;
+			setAttr ($ParentGroup + ".aimOffset") $tx $ty $tz;
+	
+			addAttr -ln "aimVector" -sn "Nv" -at double3 -k 1 $ParentGroup;
+				addAttr -ln "aimVectorX" -sn "NvX" -at double -k 1 -p "aimVector";
+				addAttr -ln "aimVectorY" -sn "NvY" -at double -k 1 -p "aimVector";
+				addAttr -ln "aimVectorZ" -sn "NvZ" -at double -k 1 -p "aimVector";
+			float $aimVector[] = `optionVar -q aimConstraintAimVector`;
+			setAttr ($ParentGroup + ".aimVector") $aimVector[0] $aimVector[1] $aimVector[2];
+	
+			addAttr -ln "aimUpVector" -sn "Uv" -at double3 -k 1 $ParentGroup;
+				addAttr -ln "aimUpVectorX" -sn "UvX" -at double -k 1 -p "aimUpVector";
+				addAttr -ln "aimUpVectorY" -sn "UvY" -at double -k 1 -p "aimUpVector";
+				addAttr -ln "aimUpVectorZ" -sn "UvZ" -at double -k 1 -p "aimUpVector";
+			float $upVector[] = `optionVar -q aimConstraintUpVector`;
+			setAttr ($ParentGroup + ".aimUpVector") $upVector[0] $upVector[1] $upVector[2];
+		}
+		for ($object in $duplicated)
+		{
+			if (`attributeExists "objectId" $object`)
+			{
+				select -cl;
+				select -r $aimConstraintLocator[0] $object;
+			
+				string $aimConstrainArray[] = `eval (doAimConstraint())`;
+				$aimConstrain = $aimConstrainArray[0];
+
+				connectAttr -f ($ParentGroup + "." + "aimOffset") ($aimConstrain+".offset");
+				connectAttr -f ($ParentGroup + "." + "aimVector") ($aimConstrain+".aimVector");
+				connectAttr -f ($ParentGroup + "." + "aimUpVector") ($aimConstrain+".upVector");
+			}
+		}
+	}
+	select -r $ParentGroup;
+}
+
+waitCursor -state off;
+perform_NP_duplicateTotalTransform(0);
+}

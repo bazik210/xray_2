@@ -1,0 +1,26 @@
+global proc string timerMy(string $action)
+{
+if ($action == "start")
+	{
+	global float $gStartTime;
+	$gStartTime = `timerX`;
+	return "0";
+	}
+else if ($action == "end")
+	{
+	global float $gStartTime;
+	$totalTime = `timerX -startTime $gStartTime`;
+//$totalTime = 195.34;
+	$minutes = ($totalTime / 60);
+	$minutes -= $minutes % 1;
+	$seconds = $totalTime - ($minutes * 60);
+	$seconds -= $seconds % 1;
+	string $zero = "";
+	if ($seconds < 10)
+		$zero = "0";
+	string $time = ("time: " + $minutes + ":" + $zero + $seconds + " m");
+	return $time;
+	}
+else
+	return 0;
+}

@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<user>
+  <fullName>Sergey Chechin</fullName>
+  <properties>
+    <hudson.model.MyViewsProperty>
+      <primaryViewName>All</primaryViewName>
+      <views>
+        <hudson.model.AllView>
+          <owner class="hudson.model.MyViewsProperty" reference="../../.."/>
+          <name>All</name>
+        </hudson.model.AllView>
+        <hudson.model.ListView>
+          <owner class="hudson.model.MyViewsProperty" reference="../../.."/>
+          <name>Public View</name>
+          <jobNames class="tree-set">
+            <comparator class="hudson.util.CaseInsensitiveComparator"/>
+            <string>Stalker_2-Build</string>
+            <string>Stalker_2-Polling</string>
+            <string>Stalker_2-Polling-XraySources</string>
+            <string>Stalker_2-Rebuild</string>
+          </jobNames>
+          <columns>
+            <hudson.views.StatusColumn/>
+            <hudson.views.WeatherColumn/>
+            <hudson.views.JobColumn/>
+            <hudson.views.LastSuccessColumn/>
+            <hudson.views.LastFailureColumn/>
+            <hudson.views.LastDurationColumn/>
+            <hudson.views.BuildButtonColumn/>
+          </columns>
+        </hudson.model.ListView>
+      </views>
+    </hudson.model.MyViewsProperty>
+    <hudson.plugins.jabber.user.JabberUserProperty/>
+    <hudson.security.HudsonPrivateSecurityRealm_-Details>
+      <passwordHash>XVUneq:24f0129677b051f55004dd9bc223edfd1b0f90a4367dd61e03df5827e4ddcab3</passwordHash>
+    </hudson.security.HudsonPrivateSecurityRealm_-Details>
+    <hudson.tasks.Mailer_-UserProperty>
+      <emailAddress>lain@gsc-game.kiev.ua</emailAddress>
+    </hudson.tasks.Mailer_-UserProperty>
+  </properties>
+</user>

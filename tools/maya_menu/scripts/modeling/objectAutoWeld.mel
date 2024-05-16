@@ -1,0 +1,47 @@
+global proc objectAutoWeld()
+{
+$his = `constructionHistory -q -tgl`;
+global float $gMergeValue;
+global float $gMergeValuerRes;
+$gMergeValue = 0.001;
+
+makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+DeleteHistory;
+
+trace ("\n"+"================================================================");
+trace ("=== Merge Object vertex & uvs ==================================");
+trace ("================================================================" + "\n");
+
+print ("================================================================" + "\n");
+print ("=== Merge Object vertex & uvs ==================================" + "\n");
+print ("================================================================" + "\n");
+
+	$sel = `ls -sl`;
+	$verts = `size (conv($sel, "v"))`;
+	string $obj;
+	for ($obj in $sel)
+		polyMergeVertex -d $gMergeValue -ch $his $obj;
+	select $sel;
+	$verts2 = `size (conv($sel, "v"))`;
+	$size = $verts - $verts2;
+	if ($size == 0)
+		warning ($gMergeValuerRes + ". NO VERTTICES WELDED WITH THIS THRESHOLD");
+	else
+		{
+		print ("MergeValue - " + $gMergeValuerRes + ". " + $size + " verts welded");
+		trace ("MergeValue - " + $gMergeValuerRes + ". " + $size + " verts welded");
+		}
+	$sel = sel();
+	$verts = `size (conv($sel, "u"))`;
+	for ($obj in $sel)
+		polyMergeUV -d $gMergeValue -ch 1 $obj;
+	$verts2 = `size (conv($sel, "u"))`;
+	$size = $verts - $verts2;
+
+	print ("Summary - " + $gMergeValue + ". " + $size + " uvs verts welded");
+	trace ("Summary - " + $gMergeValue + ". " + $size + " uvs verts welded");
+	select $sel;
+
+	makeIdentity -apply true -t 1 -r 1 -s 1 -n 0;
+	DeleteHistory;
+}

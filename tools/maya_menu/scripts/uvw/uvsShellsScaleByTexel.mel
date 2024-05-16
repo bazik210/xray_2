@@ -1,0 +1,101 @@
+//==============================================================================
+//Name:
+//  uvsShellsScaleByTexel.mel
+//==============================================================================
+//Purpose:
+//uvsShellsScaleByTexel; 					//uvs Shells Scale By Texel.
+//==============================================================================
+//Usage:
+//  1. Save the uvsShellsScaleByTexel.mel to your scripts directory.
+//  2. Start Maya. In the command line type uvsShellsScaleByTexel();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc string uvsShellsScaleByTexel()
+{
+float $maxScale = 1;
+float $minScale = 1;
+float $averageScale = 0;
+
+string $edge = stringSingle(selMask("e"));
+string $object = selObj();
+string $uvs[];
+$uvs = selMask("u");
+if (`size $uvs` == 0)
+	$uvs = conv({$object}, "u");
+float $texel[];
+if (`size $edge` > 0)
+	$texel = edgeTexels($edge);
+else
+	$texel[0] = averageTexeleration();
+if (`size $texel` > 1 && `size $edge` > 0)
+	return ("select edge with 2 uvs");
+progressBegin "Rescale uv-shells to one texel";
+string $shells[] = getUVShells ($uvs);
+int $edgesCount = 0;
+string $shell;
+for ($shell in $shells)
+	{
+//$shell = $shells[0];
+	string $uvs[] = stringToStringArray($shell, " ");
+	string $edges[] = conv($uvs, "e");
+	$edgesCount += `size $edges`;
+	}
+
+int $allEdges = 0;
+int $shellC = 1;
+for ($shell in $shells)
+	{
+//$shell = $shells[0];
+	string $uvs[] = stringToStringArray($shell, " ");
+	string $edges[] = conv($uvs, "e");
+	string $edgesN[] = percentStringCut($edges, 10);
+	if (`size $edgesN` == 0)
+		$edgesN = {$edges[0]};
+	$edges = $edgesN;
+//	select $edges;
+//	select $uvs;
+	float $texels[] = {};
+	float $texelsCurr[] = {};
+	float $texelCurr;
+	string $edge;
+	int $count = 0;
+	int $esc = 0;
+	for ($edge in $edges)
+		{
+	//$edge = $edges[0];
+	//select $edge;
+		$texelsCurr = edgeTexelsLimited($edge, $uvs);
+		for ($texelCurr in $texelsCurr)
+			$texels[`size $texels`] = $texelCurr;
+		$count++;
+		$allEdges++;
+		if ($allEdges % 10 == 0)
+			{
+			progressText ("Shell " + $shellC + "/" + `size $shells` + ".  Edge " + $count + "/" + `size $edges` + ".");
+			progressValue (intToFloat($allEdges) / $edgesCount * 1000);
+			}
+		if (progressEsc())
+			{
+			$esc = 1;
+			break;
+			}
+		}
+	if ($esc)
+		break;
+	float $texelAverage = floatArraySum($texels) / (`size $texels`);
+	float $scale = $texelAverage / $texel[0];
+	float $center[] = uvsCenter($uvs);
+	polyEditUV -pu $center[0] -pv $center[1] -su $scale -sv $scale $uvs;
+	$shellC++;
+
+	if ($scale < $minScale)
+		$minScale = $scale;
+	if ($scale > $maxScale)
+		$maxScale = $scale;
+	$averageScale += $scale;
+	}
+progressEnd;
+$averageScale /= `size $shells`;
+return ("Min scale is " + $minScale + ". Max scale is " + $maxScale + ". Average scale is " + $averageScale);
+}

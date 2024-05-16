@@ -1,0 +1,154 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <logRotator>
+    <daysToKeep>-1</daysToKeep>
+    <numToKeep>50</numToKeep>
+  </logRotator>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>Fingerprint_Build_Number</name>
+          <description>This string id will be included in svn commit message </description>
+          <defaultValue></defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector"/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@SETLOCAL   ENABLEDELAYEDEXPANSION
+
+@set   designers_repository=&quot;http://filesophia/xr2-dsgn&quot;
+@set   programmers_repository=&quot;http://filesophia/xr2-prog&quot;
+
+@set   source_dir=.
+@set   destination_dir=..\build
+@mkdir %destination_dir%
+
+@pushd !cd!
+@cd /d &quot;%source_dir%&quot;
+@set   full_source_dir=!cd!
+@popd
+
+@pushd !cd!
+@cd /d &quot;%destination_dir%&quot;
+@set   full_destination_dir=!cd!
+@popd
+
+@set synchronize_sub_directory=win32
+@call:function_synchronize
+
+@set synchronize_sub_directory=x64
+@call:function_synchronize
+
+@set synchronize_sub_directory=xbox 360
+@call:function_synchronize
+
+@set synchronize_sub_directory=ps3
+@call:function_synchronize
+
+hg add &quot;%full_destination_dir%&quot;
+hg commit -m &quot;Build number: %Fingerprint_Build_Number%&quot;
+
+:try_push
+hg push --new-branch %designers_repository%
+@set /a did_pushes+=1
+
+@if not &quot;%ERRORLEVEL%&quot;==&quot;0&quot; @(
+
+  @if &quot;!did_pushes!&quot;==&quot;10&quot; @(
+    @echo did already !did_pushes! tries to push and still cant, check for a problem
+    @goto:eof
+  )
+
+  hg pull %designers_repository%
+  hg update
+  hg merge
+  hg commit -m merge
+  @goto:try_push
+)
+
+@goto:eof
+
+
+@rem argument: synchronize_sub_directory
+:function_synchronize
+
+  del &quot;%source_dir%\!synchronize_sub_directory!\*.*.backup&quot;
+  del &quot;%source_dir%\!synchronize_sub_directory!\*.*.lib&quot;
+  del &quot;%source_dir%\!synchronize_sub_directory!\*.*.exp&quot;
+  del &quot;%source_dir%\!synchronize_sub_directory!\*.*.txt&quot;
+  xcopy  &quot;%source_dir%\!synchronize_sub_directory!\*.*&quot; &quot;%destination_dir%\!synchronize_sub_directory!\*.*&quot; /Y
+
+  @pushd !cd!
+  @cd /d &quot;%full_destination_dir%&quot;
+  
+  @for %%i in (&quot;!synchronize_sub_directory!\*.*&quot;) do @(
+
+    @set file=%%i
+    @set full_source_path=%full_source_dir%\!file!
+
+    if not exist &quot;!full_source_path!&quot; @(
+       @set full_destination_path=%full_destination_dir%\!file!
+       @hg remove -f &quot;!full_destination_path!&quot;
+    )
+
+  )
+
+  @popd
+
+)
+@goto:eof</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher>
+      <recipientList>dummy@gsc-game.kiev.ua</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>dummy@gsc-game.kiev.ua bes@gsc-game.kiev.ua stohe@gsc-game.kiev.ua iassenev@gsc-game.kiev.ua ironnick@gsc-game.kiev.ua peacemaker@gsc-game.kiev.ua andy@gsc-game.kiev.ua lain@gsc-game.kiev.ua arkom@gsc-game.kiev.ua plecha@gsc-game.kiev.ua jes@gsc-game.kiev.ua dimetcm@gsc-game.kiev.ua a.stupakov@gsc-game.kiev.ua rocksteady@gsc-game.kiev.ua fox@gsc-game.kiev.ua miron@gsc-game.kiev.ua crimsonic@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>dummy@gsc-game.kiev.ua yojig@gsc-game.kiev.ua bes@gsc-game.kiev.ua stohe@gsc-game.kiev.ua iassenev@gsc-game.kiev.ua ironnick@gsc-game.kiev.ua peacemaker@gsc-game.kiev.ua andy@gsc-game.kiev.ua lain@gsc-game.kiev.ua slipch@gsc-game.kiev.ua plecha@gsc-game.kiev.ua jes@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+      </configuredTriggers>
+      <defaultSubject>$BUILD_STATUS Build # $BUILD_NUMBER $PROJECT_NAME!.</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.locksandlatches.LockWrapper>
+      <locks>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Build_Publish_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+      </locks>
+    </hudson.plugins.locksandlatches.LockWrapper>
+  </buildWrappers>
+  <customWorkspace>D:\Hudson\jobs\Stalker_2-Polling\workspace\binaries</customWorkspace>
+</project>

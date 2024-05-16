@@ -1,0 +1,72 @@
+//==============================================================================
+//Name:
+//  HardwareTexturingColorOn.mel
+//==============================================================================
+//Purpose:
+//  S.T.A.L.K.E.R. Project - scripts
+//==============================================================================
+//Usage:
+//  1. Save the HardwareTexturingColorOn.mel to your scripts directory.
+//  2. Start Maya.
+//  3. Middlemouse drag source scripts to a shelf you like.
+//==============================================================================
+
+proc string getMaterialInfo( string $messagePlug )
+//
+//        Description:
+//                Return the materialInfo node for a given plug
+//
+{
+        string $connections[] = `listConnections $messagePlug`;
+        for ( $item in $connections ) {
+                if (`objectType $item` == "materialInfo")
+                        return $item;
+        }
+        return "";
+}
+
+proc disconnectInfoTexture( string $matInfo )
+//
+//        Description:
+//                Break the connection between the materialInfo node
+//                and the current texture used for hardware display
+//
+{
+        // We need to break all connection because we want to ensure the
+        // texture being displayed has a multi index of zero.
+        //
+        // Note: the connections are broken from back to front because
+        // breaking a connection at the end of the multi will not affect
+        // the connections at the start of the multi.
+        string $connections[];
+        $connections = `listConnections -connections true ($matInfo+".texture")`;
+        if ( size($connections) < 2 ) return;
+
+        for ($i = size($connections); $i > 0; $i -= 2) {
+                disconnectAttr ($connections[$i-1]+".message") $connections[$i-2];
+        }
+        }
+
+//string $a[] = `ls -sl`;
+string $a[] = `ls -typ xray_shader`;
+                        /*
+                                                -typ lambert
+                        -typ blinn
+                        -typ anisotropic
+                        -typ phong
+                        -typ phongE `;
+                                                */
+string $b,$c;
+string $d1[];
+for($b in $a){
+$c = `getMaterialInfo $b`;
+print ($c + "\n");
+$d1 = eval("listConnections " + $b +".color");
+print ($d1[0]);
+disconnectInfoTexture $c;
+connectAttr ($d1[0]+".message") ($c+".texture[0]");
+}
+print ("\n" + "Hardware texturing switch -> color");
+
+
+

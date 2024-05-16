@@ -1,0 +1,54 @@
+
+// MJ Poly Tools
+//
+//
+//    Created by:
+//         Mikkel Jans
+//         info@maya3d.dk
+//         www.maya3d.dk
+
+
+global proc selectFacesOutline()
+{
+string $Faces[] = `ls -sl -fl`;
+string $Edges[] = getEdges();
+string $Result[];
+int $i = 0;
+
+
+for ( $Edge in $Edges )
+{
+if ( size(ArrayIntersector($Faces, edge2Face($Edge))) == 2 )
+$Result[$i++] = $Edge;
+}
+
+select $Edges; select -d $Result;
+}
+
+
+global proc string[] edge2Face(string $theEdge)
+{
+string $buffer[];
+string $listFace[] = `polyInfo -ef $theEdge`;
+tokenize $theEdge "." $buffer;
+string $ObjectName = $buffer[0];
+int $nbFace = tokenize($listFace[0] ,$buffer);
+$nbFace -= 2;
+string $listFaceName[];
+for ($i=2;$i<size($buffer);$i++)
+{
+$listFaceName[$i-2] = ($ObjectName + ".f["+$buffer[$i]+"]");
+}
+return $listFaceName;
+}
+
+
+global proc string[] ArrayIntersector(string $array1[] ,string $array2[] )
+{
+    string $myIntersector = `stringArrayIntersector`;
+    stringArrayIntersector -edit -intersect $array1 $myIntersector;
+    stringArrayIntersector -edit -intersect $array2 $myIntersector;
+    string $result[]        = `stringArrayIntersector -query $myIntersector`;
+    stringArrayIntersector -edit -reset $myIntersector;
+    return $result;
+}

@@ -1,0 +1,322 @@
+//==============================================================================
+//Name:
+//  XRayShaders.mel
+//==============================================================================
+//Purpose:
+//  S.T.A.L.K.E.R. Project - XRayShaders.
+//==============================================================================
+//Usage:
+//  1. Save the XRayShaders.mel to your scripts directory.
+//  2. Start Maya. In the command line type XRayShaders();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+//--- Shader ----------------------------------------------------------------------------//
+global proc Engine(int $value)
+{
+string $SG_selected;
+string $multiListerSelection[] = `listerEditor -q -hl multiListerPanel1TopTab1`;
+  if ((!(size($multiListerSelection))) == 1)
+	{
+	confirmDialog -message "Please highlight just one material."
+	-button "Ok" -cancelButton "Ok" -dismissString "Ok";
+	}
+for ($SG_selected in $multiListerSelection)
+	{
+	print $SG_selected;
+	print "  =>_assign preset_=>  ";
+	string $material1[] = `listConnections -s on -d off $SG_selected`;
+{
+        string $str = "setAttr " + $material1[0] + ".xrayEngineShader " + $value;
+        eval $str;
+}
+}
+}
+
+global proc Compiler(int $value)
+{
+string $SG_selected;
+string $multiListerSelection[] = `listerEditor -q -hl multiListerPanel1TopTab1`;
+  if ((!(size($multiListerSelection))) == 1)
+	{
+	confirmDialog -message "Please highlight just one material."
+	-button "Ok" -cancelButton "Ok" -dismissString "Ok";
+	}
+for ($SG_selected in $multiListerSelection)
+	{
+	print $SG_selected;
+	print "  =>_assign preset_=>  ";
+	string $material1[] = `listConnections -s on -d off $SG_selected`;
+{
+        string $str = "setAttr " + $material1[0] + ".xrayCompilerShader " + $value;
+        eval $str;
+}
+}
+}
+
+global proc Material(int $value)
+{
+string $SG_selected;
+string $multiListerSelection[] = `listerEditor -q -hl multiListerPanel1TopTab1`;
+  if ((!(size($multiListerSelection))) == 1)
+	{
+	confirmDialog -message "Please highlight just one material."
+	-button "Ok" -cancelButton "Ok" -dismissString "Ok";
+	}
+for ($SG_selected in $multiListerSelection)
+	{
+	print $SG_selected;
+	print "  =>_assign preset_=>  ";
+	string $material1[] = `listConnections -s on -d off $SG_selected`;
+{
+        string $str = "setAttr " + $material1[0] + ".xrayGameMaterial " + $value;
+        eval $str;
+}
+}
+}
+//--- Shader ----------------------------------------------------------------------------//
+
+proc MyButton(string $caption, string $action)
+{
+        button -rs true -w 96 -h 15 -l $caption -al "left" -c($action);
+}
+
+proc ListButtons(string $lists[])
+{
+        for($i = 0; $i < size($lists); $i += 2)
+        {
+                MyButton($lists[$i], $lists[$i+1]);
+        };
+          separator -height 10 -style "none";
+}
+global proc XRayShaders()
+{
+
+//---Engine------------------------------------------------------------------------------//
+string $list1[] =         {
+        "default",                                 "Engine(14855)",
+        "def_vertex",                        "Engine(-7784)",
+        "def_objects_lod",                "Engine(-19669)",
+        "def_objects_lod_trans",                "Engine(18072)",
+//        "def_add",                                  "Engine(-7352)",
+        "def_aref",                          "Engine(18563)",
+        "def_aref_v",                        "Engine(4313)",
+//        "def_refl_alpha",                 "Engine(17996)",
+//        "def_refl_alpha_heli",        "Engine(-9615)",
+//        "def_refl_trans",                "Engine(1428)",
+        "def_trans",                          "Engine(-31229)",
+        "def_trans_v",                        "Engine(17465)",
+        "selflight_v",                        "Engine(18433)"
+//        "lod",                                        "Engine(-22266)"
+                                        };
+
+string $list2[] =         {
+//        "flora/leaf",                        "Engine(-29069)",
+//        "flora/leaf_sux",                "Engine(-11585)",
+        "flora/leaf_wave",                "Engine(-12522)",
+        "flora/trunk",                        "Engine(30956)",
+        "flora/trunk_wave",                "Engine(23473)",
+        "details/blend",                "Engine(22966)"
+                        };
+string $list3[] =         {
+        "models/antigas_glass",                "Engine(5541)",
+        "models/artefact",                "Engine(28830)",
+        "models/artefact2",                "Engine(32112)",
+        "models/glass_stalker_refl",         "Engine(28978)",
+        "models/model_fur",                "Engine(-24207)",
+        "models/lightplanes",                "Engine(32381)",
+        "models/model_miror",                "Engine(5592)",
+        "models/model_aref",                "Engine(19294)",
+        "models/model",                        "Engine(9711)",
+        "models/model_puh",                "Engine(-20975)",
+        "models/model_refl",                "Engine(15466)",
+        "models/pautina",                "Engine(29253)",
+        "models/selflight",                "Engine(-26834)",
+        "models/selflightl",                "Engine(12567)",
+        "models/transparent",                "Engine(-28240)",
+        "models/transrefl",                "Engine(18851)",
+        "models/water",                        "Engine(-15819)",
+        "models/weapons",                "Engine(2403)",
+        "models/window",                "Engine(30972)",
+        "models/xdistort",                "Engine(29194)",
+        "models/xdistortinv",                "Engine(14457)",
+        "models/xdistortcolor",                "Engine(-21193)",
+        "models/xdistortcolorl",        "Engine(-1044)",
+        "models/xdistortcolorlinv",        "Engine(24575)",
+        "models/xanomaly",                "Engine(-735)",
+        "models/xbrainglass",                  "Engine(8232)",
+        "models/xglass",                "Engine(-883)",
+        "models/xglass2",                "Engine(-20291)",
+        "models/xlens",                        "Engine(-25867)",
+        "models/xmonolith",                "Engine(20290)",
+        "models/xwindows",                "Engine(-7294)"
+                        };
+string $list4[] =         {
+//        "effects/blur",                        "Engine(6605)",
+//        "effects/bullet_tracer",        "Engine(-31674)",
+//        "effects/glow",                        "Engine(-18938)",
+//        "effects/flame",                "Engine(19105)",
+//        "effects/flare",                "Engine(31401)",
+//        "effects/fx_refl",                "Engine(-4098)",
+//        "effects/fx_refl_pod",                "Engine(-14017)",
+//        "effects/light",                "Engine(-9702)",
+        "effects/lightplanes",                 "Engine(17620)",
+//        "effects/rain",                        "Engine(4945)",
+//        "effects/screen_add",                  "Engine(17842)",
+//        "effects/screen_blend",                "Engine(30863)",
+//        "effects/screen_set",                "Engine(7186)",
+//        "effects/shadow",                "Engine(14830)",
+//        "effects/shadow_world",                "Engine(3042)",
+//        "effects/sun",                        "Engine(-11445)",
+        "effects/water",                "Engine(-4343)",
+        "effects/waterstuden",                "Engine(10655)",
+        "effects/waterryaska",                "Engine(-22206)"
+//        "effects/wallmarkblend",        "Engine(12216)",
+//        "effects/wallmarkset",                 "Engine(6055)"
+                        };
+//---Compiler----------------------------------------------------------------------------//
+string $list5[] =         {
+        "default",                         "Compiler(14855)",
+        "def_vertex",                      "Compiler(-7784)",
+        "def_objects_lod",                 "Compiler(-19669)",
+        "def_objects_lod_collision",       "Compiler(-19449)",
+        "def_objects_lod_visual",        	"Compiler(-18341)",
+        "def_ghost",                       "Compiler(3240)",
+        "def_kolizion",                    "Compiler(27861)",
+        "def_kolizion_vertex",             "Compiler(-5611)",
+        "default_lm01",                    "Compiler(4233)",
+        "default_lm01_ghost",              "Compiler(-26642)",
+		"default_lm03",                     "Compiler(-12024)",
+		"default_lm03_ghost",               "Compiler(22477)",
+		"default_lm05",                     "Compiler(-11384)",
+		"default_lm05_ghost",               "Compiler(22443)",
+		"default_lmHQ",					"Compiler(-12517)",
+//		"def_noshadow",                               "Compiler(4476)",
+//        "def_selflight",                        "Compiler(-26292)",
+//        "def_translucensy",                        "Compiler(3796)",
+        "def_vertex_ghost",                        "Compiler(912)",
+        "def_vertex_ghost_no_shadow",         "Compiler(-13195)",
+        "def_vertex_no_shadow",                "Compiler(-32220)"
+//        "def_vertex_invisible_castshadow",           "Compiler(-27305)",
+                        };
+string $list51[] =	{
+        "flora/leaf",                                "Compiler(-29069)",
+        "flora/flora_collision",        "Compiler(-9782)",
+        "flora/trunk",                               "Compiler(30956)",
+        "flora/trunk_no_collision",        "Compiler(7402)"
+			};
+//---Material----------------------------------------------------------------------------//
+string $list6[] =         {
+        "default",                        "Material(14855)",
+        "default_object",                "Material(6153)",
+        "material/asphalt",                "Material(6192)",
+        "material/bricks",                "Material(-2727)",
+        "material/bush",                "Material(-9906)",
+        "material/bush_sux",                "Material(-20989)",
+        "material/cloth",                "Material(16555)",
+        "material/concrete",                "Material(-8458)",
+        "material/death",                "Material(-8324)",
+        "material/earth",                "Material(-5455)",
+        "material/earth_death",                "Material(-21226)",
+        "material/earth_slide",                "Material(-2772)",
+//        "material/dirt",                "Material(-12657)",
+        "material/fake",                "Material(10436)",
+        "material/fake_slide",                "Material(16734)",
+        "material/fake_ladders",        "Material(2143)",
+        "material/flooring_tile",        "Material(17206)",
+        "material/glass",                "Material(30841)",
+        "material/grass",                "Material(20607)",
+        "material/gravel",                "Material(-21489)",
+        "material/metal",                "Material(18878)",
+        "material/metall_pipe",                "Material(32133)",
+        "material/metal_plate",                "Material(4384)",
+        "material/occ",                "Material(24789)",
+        "material/sand",                "Material(-19454)",
+        "material/setka_rabica",        "Material(-7943)",
+        "material/shifer",                "Material(-10282)",
+        "material/stucco",                "Material(11731)",
+        "material/tin",                        "Material(610)",
+        "material/tree_trunk",                "Material(-6061)",
+        "material/water",                "Material(29540)",
+        "material/wood",                "Material(-10397)",
+        "material/wooden_board",        "Material(1844)"
+                        };
+string $list7[] =         {
+        "objects/barrel",                       "Material(3206)",
+        "objects/bottle",                "Material(4809)",
+        "objects/bullet",                "Material(11216)",
+        "objects/car_cabine",                  "Material(-15285)",
+        "objects/car_wheel",                "Material(21869)",
+        "objects/clothes",                "Material(-31834)",
+        "objects/concrete_box",                "Material(14534)",
+        "objects/dead_body",                "Material(24559)",
+        "objects/fuel_can",                "Material(5384)",
+        "objects/glass",                "Material(29122)",
+        "objects/knife",                "Material(21725)",
+        "objects/large_furnitura",        "Material(-21419)",
+        "objects/large_metal_trash",        "Material(-18309)",
+        "objects/large_weapon",                "Material(22499)",
+        "objects/metal_box",                "Material(159)",
+        "objects/monster_body",                "Material(-1568)",
+        "objects/small_box",                "Material(-9638)",
+        "objects/small_metal_trash",        "Material(-31742)",
+        "objects/small_weapon",                "Material(11339)",
+        "objects/tin_can",                "Material(-1978)"
+                        };
+
+string $window = `window`;
+ scrollLayout;
+  string $form = `formLayout`;
+   string $tabs = `tabLayout -innerMarginWidth 1 -innerMarginHeight 1`;
+   formLayout -edit -w 280
+    -attachForm $tabs "top"  0
+    -attachForm $tabs "left"  0
+    -attachForm $tabs "bottom"  0
+    -attachForm $tabs "right"  0
+  $form;
+    string $child1 = `rowColumnLayout -numberOfColumns 3`;
+
+//---Engine------------------------------------------------------------------------------//
+         frameLayout -label "Engine" -labelAlign "top"
+           -borderStyle "in";
+           columnLayout;
+
+        ListButtons($list1);
+        ListButtons($list2);
+        ListButtons($list3);
+
+      setParent ..;
+    setParent ..;
+//---Engine------------------------------------------------------------------------------//
+
+//---Compiler----------------------------------------------------------------------------//
+         frameLayout -label "Compiler" -labelAlign "top"
+           -borderStyle "in";
+           columnLayout;
+        ListButtons($list5);
+        ListButtons($list51);
+        ListButtons($list4);
+
+      setParent ..;
+    setParent ..;
+//---Compiler----------------------------------------------------------------------------//
+
+//---Material----------------------------------------------------------------------------//
+         frameLayout -label "Material" -labelAlign "top"
+           -borderStyle "in";
+           columnLayout;
+
+        ListButtons($list6);
+        ListButtons($list7);
+
+        setParent ..;
+      setParent ..;
+    setParent ..;
+//---Material----------------------------------------------------------------------------//
+
+      tabLayout -edit
+      -tabLabel $child1 "XRay Shaders"
+  $tabs;
+    window -tlb true -te 30 -title "XRay Shaders - Ugrumiy" -s true -e -wh 352 890 $window;
+showWindow $window;
+}

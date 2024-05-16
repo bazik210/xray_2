@@ -1,0 +1,15 @@
+global proc triangulateAdv()
+{
+$sel = sel();
+ConvertSelectionToFaces;
+createSet tmpTrianFaces;
+PolySelectConvert 2;
+createSet tmpTrianEdges;
+select tmpTrianFaces;
+polyTriangulate -ch 1;
+PolySelectConvert 2;
+select -d tmpTrianEdges;
+delete tmpTrianFaces;
+delete tmpTrianEdges;
+selectionMode($sel[0], "edge");
+}

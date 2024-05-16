@@ -1,0 +1,110 @@
+// #################################################################################################
+// # 												   #
+// #	PolyCounter 1.5 for Maya (NT) [ by Khazad-Dum ]	email: khazaddum@abv.bg			   #
+// # 												   #
+// #################################################################################################
+
+global proc polyCounter ()
+{
+	string $form, $top, $bottom, $selection[], $listRelatives[];
+	int $count, $vertCount[], $edgeCount[], $faceCount[], $triCount[], $uvCount[] ;
+
+	if ( `window -ex polyCounter` == 1 )
+	{
+		deleteUI -window polyCounter;
+	}
+
+	window -t "PolyCounter" -s 1 polyCounter;
+	windowPref -w 450 -h 900 polyCounter;
+
+	if ( `formLayout -ex FormLayout` == 1 )
+	{
+		deleteUI -lay FormLayout;
+	}
+
+	$form = `formLayout -nd 100 FormLayout`;
+
+	$top = `columnLayout -co "left" 2`;
+
+		button -l "Refresh" -w 417 -h 20 -bgc 0.785799 0.816 0.690336 -c polyCounter polyCounter;
+		rowColumnLayout -nc 7 
+			-cw 1 120 
+			-cw 2 50 
+			-cw 3 50 
+			-cw 4 50 
+			-cw 5 50  
+			-cw 6 50 
+			-cw 7 50;
+
+			textField -tx "Polygonal Objects" -w 128 -ed 0;
+			textField -tx "Vertices" -ed 0;
+			textField -tx "Edges" -ed 0;
+			textField -tx "Faces" -ed 0;
+			textField -tx "Triangles" -ed 0;
+			textField -tx "UV's" -ed 0;
+			textField -tx "Area m2" -ed 0;
+		setParent ..;
+	setParent ..;
+
+	
+string $selection[];
+	$selection = `ls -sl -fl`;
+	$count = `size ( $selection )`;
+
+	$bottom = `scrollLayout -hst 0 -vst 10`;
+
+		columnLayout;
+
+		for ( $i = 0; $i < $count; $i++ )
+		{
+			$listRelatives = `listRelatives -typ mesh -pa -s $selection[$i]`;
+
+			if ( `objectType $listRelatives[0]` == "mesh" )
+			{
+				$vertCount = `polyEvaluate -v $selection[$i]`;
+				$edgeCount = `polyEvaluate -e $selection[$i]`;
+				$faceCount = `polyEvaluate -f $selection[$i]`;
+				$triCount = `polyEvaluate -t $selection[$i]`;
+				$uvCount = `polyEvaluate -uv $selection[$i]`;
+				$areaCount = `polyEvaluate -a $selection[$i]`;
+			
+				rowColumnLayout -nc 7 
+					-cw 1 120
+					-cw 2 50 
+					-cw 3 50 
+					-cw 4 50 
+					-cw 5 50 
+					-cw 6 50 
+					-cw 7 50;
+
+					button 
+						-l $selection[$i] 
+						-bgc 0.690336 0.753168 0.816
+						-c ( "select " + $selection[$i] );
+					textField -tx $vertCount[0] -ed 0;
+					textField -tx $edgeCount[0] -ed 0;
+					textField -tx $faceCount[0] -ed 0;
+					textField -tx $triCount[0] -ed 0;
+					textField -tx $uvCount[0] -ed 0;
+					textField -tx ($areaCount[0] / 10000) -ed 0;
+				setParent ..;
+			}
+		}
+		setParent ..;
+	setParent ..;
+
+	formLayout -edit
+		-af $top "top" 4
+		-af $top "left" 0
+		-af $top "bottom" 820
+		-af $top "right" 0
+
+		-af $bottom "top" 45
+		-af $bottom "left" 0
+		-af $bottom "bottom" 0
+		-af $bottom "right" 0
+	$form;
+
+	showWindow polyCounter;
+}
+polyCounter;

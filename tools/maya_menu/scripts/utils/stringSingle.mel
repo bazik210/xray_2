@@ -1,0 +1,1 @@
+global proc string stringSingle(string $array[]){return $array[0];}

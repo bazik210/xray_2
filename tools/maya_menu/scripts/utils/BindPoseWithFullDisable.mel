@@ -1,0 +1,27 @@
+global proc BindPoseWithFullDisable()
+{
+int $autoKeyOnAtEnd = 0;
+if (`autoKeyframe -q -st`)
+	{
+	autoKeyframe -st 0;
+	$autoKeyOnAtEnd = 1;
+	}
+$sel = `ls -sl -l -fl`;
+string $influences[];
+if (`objectType $sel[0]` != "joint")
+	$influences = `skinCluster -q -inf (skinClusterFind($sel[0]))`;
+else
+	$influences = sel();
+string $skinArray[] = `connectionInfo -dfs ($influences[0] + ".worldMatrix")`;
+$skinCluster = attribute_to_node($skinArray[0]);
+$influences = `skinCluster -q -inf $skinCluster`;
+string $bindPose[] = `dagPose -q -bp $influences[0]`;
+DisableAll;
+if (`size $bindPose` > 0)
+	dagPose -r -g -bp $influences[0];
+else
+	warning "no bind pose founded";
+if ($autoKeyOnAtEnd)
+	autoKeyframe -st 1;
+//EnableAll;
+}

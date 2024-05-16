@@ -1,0 +1,2853 @@
+// ===============================
+// poseLib
+// ===============================
+//
+// Purpose:
+// --------
+// Allows you to record poses for anything in Maya (most likely the controls of a character rig).
+//
+// Usage:
+// ------
+//		poseLib;
+//
+
+proc poseLibInitializeVariables()
+	{
+	// --------------------------
+	// Initializing variables.
+	// --------------------------
+	global string $poseLibVersion;
+	global string $poseLibCurrentProject;		// A "poseLib" folder will be created here by default.
+	global string $poseLibBasePath;				// The path to the root poseLib folder where character folders are located.
+	global string $poseLibCharacterList[];		// Those are character folders that get created if none exist.
+	global string $poseLibCategoryList[];		// Those are category folders that get created if none exist.
+	global int $poseLibIconsSize[];				// The size of the icons displayed.
+	global float $poseLibIconsBGColor[];		// The background color of the icons.
+	global float $poseLibCaptureCameraBGColor[];// The background color of the capture camera.
+	global float $poseLibApplyIncrement;		// Used for ALT+click (apply increments of a pose).
+	global string $poseLibPathsBookmarks[];		// A list of paths stored to multiple projects.
+	global string $poseLibTextEditor;			// The text editor used to edit poses.
+	global int $poseLibUseTexturesForIconPreview;// Should we display textures when capturing an icon.
+	global string $poseLibIconFormat = "";		// The image format used for the icons.
+	//global string $poseLibCancelIsolateCmd;
+	$poseLibVersion = "4.5.6";
+	$poseLibCurrentProject = `workspace -q -fn`;
+	$poseLibCharacterList = {"default"};
+	$poseLibCategoryList =	{"default"};
+	$poseLibIconsSize = {64, 64};
+	$poseLibIconsBGColor = {1.0, 1.0, 1.0};
+	$poseLibCaptureCameraBGColor = {.75, .75, .75};
+	$poseLibApplyIncrement = 0.75;
+	$poseLibIconFormat = ".bmp";
+	//$poseLibTextEditor = "C:/Program Files/EditPlus 3/editplus.exe";
+
+	// Check if the default path option var exists and set the poseLib default path accordingly.
+	if ( `optionVar -exists poseLibDefaultPathStatus` )
+		$poseLibBasePath = `optionVar -q poseLibDefaultPathStatus`;
+	else
+		$poseLibBasePath = $poseLibCurrentProject;
+	print ("\nposeLib base path = " + $poseLibBasePath);
+
+	if ( `optionVar -exists poseLibTextEditorStatus` )
+		$poseLibTextEditor = `optionVar -q poseLibTextEditorStatus`;
+	else
+		$poseLibTextEditor = "C:/Program Files/Windows NT/Accessories/wordpad.exe"; //print ("\n$defaultPath=" + $poseLibBasePath );
+	print ("\nposeLib text editor = " + $poseLibTextEditor);
+
+	// Recall the icons size preferences.
+	if ( `optionVar -exists iconsSizeWidthStatus` )
+		$poseLibIconsSize[0] = `optionVar -q iconsSizeWidthStatus`;
+
+	if ( `optionVar -exists iconsSizeHeightStatus` )
+		$poseLibIconsSize[1] = `optionVar -q iconsSizeHeightStatus`;
+
+	// Recall the icons BG color preferences.
+	if ( `optionVar -exists iconsBackgroundColorStatus` )
+		{
+		string $tmp = `optionVar -q iconsBackgroundColorStatus`;
+		$arrayTmp = `stringToStringArray $tmp " "`;
+		$poseLibIconsBGColor[0] = $arrayTmp[0];
+		$poseLibIconsBGColor[1] = $arrayTmp[1];
+		$poseLibIconsBGColor[2] = $arrayTmp[2];
+		}
+
+	// Use textures or not while capturing icon.
+	if ( `optionVar -exists useTexturesForIconPreviewStatus` )
+		$poseLibUseTexturesForIconPreview = `optionVar -q useTexturesForIconPreviewStatus`;
+	else
+		$poseLibUseTexturesForIconPreview = 1;
+
+	// Recall the capture camera BG color preferences.
+	if ( `optionVar -exists captureCameraBackgroundColorStatus` )
+		{
+		string $tmp = `optionVar -q captureCameraBackgroundColorStatus`;
+		$arrayTmp = `stringToStringArray $tmp " "`;
+		$poseLibCaptureCameraBGColor[0] = $arrayTmp[0];
+		$poseLibCaptureCameraBGColor[1] = $arrayTmp[1];
+		$poseLibCaptureCameraBGColor[2] = $arrayTmp[2];
+		}
+	}
+
+// ---------------------------------------------------------------------------
+
+global proc poseLibSavePrefs()
+	{
+	global string $poseLibBasePath;
+	global int $poseLibIconsSize[];
+	global float $poseLibIconsBGColor[];
+	global float $poseLibCaptureCameraBGColor[];
+	global string $poseLibPathsBookmarks[];
+	global string $poseLibTextEditor;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+	// Store all the option choices in option variables.
+	optionVar -stringValue poseLibDefaultPathStatus $poseLibBasePath;
+	optionVar -stringValue poseLibTextEditorStatus $poseLibTextEditor;
+	//optionVar -intValue useCurrentCharacterStatus `checkBox -q -v useSelectionNamespaceCB`;
+	//optionVar -intValue useCustomNamespaceStatus `checkBox -q -v useCustomNamespaceCB`;
+	if (`checkBox -ex forceExactNamespaceCB`)
+		optionVar -intValue forceExactNamespaceStatus `checkBox -q -v forceExactNamespaceCB`;
+	optionVar -stringValue namespaceTextFieldStatus `textField -q -tx namespaceTextFieldTF`;
+	optionVar -stringValue characterChoiceStatus `optionMenu -q -v characterChoiceOM`;
+	optionVar -stringValue categoryChoiceStatus `optionMenu -q -v categoryChoiceOM`;
+	optionVar -intValue iconsSizeWidthStatus $poseLibIconsSize[0];
+	optionVar -intValue iconsSizeHeightStatus $poseLibIconsSize[1];
+
+	if (`radioCollection -ex namespaceChoiceRC`)
+		optionVar -stringValue namespaceChoiceStatus `radioCollection -q -sl namespaceChoiceRC`;
+
+	// We save the color as a string, but we change them to float[] when we recall them.
+	optionVar -stringValue iconsBackgroundColorStatus ($poseLibIconsBGColor[0] + " " + $poseLibIconsBGColor[1] + " " + $poseLibIconsBGColor[2]);
+	optionVar -stringValue captureCameraBackgroundColorStatus ($poseLibCaptureCameraBGColor[0] + " " + $poseLibCaptureCameraBGColor[1] + " " + $poseLibCaptureCameraBGColor[2]);
+	string $pathsBookmarksStatusTmp = stringArrayToString($poseLibPathsBookmarks, ",");
+	optionVar -stringValue pathsBookmarksStatus $pathsBookmarksStatusTmp; //print ("\nSaved $pathsBookmarksStatusTmp: " + $pathsBookmarksStatusTmp + "\n");
+
+	// Store some of the capture camera info, while we're at it.
+	if ( `objExists "poseLibCaptureCamera"` )
+		{
+		optionVar -intValue captureCameraFocalLengthStatus `getAttr "poseLibCaptureCameraShape.focalLength"`;
+		optionVar -floatValue captureCameraNearClipStatus `getAttr "poseLibCaptureCameraShape.nearClipPlane"`;
+		optionVar -floatValue captureCameraFarClipStatus `getAttr "poseLibCaptureCameraShape.farClipPlane"`;
+		}
+
+	// Index business ------------------------------------------------------------
+	// what we need to do is to embed the poses index order in the pose files
+
+	// Get the list of poses currently displayed and their index.
+	string $posesUINames[] = `shelfLayout -q -ca plPosesSL`;
+	//string $posesUINames[] = `flowLayout -q -ca plPosesSL`;
+	string $poseNames[] = {};
+	for ($i=0;$i<`size $posesUINames`;$i++)
+		{
+		$poseNames[$i] = `shelfButton -q -l $posesUINames[$i]`;
+		}
+	//print ("$poseNames:\n"); print $poseNames; print "\n";
+
+	// Open each pose file.
+	for ($i=0;$i<`size $poseNames`;$i++)
+		{
+		if (`filetest -w ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseNames[$i])`)
+			{
+			//print ("\nAssigning index order " + $i + " to pose \"" + $poseNames[$i] + "\"");
+			string $allLines[] = {};
+			int $fileId = `fopen ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseNames[$i]) "r"`;
+
+			// Store the file's content.
+			while ( !`feof $fileId` )
+				{
+				$allLines[`size $allLines`] = `fgetline $fileId`;
+				}
+			fclose $fileId;
+			//print ("pose = " + $poseNames[$i] + "\n");
+
+			// Rewrite the file starting with the new index number.
+			int $fileId = `fopen ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseNames[$i]) "w"`;
+			fprint $fileId ("\nposeLibIndexOrder " + $i);
+
+			int $start = 1;
+			string $buffer[];
+			int $numTokens = `tokenize $allLines[1] " " $buffer`; //print ($buffer[`size $buffer`-1]);
+			if ( $buffer[0] == "poseLibIndexOrder" )
+				$start = 2;
+
+			for ($j=$start;$j<`size $allLines`;$j++)
+				{
+				$allLines[$j] = strip($allLines[$j]);
+				if ( $allLines[$j] != "" )
+					fprint $fileId ("\n" + $allLines[$j]);
+				}
+			fclose $fileId;
+			}
+		}
+	// End of index business ------------------------------------------------------------
+
+	evalDeferred("poseLibRefreshPoseList(\"\")");
+	print "poseLib: Saved preferences!\n";
+	}
+
+global proc string poseLibCheckIfIndexExists(int $fileId)
+	/* Find if there's an index order keyword at the start of the pose file
+	and position the file pointer just before the first attribute name. */
+	{
+	// Check if the index order keyword exists.
+	string $checkForIndex = `fgetword $fileId`;
+	string $result = "";
+	// If it does, then read one more word (the index itself), so that the next word will be the attribute name
+	if ( $checkForIndex == "poseLibIndexOrder" )
+		$result = `fgetword $fileId`;
+	// If not, then rewind the file and skip the first line (always empty).
+	else
+		{
+		frewind $fileId;
+		string $controlName = `fgetline $fileId`;
+		}
+	return $result;
+	}
+
+global proc poseLibChooseTextEditor()
+	/* Set the text editor to be used when editing poses. */
+	{
+	// get the text-editor program
+	global string $poseLibTextEditor;
+	string $result = `fileDialog -dm "*.exe"`;
+
+	if ( $result != "" )
+		{
+		text -e -ann $result -l $result poseLibTextEditorOptionText;
+		$poseLibTextEditor = $result;
+		}
+	else
+		text -e -ann $poseLibTextEditor -l $poseLibTextEditor poseLibTextEditorOptionText;
+
+	// save the prefs
+	poseLibSavePrefs;
+	}
+
+global proc poseLibGetNamepaceFromSelection()
+	{
+	// Set the namespace based on the current selection.
+	string $selection[] = `ls -sl`;
+	string $buffer[];
+	int $numTokens = `tokenize $selection[0] ":" $buffer`; //print ($buffer[`size $buffer`-1]);
+	string $namespace = $buffer[0];
+
+	textField -e -text $namespace namespaceTextFieldTF;
+	}
+
+global proc poseLibBrowseForFolder(string $startFolder)
+	{
+	global string $poseLibBasePath;
+
+	workspace -dir $startFolder;
+
+	fileBrowserDialog -mode 4
+		-fileCommand ( "poseLibBrowseForFolderCallback \"" + $poseLibBasePath + "\"" )
+		-actionName "Choose New poseLib Folder:";
+	}
+
+global proc poseLibBrowseForFolderCallback(string $poseLibBookmarkDoubleClicked, string $poseLibFolderResult, string $type)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibPathsBookmarks[];
+
+	string $checkName = `match "[$%\\#@.;?!\"\'\`]" $poseLibFolderResult`;
+
+	if ( `size $checkName` )
+		error "poseLib: The poseLib path can NOT include any space (\" \") nor either of these: \" $ % \\ # @ . ; ? ! \' \`";
+
+	if ( $poseLibFolderResult != $poseLibBasePath )
+		{
+		string $askToCopyOldPoseLibFolder = `confirmDialog
+			-title "New poseLib Folder"
+			-message ( "Do you want to copy any existing character(s) and categories to the new directory?\n\n(Note: You will have to manually delete the old poseLib folder. This is a safety mesure!)" ) -ma "center"
+			-button "Yes" -button "No, just change the path" -button "Cancel"
+			-defaultButton "Yes" -cancelButton "Cancel"
+			-dismissString "No"`;
+
+		string $oldPoseLibDefaultPath = $poseLibBasePath; //print ("\nChosen OS path = " + $poseLibFolderResult );
+
+		if ( `checkBox -q -v poseLibFolderOptionCB` )
+			{
+			$poseLibBasePath = $poseLibFolderResult + "/poseLib"; //print ("\nAdding \"/poseLib\" to OS path = " + $poseLibFolderResult + "/poseLib");
+			}
+		else
+			$poseLibBasePath = $poseLibFolderResult;
+
+		if ( $askToCopyOldPoseLibFolder == "Yes" )
+			{
+			text -e -l $poseLibBasePath poseLibFolderOptionText;
+
+			string $tmp = toNativePath( $oldPoseLibDefaultPath );
+			string $tmp2 = toNativePath( $poseLibBasePath );
+
+			if ( `about -macOS` || `about -linux` )
+				system( "cp -R " + $tmp + " " + $tmp2 );
+			else
+				system( "xcopy " + $tmp + " " + $tmp2 + "/s /e /i" );
+			}
+
+		else if ( $askToCopyOldPoseLibFolder == "No, just change the path" )
+			text -e -l $poseLibBasePath poseLibFolderOptionText;
+
+		// If the user didn't simply double-click on a bookmark, then add the location to the bookmark list.
+		if ( $poseLibBookmarkDoubleClicked != "yes" )
+			{
+			textScrollList -e -appendPosition 1 $poseLibBasePath poseLibDirectoriesBookmarksTSL;
+			$poseLibPathsBookmarks = `textScrollList -q -ai poseLibDirectoriesBookmarksTSL`; //print ( "Updating $poseLibPathsBookmarks[zero] = " + $poseLibPathsBookmarks[0] + "\n");
+			}
+
+		if ( $askToCopyOldPoseLibFolder != "Cancel" )
+			{
+			poseLibSavePrefs;
+			evalDeferred("poseLib");
+			}
+
+		print ( "poseLib: Successfuly changed default path to \"" + $poseLibBasePath + "\"." );
+		}
+	}
+
+// Poses creation ---------------
+
+global proc poseLibCreateNewPose(string $ifTextfieldNotEmpty)
+	{
+	global int $poseLibIconsSize[];
+	global int $poseLibUseTexturesForIconPreview;
+	global float $poseLibCaptureCameraBGColor[];
+
+	// ------------------------------
+	// 1- Create snapshot window UI
+	// ------------------------------
+	if ( `window -exists poseLibCreateNewPoseWindow` )
+		deleteUI poseLibCreateNewPoseWindow;
+
+	string $selection[] = `ls -sl`;
+	//string $captureModelPanel = "";
+
+	window -rtf true -menuBar false -title "Create New Pose" -w 10 -h 10 -te 300 -le 500 poseLibCreateNewPoseWindow;
+		columnLayout -adjustableColumn true poseLibMainColumn;
+			// The way this works is we have 4 columns:
+			// 1 is for the capture camera
+			// 2 is for the glRender camera
+			// 3 is for the icon image
+			// 4 is for the buttons
+			rowLayout -nc 4 -cw4 106 1 1 150 iconCaptureRL;
+
+				// Frame for the capture camera.
+				//frameLayout -borderStyle "etchedOut" -cl false -cll false -m on -labelVisible false -width ($poseLibIconsSize[0] + 4) -height ($poseLibIconsSize[1] + 4) captureCamFrame;
+				frameLayout -borderStyle "etchedOut" -cl false -cll false -m on -labelVisible false -width 100 -height 100 captureCamFrame;
+					if ( !`modelPanel -q -ex plCaptureMP` )
+						modelPanel -parent captureCamFrame -mbv off -cam poseLibCaptureCamera plCaptureMP;
+					else
+						modelPanel -e -parent captureCamFrame -mbv off -cam poseLibCaptureCamera plCaptureMP;
+
+					string $barLayout = `modelPanel -q -barLayout plCaptureMP`;
+					if ("" != $barLayout && `frameLayout -q -exists $barLayout`)
+						{
+						frameLayout -e -collapse 1 $barLayout;
+						//control -e -m off $barLayout;
+						}
+
+					string $modelEditor = `modelPanel -q -me plCaptureMP`;
+					modelEditor -e -da "smoothShaded" -grid off -hud off -manipulators off -displayTextures on -wos off -dl "default" $modelEditor;
+
+					setParent ..;
+				setParent ..;
+
+				// Frame for the glRender camera.
+				frameLayout -borderStyle "etchedOut" -cl false -cll false -m off -labelVisible false /*-width ($poseLibIconsSize[0] + 4) -height ($poseLibIconsSize[1] + 4)*/ glRenderFrame;
+					glRenderEditor hardwareRenderViewBis;
+				setParent ..;
+
+				// Buttons.
+				frameLayout -borderStyle "etchedOut" -labelVisible false -m on -mw 4 -width 190 buttonsFrame;
+					columnLayout -adjustableColumn true createNewPoseButtonsCL;
+						separator -style "none" -h 2;
+
+							textFieldGrp -cw2 40 134 -l "Name:" -tx $ifTextfieldNotEmpty setNameField;
+							separator -style "none" -h 2;
+							checkBox -l "Use Textures" -v $poseLibUseTexturesForIconPreview -onc "setAttr defaultHardwareRenderGlobals.texturing 1; $poseLibUseTexturesForIconPreview = 1; optionVar -intValue useTexturesForIconPreviewStatus `checkBox -q -v poseLibUseTexturesForIconPreviewCB`" -ofc "setAttr defaultHardwareRenderGlobals.texturing 0; $poseLibUseTexturesForIconPreview = 0; optionVar -intValue useTexturesForIconPreviewStatus `checkBox -q -v poseLibUseTexturesForIconPreviewCB`" poseLibUseTexturesForIconPreviewCB;
+							separator -style "none" -h 2;
+							button -label "Create Pose" -en on -c "poseLibDoIconPreview(); evalDeferred(\"poseLibDoCreateNewPose\")" createPoseButton;
+
+							separator -style "none" -h 2;
+
+							button -label " Cancel " -c "deleteUI poseLibCreateNewPoseWindow" -h 23;
+						setParent ..;
+					setParent ..;
+				setParent ..;
+			setParent ..;
+
+	// -------------------------------------------------
+	// 2- Generate a unique camera using current view.
+	// -------------------------------------------------
+	if ( !`objExists poseLibCaptureCamera` )
+		{
+		string $CurrentPanel  = `getPanel -withFocus`;
+
+		if (`getPanel -to $CurrentPanel` != "modelPanel")	// make sure we've got a camera
+			{
+			string $visPanel[] = `getPanel -vis`;	// get all visible Panels
+
+			string $n;
+			for ($n in $visPanel)
+				{
+				string $modelPanels[] = `getPanel -type modelPanel`;	// get all modelPanels
+
+				if ( (`getPanel -to $n`) == "modelPanel")
+					{
+					setFocus($n);
+					$CurrentPanel = $n;
+					break;
+					}
+				}
+			}
+
+		string $CurrentCamera = `modelPanel -q -cam  $CurrentPanel`;
+		float $campos[] = `camera -q -position $CurrentCamera`;
+		float $camrot[] = `camera -q -rotation $CurrentCamera`;
+		float $camwup[] = `camera -q -worldUp  $CurrentCamera`;
+		float $camcoi   = `camera -q -coi      $CurrentCamera`;
+		float $focal    = `camera -q -fl       $CurrentCamera`;
+
+		string $camShapeNode = `createNode "camera"`;
+		string $camTopNode[] = `listRelatives -p $camShapeNode`;
+		rename $camTopNode[0] "poseLibCaptureCamera";
+		hide "poseLibCaptureCamera";
+
+		int $focalLengthTmp = 200;
+		float $nearClipTmp = .1;
+		float $farClipTmp = 10000;
+
+		if ( `optionVar -exists captureCameraFocalLengthStatus` )
+			$focalLengthTmp = `optionVar -q captureCameraFocalLengthStatus`;
+
+		if ( `optionVar -exists captureCameraNearClipStatus` )
+			$nearClipTmp = `optionVar -q captureCameraNearClipStatus`;
+
+		if ( `optionVar -exists captureCameraFarClipStatus` )
+			$farClipTmp = `optionVar -q captureCameraFarClipStatus`;
+
+		camera -edit
+			-centerOfInterest $camcoi
+			-position $campos[0] $campos[1] $campos[2]
+			-rotation $camrot[0] $camrot[1] $camrot[2]
+			-worldUp  $camwup[0] $camwup[1] $camwup[2]
+			-fl $focalLengthTmp
+			-nearClipPlane $nearClipTmp
+			-farClipPlane $farClipTmp
+		poseLibCaptureCamera;
+		}
+
+	// Look through the poseLib camera.
+	modelEditor -e -camera "poseLibCaptureCamera" $modelEditor;
+
+	// ---------------------------------------------
+	// 3- Hardware render looks thru snapshot camera.
+	// ---------------------------------------------
+	glRenderEditor -e -lt poseLibCaptureCamera hardwareRenderViewBis;
+
+	// ---------------------------------------------
+	// 4- Setup hardware render options.
+	// ---------------------------------------------
+	// Make sure we're not on a negative frame number.
+	int $frame = `currentTime -q`;
+
+	if ( $frame < 0 )
+		{
+		currentTime 1;
+		$frame = 1;
+		warning "==> poseLib doesn't work with negative frame numbers (e.g.: Current time frame has to be 1 or higher).";
+		}
+
+	// Unlock start and end frame first (as sometimes they get locked (!?) ).
+	setAttr -l false "defaultHardwareRenderGlobals.startFrame";
+	setAttr -l false "defaultHardwareRenderGlobals.endFrame";
+	setAttr -l false "defaultHardwareRenderGlobals.byFrame";
+
+	setAttr "defaultHardwareRenderGlobals.startFrame"  $frame;
+	setAttr "defaultHardwareRenderGlobals.endFrame"    $frame;
+	setAttr "defaultHardwareRenderGlobals.extension"   1;		// 1=xxx.#.ext
+	setAttr "defaultHardwareRenderGlobals.backgroundColor" -type double3 0.75 0.75 0.75;
+
+	// Use textures or not?
+	if ( $poseLibUseTexturesForIconPreview == 1 )
+		setAttr "defaultHardwareRenderGlobals.texturing" 1;
+	else
+		setAttr "defaultHardwareRenderGlobals.texturing" 0;
+
+	setAttr "defaultHardwareRenderGlobals.imageFormat" 20;	// bmp=20; jpg=8; tiff=3
+	setAttr "defaultHardwareRenderGlobals.resolution" -type "string" "90x68 90 68 1.33";
+
+	// This is because the first time the window appears, everything gets deselected (?!!).
+	select -r $selection;
+	showWindow poseLibCreateNewPoseWindow;
+	window -e -w 200 -h 100 poseLibCreateNewPoseWindow;
+	print "Ready to capture icon...";
+	}
+
+global proc poseLibDoIconPreview()
+	{
+	global int $poseLibIconsSize[];
+	global float $poseLibCaptureCameraBGColor[];
+	global string $poseLibIconFormat;
+
+	// Get the tmp icon path.
+	string $ws = `workspace -q -fullName`; //print ( "\nProject = " + $ws );
+	string $imagesDir = `workspace -q -renderTypeEntry "images"`; //print ( "\nImages directory = " + $imagesDir);
+	string $currentImagePath = "";
+
+	// This is in the case the "images" directory path is an absolute path (e.g.: C:/blah...).
+	string $buffer[];
+	int $numTokens = `tokenize $imagesDir ":" $buffer`; //print ($buffer[`size $buffer`-1]);
+
+	// The path is absolute...
+	if ( $buffer[1] == "" )
+		{
+		$currentImagePath = $ws + "/" + $imagesDir + "/"; //print ( "\n$currentImagePath = " + $currentImagePath );
+		}
+	else
+		{
+		// The path is relative...
+		$currentImagePath = $imagesDir + "/"; //print ( "\n$currentImagePath = " + $currentImagePath );
+		}
+
+	// Set the BG color.
+	float $currentBGColor[] = `displayRGBColor -q background`;
+	displayRGBColor "background" $poseLibCaptureCameraBGColor[0] $poseLibCaptureCameraBGColor[1] $poseLibCaptureCameraBGColor[2];
+
+	setAttr -type "string" defaultHardwareRenderGlobals.filename "iconTmp";
+	setAttr -type "string" defaultHardwareRenderGlobals.resolution ( $poseLibIconsSize[0] + "x" + $poseLibIconsSize[1] + " " + $poseLibIconsSize[0] + " " + $poseLibIconsSize[1] + " 1.0");
+
+	//frameLayout -e -m on -width ($poseLibIconsSize[0] + 4) -height ($poseLibIconsSize[1] + 4) captureCamFrame;
+	frameLayout -e -m on -width ($poseLibIconsSize[0] + 4) -height ($poseLibIconsSize[1] + 4) glRenderFrame;
+
+	// Do the render.
+	int $frameNumber = `currentTime -q`;
+	glRender -e -fs $frameNumber -vp 32 32 1.0;
+	glRender -e -is 32 32 1.0 -accumBufferPasses 4 -ds "smoothShaded" -transformIcons 0 -edgeSmoothness 1.0 -aam "gaussian" -rs hardwareRenderViewBis;
+
+	/*
+	frameLayout -e -cl false -cll false -m on -labelVisible false -width ($poseLibIconsSize[0]) -height ($poseLibIconsSize[1]) imageCaptureFrame;
+	frameLayout -e -width 1 -cl false -cll false -m on glRenderFrame;
+	rowLayout -e -nc 4 -cw4 1 1 ($poseLibIconsSize[0]+4) 150 iconCaptureRL;
+
+	// Display the temp icon.
+	$iconTmp = $currentImagePath + "iconTmp." + `currentTime -q` + $poseLibIconFormat; print ( "\n$iconTmp = " + $iconTmp );
+	evalDeferred ("image -e -m on -w $poseLibIconsSize[0] -h $poseLibIconsSize[1] -image \"" + $iconTmp + "\" capturedI");
+	*/
+	// Put back the background color the way it was.
+	displayRGBColor "background" $currentBGColor[0] $currentBGColor[1] $currentBGColor[2];
+	/*
+	// Finally, resize the capture window.
+	window -e -w ($poseLibIconsSize[0] + `frameLayout -q -width buttonsFrame` + 10) poseLibCreateNewPoseWindow;
+	image -e -m on -w $poseLibIconsSize[0] -h $poseLibIconsSize[1] -image $iconTmp capturedI;
+	*/
+	print "\nIcon preview done!";
+	}
+
+global proc poseLibDoCreateNewPose()
+	{
+	global string $poseLibBasePath;
+	global string $poseLibIconFormat;
+	global int $poseLibIconsSize[];
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+	string $selection[] = `ls -l -sl`;
+	string $theAttributes[] = {};
+
+	if ( size($selection) == 0 )
+		{
+		warning " ---> Please select the character's controls first!\n";
+		return;
+		}
+
+	//string $iconNameTmp;
+	frameLayout -e -m off -width ($poseLibIconsSize[0] + 4) -height ($poseLibIconsSize[1] + 4) glRenderFrame;
+
+	//----------------------
+	// 1- Get pose name.
+	//----------------------
+	string $nameTmp = `textFieldGrp -q -tx setNameField`;
+	string $name = `strip $nameTmp`;
+	string $checkName = `match "[$%\\/#@.:;?!\"\'\`]" $name`;
+
+	if ( (`size $checkName` > 0) || (`size $name` == 0) )
+		{
+		error "You must enter a valid name, without any of these: \" $ % \\ / # @ . :; ? ! \' \`";
+		return;
+		}
+
+	//---------------------------------
+	// 2- Check if file already exists.
+	//---------------------------------
+	string $newPoseFile = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $name;
+
+	if ( `file -q -ex $newPoseFile` )
+		{
+		string $result = `confirmDialog
+			-parent poseLibWindow
+			-title "Confirm Save Pose"
+			-message ( "Overwrite the existing pose: " + $newPoseFile + " ?" ) -ma "center"
+			-button "Yes" -button "No"
+			-defaultButton "Yes" -cancelButton "No"
+			-dismissString "No"`;
+
+		if ($result == "No")
+			{
+			error "---> The pose has NOT been saved!!!";
+			return;
+			}
+		}
+
+	//---------------------------------
+	// 3- Write down pose file.
+	//---------------------------------
+	int $fileId=`fopen $newPoseFile "w"`;
+
+	for ($i=0;$i<`size $selection`;$i++)
+		{
+		// Get the list of attributes to save.
+		select -r $selection[$i];
+		$theAttributes = `listAttr -k -m -s`;//print ($selection[$i] + "\n");
+
+		// Get the short name of the control.
+		string $selection[] = `ls -l -sl`;
+		string $buffer1[];
+		int $numTokens = `tokenize $selection[0] "|" $buffer1`; //print ($buffer1[`size $buffer1`-1]);
+		string $controlName = $buffer1[`size $buffer1`-1]; //print ("\n$controlName = " + $controlName);
+
+		// Check which type of selection we got.
+		string $showType[] = `ls -st -sl`; //print ( $selection[$i] + "is of type:" + $showType[1] + "\n");
+
+		// Are we dealing with a blendshape?
+		if ( $showType[1] == "blendShape" )
+			{
+			// Write down the lines in the pose file.
+			fprint $fileId ( "\n" + $controlName + " envelope " + `blendShape -q -envelope` );
+			string $listOfTargets[] = `listAttr -k -m $selection[0]`; //print "\n$listOfTargets: \n"; print $listOfTargets;
+
+			for ($target in $listOfTargets)
+				{
+				fprint $fileId ( "\n" + $controlName + " " + $target + " " + (`getAttr ($selection[0] + "." + $target)`) );
+				}
+			}
+
+		// Are we dealing with a character set?
+		else if ( $showType[1] == "character" )
+			{
+			string $objectsPlusAttributes[] = `sets -q`;
+			//print $objectsPlusAttributes;
+
+			for ($attribute in $objectsPlusAttributes)
+				{
+				string $bufferTmp[];
+				$numTokens = `tokenize $attribute "." $bufferTmp`; //print ($buffer2[`size $buffer2`-1]);
+
+				// Remove the namespace if it exists.
+				string $bufferNameTmp[];
+				$numTokens = `tokenize $bufferTmp[0] ":" $bufferNameTmp`; //print ($buffer2[`size $buffer2`-1]);
+
+				fprint $fileId ( "\n" + $bufferNameTmp[1] + " " + $bufferTmp[1] + " " + (`getAttr ($bufferTmp[0]+"."+$bufferTmp[1])`) );//print ( "\n" + $selection[$i] + "." + $theAttributes[$k] );
+				}
+			}
+		else
+			{
+			// Write down the line in the pose file.
+			for ($k=0;$k<`size $theAttributes`;$k++)
+				{
+				fprint $fileId ( "\n" + $controlName + " " + $theAttributes[$k] + " " + (`getAttr ($selection[0]+"."+$theAttributes[$k])`) );//print ( "\n" + $selection[$i] + "." + $theAttributes[$k] );
+				}
+			}
+		}
+	fclose $fileId;
+
+	//--------------------------------------------------------------------
+	// 4- Copy icon file from maya default "image" dir to the poselib dir.
+	//--------------------------------------------------------------------
+	//string $currentImagePath = `workspace -q -rd` + "images/"; print ( "\n$currentImagePath = " + $currentImagePath );
+	string $ws = `workspace -q -fullName`; //print ( "\n$ws = " + $ws );
+	string $imagesDir = `workspace -q -renderTypeEntry "images"`; //print ( "\n$imagesDir = " + $imagesDir );
+	string $currentImagePath = "";
+
+	// This is in the case the "images" directory path is an absolute path (e.g.: C:/blah...).
+	string $buffer[];
+	int $numTokens = `tokenize $imagesDir ":" $buffer`; //print ($buffer[`size $buffer`-1]);
+
+	if ( $buffer[1] == "" )
+		{
+		$currentImagePath = $ws + "/" + $imagesDir + "/"; //print ( "\n$currentImagePath = " + $currentImagePath );
+		}
+	else
+		{
+		$currentImagePath = $imagesDir + "/"; //print ( "\n$currentImagePath = " + $currentImagePath );
+		}
+	// Temp icon created by Maya
+	int $frameNumber = `currentTime -q`;
+	string $iconTmp = $currentImagePath + "iconTmp." + $frameNumber + $poseLibIconFormat;
+	string $newPoseIconFile = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $name + $poseLibIconFormat; //print ("\n$newPoseIconFile = " + $newPoseIconFile );
+
+	// Copy the icon file to its destination.
+	sysFile -copy $newPoseIconFile $iconTmp;
+
+	//---------------------------------
+	// 5- Clean-up behind us.
+	//---------------------------------
+	clear $theAttributes;
+	//sysFile -delete $iconTmp;
+
+	// Update the poses.
+	poseLibRefreshPoseList("");
+
+	deleteUI poseLibCreateNewPoseWindow;
+	select -r $selection;
+	print ( "poseLib: Created new pose \"" + $name + "\"\n" );
+	}
+
+global proc poseLibResetView()
+	{
+	string $getTextfield = `textFieldGrp -q -tx setNameField`; //print ("\n$getTextfield = " + $getTextfield);
+	poseLibCreateNewPose($getTextfield);
+	}
+
+// Poses files manipulation -------------
+
+global proc poseLibRenamePose(int $controlNumber)
+	{
+	if (`window -exists poseLibRenamePoseWindow` )
+		deleteUI poseLibRenamePoseWindow;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+
+	window -tlb off -rtf on -w 30 -h 30 -title "Rename Pose" poseLibRenamePoseWindow;
+		columnLayout -adj true;
+			textFieldGrp -cw2 50 150 -l "Name" -cc ("poseLibDoRenamePose ( \"" + $poseName + "\" )") -tx $poseName setNameField;
+			button -w 100 -l "Close" -al "center" -c "deleteUI poseLibRenamePoseWindow";
+
+	if ( $poseName != "" )
+		{
+		showWindow poseLibRenamePoseWindow;
+		int $poseLibWindowPos[] = `window -q -topLeftCorner poseLibWindow`; //print ("\nleft=" + $poseLibWindowPos[1] );
+		window -e -tlc ($poseLibWindowPos[0]+50) ($poseLibWindowPos[1]+50) poseLibRenamePoseWindow;
+		}
+	else
+		warning " ---> Please select a pose first!\n";
+	}
+
+global proc poseLibDoRenamePose(string $nameTmp)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibIconFormat;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+	string $softPoseToRename = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $nameTmp;
+	string $newName = `textFieldGrp -q -tx setNameField`;
+	string $newPoseFile = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $newName;
+
+	string $result = "";
+
+	if ( `file -q -exists $newPoseFile` )
+		{
+		setFocus plMainFL;
+
+		$result = `confirmDialog
+			-parent poseLibWindow
+			-title "Confirm Rename Pose"
+			-message "There is already a pose with this name!" -ma "center"
+			-button "Overwrite It" -button "Cancel"
+			-defaultButton "Overwrite It" -cancelButton "Cancel"
+			-dismissString "Cancel"`;
+		}
+
+	if ($result == "Overwrite It" || $result == "" )
+		{
+		sysFile -rename ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $newName) $softPoseToRename; //print ( "\noldName= " + $nameTmp + "\nnewName= " + $newName );
+
+		string $softPoseIconToRename = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $nameTmp + $poseLibIconFormat;
+		sysFile -rename ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $newName + $poseLibIconFormat) $softPoseIconToRename;
+		evalDeferred("poseLibRefreshPoseList(\"\")");
+		print ( "poseLib: Renamed pose \"" + $nameTmp + "\" to \"" + $newName + "\"\n" );
+		}
+
+	//deleteUI poseLibRenamePoseWindow;
+	}
+
+global proc poseLibMoveCopyUpdateMenu(string $defaultPathTmp)
+	{
+	string $characterName = `optionMenu -q -v characterChoiceOMtmp`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOMtmp`;
+	string $allCategoryDirsTmp[] = `getFileList -folder ($defaultPathTmp + $characterName + "/")`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+	string $allCategoryDirs[] = {};
+	int $numberOfCategoriesTmp = `optionMenu -q -ni categoryChoiceOMtmp`;
+
+	int $i;
+	for ($i=0;$i<`size $allCategoryDirsTmp`;$i++)
+		{
+		if ( (`match ".deleted" $allCategoryDirsTmp[$i]` != ".deleted") && (`match ".DS_Store" $allCategoryDirsTmp[$i]` != ".DS_Store") )
+			$allCategoryDirs = stringArrayCatenate ( $allCategoryDirs, { $allCategoryDirsTmp[$i] } );
+		}
+
+	for ($i=0;$i<$numberOfCategoriesTmp;$i++)
+		{
+		deleteUI ("categoryMItmp_" + $i + "_");
+		}
+
+	optionMenu -e categoryChoiceOMtmp;
+		for ($i=0;$i<`size $allCategoryDirs`;$i++)
+			{
+			menuItem -label $allCategoryDirs[$i] -p categoryChoiceOMtmp categoryMItmp[$i]; //print ("\nlabel = " + $poseLibCategoryList[$i] + " control = categoryMI_" + $i + "_" );
+			}
+
+	if ( `optionMenu -q -ni categoryChoiceOMtmp` > 1 )
+		{
+		optionMenu -e -sl 2 categoryChoiceOMtmp;
+		optionMenu -e -sl 1 categoryChoiceOMtmp;
+		}
+	}
+
+global proc poseLibMovePose(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibCharacterList[];
+	global string $poseLibCategoryList[];
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+
+	if ( $poseName != "" )
+		{
+		if (`window -exists poseLibMovePoseWindow` )
+			deleteUI poseLibMovePoseWindow;
+
+		window -tlb off -w 300 -h 85 -title ("Move Pose -> " + $poseName) poseLibMovePoseWindow;
+			columnLayout;
+			text -al "center" "         Where do you want to move this pose?";
+			separator -style "in" -w 305 -h 10;
+			setParent..;
+			rowLayout -nc 2 -cw2 150 160;
+
+			optionMenu -h 29 -w 150 -label " Character:" -cc "poseLibMoveCopyUpdateMenu ( ($poseLibBasePath + \"/\") )" characterChoiceOMtmp;
+
+			string $c;
+			for ( $c in $poseLibCharacterList )
+				{
+				menuItem -label $c;
+				}
+
+			optionMenu -h 29 -w 160 -label " Category:" categoryChoiceOMtmp;
+
+			int $i;
+			for ($i=0;$i<`size $poseLibCategoryList`;$i++)
+				{
+				menuItem -label $poseLibCategoryList[$i] -p categoryChoiceOMtmp categoryMItmp[$i];
+				}
+			setParent..	;
+
+			optionMenu -e -v (`optionMenu -q -v characterChoiceOM`) characterChoiceOMtmp;
+			optionMenu -e -v (`optionMenu -q -v categoryChoiceOM`) categoryChoiceOMtmp;
+
+			rowLayout -nc 2 -cw2 150 163;
+				button -w 147 -l "                 Apply" -al "left" -c ("poseLibDoMovePose ( \"" + $poseName + "\" )");
+				button -w 154 -l "                  Cancel" -al "left" -c "deleteUI poseLibMovePoseWindow";
+
+		showWindow poseLibMovePoseWindow;
+		int $poseLibWindowPos[] = `window -q -topLeftCorner poseLibWindow`; //print ("\nleft=" + $poseLibWindowPos[1] );
+		window -e -tlc ($poseLibWindowPos[0]+50) ($poseLibWindowPos[1]+50) poseLibMovePoseWindow;
+		}
+	else
+		warning " ---> Please select a pose first!\n";
+	}
+
+global proc poseLibDoMovePose(string $poseName)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibIconFormat;
+	string $originCharacterName = `optionMenu -q -v characterChoiceOM`; //print ( "\n $originCharacterName = " + $originCharacterName );
+	string $originCategoryName = `optionMenu -q -v categoryChoiceOM`; //print ( "\n $originCategoryName = " + $originCategoryName );
+	string $destinationCharacterName = `optionMenu -q -v characterChoiceOMtmp`; //print ( "\n $destinationCharacterName = " + $destinationCharacterName );
+	string $destinationCategoryName = `optionMenu -q -v categoryChoiceOMtmp`; //print ( "\n $destinationCategoryName = " + $destinationCategoryName );
+
+	if ( (($destinationCharacterName == $originCharacterName) && ($destinationCategoryName != $originCategoryName))
+		|| ($destinationCharacterName != $originCharacterName) )
+		{
+		string $softPoseOrigin = $poseLibBasePath + "/" + $originCharacterName + "/" + $originCategoryName + "/" + $poseName;
+		string $softPoseDestination = $poseLibBasePath + "/" + $destinationCharacterName + "/" + $destinationCategoryName + "/" + $poseName;
+
+		string $softPoseIconOrigin = $poseLibBasePath + "/" + $originCharacterName + "/" + $originCategoryName + "/" + $poseName + $poseLibIconFormat;
+		string $softPoseIconDestination = $poseLibBasePath + "/" + $destinationCharacterName + "/" + $destinationCategoryName + "/" + $poseName + $poseLibIconFormat;
+
+		sysFile -move $softPoseDestination $softPoseOrigin; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+		sysFile -move $softPoseIconDestination $softPoseIconOrigin; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		deleteUI poseLibMovePoseWindow;
+		poseLibRefreshPoseList("");
+		print ( "poseLib: Moved selected pose to: " + $destinationCharacterName + "/" + $destinationCategoryName +"\n");
+		}
+	else
+		warning " ---> The selected pose already belongs to this character AND category!\n";
+	}
+
+global proc poseLibDeletePose(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibIconFormat;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $confirmDeleteWindow = "";
+
+	setFocus plMainFL;
+	$confirmDeleteWindow = `confirmDialog -p poseLibWindow -title "Confirm Delete Pose" -message ("Are you sure you want to delete: \"" + $poseName + "\" ?") -button "Yes" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel"`;
+
+	if ( $confirmDeleteWindow == "Yes" )
+		{
+		string $characterName = `optionMenu -q -v characterChoiceOM`;
+		string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+		string $softPoseToDelete = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName;
+		string $softPoseIconToDelete = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName + $poseLibIconFormat;
+
+		// sysFile -delete $softPoseToDelete; print ("\n$Deleted pose: " + $softPoseToDelete);
+		// --> Well, actually let's make a backup of the file rather than delete it.
+		sysFile -rename ($softPoseToDelete + ".deleted") $softPoseToDelete; print ("poseLib: Deleted pose: " + $softPoseToDelete +"\n");
+
+		if ( `filetest -r $softPoseIconToDelete` )
+			sysFile -delete $softPoseIconToDelete; //print ("\n$Deleted pose: " + $softPoseToDelete);
+
+		poseLibRefreshPoseList("");
+		}
+
+	else
+		print "poseLib: Did nothing...";
+	}
+
+global proc poseLibReplacePose(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $confirmDeleteWindow = "";
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+	string $selection[] = `ls -l -sl`;
+	string $theAttributes[] = {};
+
+	if ( size($selection) == 0 )
+		{
+		warning " ---> Please select the character's controls first!\n";
+		return;
+		}
+
+	//----------------------
+	// 1- Get pose name.
+	//----------------------
+	setFocus plMainFL;
+	string $confirmReplaceWindow = `confirmDialog -p poseLibWindow -title "Confirm Replace Pose" -message ("Are you sure you want to replace: \"" + $poseName + "\" ?") -button "Yes" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel"`;
+
+	if ( $confirmReplaceWindow == "Yes" )
+		{
+		//------------------------------------------------------
+		// 2- Write down pose file (no need to change the icon).
+		//------------------------------------------------------
+		string $newPoseFile = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName;
+
+		// do a backup before messing with the pose (you never know)
+		sysFile -copy ($newPoseFile + ".deleted") $newPoseFile; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		// Get the existing index order.
+		int $fileId=`fopen $newPoseFile "r"`;
+		string $getIndex = poseLibCheckIfIndexExists($fileId); print ("$getIndex = " + $getIndex);
+		// If there's no index order, set it to 100.
+		if ( $getIndex == "" )
+			$getIndex = 100;
+		fclose $fileId;
+
+		int $fileId=`fopen $newPoseFile "w"`;
+		fprint $fileId ("\nposeLibIndexOrder " + $getIndex);
+
+		int $i, $k;
+		for ($i=0;$i<`size $selection`;$i++)
+			{
+			// Get the list of attributes to save.
+			select -r $selection[$i];
+			$theAttributes = `listAttr -k -m -s`;//print ($selection[$i] + "\n");
+
+			// Get the short name of the control.
+			string $selection[] = `ls -l -sl`;
+			string $buffer1[];
+			int $numTokens = `tokenize $selection[0] "|" $buffer1`; //print ($buffer1[`size $buffer1`-1]);
+			string $shortNameTmp = $buffer1[`size $buffer1`-1];
+
+			// Check if the control has a namespace...
+			string $buffer2[];
+			$numTokens = `tokenize $shortNameTmp ":" $buffer2`; //print ($buffer2[`size $buffer2`-1]);
+
+			// ... And remove it if it does.
+			string $controlName = ($buffer2[`size $buffer2`-1]); //print ("\n$controlName = " + $controlName);
+
+			// Are we dealing with a blendshape?
+			string $showType[] = `ls -st -sl`;
+
+			if ( $showType[1] == "blendShape" )
+				{
+				// Write down the lines in the pose file.
+				fprint $fileId ( "\n" + $controlName + " envelope " + `blendShape -q -envelope` );
+				string $listOfTargets[] = `listAttr -k -m $selection[0]`;
+
+				for ($target in $listOfTargets)
+					{
+					fprint $fileId ( "\n" + $controlName + " " + $target + " " + (`getAttr ($selection[0] + "." + $target)`) );
+					}
+				}
+
+			else
+				{
+				// Write down the line in the pose file.
+				for ($k=0;$k<`size $theAttributes`;$k++)
+					{
+					fprint $fileId ( "\n" + $controlName + " " + $theAttributes[$k] + " " + (`getAttr ($selection[0]+"."+$theAttributes[$k])`) );//print ( "\n" + $selection[$i] + "." + $theAttributes[$k] );
+					}
+				}
+			}
+		fclose $fileId;
+
+		//-----------------------------
+		// 3- Clean-up behind us.
+		//-----------------------------
+		clear $theAttributes;
+		select -r $selection;
+
+		poseLibRefreshPoseList("");
+		print ( "poseLib: Replaced pose \"" + $poseName + "\"\n" );
+		}
+
+	else
+		print "poseLib: Did nothing -> Aborted by user.";
+	}
+
+// Poses right-click menu -------------
+
+global proc poseLibSelectPoseControls(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+	string $actualControlName[] = {};
+	string $controlsToSelect[] = {};
+	string $sel[] = `ls -sl`;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName; //print ("\n$poseFilePath="+$poseFilePath);
+
+	// ---------------------------------------------------
+	// 1- Read the pose file to get all the control names
+	// ---------------------------------------------------
+	int $fileId=`fopen $poseFilePath "r"`;
+	string $controlName = `fgetline $fileId`;
+
+	poseLibCheckIfIndexExists($fileId);
+
+	string $alreadyDone = "";
+	string $consTmp = "";
+	string $controlsToSelect[] = {};
+	string $array[] = {};
+
+	// Get the namespace of the current selection (based on the first object selected).
+	string $selectionNamespace = "";
+	$tmp = `match "[^:]*$"  $sel[0]`;
+	$selectionNamespace = `substitute $tmp $sel[0] ""`;//print ("\n$selectionNamespace = " + $selectionNamespace);
+
+	// Get the namespace of the current selection (based on the first object selected).
+	string $bufferTmp[];
+	int $numTokens = `tokenize $sel[0] ":" $bufferTmp`; //print ($buffer[`size $buffer`-1]);
+
+	if ( `size $bufferTmp` > 1 && `size $bufferTmp` < 3)
+		$selectionNamespace = $bufferTmp[0];
+	else if ( `size $bufferTmp` >= 3 )
+		$selectionNamespace = $bufferTmp[0] + ":" + $bufferTmp[1];
+
+	if ($selectionNamespace != "")
+		{
+		if (!endsWith($selectionNamespace, ":"))
+			$selectionNamespace = $selectionNamespace + ":";
+		}
+	//print ("\n$selectionNamespace = " + $selectionNamespace);
+
+	string $customNamespace = `textField -q -text namespaceTextFieldTF`;
+	if ($customNamespace != "")
+		{
+		if (!endsWith($customNamespace, ":"))
+			$customNamespace = $customNamespace + ":";
+		}
+	//print ("\n$customNamespace = " + $customNamespace);
+
+	while ( size( $controlName ) > 0 )
+		{
+		$controlName = `fgetword $fileId`; //print $controlName;
+		string $attributeName = `fgetword $fileId`; //print $attributeName;
+		string $attributeValue = `fgetword $fileId`; //print $attributeValue;
+		string $checkTmp = $controlName;
+
+		if ( $checkTmp != $alreadyDone )
+			$controlsToSelect = stringArrayCatenate ( $controlsToSelect, { $controlName } );
+
+		$alreadyDone = $checkTmp;
+		}
+	fclose $fileId;
+
+	// --------------------------
+	// 2- Select the controls
+	// --------------------------
+	string $namespace = "";
+	int $didSomething = 0;
+
+	for ($i=0;$i<`size $controlsToSelect`;$i++)
+		{
+		string $buffer[];
+		int $numTokens = `tokenize $controlsToSelect[$i] ":" $buffer`; //print ($buffer[`size $buffer`-1]);
+
+		// If we're in ref mode, add the namespace to the control name.
+		if ( `radioCollection -q -sl namespaceChoiceRC` == "useSelectionNamespaceRB" )
+			{
+			$namespace = $selectionNamespace; //print ($namespace + "\n");
+
+			if (`checkBox -q -v forceExactNamespaceCB`)
+				$controlsToSelect[$i] = $controlsToSelect[$i];
+			else if ( $sel[0] != "" )
+				$controlsToSelect[$i] = $namespace + $buffer[(size ($buffer)-1)];
+			}
+		else if ( `radioCollection -q -sl namespaceChoiceRC` == "useCustomNamespaceRB" )
+			{
+			$namespace = $customNamespace;
+			$controlsToSelect[$i] = $namespace + $buffer[(size ($buffer)-1)];
+			}
+
+		if ( `objExists $controlsToSelect[$i]` )
+			{
+			select -add $controlsToSelect[$i];
+			$didSomething = 1; //print ("\n$controlsToSelect[$i]=" + $controlsToSelect[$i] );
+			}
+		}
+	//print "\n\n$controlsToSelect:\n"; print $controlsToSelect;
+
+	if ( $didSomething == 0 )
+		warning " ---> Could not find the controls! (check reference mode)\n";
+	else
+		print "poseLib: Selected pose controls done!\n";
+	}
+
+global proc poseLibEditPoseFile(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibTextEditor;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName; //print ("\n$poseFilePath="+$poseFilePath);
+
+	system("start " + $poseLibTextEditor + " " + $poseFilePath);
+	}
+
+global proc poseLibAddReplaceSelectedControls(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName; //print ("\n$poseFilePath="+$poseFilePath);
+
+	string $selection[] = `ls -l -sl`;
+	string $controlsToAdd[] = `ls -l -sl`;
+	string $array[] = {};
+
+	setFocus plMainFL;
+	string $confirmAddControlsWindow;
+	if ( $controlsToAdd[0] != "" )
+		$confirmAddControlsWindow = `confirmDialog -parent poseLibWindow -title "Confirm Add/Replace Control(s)" -message "Are you sure you want to Add/Replace the selected control(s) in this pose?" -button "Yes" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel"`;
+	else
+		warning " ---> Please select controls first!\n";
+
+	// Get control short name and remove potential namespace.
+	string $controlsToAdd[] = `ls -l -sl`;
+
+	int $i;
+	for ($i=0;$i<`size $controlsToAdd`;$i++)
+		{
+		string $buffer[];
+		int $numTokens = `tokenize ($controlsToAdd[$i]) "|:" $buffer`; //print $buffer[`size $buffer` -1];
+
+		$controlsToAdd[$i] = $buffer[`size $buffer` -1];
+		}
+
+	// The way this works is: We create a temporary new pose file, and fill-it up line after
+	// line, while parsing through the original, in order to create the new file (without the undesirable controls)...
+	string $softPoseToTweak = $poseFilePath;
+	string $softNewPosePath = $poseFilePath + ".TMP";
+
+	// First, remove the controls to add/replace (we'll add them at the end of the file)...
+	if ( $confirmAddControlsWindow == "Yes" )
+		{
+		int $fileId1=`fopen $softPoseToTweak "r"`;
+		int $fileId2=`fopen $softNewPosePath "w"`;
+
+		// Do a backup of the pose file before messing with the controls (you never know)...
+		sysFile -copy ($softPoseToTweak + ".deleted") $softPoseToTweak; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		string $controlName = `fgetline $fileId1`; // because 1st line is empty
+
+		// Get the existing index order.
+		string $getIndex = poseLibCheckIfIndexExists($fileId1); print ("$getIndex = " + $getIndex);
+		// If there's no index order, set it to 100.
+		if ( $getIndex == "" )
+			$getIndex = 100;
+		fprint $fileId2 ("\nposeLibIndexOrder " + $getIndex);
+
+		string $previouslyWritten = "";
+		int $didSomething = 0;
+
+		while ( !`feof $fileId1` )
+			{
+			$controlName = `fgetword $fileId1`; //print $controlName;
+			string $attributeName = `fgetword $fileId1`; //print $attributeName;
+			float $attributeValue = `fgetword $fileId1`; //print $attributeValue;
+
+			int $check = 0;
+
+			string $c;
+			for ( $c in $controlsToAdd )
+				{
+				if ( $c == $controlName )
+					{
+					$check = 1;
+
+					if ( $previouslyWritten != $c )
+						{
+						print ("poseLib: Added/Replaced \"" + $c + "\" in \"" + $poseName + "\"\n" );
+						$previouslyWritten = $c;
+						}
+					}
+				}
+
+			if ( $check == 0 )
+				fprint $fileId2 ( "\n" + $controlName + " " + $attributeName + " " + $attributeValue );
+			}
+
+		// ... Now, add the selected controls at the end of the file.
+		for ($i=0;$i<`size $selection`;$i++)
+			{
+			select -r $selection[$i];
+			string $theAttributes[] = `listAttr -k`;
+
+			// Get the short name of the control.
+			string $selection[] = `ls -l -sl`;
+			string $buffer1[];
+			int $numTokens = `tokenize $selection[0] "|" $buffer1`; //print ($buffer1[`size $buffer1`-1]);
+			string $shortNameTmp = $buffer1[`size $buffer1`-1];
+
+			// Check if the control has a namespace...
+			string $buffer2[];
+			$numTokens = `tokenize $shortNameTmp ":" $buffer2`; //print ($buffer2[`size $buffer2`-1]);
+
+			// ... And remove it if it does.
+			string $controlName = ($buffer2[`size $buffer2`-1]); //print ("\n$controlName = " + $controlName);
+
+			// Are we dealing with a blendshape?
+			string $showType[] = `ls -st -sl`; //print ( $selection[$i] + "is of type:" + $showType[1] + "\n");
+
+			if ( $showType[1] == "blendShape" )
+				{
+				// Write down the lines in the pose file.
+				fprint $fileId2 ( "\n" + $controlName + " envelope " + `blendShape -q -envelope` );
+				string $listOfTargets[] = `blendShape -q -t`;
+				fprint $fileId2 ( "\n" + $controlName + " " + $listOfTargets[0] + " " + (`getAttr ($selection[$i] + "." + $listOfTargets[0])`) );
+				$didSomething = 1;
+				}
+
+			else
+				{
+				int $j;
+				for ($j=0;$j<`size $theAttributes`;$j++)
+					{
+					fprint $fileId2 ( "\n" + $controlsToAdd[$i] + " " + $theAttributes[$j] + " " + `getAttr ($selection[$i]+"."+$theAttributes[$j])`);
+					$didSomething = 1;
+					}
+				}
+			}
+
+		fclose $fileId1;
+		fclose $fileId2;
+
+		// Now we delete the original file and rename the copy to take it's place.
+		sysFile -delete $softPoseToTweak; //print ("\n$Deleted pose: " + $softPoseToDelete);
+		sysFile -rename $softPoseToTweak $softNewPosePath; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		select -r $selection;
+
+		if ( $didSomething == 1 )
+			print "poseLib: Selected control(s) have been Added/Replaced in pose! (see script editor for details)\n";
+		else
+			warning "--> Did nothing!\n";
+		}
+	}
+
+global proc poseLibRemoveSelectedControls(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName; //print ("\n$poseFilePath="+$poseFilePath);
+
+	string $controlsToRemove[] = `ls -l -sl`;
+	string $array[] = {};
+
+	string $confirmRemoveControlsWindow;
+	setFocus plMainFL;
+
+	if ( $controlsToRemove[0] != "" )
+		$confirmRemoveControlsWindow = `confirmDialog -parent poseLibWindow -title "Confirm" -message "Are you sure you want to Remove the selected control(s) from this pose?" -button "Yes" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel"`;
+	else
+		warning " ---> Please select controls first!\n";
+
+	// Get control short name and remove potential namespace.
+	string $controlsToRemove[] = `ls -l -sl`;
+
+	int $i;
+	for ($i=0;$i<`size $controlsToRemove`;$i++)
+		{
+		string $buffer[];
+		int $numTokens = `tokenize ($controlsToRemove[$i]) "|:" $buffer`; //print $buffer[`size $buffer` -1];
+
+		$controlsToRemove[$i] = $buffer[`size $buffer` -1];
+		}
+
+	// The way this works is: We create a temporary new pose file, and fill-it up line after
+	// line, while parsing through the original, in order to create the new file (without the undesirable controls)...
+	string $softPoseToTweak = $poseFilePath;
+	string $softNewPosePath = $poseFilePath + ".TMP";
+
+	if ( $confirmRemoveControlsWindow == "Yes" )
+		{
+		int $fileId1=`fopen $softPoseToTweak "r"`;
+		int $fileId2=`fopen $softNewPosePath "w"`;
+
+		// Do a backup of the pose file before messing with the controls (you never know)...
+		sysFile -copy ($softPoseToTweak + ".deleted") $softPoseToTweak; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		string $controlName = `fgetline $fileId1`;
+
+		poseLibCheckIfIndexExists($fileId1);
+
+		string $previouslyWritten = "";
+		int $didSomething = 0;
+
+		while ( !`feof $fileId1` )
+			{
+			$controlName = `fgetword $fileId1`; //print $controlName;
+			string $attributeName = `fgetword $fileId1`; //print $attributeName;
+			float $attributeValue = `fgetword $fileId1`; //print $attributeValue;
+
+			int $check = 0;
+
+			string $c;
+			for ( $c in $controlsToRemove )
+				{
+				if ( $c == $controlName )
+					{
+					$check = 1;
+
+					if ( $previouslyWritten != $c )
+						{
+						print ("poseLib: Removed \"" + $c + "\" from \"" + $poseName + "\"\n" );
+						$previouslyWritten = $c;
+						$didSomething = 1;
+						}
+					}
+				}
+
+			if ( $check == 0 )
+				fprint $fileId2 ( "\n" + $controlName + " " + $attributeName + " " + $attributeValue );
+			}
+		fclose $fileId1;
+		fclose $fileId2;
+
+		// Now we delete the original file and rename the copy to take it's place.
+		sysFile -delete $softPoseToTweak; //print ("\n$Deleted pose: " + $softPoseToDelete);
+		sysFile -rename $softPoseToTweak $softNewPosePath; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		if ( $didSomething == 1 )
+			print "poseLib: Selected control(s) have been removed from pose! (see script editor for details)\n";
+		else
+			warning "--> The selected controls were NOT a part of this pose!\n";
+		}
+	}
+
+global proc poseLibOutputPoseInfo(int $controlNumber)
+	{
+	global string $poseLibBasePath;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName; //print ("\n$poseFilePath="+$poseFilePath);
+
+	// -------------------
+	// Open the file
+	// -------------------
+	int $fileId=`fopen $poseFilePath "r"`;
+	string $controlName = `fgetline $fileId`; // Because first line is empty
+
+	poseLibCheckIfIndexExists($fileId);
+
+	string $alreadyDone = "";
+	string $consTmp = "";
+
+	print ( "\n===================================\n" );
+	print ( "Pose Control List for \"" + $poseName + "\":\n" );
+	print ( "===================================\n" );
+	int $count = 0;
+
+	// Go through all the controls.
+	while ( size( $controlName ) > 0 )
+		{
+		$controlName = `fgetword $fileId`; //print $controlName;
+		string $attributeName = `fgetword $fileId`; //print $attributeName;
+		string $attributeValue = `fgetword $fileId`; //print $attributeValue;
+		string $checkTmp = $controlName;
+
+		if ( ($checkTmp != $alreadyDone) && ($controlName != "") )
+			{
+			$count++;
+			print ( $count + "- " + $controlName + "\n" );
+			}
+
+		$alreadyDone = $checkTmp;
+		}
+	fclose $fileId;
+
+	print ( "--> " + $count + " control(s) in this pose... (see script editor for details)" );
+	}
+
+// Apply pose ---------------
+
+global proc poseLibApplyPose(int $controlNumber)
+	{
+	// Is the ALT or CTRL key pressed?
+	int $altKeyDown = 0;
+	int $getModifiers = `getModifiers`;
+
+	if ( ($getModifiers == 8) || ($getModifiers == 4) )
+		{
+		//print ("mod down and we have an inverse increment val of "+ $poseLibApplyIncrement +"\n");  // ALT key down x%
+		$altKeyDown = 1; // to pass into the value mult operation
+		}
+
+	string $poseNameTmp = `shelfButton -q -l ("poseButton_" + $controlNumber + "_")`;
+	string $poseName = `strip $poseNameTmp`; //print ("\n$poseName=" + $poseName );
+
+	poseLibDoApplyPose($poseName, $altKeyDown);
+	}
+
+global proc poseLibDoApplyPose(string $poseName, int $altKeyDown)
+	{
+	global string $poseLibBasePath;
+	global float $poseLibApplyIncrement; // KDL hack for alt key
+
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	string $categoryName = `optionMenu -q -v categoryChoiceOM`;
+	string $selection[] = `ls -l -sl`;
+	string $poseFilePath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $poseName;  //print ("\n$poseFilePath="+$poseFilePath);
+	string $namespace = "";
+	string $array[] = {};
+	string $sel[] = `ls -sl`;
+
+	waitCursor -state on;
+
+	// Are we dealing with a character set?
+	for ($object in $sel)
+		{
+		string $checkTmp[] = `ls -type "character" $object`;
+		// Deselect the set itself.
+		if ( $checkTmp[0] != "" )
+			{
+			select -d $object;
+			// Select instead its members.
+			string $membersTmp[] = `sets -q -no $object`;
+			select -add $membersTmp;
+			}
+		}
+
+	// This is here for backward compatibility with previous poseLib versions (where attribute names were saved as "long names" e.g.:|toto|tutu...).
+	string $selectedChannels[] = `channelBox -q -sma "mainChannelBox"`; //print $selectedChannels;
+
+	for ($i=0;$i<`size $selectedChannels`;$i++)
+		{
+		string $defaultObjectPlusAttribute = $selection[0] + "." + $selectedChannels[$i];
+		string $longObjectPlusAttribute = `longNameOf($defaultObjectPlusAttribute)`;// print ( $longObjectPlusAttribute + "\n" );
+
+		string $buffer[];
+		int $numTokens = `tokenize $longObjectPlusAttribute "." $buffer`; //print $buffer[1];
+
+		$selectedChannels[$i] = $buffer[1];
+		}
+
+	// Find out what is selected.
+	string $sel[] = `ls -sl`;
+	string $revisedSelection[] = {};
+	$revisedSelection = $sel;
+	//print "\n$revisedSelection = "; print $revisedSelection; print "\n";
+
+	// Get the namespace of the current selection (based on the first object selected).
+	string $selectionNamespace = "";
+	$tmp = `match "[^:]*$"  $sel[0]`;
+	$selectionNamespace = `substitute $tmp $sel[0] ""`;//print ("\n$selectionNamespace = " + $selectionNamespace);
+
+	// Get the namespace of the current selection (based on the first object selected).
+	string $bufferTmp[];
+	int $numTokens = `tokenize $sel[0] ":" $bufferTmp`; //print ($buffer[`size $buffer`-1]);
+
+	if ( `size $bufferTmp` > 1 && `size $bufferTmp` < 3)
+		$selectionNamespace = $bufferTmp[0];
+	else if ( `size $bufferTmp` >= 3 )
+		$selectionNamespace = $bufferTmp[0] + ":" + $bufferTmp[1];
+
+	if ($selectionNamespace != "")
+		{
+		if (!endsWith($selectionNamespace, ":"))
+			$selectionNamespace = $selectionNamespace + ":";
+		}
+	//print ("\n$selectionNamespace = " + $selectionNamespace);
+	//print ("\n$controlName = " + $controlName);
+
+	string $customNamespace = `textField -q -text namespaceTextFieldTF`;
+	if ($customNamespace != "")
+		{
+		if (!endsWith($customNamespace, ":"))
+			$customNamespace = $customNamespace + ":";
+		}
+	//print ("\n$customNamespace = " + $customNamespace);
+
+	// Parse the pose file.
+	if ( `filetest -r $poseFilePath` )
+		{
+		// Open pose file.
+		int $fileId=`fopen $poseFilePath "r"`;
+		$tmp = `fgetline $fileId`; // This is because the first line is empty...
+
+		poseLibCheckIfIndexExists($fileId);
+
+		$poseLibApplyPoseCommand = "string $poseName = \"" + $poseName + "\"; int $didSomething = 0; ";
+
+		// For every line in the pose file:
+		while ( !`feof $fileId` )
+			{
+			// Get the pose info.
+			string $controlName = `fgetword $fileId`;
+			string $attributeName = `fgetword $fileId`; //print ($attributeName + "\n");
+			string $attributeValue = `fgetword $fileId`; //print ($attributeValue + "\n");
+			string $newControlName = "";
+
+			// Check for a namespace in the pose control name.
+			string $buffer[];
+			int $numTokens = `tokenize $controlName ":" $buffer`; //print ($buffer[`size $buffer`-1]);
+
+			// If we should use the selection namespace...
+			if ( `radioCollection -q -sl namespaceChoiceRC` == "useSelectionNamespaceRB" )
+				{
+				// If there is a selection, override the pose namespace with the current selection namespace:
+				if ($sel[0] != "")
+					{
+					// If we should only enforce the pose verbatim.
+					if (`checkBox -q -v forceExactNamespaceCB` && `objExists $controlName`)
+						$newControlName = $controlName;
+					else
+						{
+						// If the selection doesn't have a namespace:
+						if ($selectionNamespace == "")
+							$newControlName = $buffer[(size ($buffer)-1)];
+						// If the selection does have a namespace, then we replace the one from the pose control:
+						else
+							$newControlName = $selectionNamespace + $buffer[(size ($buffer)-1)];
+						}
+					}
+				else
+					$newControlName = $controlName;
+				//print ("\n$newControlName (after namespace operation) = " + $newControlName);
+				}
+			// ... If we should use a custom namespace:
+			else if ( `radioCollection -q -sl namespaceChoiceRC` == "useCustomNamespaceRB" )
+				{
+				// Replace the pose's control namespace by the custom one.
+				if ($customNamespace != "")
+					$newControlName = $customNamespace + $buffer[(size ($buffer)-1)];
+				else
+					$newControlName = $buffer[(size ($buffer)-1)];
+				}
+			//print ("\n$newControlName plus $attributeName (after namespace operation) = " + $newControlName + "." + $attributeName + "\n");
+
+			// If the pose control name and attribute are part of the revised selection or if there is a ($controlName + ".everything") in the revised selection then add the info to the command.
+			// Or if there's nothing selected, check if the pose control exists. If it does, then add the info to the command.
+			if ( `objExists ($newControlName + "." + $attributeName)`
+				&& (stringArrayContains(($newControlName + "." + $attributeName), $revisedSelection) || stringArrayContains(($newControlName), $revisedSelection))
+				|| ($sel[0] == ""  && `objExists ($newControlName + "." + $attributeName)`) )
+				{
+				if ( `getAttr -se ($newControlName + "." + $attributeName)` )
+					{
+					/*
+					// For the attributes that should be filtered (eg: "scale", "stretch", ...).
+					for ($i = 0; $i < size ($toFilter); ++$i)
+						{
+						if (`gmatch $attributeName ("*" + $toFilter[$i] + "*")`)
+							{
+							// Add to the existing command to be executed later all at once.
+							if ( (($parsing[0] != "" ) && $currentSelection[0] != "") && (`objExists ($parsing[0] + "." + $attributeName)`) && (`getAttr -se ($parsing[0] + "." + $attributeName)`) )
+								$poseLibApplyPoseCommand = $poseLibApplyPoseCommand + " setAttr " + $parsing[0] + "." + $attributeName + " (" + $attributeValue +  "); $didSomething = 1;";
+
+							else if ( ($currentSelection[0] == "") && (`objExists ($newControlName + "." + $attributeName)`) && ($multiple[1] == "") && (`getAttr -se ($newControlName + "." + $attributeName)`) )
+								$poseLibApplyPoseCommand = $poseLibApplyPoseCommand + " setAttr " + $newControlName + "." + $attributeName + " (" + $attributeValue + "); $didSomething = 1;";
+
+							print ("\nFilter attr : " + $attributeName + "\n"); print ("\nsetAttr " + $newControlName + "." + $attributeName);
+							$z = 0;
+							break;
+							}
+					*/
+					// If the ALT key is pressed, then set a fraction of the pose.
+					if ( $altKeyDown )
+						{
+						string $currentAttributeValueAsString = `getAttr ($newControlName + "." + $attributeName)`;
+						float $currentAttrFloat = $currentAttributeValueAsString; // turns the string into a float if possible
+						string $gPassOnVal = $attributeValue; // capture pose val string for later if it can't float
+						float $valFloat = $attributeValue; // convert the pose doc val string to a float if you can
+
+						if (($currentAttrFloat >= 0) || ($currentAttrFloat <= 0)) // if the string is a number of some kind and not just a 0
+							{
+							float $valDifference = ($currentAttrFloat - $valFloat); //get the difference in values between what is current and what is in the pose
+							float $modAttrVal = ($valDifference * $poseLibApplyIncrement); // multiply the value difference by the increment
+							float $currValPlusModVal = ($valFloat + $modAttrVal); // add the current value plus the incremented value to get the modified value to pass along
+							string $gPassOnVal = $currValPlusModVal; // get the modified value into a string form
+							$attributeValue = $gPassOnVal; //  pass on the results
+							}
+						}
+
+					$poseLibApplyPoseCommand = $poseLibApplyPoseCommand + " setAttr " + $newControlName + "." + $attributeName + " " + $attributeValue + "; $didSomething = 1;";
+					//print ("\nsetAttr " + $newControlName + "." + $attributeName + " " + $attributeValue);
+					}
+				}
+			}
+		//print ("\n$poseLibApplyPoseCommand = " + $poseLibApplyPoseCommand);
+		fclose $fileId;
+
+		// This is to warn the user in the case nothing was accomplished.
+		string $amountTmp = "100 %";
+
+		if ( $altKeyDown == 1)
+			$amountTmp = "25 %";
+
+		$poseLibApplyPoseCommand = $poseLibApplyPoseCommand + "if ($didSomething == 0) warning \"poseLib: ==> Nothing happened! <==  (please refer to script editor for possible reasons)\\n\\n1) Your current selection might not part of this pose.\\n2) Maybe the Ref/Unref choice is wrong: Try unchecking the Use Namespace checkbox.\\n3) There might be two or more controls with the exact same name in your scene. (in this case, just select the one you want to pose)\"; else print (\"poseLib: " + $amountTmp + " of pose '\" + $poseName + \"' applied !\")";
+
+		catch( `eval( $poseLibApplyPoseCommand )` );
+		}
+	else
+		error ( "poseLib: The file " + $poseFilePath + " can not be found!");
+
+	// This is in case we deselected a character set before applying the pose.
+	select -r $sel;
+	setFocus `getPanel -wf`;
+
+	waitCursor -state off;
+	}
+
+// Options business ----------------
+
+global proc poseLibEditOptions()
+	{
+	global string $poseLibBasePath;
+	global string $poseLibCharacterList[];
+	global string $poseLibCategoryList[];
+	global string $poseLibTextEditor;
+	global int $poseLibIconsSize[];
+	global float $poseLibIconsBGColor[];
+	global float $poseLibCaptureCameraBGColor[];
+	global string $poseLibPathsBookmarks[];
+	//print "\nOption window: ";
+	//print $poseLibPathsBookmarks;
+	//print "\n";
+
+	// ---------------------
+	// Check directories.
+	// ---------------------
+	string $allCharDirsTmp[] = `getFileList -folder ($poseLibBasePath + "/")`; //print ("\n$allCharDirs="+$allCharDirs[0]);
+	string $allCharDirs[] = {};
+
+	int $i;
+	for ($i=0;$i<`size $allCharDirsTmp`;$i++)
+		{
+		if ( (`match ".deleted" $allCharDirsTmp[$i]` != ".deleted") && (`match ".DS_Store" $allCharDirsTmp[$i]` != ".DS_Store") )
+			$allCharDirs = stringArrayCatenate ( $allCharDirs, { $allCharDirsTmp[$i] } );
+		}
+
+	$poseLibCharacterList = $allCharDirs;
+
+	// ------------------
+	// Build UI layout
+	// ------------------
+	if (`window -exists poseLibEditOptionsWindow` )
+		deleteUI poseLibEditOptionsWindow;
+
+	//if (`window -exists poseLibCreateNewPoseWindow` )
+	//	deleteUI poseLibCreateNewPoseWindow;
+
+	window -tlb off -rtf on -sizeable true -width 200 -height 350  -title "poseLib - Edit Options" poseLibEditOptionsWindow;
+
+	string $form = `formLayout`;
+	string $tabs = `tabLayout -cc "window -e -h 378 poseLibEditOptionsWindow" -innerMarginWidth 1 -innerMarginHeight 1 poseLibOptionsWindowTL`;
+
+	formLayout -edit
+		-attachForm $tabs "top"    0
+		-attachForm $tabs "left"   0
+		-attachForm $tabs "bottom" 0
+		-attachForm $tabs "right"  0
+		$form;
+
+	// Characters/Categories:
+	string $characterCategoriesUI = `frameLayout -mw 2 -lv off -collapsable false -borderVisible off -w 322 -p $tabs charactersCategoriesOptionsFL`;
+
+		columnLayout -adjustableColumn true /*-width 500*/ -p charactersCategoriesOptionsFL mainColumn;
+
+			frameLayout -mw 5 -h 31 -bv on -lv off -collapsable false -borderStyle "etchedOut" -w 322 -p mainColumn newCharFrame;
+				columnLayout -adjustableColumn false newCharColumn;
+
+					separator -style "none" -h 2;
+					textFieldButtonGrp -label "New Character:" -bc "poseLibCreateNewCharacterMenu" -text "" -buttonLabel "     Add     " -cw3 98 120 50 newCharacterTFG;
+					separator -style "none" -h 2;
+
+					setParent..;
+				setParent..;
+
+			separator -style "none" -h 4;
+
+			frameLayout -mw 5 -h 57 -bv on -lv off -collapsable false -p mainColumn -borderStyle "etchedOut" -w 322 newCatFrame;
+				columnLayout -adjustableColumn true -w 172 -p newCatFrame newCatColumn;
+
+					separator -style "none" -h 2;
+					textFieldButtonGrp -label "New Category:" -bc "poseLibCreateNewCategoryMenu" -text "" -buttonLabel "     Add     " -cw3 98 120 50 newCategoryTFG;
+					separator -style "none" -h 6;
+
+					rowLayout -nc 2 -cw2 175 160 -p newCatColumn;
+
+						radioCollection forCurrentOrAllCharRB;
+							radioButton -ann "" -label "To selected character only" -al "left" forCurrentChar;
+							radioButton -ann "" -label "To every characters" -al "left" forAllChar;
+						radioCollection -e -sl forCurrentChar forCurrentOrAllCharRB;
+
+						setParent..;
+
+					separator -style "none" -h 2;
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 4;
+
+			frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedOut" -w 322 tweakFrame;
+
+				columnLayout -adjustableColumn true tweakColumn;
+					rowLayout -nc 2 -cw2 158 158 ;
+						columnLayout -adjustableColumn true;
+							text -al "center" -l "Characters:";
+							textScrollList -fn "boldLabelFont" -ams false -w 150 -h 120 listCharacters;
+						setParent..;
+						columnLayout -adjustableColumn true;
+							text -al "center" -l "Categories:";
+							textScrollList -fn "boldLabelFont" -ams false -w 150 -h 120 listCategories;
+						setParent..;
+					setParent..;
+
+			separator -style "none" -h 4;
+
+			rowLayout -nc 2 -cw2 158 158;
+				columnLayout -adjustableColumn true;
+					button -w 150 -al "center" -l "Rename Character" -c poseLibRenameCharacterMenu;
+					button -w 150 -l "Delete Character" -c poseLibDeleteCharacterMenu;
+				setParent..;
+
+				columnLayout -adjustableColumn true;
+					button -w 150 -l "Rename Category" -c poseLibRenameCategoryMenu;
+					button -w 150 -l "Delete Category" -c poseLibDeleteCategoryMenu;
+				setParent..;
+			setParent..;
+
+			columnLayout -adj true;
+
+				separator -style "none" -h 4;
+				button -c "deleteUI poseLibEditOptionsWindow" -al "center" -l "Close";
+				separator -style "none" -h 4;
+			setParent..;
+		setParent..;
+
+	// Display:
+	string $displayUI = `frameLayout -lv off -collapsable false -borderVisible off -w 322 -p $tabs displayIconsOptionsFL`;
+
+		columnLayout -adjustableColumn true -p displayIconsOptionsFL mainColumn2;
+
+			separator -style "none" -h 2;
+			frameLayout -mw 5 -bv off -lv on -li 8 -l "Icons Size:" -collapsable false -borderStyle "etchedOut" -w 322 -p mainColumn2 iconsDisplayFrame;
+				columnLayout -adjustableColumn true -w 320 iconsDisplayColumn;
+
+					separator -style "none" -h 8;
+					radioButtonGrp -numberOfRadioButtons 4 -cw4 70 70 90 80 -sl 1
+						-labelArray4 "50x50" "64x64" "100x100" "128x128" iconsSizeRB;
+
+					separator -style "in" -h 10;
+
+					rowColumnLayout -numberOfColumns 5
+						-columnWidth 1 90
+						-columnWidth 2 30
+						-columnWidth 3 20
+						-columnWidth 4 30
+						-columnWidth 5 150;
+
+						checkBox -l "Custom Size:" -onc "intField -e -en on iconsWidthIF; intField -e -en on iconsHeightIF; radioButtonGrp -e -en off iconsSizeRB"
+							-ofc "intField -e -en off iconsWidthIF; intField -e -en off iconsHeightIF; radioButtonGrp -e -en on iconsSizeRB" customSizeCB;
+
+						intField -v 256 -en off -min 32 -max 512 iconsWidthIF;
+						text "  x";
+						intField -v 256 -en off -min 32 -max 512 iconsHeightIF;
+
+						text /*-bgc .75 .75 .75*/ " (Min= 32*32   Max=512*512)";
+						separator -style "none" -h 4;
+
+					setParent..;
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 4;
+			frameLayout -mw 5 -bv on -lv on -li 8 -l "Colors:" -collapsable false -borderStyle "etchedOut" -p mainColumn2 iconsBackgroundColorFrame;
+				columnLayout -adjustableColumn true;
+					separator -style "none" -h 8;
+					colorSliderGrp -label "Icons Background Color" -cw3 130 60 30 -rgb $poseLibIconsBGColor[0] $poseLibIconsBGColor[1] $poseLibIconsBGColor[2] iconsBGColorCSG;
+					colorSliderGrp -label "Capture Camera BG Color" -cw3 130 60 30 -rgb $poseLibCaptureCameraBGColor[0] $poseLibCaptureCameraBGColor[1] $poseLibCaptureCameraBGColor[2] captureCameraBGColorCSG;
+					separator -style "none" -h 4;
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 4;
+			frameLayout -mw 5 -bv on -lv on -li 8 -l "Capture Camera:" -collapsable false -borderStyle "etchedOut" -w 322 -p mainColumn2 captureCameraOptionsFrame;
+				columnLayout -adjustableColumn true -w 320;
+					separator -style "none" -h 8;
+					intSliderGrp -label "Focal Length" -cw 1 90 -cw 2 60 -field true
+						-minValue 15 -maxValue 300
+						-fieldMinValue 15 -fieldMaxValue 300
+						-value 200 captureCameraFocalLengthISG;
+					connectControl captureCameraFocalLengthISG "poseLibCaptureCameraShape.focalLength";
+
+					floatSliderGrp -label "Near Clip Plane" -cw 1 90 -cw 2 60 -field true
+						-minValue 0.01 -maxValue 10000.0
+						-fieldMinValue 0.01 -fieldMaxValue 10000.0
+						-value 0.1 captureCameraNearClipFSG;
+					connectControl captureCameraNearClipFSG "poseLibCaptureCameraShape.nearClipPlane";
+
+					floatSliderGrp -label "Far Clip Plane" -cw 1 90 -cw 2 60 -field true
+						-minValue 1.0 -maxValue 100000.0
+						-fieldMinValue 1.0 -fieldMaxValue 100000.0
+						-value 10000.0 captureCameraFarClipFSG;
+					connectControl captureCameraFarClipFSG "poseLibCaptureCameraShape.farClipPlane";
+
+					separator -style "none" -h 4;
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 8;
+
+			button -l "Apply and Close" -command "poseLibChangeIconsDisplay";
+			separator -style "none" -h 4;
+
+		setParent..;
+
+	// Directory:
+	string $poseLibFolderUI = `frameLayout -lv off -collapsable false -borderVisible off -w 322 -p $tabs poseLibFolderOptionsFL`;
+
+		columnLayout -adjustableColumn true -p poseLibFolderOptionsFL mainColumn3;
+
+			separator -style "none" -h 2;
+
+			frameLayout -mw 5 -h 280 -bv on -lv on -li 8 -l "Directories Bookmarks:" -collapsable false -borderStyle "etchedOut" -w 322 -p mainColumn3 poseLibFolderFrame;
+				columnLayout -adjustableColumn true poseLibFolderColumn;
+
+					separator -style "none" -h 2;
+
+					text -l "(Double-click to set path)        (DEL key to delete)";
+					paneLayout -w 308 -h 110;
+						textScrollList -numberOfRows 8
+						-allowMultiSelection false
+						-dkc "string $toto[] = `textScrollList -q -si poseLibDirectoriesBookmarksTSL`; textScrollList -e -ri $toto[0] poseLibDirectoriesBookmarksTSL; string $tmpList[] = $poseLibPathsBookmarks; string $tmpItems[] = $toto; $poseLibPathsBookmarks = stringArrayRemove($tmpItems, $tmpList); poseLibSavePrefs;"
+						-sc "textScrollList -e -ann `textScrollList -q -si poseLibDirectoriesBookmarksTSL` poseLibDirectoriesBookmarksTSL"
+						-dcc "string $pathTmp[] = `textScrollList -q -si poseLibDirectoriesBookmarksTSL`; poseLibBrowseForFolderCallback( \"yes\", $pathTmp[0], \"typeNothing\" )"
+						poseLibDirectoriesBookmarksTSL;
+					setParent..;
+
+					for ($i=0;$i<`size $poseLibPathsBookmarks`;$i++)
+						{
+						textScrollList -e -appendPosition 1 $poseLibPathsBookmarks[$i] -si $poseLibBasePath poseLibDirectoriesBookmarksTSL;
+						print ( "Loaded poseLib bookmark: " + $poseLibPathsBookmarks[$i] + "\n");
+						}
+
+					text -w 210 -fn "boldLabelFont" -l "Current poseLib Directory:";
+
+					string $pathToDisplay = "";
+					if ( endsWith($poseLibBasePath, "/") )
+						$pathToDisplay = $poseLibBasePath;
+					else
+						$pathToDisplay = ($poseLibBasePath + "/");
+
+					text -bgc .8 .8 .8 -ann $pathToDisplay -l $pathToDisplay poseLibFolderOptionText;
+					separator -style "none" -h 2;
+
+					textField -cc "poseLibBrowseForFolderCallback( \"\", `textField -q -tx poseLibFolderOptionTF`, \"\")" -ann $pathToDisplay -tx $pathToDisplay poseLibFolderOptionTF;
+					checkBox -v 0 -en on -al "left" -l "Add \"/poseLib/\" at the end of the chosen path." poseLibFolderOptionCB;
+					separator -style "none" -h 2;
+					button -w 308 -l "Choose Location of poseLib Directory" -c ("poseLibBrowseForFolder( \"" + $poseLibBasePath + "\" )");
+
+					separator -style "none" -h 4;
+					button -w 308 -l "Open Windows Explorer Here" -c ("string $lastPlaceTmp = `text -q -label poseLibFolderOptionText`; string $lastPlace = toNativePath($lastPlaceTmp); print $lastPlace; system (\"start explorer /n,/e, \" + $lastPlace)");
+					separator -style "none" -h 4;
+
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 4;
+			button -w 320 -c "deleteUI poseLibEditOptionsWindow" -al "center" -l "Close";
+		setParent..;
+
+	// Text editor:
+	string $poseLibTextEditorUI = `frameLayout -lv off -collapsable false -borderVisible off -w 322 -p $tabs poseLibTextEditorOptionsFL`;
+
+		columnLayout -adjustableColumn true -p poseLibTextEditorOptionsFL mainColumn3;
+			separator -style "none" -h 2;
+			frameLayout -mw 5 -bv on -lv on -li 8 -l "Current Text Editor:" -collapsable false -borderStyle "etchedOut" -w 322 -p mainColumn3 poseLibTextEditorFrame;
+				columnLayout -adjustableColumn true poseLibTextEditorColumn;
+					separator -style "none" -h 2;
+					text -l "(This is the program used when editing pose files)";
+					text -bgc .8 .8 .8 -ann $poseLibTextEditor -l $poseLibTextEditor poseLibTextEditorOptionText;
+					separator -style "none" -h 2;
+					button -l "Choose Text Editor" -c "poseLibChooseTextEditor";
+					separator -style "none" -h 4;
+
+				setParent..;
+			setParent..;
+
+			separator -style "none" -h 4;
+			button -c "deleteUI poseLibEditOptionsWindow; poseLibSavePrefs" -al "left" -l "Close";
+		setParent..;
+
+	// ------------------
+	// Organize tabs
+	// ------------------
+	tabLayout -edit
+		-tabLabel $characterCategoriesUI "Characters/Categories"
+		-tabLabel $displayUI "Display"
+		-tabLabel $poseLibFolderUI "Directory"
+		-tabLabel $poseLibTextEditorUI "Text Editor"
+		-st $characterCategoriesUI
+		$tabs;
+
+	if ( ($poseLibIconsSize[0] == 50) && ($poseLibIconsSize[1] == 50) )
+		{
+		radioButtonGrp -e -sl 1 iconsSizeRB;
+		checkBox -e -v 0 customSizeCB;
+		}
+
+	else if ( ($poseLibIconsSize[0] == 64) && ($poseLibIconsSize[1] == 64) )
+		{
+		radioButtonGrp -e -sl 2 iconsSizeRB;
+		checkBox -e -v 0 customSizeCB;
+		}
+
+	else if ( ($poseLibIconsSize[0] == 100) && ($poseLibIconsSize[1] == 100) )
+		{
+		radioButtonGrp -e -sl 3 iconsSizeRB;
+		checkBox -e -v 0 customSizeCB;
+		}
+
+	else if ( ($poseLibIconsSize[0] == 128) && ($poseLibIconsSize[1] == 128) )
+		{
+		radioButtonGrp -e -sl 4 iconsSizeRB;
+		checkBox -e -v 0 customSizeCB;
+		}
+
+	else
+		{
+		radioButtonGrp -e -en off iconsSizeRB;
+		checkBox -e -en on -v 1 customSizeCB;
+		intField -e -en on -v $poseLibIconsSize[0] iconsWidthIF;
+		intField -e -en on -v $poseLibIconsSize[1] iconsHeightIF;
+		}
+
+	colorSliderGrp -e -rgb $poseLibIconsBGColor[0] $poseLibIconsBGColor[1] $poseLibIconsBGColor[2] iconsBGColorCSG;
+	colorSliderGrp -e -rgb $poseLibCaptureCameraBGColor[0] $poseLibCaptureCameraBGColor[1] $poseLibCaptureCameraBGColor[2] captureCameraBGColorCSG;
+
+	// ------------------
+	// Populate lists
+	// ------------------
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+
+	textScrollList -e -ra listCharacters;
+
+	string $c;
+	for ( $c in $poseLibCharacterList )
+		{
+		textScrollList -e -m off -w 150 -h 120 -append $c -sc "poseLibRefreshCategoryList" listCharacters;
+		}
+	textScrollList -e -si $characterName -m on listCharacters;
+	poseLibRefreshCategoryList;
+	showWindow poseLibEditOptionsWindow;
+	window -e -wh 342 358 poseLibEditOptionsWindow;
+	}
+
+global proc poseLibChangeIconsDisplay()
+	{
+	global int $poseLibIconsSize[];
+	global float $poseLibIconsBGColor[];
+	global float $poseLibCaptureCameraBGColor[];
+
+	// Set icons sizes.
+	if ( `radioButtonGrp -q -sl iconsSizeRB` == 1 && `radioButtonGrp -q -en iconsSizeRB` )
+		{
+		$poseLibIconsSize[0] = 50;
+		$poseLibIconsSize[1] = 50;
+		}
+
+	else if ( `radioButtonGrp -q -sl -en iconsSizeRB` == 2 && `radioButtonGrp -q -en iconsSizeRB` )
+		{
+		$poseLibIconsSize[0] = 64;
+		$poseLibIconsSize[1] = 64;
+		}
+
+	else if ( `radioButtonGrp -q -sl -en iconsSizeRB` == 3 && `radioButtonGrp -q -en iconsSizeRB` )
+		{
+		$poseLibIconsSize[0] = 100;
+		$poseLibIconsSize[1] = 100;
+		}
+
+	else if ( `radioButtonGrp -q -sl -en iconsSizeRB` == 4 && `radioButtonGrp -q -en iconsSizeRB` )
+		{
+		$poseLibIconsSize[0] = 128;
+		$poseLibIconsSize[1] = 128;
+		}
+
+	else
+		{
+		$poseLibIconsSize[0] = `intField -q -v iconsWidthIF`;
+		$poseLibIconsSize[1] = `intField -q -v iconsHeightIF`;
+		}
+
+	// Set colors to reflect current preferences.
+	$poseLibIconsBGColor = `colorSliderGrp -q -rgb iconsBGColorCSG`; //print "\n$poseLibIconsBGColor = "; print $poseLibIconsBGColor; print "\n";
+	$poseLibCaptureCameraBGColor = `colorSliderGrp -q -rgb captureCameraBGColorCSG`; //print "\n$poseLibCaptureCameraBGColor = "; print $poseLibCaptureCameraBGColor; print "\n";
+
+	poseLibSavePrefs;
+	poseLib;
+	print ("Icons size set to: " + $poseLibIconsSize[0] + " x " + $poseLibIconsSize[1] + "\n");
+	}
+
+global proc poseLibRefreshCategoryList()
+	{
+	global string $poseLibBasePath;
+	string $characterName[0] = `textScrollList -q -si listCharacters`;
+	string $allCatDirsTmp[] = `getFileList -folder ($poseLibBasePath + "/" + $characterName[0] + "/")`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+	string $allCatDirs[] = {};
+
+	int $i;
+	for ($i=0;$i<`size $allCatDirsTmp`;$i++)
+		{
+		if ( (`match ".deleted" $allCatDirsTmp[$i]` != ".deleted") && (`match ".DS_Store" $allCatDirsTmp[$i]` != ".DS_Store") )
+			$allCatDirs = stringArrayCatenate ( $allCatDirs, { $allCatDirsTmp[$i] } );
+		}
+
+	textScrollList -e -ra listCategories;
+
+	string $g;
+	for ( $g in $allCatDirs )
+		{
+		textScrollList -e -m off -w 150 -h 120 -append $g listCategories;
+		}
+	textScrollList -e -m on listCategories;
+	}
+
+global proc poseLibCreateNewCharacterMenu()
+	{
+	global string $poseLibBasePath;
+	string $character = `textFieldButtonGrp -q -text newCharacterTFG`;
+	string $checkName = `match " [$%\\/#@.:;?!\"\'\`]" $character`;
+	string $allCharDirs[] = `getFileList -folder ($poseLibBasePath + "/")`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+
+	if ( (`size $checkName` > 0) || (`size $character` == 0) )
+		{
+		error "You must enter a valid name, without any of these: \" $ % \\ / # @ . :; ? ! \' \`";
+		return;
+		}
+	else
+		{
+		sysFile -makeDir ( $poseLibBasePath + "/" + $character );
+		sysFile -makeDir ( $poseLibBasePath + "/" + $character + "/default" );
+		poseLib;
+		poseLibEditOptions;
+		textScrollList -e -si $character listCharacters;
+		poseLibRefreshCategoryList;
+
+		print ( "poseLib: Created new character: " + $character + "\n" );
+
+		string $c;
+		for ( $c in $allCharDirs )
+			{
+			string $checkTmp = `match $c $character`;
+
+			if ( `size $checkTmp` > 0 )
+				warning "There is already a character with this name!";
+			}
+		}
+	}
+
+global proc poseLibRenameCharacterMenu()
+	{
+	if (`window -exists renameCharacterWindow` )
+		deleteUI renameCharacterWindow;
+
+	string $nameTmp[0] = `textScrollList -q -si listCharacters`;
+
+	window -tlb off -rtf true -w 10 -h 10 -title "Rename Character" renameCharacterWindow;
+		columnLayout -adj true;
+			frameLayout -mw 2 -lv false -collapsable false -borderStyle "etchedOut";
+				columnLayout -adj true;
+					textFieldGrp -cw2 50 150 -l "Name" -cc "poseLibDoRenameCharacterMenu" -tx (`textScrollList -q -si listCharacters`) setNameField;
+					button -l "Cancel" -al "center" -c "deleteUI renameCharacterWindow";
+
+	if ( $nameTmp[0] != "" )
+		showWindow renameCharacterWindow;
+	else
+		warning " ---> Please select a character first!\n";
+	}
+
+global proc poseLibDoRenameCharacterMenu()
+	{
+	global string $poseLibBasePath;
+	string $nameTmp[0] = `textScrollList -q -si listCharacters`;
+	string $softCharacterToRename = ( $poseLibBasePath + "/" + $nameTmp[0] );
+
+	string $newName = `textFieldGrp -q -tx setNameField`;
+
+	sysFile -rename ($poseLibBasePath + "/" + $newName) $softCharacterToRename; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+	evalDeferred("poseLib");
+	poseLibEditOptions;
+	textScrollList -e -si $newName listCharacters;
+	poseLibRefreshCategoryList;
+	print ("poseLib: Renamed character: " + $poseLibBasePath + "/" + $nameTmp[0] + " to: " + $newName + "\n" );
+	}
+
+global proc poseLibDeleteCharacterMenu()
+	{
+	global string $poseLibBasePath;
+	string $nameTmp[0] = `textScrollList -q -si listCharacters`;
+	string $confirmDeleteWindow = "";
+
+	if ( $nameTmp[0] != "" )
+		$confirmDeleteWindow = `confirmDialog -title "Confirm" -message "Are you sure you want to delete this character\nwith all the poses and categories inside?" -button "Yes" -button "No" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel" -dismissString "No"`;
+	else
+		warning " ---> Please select a character in the list first!\n";
+
+	if ( $confirmDeleteWindow == "Yes" )
+		{
+		string $solidPath = "";
+		string $buffer[];
+		int $numTokens = `tokenize ($poseLibBasePath + "/" + $nameTmp[0]) "\/" $buffer`;
+
+		int $i;
+		for ($i=0;$i<`size $buffer`;$i++)
+			{
+			if ( $i < (`size $buffer`-1) )
+				$solidPath = $solidPath + $buffer[$i] + "\\";
+			else
+				$solidPath = $solidPath + $buffer[$i];
+			}
+
+		if ( `filetest -d ($poseLibBasePath + "/" + $nameTmp[0] + ".deleted")` )
+			system ("rmdir " + $solidPath + ".deleted /s /q" ); //print ("\nrmdir " + $solidPath + ".deleted");
+
+		sysFile -rename (($poseLibBasePath + "/" + $nameTmp[0]) + ".deleted") ($poseLibBasePath + "/" + $nameTmp[0]); //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+		poseLib;
+		poseLibEditOptions;
+		print ("poseLib: Deleted character: " + $poseLibBasePath + "/" + $nameTmp[0] + "\n" );
+		}
+	}
+
+global proc poseLibCreateNewCategoryMenu()
+	{
+	global string $poseLibBasePath;
+	string $character[0] = `textScrollList -q -si listCharacters`;
+	string $category = `textFieldButtonGrp -q -text newCategoryTFG`;
+	string $checkName = `match " [$%\\/#@.:;?!\"\'\`]" $category`;
+	string $allCharDirs[] = `getFileList -folder ($poseLibBasePath + "/")`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+	string $allCatDirs[] = `getFileList -folder ($poseLibBasePath + "/" + $character[0])`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+
+	if ( (`size $checkName` > 0) || (`size $category` == 0) )
+		{
+		error "You must enter a valid name, without any of these: \" $ % \\ / # @ . :; ? ! \' \`";
+		return;
+		}
+
+	if ( `radioCollection -q -sl forCurrentOrAllCharRB` == "forCurrentChar" )
+		{
+		sysFile -makeDir ( $poseLibBasePath + "/" + $character[0] + "/" + $category );
+		poseLib;
+		poseLibEditOptions;
+		textScrollList -e -si $character[0] listCharacters;
+		radioCollection -e -sl forCurrentChar forCurrentOrAllCharRB;
+		poseLibRefreshCategoryList;
+
+		print ( "poseLib: Created new category: " + $category + "\n" );
+
+		string $c;
+		for ( $c in $allCatDirs )
+			{
+			string $checkTmp = `match $c $category`;
+
+			if ( `size $checkTmp` > 0 )
+				warning "There is already a category with this name!";
+			}
+		}
+	else
+		{
+		string $g;
+		for ( $g in $allCharDirs )
+			{
+			sysFile -makeDir ( $poseLibBasePath + "/" + $g + "/" + $category );
+			}
+		poseLib;
+		poseLibEditOptions;
+		textScrollList -e -si $character[0] listCharacters;
+		radioCollection -e -sl forAllChar forCurrentOrAllCharRB;
+		poseLibRefreshCategoryList;
+
+		print ( "poseLib: Created new category: " + $category + " for all characters\n" );
+		}
+	}
+
+global proc poseLibRenameCategoryMenu()
+	{
+	if (`window -exists renameCategoryWindow` )
+		deleteUI renameCategoryWindow;
+
+	string $nameTmp[0] = `textScrollList -q -si listCategories`;
+
+	window -tlb off -rtf true -w 10 -h 10 -title "Rename Category" renameCategoryWindow;
+		columnLayout -adj true;
+			frameLayout -mw 2 -lv false -collapsable false -borderStyle "etchedOut";
+				columnLayout -adj true;
+					textFieldGrp -cw2 50 150 -l "Name" -cc "poseLibDoRenameCategoryMenu" -tx (`textScrollList -q -si listCategories`) setNameField;
+					button -w 100 -l "Cancel" -al "center" -c "deleteUI renameCategoryWindow";
+
+	if ( $nameTmp[0] != "" )
+		showWindow renameCategoryWindow;
+	else
+		warning " ---> Please select a category in the list first!\n";
+	}
+
+global proc poseLibDoRenameCategoryMenu()
+	{
+	global string $poseLibBasePath;
+	string $charTmp[0] = `textScrollList -q -si listCharacters`;
+	string $nameTmp[0] = `textScrollList -q -si listCategories`;
+	string $softCategoryToRename = ( $poseLibBasePath + "/" + $charTmp[0] + "/" + $nameTmp[0] );
+
+	string $newName = `textFieldGrp -q -tx setNameField`;
+
+	sysFile -rename ($poseLibBasePath + "/" + $charTmp[0] + "/" + $newName) $softCategoryToRename; //print ( "\noldName= " + $currentName + "\nnewName= " + $newName );
+
+	evalDeferred("poseLib");
+	poseLibEditOptions;
+	textScrollList -e -si $charTmp[0] listCharacters;
+	poseLibRefreshCategoryList;
+	textScrollList -e -si $newName listCategories;
+	print ("poseLib: Renamed category: " + $poseLibBasePath + "/" + $nameTmp[0] + " to: " + $newName + "\n");
+	}
+
+global proc poseLibDeleteCategoryMenu()
+	{
+	global string $poseLibBasePath;
+	string $charTmp[0] = `textScrollList -q -si listCharacters`;
+	string $nameTmp[0] = `textScrollList -q -si listCategories`;
+	string $confirmDeleteWindow = "";
+
+	if ( $nameTmp[0] != "" )
+		$confirmDeleteWindow = `confirmDialog -title "Confirm" -message "Are you sure you want to delete\nthis category with all the poses inside?" -button "Yes" -button "No" -button "Cancel" -defaultButton "Yes" -cancelButton "Cancel" -dismissString "No"`;
+	else
+		warning " ---> Please select a category in the list first!\n";
+
+	if ( $confirmDeleteWindow == "Yes" )
+		{
+		string $solidPath = "";
+		string $buffer[];
+		int $numTokens = `tokenize ($poseLibBasePath + "/" + $charTmp[0] + "/" + $nameTmp[0]) "\/" $buffer`;
+
+		int $i;
+		for ($i=0;$i<`size $buffer`;$i++)
+			{
+			if ( $i < (`size $buffer`-1) )
+				$solidPath = $solidPath + $buffer[$i] + "\\";
+			else
+				$solidPath = $solidPath + $buffer[$i];
+			}
+
+		if ( `filetest -d ($poseLibBasePath + "/" + $charTmp[0] + "/" + $nameTmp[0] + ".deleted")` )
+			{
+			system ("rmdir " + $solidPath + ".deleted /s /q" ); //print ("\nrmdir " + $solidPath + ".deleted");
+			}
+
+		sysFile -rename ($poseLibBasePath + "/" + $charTmp[0] + "/" + $nameTmp[0] + ".deleted") ($poseLibBasePath + "/" + $charTmp[0] + "/" + $nameTmp[0]);
+
+		poseLib;
+		poseLibEditOptions;
+		textScrollList -e -si $charTmp[0] listCharacters;
+		poseLibRefreshCategoryList;
+		print ("poseLib: Deleted category: " + $poseLibBasePath + "/" + $nameTmp[0] + "\n");
+		}
+	}
+
+// Main UI work ---------------
+
+global proc string[] howToDragCB( string $dragControl, int $x, int $y, int $mods )
+	{
+    print ( "Drag from " + $dragControl + "\n" );
+
+    // The msg array returned from the drag callback must _not_ be empty,
+    // else the drop callback will not trigger.
+    //
+    return { $dragControl };
+	}
+
+global proc howToDropCB( string $drag, string $drop, string $msgs[], int $x, int $y, int $type )
+	{
+    print ( "Drop on " + $drop + " from " + $msgs[0] + "\n" );
+
+    // Special case for textScrollList.
+    //
+    if ( `textScrollList -q -exists $drop` )
+		{
+		textScrollList -e -append ( "Drop from " + $msgs[0] ) $drop;
+		}
+	}
+
+global proc poseLibRefreshPoseList(string $categoryName)
+	{
+	global string $poseLibBasePath;
+	global string $poseLibCategoryList[];
+	global int $realNumber;
+	global int $poseLibIconsSize[];
+	global float $poseLibIconsBGColor[];
+	global string $poseLibIconFormat;
+	string $characterName = `optionMenu -q -v characterChoiceOM`;
+	if ($categoryName == "" )
+		$categoryName = `optionMenu -q -v categoryChoiceOM`; //print ("poseLib: $categoryName = " + $categoryName +"\n");
+	string $allCategoryDirsTmp[] = `getFileList -folder ($poseLibBasePath + "/" + $characterName + "/")`; //print ("\n$allPoseFiles="+$allPoseFiles[0]);
+	string $allCategoryDirs[] = {};
+
+	// Enforce 50 pixels as the smallest icon size.
+	if ( $poseLibIconsSize[0] < 32 )
+		{
+		$poseLibIconsSize[0] = 50;
+		$poseLibIconsSize[1] = 50;
+		}
+
+	// ---------------------------------
+	// 1- Filter out what can be shown
+	// ---------------------------------
+	int $i;
+	for ($i=0;$i<`size $allCategoryDirsTmp`;$i++)
+		{
+		if ( (`match ".deleted" $allCategoryDirsTmp[$i]` != ".deleted") && (`match ".DS_Store" $allCategoryDirsTmp[$i]` != ".DS_Store") )
+			$allCategoryDirs = stringArrayCatenate ( $allCategoryDirs, { $allCategoryDirsTmp[$i] } );
+		}
+
+	// ---------------------------------------
+	// 2- Update the category option menus
+	// ---------------------------------------
+	for ($i=0;$i<`size $poseLibCategoryList`;$i++)
+		{
+		deleteUI ("categoryMI_" + $i + "_");
+		}
+
+	$poseLibCategoryList = $allCategoryDirs;
+
+	//optionMenu -e -h 28 -w 180 -label "Category:" -cc "poseLibRefreshPoseList(\"\")" -p optionMenusRow categoryChoiceOM;
+	for ($i=0;$i<`size $poseLibCategoryList`;$i++)
+		{
+		menuItem -label $poseLibCategoryList[$i] -p categoryChoiceOM categoryMI[$i]; //print ("\nlabel = " + $poseLibCategoryList[$i] + " control = categoryMI_" + $i + "_" );
+		}
+
+	string $myIntersector = `stringArrayIntersector`;
+	stringArrayIntersector -edit -intersect $poseLibCategoryList $myIntersector;
+	stringArrayIntersector -edit -intersect $categoryName $myIntersector;
+	string $isItIncluded[] = `stringArrayIntersector -query $myIntersector`;
+
+	if ( $isItIncluded[0] != "" )
+		optionMenu -e -v $categoryName categoryChoiceOM;
+	else
+		{
+		if ( $poseLibCategoryList[0] != "" )
+			{
+			optionMenu -e -v $poseLibCategoryList[0] categoryChoiceOM; //		print ("poseLib: \"" + $categoryName + "\" category doesn't exist for this character!\n" );
+			$categoryName = $poseLibCategoryList[0]; //print ("poseLib: $poseLibCategoryList[0] = " + $poseLibCategoryList[0] +"\n");
+			}
+		}
+
+	if ( (`optionMenu -q -sl categoryChoiceOM` == 1) && (`optionMenu -q -ni categoryChoiceOM` > 1) )
+		{
+		optionMenu -e -m off -sl 2 categoryChoiceOM; // absolutely absurd: if not, first item is shown as last!
+		optionMenu -e -m on -sl 1 categoryChoiceOM;
+		}
+
+	//print ("poseLib: character/category = " + $characterName + "/" + $categoryName +"\n");
+	string $poseFilesPath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/"; //print ("\n$poseFilesPath="+$poseFilesPath);
+	string $allPoseFiles[] = `getFileList -folder $poseFilesPath`; //print "\n$allPoseFiles:\n"; print $allPoseFiles; print "\n";
+	string $iconsPath = $poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/"; //print ("\n$iconsPath="+$iconsPath);
+
+	// ------------------------------
+	// 3- Clear previous poses icons.
+	// ------------------------------
+	frameLayout -e -m off plPosesFL;
+	shelfLayout -e -m off -st "iconAndTextVertical" -h 200 -cw ($poseLibIconsSize[0] + 5) -ch ($poseLibIconsSize[1] + 23) plPosesSL;
+	//flowLayout -e -m off -h 200 plPosesSL;
+	string $iconsToDelete[] = `shelfLayout -q -ca plPosesSL`;
+	//string $iconsToDelete[] = `flowLayout -q -ca plPosesSL`;
+
+	for ($icon in $iconsToDelete)
+		deleteUI $icon;
+
+	// --------------------------------------------
+	// 4- Get the indices for the pose orders
+	// --------------------------------------------
+	$realNumber = 0;
+	string $listOfPoses[] = {};
+	int $listOfIndexes[] = {};
+	int $count = 0;
+
+	for ($i=0;$i<`size $allPoseFiles`;$i++)
+		{
+		if ( (`match ".bmp" $allPoseFiles[$i]` != ".bmp") &&
+			(`match ".xpm" $allPoseFiles[$i]` != ".xpm") &&
+			(`match ".deleted" $allPoseFiles[$i]` != ".deleted") &&
+			(`match ".DS_Store" $allPoseFiles[$i]` != ".DS_Store") &&
+			(`match ".bak" $allPoseFiles[$i]` != ".bak") )
+			{
+			// Open pose file.
+			int $fileId = `fopen ($poseLibBasePath + "/" + $characterName + "/" + $categoryName + "/" + $allPoseFiles[$i]) "r"`;
+			string $firstWord = `fgetword $fileId`; // This is because the first line is empty.
+
+			// Get the pose index number.
+			if ( $firstWord == "poseLibIndexOrder")
+				{
+				//print ("\n$firstWord of \"" + $allPoseFiles[$i] + "\" is \"" + $firstWord + "\"");
+				int $indexOrder = `fgetword $fileId`; //print ("$indexOrder = " + $indexOrder + "\n");
+				$listOfIndexes[`size $listOfIndexes`] = $indexOrder;
+				$listOfPoses[`size $listOfPoses`] = $allPoseFiles[$i];
+				//stringArrayInsertAtIndex($indexOrder, $listOfPosesByIndex, $allPoseFiles[$count]);
+				$count ++;
+				}
+			else
+				{
+				//print ("\n$firstWord of \"" + $allPoseFiles[$i] + "\" is \"" + $firstWord + "\"");
+				//stringArrayInsertAtIndex(100+$count, $listOfPosesByIndex, $allPoseFiles[$count]);
+				$listOfIndexes[`size $listOfIndexes`] = 100 + $count;
+				$listOfPoses[`size $listOfPoses`] = $allPoseFiles[$i];
+				$count ++;
+				}
+			fclose $fileId;
+			}
+		}
+
+	//print "\n\n$listOfIndexes:\n"; print $listOfIndexes;
+	//print "\n\n$listOfPoses:\n"; print $listOfPoses;
+
+	string $listOfPosesByIndex[] = {};
+	for ($i=0;$i<`size $listOfIndexes`;$i++)
+		{
+		$listOfPosesByIndex[$listOfIndexes[$i]] = $listOfPoses[$i];
+		//print ("\n$listOfPosesByIndex[" + $listOfIndexes[$i] + "] = " + $listOfPosesByIndex[$listOfIndexes[$i]]);
+		}
+	$finalListOfPoses = stringArrayRemoveExact({""}, $listOfPosesByIndex);
+	//print "\n\n$listOfPoses = "; print $listOfPoses;
+	//print "\n\n$listOfPosesByIndex = "; print $listOfPosesByIndex; print "<--- end!";
+	//print "\n\n$finalListOfPoses = "; print $finalListOfPoses;
+
+	// Now add the poses that didn't have an index
+
+	// ------------------------------
+	// 5- Create new poses buttons.
+	// ------------------------------
+	for ($i=0;$i<`size $finalListOfPoses`;$i++)
+		{
+		if ( $finalListOfPoses[$i] != "" )
+			{
+			shelfButton
+				//-style "iconOnly"
+				-style "iconAndTextVertical"
+				//-style "iconAndTextCentered"
+				-bgc $poseLibIconsBGColor[0] $poseLibIconsBGColor[1] $poseLibIconsBGColor[2]
+				-parent plPosesSL
+				//-iol $listOfPoses[$i]
+				-label $finalListOfPoses[$i]
+				//-fn "smallPlainLabelFont"
+				-w ($poseLibIconsSize[0]+4)
+				-h ($poseLibIconsSize[1]+24)
+				-c ("poseLibApplyPose (" + $realNumber + ")")
+				//-dragCallback howToDragCB
+				//-dropCallback howToDropCB
+				poseButton[$realNumber];
+
+			//Add a popup to each shelfButton so we can edit its parameters, or delete it.
+			popupMenu -button 3 posePopupMenu[$realNumber];
+
+				menuItem -en on -label "Select Pose Controls" -c ("poseLibSelectPoseControls (" + $realNumber + ")") poseLibSelectPoseControlsPUM[$realNumber];
+				menuItem -divider true;
+				menuItem -en on -label "Rename Pose" -c ("poseLibRenamePose (" + $realNumber + ")") poseLibRenamePosePUM[$realNumber];
+				menuItem -divider true;
+				menuItem -en on -label "Move Pose" -c ("poseLibMovePose (" + $realNumber + ")") poseLibMovePosePUM[$realNumber];
+				menuItem -divider true;
+				menuItem -en on -label "Replace Pose" -c ("poseLibReplacePose (" + $realNumber + ")") poseLibReplacePosePUM[$realNumber];
+				menuItem -divider true;
+				menuItem -en on -label "Delete Pose" -c ("poseLibDeletePose (" + $realNumber + ")") poseLibDeletePosePUM[$realNumber];
+				menuItem -divider true;
+				menuItem -en on -label "Edit Pose" -subMenu true;
+					menuItem -en on -label "Add/Replace Selected Control(s)" -c ("poseLibAddReplaceSelectedControls (" + $realNumber + ")") addReplaceControlsPUM[$realNumber];
+					menuItem -divider true;
+					menuItem -en on -label "Remove Selected Control(s)" -c ("poseLibRemoveSelectedControls (" + $realNumber + ")") removeControlsPUM[$realNumber];
+					menuItem -divider true;
+					menuItem -en on -label "Output Pose Info to Script Editor" -c ("poseLibOutputPoseInfo(" + $realNumber + ")") poseLibSelectPoseControlsPUM[$realNumber];
+					menuItem -divider true;
+					menuItem -en on -label "Edit Pose File" -c ("poseLibEditPoseFile(" + $realNumber + ")") poseLibSelectPoseControlsPUM[$realNumber];
+				setParent ..;
+			setParent ..;
+
+			//print ($iconsPath + $listOfPoses[$i] + ".bmp\n");
+
+			// Assign the icon if it exists.
+			if ( `filetest -r ($iconsPath + $finalListOfPoses[$i] + ".xpm")` && !`filetest -r ($iconsPath + $finalListOfPoses[$i] + ".bmp")`)
+				{
+				//print ("\nIcon file for \"" + $listOfPoses[$i] + "\" = " + $iconsPath + $listOfPoses[$i] + ".xpm");
+				shelfButton -e -image1 ($iconsPath + $finalListOfPoses[$i] + ".xpm") ("poseButton_" + $realNumber + "_");
+				}
+			else if ( `filetest -r ($iconsPath + $finalListOfPoses[$i] + ".bmp")` )
+				{
+				//print ("\nIcon file for \"" + $listOfPoses[$i] + "\" = " + $iconsPath + $listOfPoses[$i] + ".bmp");
+				shelfButton -e -image1 ($iconsPath + $finalListOfPoses[$i] + ".bmp") ("poseButton_" + $realNumber + "_");
+				}
+				// If there's no icon for the pose, just display a red background.
+			else
+				{
+				shelfButton -e -bgc .9 .2 0 ("poseButton_" + $realNumber + "_");
+				print ("\n-> Did not find an icon file (either .xpm or .bmp) for \"" + $finalListOfPoses[$i] + "\"");
+				}
+
+			$realNumber++;
+			}
+		}
+
+	// --------------------------
+	// 6- Update frame layouts.
+	// --------------------------
+	frameLayout -e -m on plPosesFL;
+	shelfLayout -e -m on plPosesSL;
+	//flowLayout -e -m on plPosesSL;
+	int $tmp = `frameLayout -q -w plPosesFL` / 2.5;
+	frameLayout -e -li $tmp /*-lw 75*/ -l ("Poses: " + $realNumber) -fn "smallFixedWidthFont" plPosesFL;
+	}
+
+global proc poseLib()
+	{
+	global string $poseLibVersion;
+	global string $poseLibBasePath;
+	global string $poseLibCharacterList[];
+	global string $poseLibCategoryList[];
+	global string $poseLibCurrentProject = "";
+	global string $poseLibPathsBookmarks[];
+	global int $poseLibIconsSize[];
+	global float $poseLibIconsBGColor[];
+	global float $poseLibCaptureCameraBGColor[];
+
+	// Run the proc to initialize all the global variable at the start (this is in case poseLib is launched without being sourced first).
+	poseLibInitializeVariables();
+
+	// -------------------------------
+	// Define characters directories.
+	// -------------------------------
+	string $allCharDirsTmp[] = `getFileList -folder ($poseLibBasePath + "/")`; //print ("\n$allCharDirs="+$allCharDirs[0]);
+	string $allCharDirs[];
+
+	for ($i=0;$i<`size $allCharDirsTmp`;$i++)
+		{
+		if ( (`match ".deleted" $allCharDirsTmp[$i]` != ".deleted") && (`match ".DS_Store" $allCharDirsTmp[$i]` != ".DS_Store") )
+			$allCharDirs = stringArrayCatenate ( $allCharDirs, { $allCharDirsTmp[$i] } );
+		}
+
+	// If there are no characters folders, create the default one(s).
+	if ( $allCharDirs[0] == "" )
+		{
+		string $softPosesPathTmp;
+		for ($c in $poseLibCharacterList)
+			{
+			$softPosesPathTmp = $poseLibBasePath + "/" + $c; //print ( "\ncreated " + $softPosesPathTmp );
+			sysFile -makeDir $softPosesPathTmp;
+			}
+
+		$softPosesPathTmp = $poseLibBasePath + "/" + $c;
+
+		for ( $g in $poseLibCategoryList )
+			{
+			string $softCategoriesPathTmp = $softPosesPathTmp + "/" + $g; //print ( "\ncreated =" + $softCategoriesPathTmp );
+			sysFile -makeDir $softCategoriesPathTmp;
+			}
+		}
+	else
+		$poseLibCharacterList = $allCharDirs;
+
+	// Delete any existing poseLib-related window.
+	if (`window -exists poseLibWindow` )
+		deleteUI poseLibWindow;
+
+	if (`window -exists poseLibEditOptionsWindow` )
+		deleteUI poseLibEditOptionsWindow;
+
+	if (`window -exists poseLibCreateNewPoseWindow` )
+		deleteUI poseLibCreateNewPoseWindow;
+
+	if (`window -exists renameCharacterWindow` )
+		deleteUI renameCharacterWindow;
+
+	if (`window -exists renameCategoryWindow` )
+		deleteUI renameCategoryWindow;
+
+	if (`window -exists poseLibRenamePoseWindow` )
+		deleteUI poseLibRenamePoseWindow;
+
+	// ----------------
+	// Build main UI.
+	// ----------------
+	window -tlb off -rtf off -sizeable true -menuBar true -w 450 -title ("poseLib v" + $poseLibVersion + " - " + $poseLibBasePath) poseLibWindow;
+
+	int $h = 20;
+
+	// --------------
+	// Poses frame.
+	// --------------
+	string $form = `formLayout -numberOfDivisions 100 plMainFL`;
+	string $posesFrameLayout = `frameLayout -m off -mw 2 -mh 2 -p plMainFL -l "Poses: " -fn "smallFixedWidthFont" -collapsable false -borderStyle "etchedOut" plPosesFL`;
+	string $posesShelfLayout = `shelfLayout -p $posesFrameLayout -h 200 plPosesSL`;
+	//string $posesShelfLayout = `flowLayout -wr true -p $posesFrameLayout -h 200 plPosesSL`;
+	string $optionsFrameLayout = `frameLayout -lv off -p plMainFL -collapsable false -borderVisible off plOptionsFL`;
+	string $optionsColumn = `columnLayout -p $optionsFrameLayout -adjustableColumn true plOptionsColumn`;
+
+	// ---------------
+	// Options frame.
+	// ---------------
+	frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedOut" -w 190 -p plOptionsColumn namespaceFrameLayoutFL;
+		columnLayout -adjustableColumn true -p namespaceFrameLayoutFL;
+			//separator -st none -h 4 -w 150;
+			radioCollection namespaceChoiceRC;
+				radioButton -label "Use Selection Namespace" -onc "textField -e -en off namespaceTextFieldTF; checkBox -e -en on forceExactNamespaceCB" -ofc "textField -e -en on namespaceTextFieldTF; checkBox -e -en off forceExactNamespaceCB" useSelectionNamespaceRB;
+				radioButton -label "Use Custom Namespace" useCustomNamespaceRB;
+			textField -w 150 -en off -text "myNamespace" namespaceTextFieldTF;
+			checkBox -l "Force Exact Namespace Only" -ann "Force the exclusive use of the namespace saved within the pose.\n\nIf the current selection is not strictly part of the pose, then the pose won't be applied.\n(Only useful when several characters are saved within a single pose)" -v 0 forceExactNamespaceCB;
+			radioCollection -e -sl useSelectionNamespaceRB namespaceChoiceRC;
+			//floatFieldGrp -cw2 110 66 -h ($h-2) -adj off -label "Translate Scale Filter:" -v1 1.0	plTranslateScaleFFG;
+			separator -st none -h 2 -w 150;
+		setParent ..;
+	setParent ..;
+
+	separator -st none -h 4 -w 150;
+
+	frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedOut" -w 190 -p plOptionsColumn characterCategoryFL;
+		columnLayout -adjustableColumn true -p characterCategoryFL;
+			separator -st none -h 2;
+			optionMenu -h ($h+2) -label "Character: " -cc "poseLibRefreshPoseList(\"\")" characterChoiceOM;
+				for ( $c in $poseLibCharacterList )
+					{
+					menuItem -label $c;
+					}
+
+			separator -st none -h 2;
+
+			optionMenu -h ($h+2) -label "Category:  " -cc "poseLibRefreshPoseList(\"\")" categoryChoiceOM;
+				for ($i=0;$i<`size $poseLibCategoryList`;$i++)
+					{
+					menuItem -label $poseLibCategoryList[$i] -p categoryChoiceOM categoryMI[$i];
+					}
+			separator -st none -h 2;
+		setParent ..;
+	setParent ..;
+
+	separator -st "none" -h 4;
+
+	// --------------------
+	// Create pose frame.
+	// --------------------
+	frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedOut" -p plOptionsColumn frameCreate;
+		columnLayout -adjustableColumn true -p frameCreate setPosesColumn;
+
+			separator -st none -h 4;
+
+			button //-bgc .8 .8 .8
+				-label "Create New Pose!" -h 32 -w 156
+				-ann "Create a new pose based on the current selection" -c ("poseLibCreateNewPose( \"\" )") newPoseButton;
+
+			separator -st none -h 4;
+
+		setParent ..;
+	setParent ..;
+
+	separator -st "none" -h 4;
+
+	// --------------------
+	// Settings frame.
+	// --------------------
+	frameLayout -mw 5 -bv on -lv off -collapsable false -borderStyle "etchedOut" -p plOptionsColumn frameSettings;
+		columnLayout -adjustableColumn true -p frameSettings setPosesColumn;
+
+			separator -st none -h 4;
+
+			button -label "Edit Options" -h $h //-bgc .85 .85 .85
+				-ann "Edit/Create characters and categories" -c "poseLibEditOptions" editSettingsButton;
+
+			separator -st none -h 2;
+
+			button -label "Save Preferences" -h $h //-bgc .85 .85 .85
+				-ann "Save poseLib preferences" -c "poseLibSavePrefs" savePrefsButton;
+
+			separator -st none -h 4;
+
+			setParent ..;
+	setParent ..;
+
+		separator -st none -h 4;
+		button -label "Online Help" -h $h //-bgc .85 .85 .85
+			-c "system(\"load http://seithcg.com/wordpress/?page_id=19\")" helpButton;
+
+		separator -st none -h 2;
+		button -label "Close" -h $h //-bgc .85 .85 .85
+			-c "deleteUI poseLibWindow" closeButton;
+
+		setParent ..;
+	setParent ..;
+
+	formLayout -edit
+		-attachForm     $posesFrameLayout     "top"    2
+		-attachForm     $posesFrameLayout     "left"   2
+		-attachForm     $posesFrameLayout     "bottom" 2
+		-attachControl  $posesFrameLayout     "right"  2 $optionsFrameLayout
+
+		-attachForm     $optionsFrameLayout "top"    2
+		-attachNone     $optionsFrameLayout "left"
+		-attachForm     $optionsFrameLayout "bottom" 2
+		-attachForm     $optionsFrameLayout "right"  2
+	$form;
+
+	// Finally show the window.
+	showWindow poseLibWindow;
+
+	// ---------------------------------------------------------------------
+	// Update poses list to populate the menus and icons.
+	if ( `optionVar -exists characterChoiceStatus` )
+		{
+		string $characterTmp = `optionVar -q characterChoiceStatus`;
+		if ( stringArrayContains($characterTmp, $poseLibCharacterList) )
+			catchQuiet ( `optionMenu -e -v $characterTmp characterChoiceOM` );
+		}
+
+	if ( `optionVar -exists categoryChoiceStatus` )
+		{
+		string $categoryTmp = `optionVar -q categoryChoiceStatus`;
+		poseLibRefreshPoseList($categoryTmp);
+		if ( stringArrayContains($categoryTmp, $poseLibCategoryList) )
+			catchQuiet( `optionMenu -e -v $categoryTmp categoryChoiceOM` );
+		}
+	// ---------------------------------------------------------------------
+
+	// If we're on Linux, the first frame appears by default with 0 height!!!
+	if ( `about -os` == "linux" )
+		frameLayout -e -h 78 namespaceFrameLayoutFL;
+
+	// Update the number of poses readout at the top of the icons shelf layout.
+	string $numberOfIconsTmp[] = `shelfLayout -q -ca plPosesSL`;
+	int $tmp = `frameLayout -q -w plPosesFL` / 2.5;
+	frameLayout -e -m on -li $tmp /*-lw 75*/ -l ("Poses: " + `size $numberOfIconsTmp`) -fn "smallFixedWidthFont" plPosesFL;
+
+	// ---------------------
+	// Recall preferences.
+	// ---------------------
+	if ( `optionVar -exists namespaceChoiceStatus` )
+		{
+		radioCollection -e -sl `optionVar -q namespaceChoiceStatus` namespaceChoiceRC;
+		}
+
+	if ( `optionVar -exists namespaceTextFieldStatus` )
+		{
+		textField -e -tx `optionVar -q namespaceTextFieldStatus` namespaceTextFieldTF;
+		}
+
+	if ( `optionVar -exists forceExactNamespaceStatus` )
+		{
+		checkBox -e -v `optionVar -q forceExactNamespaceStatus` forceExactNamespaceCB;
+		}
+
+	if ( `optionVar -exists pathsBookmarksStatus` )
+		{
+		string $pathsBookmarksStatusTmp = `optionVar -q pathsBookmarksStatus`;
+		$poseLibPathsBookmarks = stringToStringArray($pathsBookmarksStatusTmp, ","); //print "\n$poseLibPathsBookmarks = "; print $poseLibPathsBookmarks; print "\n";
+		}
+
+	//print ( "\nposeLib path = " + $poseLibBasePath + "/\n" );
+
+	// -----------------------
+	// First time run!
+	// -----------------------
+	if ( !`optionVar -exists poseLibDefaultPathStatus` )
+		{
+		poseLibEditOptions;
+		tabLayout -edit -selectTabIndex 3 poseLibOptionsWindowTL;
+
+		if (`window -exists poseLibFirstTimeWindow` )
+			deleteUI poseLibFirstTimeWindow;
+
+		window -rtf true -t "First Time Run!" poseLibFirstTimeWindow;
+		columnLayout -adj true columnTmp;
+		text -bgc .7 .6 .9 "!Warning!";
+		text "poseLib detects it's the first time it's being launched!";
+		text -bgc .5 .6 .9 "   ";
+		text "  Please set the chosen path for poseLib before starting to use it  ";
+		text "  by clicking on \"Choose Location of poseLib Directory\"  ";
+		text "  in the \"Edit Options\" window...  ";
+		text " -------------------------------------------------";
+		text "Note that the characters and category lists reflect REAL directories";
+		text "on your hard drive/network. There shouldn’t be any real risk since";
+		text "poseLib will only add \".deleted\" at the end of the directory’s";
+		text "  (or pose’s) name if you delete them, but that could be a problem in itself.  \n";
+
+		text "In short, if you see a list of all your projects coming up in the characters";
+		text "list, it is NOT a good idea to delete them; It just means the poseLib path";
+		text "is not set correctly. That's why you should do it right now!\n";
+
+		button -l "OK" -c "deleteUI poseLibFirstTimeWindow";
+		showWindow poseLibFirstTimeWindow;
+		}
+	}

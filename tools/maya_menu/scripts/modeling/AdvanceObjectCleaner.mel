@@ -1,0 +1,342 @@
+//==============================================================================
+//Name:
+//  AdvanceObjectCleaner.mel
+//==============================================================================
+//Purpose:
+//  AdvanceObjectCleaner
+//==============================================================================
+//Usage:
+//  1. Save the AdvanceObjectCleaner.mel to your scripts directory.
+//  2. Start Maya. In the command line type AdvanceObjectCleaner(); - run script.
+//  3. Start Maya. In the command line type AdvanceObjectCleanerOptionBox(); - run options setup.
+//  4. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+//
+//i?e ia?aii noa?oa caionoeou:  AdvanceObjectCleanerOptionBox()
+//eniieuciaaiea:                AdvanceObjectCleaner()
+//
+
+proc string DBC_simplifyLongName(string $UN_longName)
+{
+        string        $UN_tokenArray[];
+        tokenize $UN_longName "|" $UN_tokenArray;
+        if( size($UN_tokenArray) == 0 )
+                return $UN_longName;
+        return $UN_tokenArray[size($UN_tokenArray)-1];
+}
+
+proc DBC_FirstRun_createOptionVars()
+{
+    $Start_value = 1;
+    if (  ! `optionVar -exists "TT_DBCghost"`  )            optionVar -iv "TT_DBCghost" $Start_value;
+    if (  ! `optionVar -exists "TT_DBCopp"`  )              optionVar -iv "TT_DBCopp" $Start_value;
+    if (  ! `optionVar -exists "TT_DBCunik"`  )             optionVar -iv "TT_DBCunik" $Start_value;
+    if (  ! `optionVar -exists "TT_DBCshape"`  )            optionVar -iv "TT_DBCshape" $Start_value;
+    if (  ! `optionVar -exists "TT_DBChis"`  )              optionVar -iv "TT_DBChis" $Start_value;
+    if (  ! `optionVar -exists "TT_DBCnonP"`  )             optionVar -iv "TT_DBCnonP" $Start_value;
+    if (  ! `optionVar -exists "TT_DBCet"`  )               optionVar -iv "TT_DBCet" $Start_value;
+    if (  ! `optionVar -exists "TT_DBPerFace"`  )           optionVar -iv "TT_DBPerFace" $Start_value;
+}
+
+
+global proc AdvanceObjectCleaner()
+{
+
+        undoInfo -state on;
+        print ("\n" + "================================================================" + "\n");
+        print ("=== AdvanceObjectCleaner =======================================" + "\n");
+        print ("================================================================" + "\n"+ "\n");
+        
+        DBC_FirstRun_createOptionVars;
+
+        int $DBC_ovGhost = `optionVar -q "TT_DBCghost"`;
+        int $DBC_ovOpp = `optionVar -q "TT_DBCopp"`;
+        int $DBC_ovUnik = `optionVar -q "TT_DBCunik"`;
+        int $DBC_ovShape = `optionVar -q "TT_DBCshape"`;
+        int $DBC_ovHis = `optionVar -q "TT_DBChis"`;
+        int $DBC_ovNonP = `optionVar -q "TT_DBCnonP"`;
+        int $DBC_ovet = `optionVar -q "TT_DBCet"`;
+        int $DBC_ovPerFace = `optionVar -q "TT_DBPerFace"`;
+
+        if ($DBC_ovGhost == 0 && $DBC_ovOpp == 0 && $DBC_ovUnik == 0 && $DBC_ovShape == 0 && $DBC_ovHis == 0 && $DBC_ovNonP == 0 && $DBC_ovet == 0 && $DBC_ovPerFace == 0)
+        {
+                warning "Select at least on cleaning method - nothing cleaned";
+        }
+        else
+        {
+                if ($DBC_ovPerFace == 1)
+                    python("import cleanPerFaceAssignment; cleanPerFaceAssignment.cleanPerFaceAssignment()");        
+                if ($DBC_ovOpp == 1)
+                        DBC_killOppositeAttr;
+                if ($DBC_ovHis == 1)
+                        DBC_DeleteHistory;
+                if ($DBC_ovNonP == 1)
+                        DBC_nonParticleExpressions;
+                if ($DBC_ovGhost == 1)
+                        DBC_killGhostShape;
+                if ($DBC_ovShape == 1)
+                        DBC_correctShapeName;
+                if ($DBC_ovet == 1)
+                        DBC_emptyTransform;
+                if ($DBC_ovUnik == 1)
+                   {
+                        //source TT_uniqueName;
+                   }
+                print ("DATABASE CLEANER : Scene cleaned" + "\n");
+        }
+}
+global proc DBC_CheckBox()
+{
+        global string $SC_Ghost, $SC_Opp, $SC_Unik, $SC_shape, $SC_history, $SC_nonParticle, $SC_emptyTransform, $SC_PerFaceAssigment;
+
+        int $SC_Ghost_V = `checkBox -q -value $SC_Ghost`;
+        optionVar -iv "TT_DBCghost" $SC_Ghost_V;
+        int $SC_Opp_V = `checkBox -q -value $SC_Opp`;
+        optionVar -iv  "TT_DBCopp" $SC_Opp_V;
+        int $SC_Unik_V = `checkBox -q -value $SC_Unik`;
+        optionVar -iv  "TT_DBCunik" $SC_Unik_V;
+        int $SC_shape_V = `checkBox -q -value $SC_shape`;
+        optionVar -iv  "TT_DBCshape" $SC_shape_V;
+        int $SC_nonP_V = `checkBox -q -value $SC_nonParticle`;
+        optionVar -iv  "TT_DBCnonP" $SC_nonP_V;
+        int $SC_his_V = `checkBox -q -value $SC_history`;
+        optionVar -iv  "TT_DBChis" $SC_his_V;
+        int $SC_et_V = `checkBox -q -value $SC_emptyTransform`;
+        optionVar -iv  "TT_DBCet" $SC_et_V;
+        int $SC_pF_V = `checkBox -q -value $SC_PerFaceAssigment`;
+        optionVar -iv  "TT_DBPerFace" $SC_pF_V;
+}
+
+global proc DBC_killGhostShape()
+{
+        string $KGS_listShapes[] = `ls -g`;
+        string $KGS_polyShapes;
+
+        for ($KGS_polyShapes in $KGS_listShapes)
+        {
+                if (`nodeType $KGS_polyShapes` == "mesh")
+                {
+                        string $KGS_intermedAttr = $KGS_polyShapes + ".intermediateObject";
+                        int $KGS_intermedAttrValue = `getAttr $KGS_intermedAttr`;
+                        string $KGS_history[] = `listHistory -f 1 $KGS_polyShapes`;
+
+                        if ($KGS_intermedAttrValue == 1 && size($KGS_history) == 1)
+                        {
+                                delete $KGS_polyShapes;
+                                print ("KILL GHOST SHAPES : Ghost Shape " + $KGS_polyShapes + " is an intermediate object and has no connection - deleted \n");
+                        }
+
+                        if ($KGS_intermedAttrValue == 1 && size($KGS_history) == 2)
+                        {
+                                delete $KGS_polyShapes;
+                                print ("KILL GHOST SHAPES : Ghost Shape " + $KGS_polyShapes + " is an intermediate object with useless connections - deleted \n");
+                        }
+
+                        if ($KGS_intermedAttrValue == 1 && size($KGS_history) > 2)
+                        {
+                                warning ($KGS_polyShapes + " is an intermediate object and has connection(s) - check if it is not history or something usefull - skipped");
+                        }
+                }
+        }
+        print ("KILL GHOSTS SHAPES : No more ghosts shapes \n");
+
+}
+
+global proc DBC_killOppositeAttr()
+{
+        string $KOPP_list[] = `ls -g`;
+        string $KOPP_object;
+
+        int $KOPP_oppMesh = 0, $KOPP_oppSurf = 0;
+        for ($KOPP_object in $KOPP_list)
+        {
+                string $KOPP_intermed = $KOPP_object + ".intermediateObject";
+                int $KOPP_intermedCheck = `getAttr $KOPP_intermed`;
+                if (`nodeType $KOPP_object` == "nurbsSurface" || `nodeType $KOPP_object` == "mesh" && $KOPP_intermedCheck == 0)
+                {
+                        string $KOPP_opp = $KOPP_object + ".opposite";
+                        string $KOPP_2sided = $KOPP_object + ".doubleSided";
+                        int $KOPP_value = `getAttr $KOPP_opp`;
+
+                        if ($KOPP_value == 1)
+                        {
+                                setAttr $KOPP_opp 0;
+                                setAttr $KOPP_2sided 0;
+
+                                if (`nodeType $KOPP_object` == "nurbsSurface")
+                                {
+                                        reverseSurface -d 3 -ch 0 $KOPP_object;
+                                        print ("KILL OPPOSITE ATTRIBUTE : " + $KOPP_object + " .Opposite and .doubleSided set to 0 - Surface reversed \n");
+                                        $KOPP_oppSurf += 1;
+                                }
+                                else if (`nodeType $KOPP_object` == "mesh")
+                                {
+                                        polyNormal -normalMode 0 -ch 1 $KOPP_object;
+                                        print ("KILL OPPOSITE ATTRIBUTE : " + $KOPP_object + " .Opposite and .doubleSided attributes set to 0 - Mesh reversed \n");
+                                        $KOPP_oppMesh += 1;
+                                }
+                        }
+                }
+                else
+                        print ("KILL OPPOSITE ATTRIBUTE : " + $KOPP_object + " is an intermediate object, check if it is not an historic shape - skipped \n");
+
+        }
+        print ("KILL OPPOSITE ATTRIBUTE : " + $KOPP_oppMesh + " meshes and " + $KOPP_oppSurf + " surfaces reversed \n");
+}
+
+global proc DBC_correctShapeName()
+{
+        string $CSN_liste[] = `ls -l -g`;
+        string $CSN_objects;
+        for ($CSN_objects in $CSN_liste)
+        {
+                string $CSN_intermedAttr = $CSN_objects + ".intermediateObject";
+                int $CSN_intermedAttrValue = `getAttr $CSN_intermedAttr`;
+                if ($CSN_intermedAttrValue == 0)
+                {
+                        string $CSN_transform[] = `pickWalk -d up $CSN_objects`;
+                        string $CSN_transformShort = `DBC_simplifyLongName($CSN_transform[0])`;
+                        string $CSN_objectNewName = $CSN_transformShort + "Shape";
+                        if ( catch( `rename $CSN_objects $CSN_objectNewName` ) )
+                        {
+                            print( "Can't rename a read only node: " + $CSN_objects + "\n");
+                        }
+                }
+                else
+                        print ($CSN_objects + " is a ghost shape - skipped \n");
+        }
+        print ("SHAPE NAME : All Shapes renamed according to their transform \n");
+}
+
+global proc DBC_DeleteHistory()
+{
+        if ( catch( `makeIdentity -apply true -t 1 -r 1 -s 1 -n 0` ) )
+        {
+             print ( "Can't apply Freeze Transform\n" );
+        }
+        if ( catch( `DeleteHistory` ) )
+        {
+             print ( "Can't delete history\n" );
+        }
+        else
+        {
+             print ("DELETE HISTORY : All history are deleted\n");
+        }
+}
+
+global proc DBC_nonParticleExpressions()
+{
+        if ( catch( `DeleteAllExpressions` ) )
+        {
+             print ( "Can't delete all Expressions\n" );
+        }
+        else
+        {
+             print ("DELETE ALL NON PARTICLE EXPRESSIONS : All non particle expressions are deleted\n");
+        }
+}
+
+global proc DBC_emptyTransform()
+{
+        string $DBC_list[] = `ls -exactType transform`;
+        string $DBC_obj;
+
+        for ($DBC_obj in $DBC_list)
+        {
+                string $DBC_under1[] = `pickWalk -d down $DBC_obj`;
+
+                if ($DBC_under1[0] == $DBC_obj)
+                {
+                        if ( catch( `delete $DBC_obj` ) )
+                        {
+                            print( "Can't delete: " + $DBC_obj + "\n");
+                        }  
+                        print ($DBC_obj + " deleted \n");
+                }
+        }
+        print ("EMPTY TRANSFORM : All empty transform nodes are removed \n");
+undoInfo -state on;
+}
+
+global proc AdvanceObjectCleanerOptionBox()
+{
+        if (!`window -exists "AdvanceObjectCleanerWin"`)
+        {
+                global string $SC_Ghost, $SC_Opp, $SC_Unik, $SC_shape, $SC_history, $SC_nonParticle, $SC_emptyTransform, $SC_PerFaceAssigment;
+
+                window
+                        -h 300
+                        -w 190
+                        -rtf 1
+                        -sizeable 0
+                        -title "DataBase Cleaner v1.5 by seb.r"
+                        AdvanceObjectCleanerWin;
+
+                formLayout DBC_FL;
+
+                $SC_Ghost = `checkBox -height 28 -cc DBC_CheckBox -label "Ghost Shapes" "GHOST_CB"`;
+                $SC_Opp = `checkBox -height 28 -cc DBC_CheckBox -label "Opposite Attribute" "OPP_CB"`;
+                $SC_Unik = `checkBox -height 28 -cc DBC_CheckBox -label "Unique Name" "UNIK_CB"`;
+                $SC_shape = `checkBox -height 28 -cc DBC_CheckBox -label "Shape Name" "SHAPE_CB"`;
+                $SC_history = `checkBox -height 28 -cc DBC_CheckBox -label "History" "HIS_CB"`;
+                $SC_nonParticle = `checkBox -height 28 -cc DBC_CheckBox -label "Non Particle Expressions" "NPE_CB"`;
+                $SC_emptyTransform = `checkBox -height 28 -cc DBC_CheckBox -label "Empty Transform" "ET_CB"`;
+                // If multiple conections to one material
+                $SC_PerFaceAssigment= `checkBox -height 28 -cc DBC_CheckBox -label "Multy Connection to SG" "PERFACE_CB"`;
+                button -w 60 -h 20 -label "CLOSE" -c "deleteUI -window  AdvanceObjectCleanerWin" "CLOSE_BT";
+                button -w 60 -h 20 -label "CLEAN" -c AdvanceObjectCleaner "CLEAN_BT";
+
+
+                formLayout -e
+                        -af "GHOST_CB" "left" 5
+                        -af "GHOST_CB" "top" 95
+                        -af "OPP_CB" "left" 5
+                        -af "OPP_CB" "top" 5
+                        -af "UNIK_CB" "left" 5
+                        -af "UNIK_CB" "top" 125
+                        -af "SHAPE_CB" "left" 5
+                        -af "SHAPE_CB" "top" 155
+                        -af "HIS_CB" "left" 5
+                        -af "HIS_CB" "top" 35
+                        -af "NPE_CB" "left" 5
+                        -af "NPE_CB" "top" 65
+                        -af "ET_CB" "left" 5
+                        -af "ET_CB" "top" 185
+                        -af "PERFACE_CB" "left" 5
+                        -af "PERFACE_CB" "top" 215
+                        -af "CLOSE_BT" "left" 120
+                        -af "CLOSE_BT" "top" 245
+                        -af "CLEAN_BT" "left" 55
+                        -af "CLEAN_BT" "top" 245
+                        DBC_FL;
+
+                window -e -h 300 -w 190 AdvanceObjectCleanerWin;
+
+                int $DBC_ovGhost = `optionVar -q "TT_DBCghost"`;
+                int $DBC_ovOpp = `optionVar -q "TT_DBCopp"`;
+                int $DBC_ovUnik = `optionVar -q "TT_DBCunik"`;
+                int $DBC_ovShape = `optionVar -q "TT_DBCshape"`;
+                int $DBC_ovHis = `optionVar -q "TT_DBChis"`;
+                int $DBC_ovNonP = `optionVar -q "TT_DBCnonP"`;
+                int $DBC_ovet = `optionVar -q "TT_DBCet"`;
+                int $DBC_ovPerFace = `optionVar -q "TT_DBPerFace"`;
+
+                checkBox -e -v $DBC_ovGhost $SC_Ghost;
+                checkBox -e -v $DBC_ovOpp $SC_Opp;
+                checkBox -e -v $DBC_ovUnik $SC_Unik;
+                checkBox -e -v $DBC_ovShape $SC_shape;
+                checkBox -e -v $DBC_ovHis $SC_history;
+                checkBox -e -v $DBC_ovNonP $SC_nonParticle;
+                checkBox -e -v $DBC_ovet $SC_emptyTransform;
+                checkBox -e -v $DBC_ovPerFace $SC_PerFaceAssigment;
+
+                showWindow AdvanceObjectCleanerWin;
+        }
+        else
+        {
+                deleteUI -window AdvanceObjectCleanerWin;
+                AdvanceObjectCleanerOptionBox;
+        }
+}
+

@@ -1,0 +1,13 @@
+global proc string[] getMaterialsOfObjects(string $objects[])
+{
+string $sel[] = $objects;
+string $polys[] = convertPoly ($sel, "tf");
+$shape = `listRelatives -s $sel`;
+string $connections[] = `listConnections -type "shadingEngine" $shape`;
+$connections = stringArrayRemoveDuplicates($connections);
+$connections2 = `listConnections $connections`;
+$connections2 = stringArrayRemoveDuplicates($connections2);
+$allMaterials = `ls -mat`;
+$mats = stringIntersect($connections2, $allMaterials);
+return $mats;
+}

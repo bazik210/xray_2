@@ -1,0 +1,56 @@
+global proc string jpHandleReference_read(string $object)
+{
+	global string $gPrefix;
+
+	string $newObject = $object;
+	string $prefix = `jpAmIaReference($object)`;
+
+	if(!catch ("menuItem -q -cb refReTarget"))
+	{
+		int $refReTarget = `menuItem -q -cb refReTarget`;
+		if($refReTarget != 0)
+		{
+			if($prefix != 0)
+			{
+				$gPrefix = `promptDialog -query -text`;
+				$newObject = jpReConstObj($object,$gPrefix);
+			}//end if
+			else
+			{
+				$gPrefix = "";
+			}//end else
+		}//end if
+	}//end if
+	else
+	{
+		$gPrefix = "";
+	}//end else
+
+	return $newObject;
+}//end proc jpHandleReference
+
+
+
+
+global proc string jpReConstObj(string $object, string $prefix)
+{
+	string $tokObj[];
+	tokenize $object "|" $tokObj;
+
+	string $reConst = "";
+	if(`size($tokObj)` > 1)
+	{
+		
+		for($level in $tokObj)
+		{
+			$reConst = ($reConst + "|" + $prefix + $level);
+		}//end for
+	}//end if
+	else
+	{
+		//$reConst = $object;
+		$reConst = ($prefix + $tokObj[`size($tokObj)`-1]);
+	}
+
+	return $reConst;
+}//end proc jpReConstObj

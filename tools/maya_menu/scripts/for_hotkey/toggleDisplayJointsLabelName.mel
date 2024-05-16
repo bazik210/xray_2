@@ -1,0 +1,58 @@
+//==============================================================================
+//Name:
+//  toggleDisplayJointsLabelName.mel
+//==============================================================================
+//Purpose:
+//if keysPressed == "" 		 		   			// - display Joints Label Name
+//if keysPressed == "Ctrl" 					 	// - hide Joints Label Name
+//==============================================================================
+//Usage:
+//  1. Save the toggleDisplayJointsLabelName.mel to your scripts directory.
+//  2. Start Maya. In the command line type toggleDisplayJointsLabelName();
+//  3. Middlemouse drag to a shelf you like.
+//==============================================================================
+
+global proc toggleDisplayJointsLabelName()
+{
+string $keys = keysPressed();
+if ($keys == "")
+{
+string $joints_list[] = `ls-type joint`;
+string $joints;
+string $jointsAttr;
+string $jointsLabel;
+for ($joints in $joints_list)
+	{
+	string $jointsAttr = $joints + ".otherType";
+	string $jointsLabel = $joints + ".drawLabel";
+
+	setAttr $jointsLabel 1;
+	setAttr -type "string" $jointsAttr $joints;
+	setAttr ($joints + ".displayLocalAxis") 1;
+	setAttr ($joints + ".radius") 2;
+	setAttr ($joints + ".displayHandle") 1;
+	setAttr ($joints + ".type") 18;
+	}
+print "display Joints Label Name";
+}
+if ($keys == "Ctrl")
+{
+string $joints_list[] = `ls-type joint`;
+string $joints;
+string $jointsAttr;
+string $jointsLabel;
+for ($joints in $joints_list)
+	{
+	string $jointsAttr = $joints + ".otherType";
+	string $jointsLabel = $joints + ".drawLabel";
+
+	setAttr $jointsLabel 0;
+	setAttr -type "string" $jointsAttr $joints;
+	setAttr ($joints + ".displayLocalAxis") 0;
+	setAttr ($joints + ".radius") 2;
+	setAttr ($joints + ".displayHandle") 0;
+	}
+print "hide Joints Label Name";
+}
+}
+

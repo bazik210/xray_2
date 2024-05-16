@@ -1,0 +1,16 @@
+displayPref -displayGradient true; // create color gradient in maya viewport scheme
+source ajrAutoSave.mel; ajrAutoSave;
+source "myMenu.mel" ;
+source libSkin.mel;
+source libString.mel;
+source displayInfo.mel; //displayInfo;
+source HKLocalTools.mel;
+
+// scriptJob to rebuild menu as working mode changes
+scriptJob 
+	-permanent
+	-event "MenuModeChanged" "bonusToolsMenu";
+
+// build the menu the first time
+bonusToolsMenu;
+

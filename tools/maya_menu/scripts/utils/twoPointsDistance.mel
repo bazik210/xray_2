@@ -1,0 +1,1 @@
+global proc float twoPointsDistance (float $p1[], float $p2[]){float $distance = sqrt(pow(($p1[0] - $p2[0]), 2) + pow(($p1[1] - $p2[1]), 2) + pow(($p1[2] - $p2[2]), 2));return $distance;}

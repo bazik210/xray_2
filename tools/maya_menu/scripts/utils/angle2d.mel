@@ -1,0 +1,9 @@
+global proc float angle2d(vector $vector1, vector $vector2)
+{
+$angle = rad_to_deg(`angle $vector1 $vector2`);
+$rotVector = `rot $vector1 <<0,0,1>> (deg_to_rad($angle * 1))`;
+$angleEq = rad_to_deg(`angle $vector2 $rotVector`);
+if ($angleEq > 0.0001)
+	$angle *= -1;
+return $angle;
+}

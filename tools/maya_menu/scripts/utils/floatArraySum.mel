@@ -1,0 +1,8 @@
+global proc float floatArraySum(float $array[])
+{
+float $sum = 0;
+float $single;
+for ($single in $array)
+	$sum += $single;
+return $sum;
+}

@@ -1,0 +1,334 @@
+/*  This file downloaded from Highend3d.com
+''
+''  Highend3d.com File Information:
+''
+''    Script Name: create_convex_hull v0.9
+''    Author: David Biggs
+''    Last Updated: March 8, 2004
+''    Update/Change this file at:
+''    http://www.highend3d.com/maya/mel/?section=polygon#2818
+''
+''  Please do not alter any information above this line
+''  it is generated dynamically by Highend3d.com and will
+''  be changed automatically on any updates.
+*/
+
+// ------------------ create_convex_hull.mel --------------------- //
+//                                                                 //
+// Script Name:   create_convex_hull.mel                           //
+//                                                                 //
+// Creation Date: 8th March 2004                                   //
+//                                                                 //
+// Last Updated:  08/03/2004                                       //
+//                                                                 //
+// Author:        David Biggs                                      //
+//                                                                 //
+// Description:   Creates a convex hull around a selection.        //
+//                the PolySplit tool.                              //
+//                                                                 //
+// Setup:                                                          //
+//      Source create_convex_hull.mel or place it in your          //
+//	~user/my Documents/maya/5.0/scripts folder                     //
+//   Command      create_convex_hull                               //
+//                                                                 //
+// Usage: Select any polygon meshes, vertices, edges or faces and  //
+//     and run 'create_convex_hull'.                               //
+//                                                                 //
+//                                                                 //
+//                                                                 //
+// NOTE:                                                           //
+//      Due to some precision problems sometimes the hull may      //
+//  contain a few extra points than necessary, a little cleanup    //
+//  may be neccessary.                                             //
+//                                                                 //
+//  In a few cases the hull will have holes in it, I'm still       //
+//   trying to figure out that bug. If you figure it out please    //
+//   lemme know =)   You can create a hull of the dodgey hull      //
+//   and that should fix it for now.                               //
+// --------------------------------------------------------------- //
+
+
+global float $gDotThreshold = 0.00001;
+
+proc string[] getShapes( string $xform )
+{
+   string $shapes[];
+
+   $shapes[0] = $xform;
+
+   if ( "transform" == `nodeType $xform` )
+   {
+      $shapes = `listRelatives -fullPath -shapes $xform`;
+   }
+
+   return $shapes;
+}
+
+
+//  Get the normal of face '$face' from mesh '$mesh'
+proc float[] face_normal(string $object, int $face){
+	string $temp[];
+	string $n[] = eval("polyInfo -fn "+$object+".f["+$face+"]");
+	tokenize($n[0],$temp);
+	float $normal[];
+	$normal[0] =  $temp[2];
+	$normal[1] =  $temp[3];
+	$normal[2] =  $temp[4];
+	return $normal;
+}
+
+proc float vector_length(float $v1[], float $v2[])
+{
+	float $dx = $v1[0] - $v2[0];
+	float $dx = abs($dx);
+	float $dy = $v1[1] - $v2[1];
+	float $dy = abs($dy);
+	float $dz = $v1[2] - $v2[2];
+	float $dz = abs($dz);
+	float $Sqrt = sqrt(($dx*$dx) + ($dy* $dy) + ($dz* $dz));
+	return $Sqrt;
+}
+proc float[] vector_mult(float $v[], float $s)
+{
+	$v[0] = $v[0] * $s;
+	$v[1] = $v[1] * $s;
+	$v[2] = $v[2] * $s;
+	return $v;
+}
+
+
+proc float[] vector_addition3D(float $p2[], float $p1[])
+{
+	float $vec3D[];
+	$vec3D[0] = $p2[0] + $p1[0];
+	$vec3D[1] = $p2[1] + $p1[1];
+	$vec3D[2] = $p2[2] + $p1[2];
+	return $vec3D;
+}
+
+proc float[] vector_subtract3D(float $p2[], float $p1[])
+{
+	float $vec3D[];
+	$vec3D[0] = $p2[0] - $p1[0];
+	$vec3D[1] = $p2[1] - $p1[1];
+	$vec3D[2] = $p2[2] - $p1[2];
+	return $vec3D;
+}
+
+
+proc delete_visible_faces(float $v[], string $mesh)
+{
+	global float $gDotThreshold;
+	int $num_faces[] = `polyEvaluate -f $mesh`;
+	float $face_normal[];
+	float $vector[];
+	float $dot ;
+	float $face_point[];
+	int $f;
+	string $face = "";
+	string $temp[];
+	int $visible_faces[];
+	int $num_visible = 0;
+	for($f=0;$f<$num_faces[0];$f++){
+		$face = $mesh+".f["+$f+"]";
+		$face_normal = face_normal($mesh, $f);
+		$temp = `polyListComponentConversion -ff -tv $face`;
+		$temp = `ls -l -flatten $temp`;
+		$face_point = `pointPosition -w $temp[0]`;
+		$vector = vector_subtract3D($face_point ,$v);
+		$dot = dotProduct($face_normal ,$vector,0);
+		if($dot < -$gDotThreshold ) {
+			// Point is visible
+			$visible_faces[$num_visible++] = $f;
+		}
+	}
+	select -clear;
+	for($f in $visible_faces){
+		$face = $mesh+".f["+$f+"]";
+		select -add $face;
+	}
+	delete;
+}
+
+// Distance from point '$point' to a face with normal '$face_normal' where '$face_vert' is a point on that face.
+proc float dist_point_to_plane( float $point[], float $face_vert[], float $face_normal[])
+{
+    float $sb, $sn, $sd;
+	float $point_on_plane[];
+
+    $sn = -dotProduct( $face_normal, vector_subtract3D($point,$face_vert),0);
+    $sd = dotProduct($face_normal, $face_normal,0);
+    $sb = $sn / $sd;
+
+    $point_on_plane = vector_addition3D($point,vector_mult($face_normal,$sb)) ;
+    return vector_length($point, $point_on_plane);
+}
+
+
+// Determines if point '$v' is inside the mesh '$mesh'
+proc int is_inside_hull(float $v[], string $mesh)
+{
+	global float $gDotThreshold;
+	int $num_faces[] = `polyEvaluate -f $mesh`;
+	float $face_normal[];
+	float $vector[];
+	float $dot ;
+	string $temp[];
+	float $face_point[];
+	int $f;
+	string $face = "";
+	for($f=0;$f<$num_faces[0];$f++){
+		$face = $mesh+".f["+$f+"]";
+		$face_normal = face_normal($mesh, $f);
+		$temp = `polyListComponentConversion -ff -tv $face`;
+		$temp = `ls -l -flatten $temp`;
+		$face_point = `pointPosition -w $temp[0]`;
+		$vector = vector_subtract3D($face_point ,$v);
+		$dot = dotProduct($face_normal ,$vector,1);
+		if($dot < -$gDotThreshold ) {
+			// Point is outside the hull.
+			return 0;
+		}
+	}
+//	Point is inside the hull.
+	return 1;
+}
+
+//get the index of a component.
+proc int getIndex(string $a) {
+	string $temp[];
+	tokenize($a,"]",$temp);
+	tokenize($temp[0],"[",$temp);
+	int $n = $temp[1];
+	return $n;
+}
+
+
+//get the name of the point in the array '$verts' furthest from face '$faceIndex' in object '$object'
+proc string furthest_point(string $object, int $faceIndex, string $verts[]){
+	global float $gDotThreshold;
+	float $vector[];
+	float $face_normal[] = {0.0,0.0,0.0};
+	float $vPos[];
+	string $temp[];
+	float $length = 0;
+	float $templength = 0;
+	float $dot;
+	string $furthest_point = "";
+	string $face = $object+".f["+$faceIndex+"]";
+	int $f = getIndex($face);
+	$face_normal = face_normal($object, $f);
+	$temp = `polyListComponentConversion -ff -tv $face`;
+	$temp = `ls -l -flatten $temp`;
+	$face_vert = `pointPosition -w $temp[0]`;
+	for($v in $verts){
+		float $fn[] = $face_normal;
+		$vPos = `pointPosition -w $v`;
+		$vector = vector_subtract3D($vPos,$face_vert);
+		$dot = dotProduct($fn ,vector_subtract3D($vPos,$face_vert),0);
+		if($dot > $gDotThreshold){
+			$templength = dist_point_to_plane( $vPos, $face_vert, $fn);
+			if($templength > $length && $templength > 0.000001){
+				$length = $templength;
+				$furthest_point = $v;
+			}
+		}
+	}
+	return $furthest_point;
+}
+
+//ConvertSelectionToVertices;
+global proc string create_convex_hull(){
+
+	//PolyCreateFacet doesn't like units that aren't cm...Maya is lame sometimes.
+	constructionHistory -toggle false;
+	string $units = `currentUnit -query -linear`;
+	currentUnit -linear "cm";
+	undoInfo -state on;
+
+	ConvertSelectionToVertices;
+	string $verts[] = `ls -sl -flatten`;
+	string $temp[];
+	tokenize($verts[0],".",$temp);
+	string $object = $temp[0];
+
+	int $numVerts = size($verts);
+
+	int $num_hull_faces[];
+	int $num_hull_verts[];
+	float $a[],$b[],$c[];
+	string $furthest_point;
+	int $done_point = 0;
+	$a = `pointPosition -w $verts[0]`;
+	$b = `pointPosition -w $verts[1]`;
+	$c = `pointPosition -w $verts[(size($verts)-1)]`;
+
+	string $polyCreate[] = `polyCreateFacet -ch 0 -tx 1 -s 1
+  				-p $a[0] $a[1] $a[2]
+				-p $b[0] $b[1] $b[2]
+				-p $c[0] $c[1] $c[2]`;
+
+
+	string $hull_mesh = $polyCreate[0];
+	$shapes = getShapes($hull_mesh);
+	string $hull_shape = $shapes[0];
+
+	polyAppend -ch 0 -s 1 -tx 1 -ed 0 -ed 2 -ed 1 $hull_shape ;
+
+	global string $gMainProgressBar;
+	int $max = size($verts);
+	progressBar -edit
+		-beginProgress
+		-isInterruptable true
+		-status "Creating Convex Hull:"
+		-maxValue $max
+		$gMainProgressBar;
+
+	$verts = stringArrayRemove({$verts[0],$verts[1],$verts[(size($verts)-1)]},$verts);
+	while(size($verts)>0){
+		$done_point = 0;
+		$num_hull_faces = `polyEvaluate -f $hull_mesh`;
+		for($j=0;$j<$num_hull_faces[0];$j++){
+			$furthest_point = furthest_point($hull_mesh, $j, $verts);
+			if($furthest_point!=""){
+				$done_point = 1;
+				$a = `pointPosition -w $furthest_point`;
+				delete_visible_faces($a,$hull_mesh);
+				select -r $hull_mesh;
+				hilite -u -r $hull_mesh;
+				polyCloseBorder -ch 0 $hull_mesh;
+				$nhull_faces = `polyEvaluate -f $hull_mesh`;
+				eval("polySubdivideFacet -dv 1 -m 1 -ch 0 "+$hull_mesh+".f["+$nhull_faces[0]+"]");
+				$num_hull_verts = `polyEvaluate -v $hull_mesh`;
+				eval("xform -ws -t "+$a[0]+" "+$a[1]+" "+$a[2]+" "+$hull_mesh+".vtx["+($num_hull_verts[0]-1)+"]");
+				$verts = stringArrayRemove({$furthest_point},$verts);
+
+				progressBar -edit -step 1 $gMainProgressBar;
+
+				if(size($verts)==0) break;
+			}
+			$furthest_point = "";
+		}
+		for($v in $verts){
+			$a = `pointPosition -w $v`;
+			if(is_inside_hull($a,$hull_mesh)){
+				progressBar -edit -step 1 -status "Creating Convex Hull:" $gMainProgressBar;
+				$verts = stringArrayRemove({$v},$verts);
+			}
+		}
+		if($done_point==0 && size($verts)>0)
+		{
+			warning("Some points within distance theshold skipped");
+			break;
+		}
+
+	}
+	select $hull_mesh;
+	polySoftEdge -a 0 -ch 0 $hull_mesh;
+	currentUnit -linear $units;
+	constructionHistory -toggle true;
+	undoInfo -state on;
+	progressBar -edit -endProgress 	$gMainProgressBar;
+
+	return $hull_mesh;
+}

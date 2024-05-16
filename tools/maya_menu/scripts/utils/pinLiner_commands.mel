@@ -1,0 +1,490 @@
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h1()
+{
+	string $sel[] = `ls -sl`;
+	if (size($sel) == 0)
+		{
+		warning "pinLiner -> Please select 1 object.";
+		}
+	else
+		{
+		HideSelectedObjects;
+		}
+	clear $sel;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h2()
+{
+	string $sel[] = `ls -sl`;
+	if (size($sel) == 0)
+		{
+		warning "pinLiner -> Please select 1 object.";
+		}
+	else
+		{
+		HideUnselectedObjects;
+		}
+	clear $sel;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h3()
+{
+ShowSelectedObjects;
+}
+
+global proc command_h4()
+{
+		ShowPolygonSurfaces;
+		hideShow -geometry -show;
+		hideShow -lights -show;
+		hideShow -kinematics -show;
+		hideShow -cameras -hide;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h5()
+{
+string $selection[] = `ls -sl -l`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	string $selAll[] = `ls -g`;
+	for ($shape in $selAll)
+		{
+		int $flag = `getAttr ($shape+".overrideDisplayType ")`;
+		if ($flag == 2)
+			{
+			setAttr ($shape+".overrideEnabled") 0;
+			setAttr ($shape+".overrideDisplayType ") 0;
+			setAttr ($shape+".overrideTexturing") 1;
+			setAttr ($shape+".overrideShading") 1;
+			setAttr ($shape+".overrideLevelOfDetail") 0;
+			setAttr ($shape+".overrideVisibility") 1;
+			}
+		}
+	print "all restored";
+	}
+
+for ($sel in $selection)
+	{
+	string $shapes[] = `listRelatives -s $sel`;
+for ($shape in $shapes)
+	{
+	int $flag = `getAttr ($shape+".overrideEnabled")`;
+	if ($flag == 1)
+	 	{
+		setAttr ($shape+".overrideEnabled") 0;
+		setAttr ($shape+".overrideDisplayType ") 0;
+		setAttr ($shape+".overrideTexturing") 1;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 0;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	else
+		{
+		setAttr ($shape+".overrideEnabled") 1;
+		setAttr ($shape+".overrideDisplayType ") 2;
+		setAttr ($shape+".overrideTexturing") 0;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 0;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	}
+}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h6()
+{
+string $selection[] = `ls -sl -l`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	string $selAll[] = `ls -g`;
+	for ($shape in $selAll)
+		{
+		int $flag = `getAttr ($shape+".overrideDisplayType ")`;
+		if ($flag == 1)
+			{
+			setAttr ($shape+".overrideEnabled") 0;
+			setAttr ($shape+".overrideDisplayType ") 0;
+			setAttr ($shape+".overrideTexturing") 1;
+			setAttr ($shape+".overrideShading") 1;
+			setAttr ($shape+".overrideLevelOfDetail") 0;
+			setAttr ($shape+".overrideVisibility") 1;
+			}
+		}
+	print "all restored";
+	}
+
+for ($sel in $selection)
+	{
+	string $shapes[] = `listRelatives -s $sel`;
+for ($shape in $shapes)
+	{
+	int $flag = `getAttr ($shape+".overrideEnabled")`;
+	if ($flag == 1)
+	 	{
+		setAttr ($shape+".overrideEnabled") 0;
+		setAttr ($shape+".overrideDisplayType ") 0;
+		setAttr ($shape+".overrideTexturing") 1;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 0;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	else
+		{
+		setAttr ($shape+".overrideEnabled") 1;
+		setAttr ($shape+".overrideDisplayType ") 1;
+		setAttr ($shape+".overrideTexturing") 1;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 0;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	}
+}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h7()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h8()
+{
+string $selection[] = `ls -sl -l`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	string $selAll[] = `ls -g`;
+	for ($shape in $selAll)
+		{
+		int $flag = `getAttr ($shape+".overrideLevelOfDetail")`;
+		if ($flag == 1)
+			{
+			setAttr ($shape+".overrideEnabled") 0;
+			setAttr ($shape+".overrideDisplayType ") 0;
+			setAttr ($shape+".overrideTexturing") 1;
+			setAttr ($shape+".overrideShading") 1;
+			setAttr ($shape+".overrideLevelOfDetail") 0;
+			setAttr ($shape+".overrideVisibility") 1;
+			}
+		}
+	print "all restored";
+	}
+
+for ($sel in $selection)
+	{
+	string $shapes[] = `listRelatives -s $sel`;
+for ($shape in $shapes)
+	{
+	int $flag = `getAttr ($shape+".overrideEnabled")`;
+	if ($flag == 1)
+	 	{
+		setAttr ($shape+".overrideEnabled") 0;
+		setAttr ($shape+".overrideDisplayType ") 0;
+		setAttr ($shape+".overrideTexturing") 1;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 0;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	else
+		{
+		setAttr ($shape+".overrideEnabled") 1;
+		setAttr ($shape+".overrideDisplayType ") 0;
+		setAttr ($shape+".overrideTexturing") 1;
+		setAttr ($shape+".overrideShading") 1;
+		setAttr ($shape+".overrideLevelOfDetail") 1;
+		setAttr ($shape+".overrideVisibility") 1;
+		}
+	}
+}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h9()
+{
+string $selection[] = `ls -sl -l`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	string $selAll[] = `ls -g`;
+	for ($shape in $selAll)
+		{
+		setAttr ($shape+".displayEdges") 1;
+		}
+	print "all restored";
+	}
+
+for ($sel in $selection)
+	{
+	string $shapes[] = `listRelatives -s $sel`;
+for ($shape in $shapes)
+	{
+	int $flag = `getAttr ($shape+".displayEdges")`;
+	if ($flag == 2)
+	 	{
+		setAttr ($shape+".displayEdges") 1;
+		print "Display Soft\Hard Edges";
+		}
+	else
+		{
+		setAttr ($shape+".displayEdges") 2;
+		print "Display Hard Edges only";
+		}
+	}
+}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_h10()
+{
+  string $selection[]  = `ls -sl`;
+  int $sel;
+
+  if (`size ($selection)` == 0)
+  {
+    warning "select at least 1 object";
+  }
+  else
+  {
+    for ($sel=0;$sel<size($selection);$sel++)
+    {
+      string $shape[] = `pickWalk -d down $selection[$sel]`;
+
+      if (`nodeType $shape[0]` == "mesh" || `nodeType $shape[0]` == "nurbsSurface")
+      {
+        int $display[] = `displaySurface -q -xRay $selection[$sel]`;
+        if ($display[0] == 0)
+          displaySurface -xRay 1 $selection[$sel];
+        else
+          displaySurface -xRay 0 $selection[$sel];
+      }
+
+    }
+    select -r $selection;
+  }
+}
+
+
+
+
+
+// Vertical ////////////////////////////////////////////////////////////////////
+global proc command_v1()
+{
+string $selection[] = `ls -sl -l`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	warning ("Select one or more object" + "\n");
+	}
+
+else
+	{
+	$name = `     createDisplayLayer -name ($selection[0] + "_layer") -number 1`;
+	//setAttr ($name + ".color") (rand(23,32));
+	print "Layer from selected object created";
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v2()
+{
+SetCustomPolygonFaceColor;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v3()
+{
+XRayObjectRenamer;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v4()
+{
+XRayCreateInstances;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v5()
+{
+python("import transformToInstance; transformToInstance.transformToInstanceMain()");
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v6()
+{
+python("import isInstanced; isInstanced.isInstanced()");
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v7()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v8()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v9()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v10()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v11()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v12()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v13()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v14()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v15()
+{
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v16()
+{
+string $selection[] = `ls -sl`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	warning ("Select one or more object" + "\n");
+	}
+
+else
+
+for ($shape in $selection)
+	{
+	undoInfo -state off;
+		polySoftEdge -a 45 -ch 1 $shape;
+		print ("Auto smooth - object >>>" + $shape + "\n");
+		DeleteHistory;
+	undoInfo -state on;
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v17()
+{
+string $selection[] = `ls -sl`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	warning ("Select one or more object" + "\n");
+	}
+
+else
+
+for ($shape in $selection)
+	{
+	undoInfo -state off;
+		polySoftEdge -a 75 -ch 1 $shape;
+		print ("Auto smooth - object >>>" + $shape + "\n");
+		DeleteHistory;
+	undoInfo -state on;
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v18()
+{
+undoInfo -state off;
+$his = `constructionHistory -q -tgl`;
+{
+string $selection[] = `ls -sl`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	warning ("Select one or more object" + "\n");
+	}
+else
+
+for ($shape in $selection)
+	{
+	$sel = `ls -sl`;
+	$verts = `size (conv($sel, "v"))`;
+	$gMergeValuerRes = 0.001;
+	string $obj;
+	for ($obj in $sel)
+		polyMergeVertex -d $gMergeValuerRes -ch $his $obj;
+	select $sel;
+	$verts2 = `size (conv($sel, "v"))`;
+	$size = $verts - $verts2;
+	if ($size == 0)
+		print ($shape + " >>> " + "0 verts welded" + "\n");
+	else
+		print ("MergeValue - " + $shape + " >>> "+ $size + " verts welded" + "\n");
+
+		DeleteHistory;
+	}
+	}
+undoInfo -state on;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc command_v19()
+{
+string $selection[] = `ls -sl`;
+$size = (size ($selection));
+
+if ($size == 0)
+	{
+	warning ("Select one or more object" + "\n");
+	}
+
+else
+
+for ($shape in $selection)
+	{
+	undoInfo -state off;
+		polyMergeUV -d 0.001 -ch 1 $shape;
+		print ("Merge UV - object >>> " + $shape + "\n");
+		DeleteHistory;
+	undoInfo -state on;
+	}
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+///Utils////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+global proc string[] pl_getShapeType(string $obj) {
+	string $catch[];
+
+	$catch = `listRelatives -s $obj`;
+
+	if (size($catch) > 0) {
+		$catch[1] = `nodeType $catch[0]`;
+	}
+
+	return $catch;
+	clear $catch;
+}
+////////////////////////////////////////////////////////////////////////////////
+global proc int pl_attrExist(string $object) {
+	string $buffer[];
+
+	tokenize $object "." $buffer;
+
+	if (`attributeQuery -n $buffer[0] -ex $buffer[1]`) {
+		return true;
+	} else {
+		return false;
+	}
+}
+////////////////////////////////////////////////////////////////////////////////
+
+
+
+

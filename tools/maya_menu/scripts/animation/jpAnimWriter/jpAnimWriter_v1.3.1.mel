@@ -1,0 +1,1313 @@
+//James Parks 12/18/03 - 06/02/05
+//jpAnimWriter_v1.3
+
+
+
+/*
+
+Copyright (C) 2005  James Parks
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+
+
+
+
+
+//This script will write out a file containing MEL commands
+//to specifically created folders in  your project. These 
+//scripts when sourced will recreate either a selection set, 
+//a character pose, or an animation clip in your scene
+
+//The interface will then allow you to pick among these files 
+//and apply one to your current scene. There is also a project 
+//line that lets you change your project to keep the scripts 
+//associated with the right scenes and characters
+
+//Thanks to Erick Miller for some code and ideas from his pose2shelf script
+//Thanks to my beta tester Andrea Shear, the guys at Entity FX and KaChew
+
+//v1.3   -- added reference retargeting for animation
+//		cleaned up the mel file names and procedure names
+//		added alpha sort function for list of files
+//		changed save settings to optionVar command
+//v1.2.2 -- added ability to save settings to a file
+//v1.2.1 -- added some file overwrite protection at the request of a user
+//v1.2   -- added "Paste Curves at Current Values" option box
+//		under animation options. It works now.
+//	added subFolders functionality. 
+//	added some file error-checking.
+//	added some Operating System checking. Might be needed in the 
+//		future for OS specific commands.
+//	changed "elegant/brute force" switch to "Tangents/No Tangents"		
+//v1.1   --  added elegant save method which can save tangency information
+//		added replace/add to selection list function
+
+
+///////////////////////
+//Set the global variable for the version number
+///////////////////////
+global string $aWriterVerNum = "1.3.1";
+
+//Set initial password
+if(!`optionVar -exists "jpAwPassword"`)
+	optionVar -sv "jpAwPassword" "2001";
+
+///////////////////////
+//switch various controls on or off as they're needed
+///////////////////////
+global proc jpTurnSelOptionsOn()
+{
+	radioButtonGrp -e -en 1 addReplaceGrp;
+	radioButtonGrp -e -l1 "Add" -l2 "Replace"  -l3 "Subtract" addReplaceGrp;
+}//end proc jpTurnSelOptionsOn
+
+global proc jpTurnSelOptionsOff()
+{
+	radioButtonGrp -e -en 0 addReplaceGrp;
+}//end proc jpTurnSelOptionsOff
+
+global proc jpTurnPoseOptionsOn()
+{
+	button -e -en 1 blendButton;
+	button -e -en 1 iconsButton;
+	radioButtonGrp -e -en 0 addReplaceGrp;
+	radioButtonGrp -e -l1 "N/A" -l2 "N/A" -l3 "N/A" addReplaceGrp;
+}//end proc jpTurnPoseOptionsOn
+
+global proc jpTurnPoseOptionsOff()
+{
+	button -e -en 0 blendButton;
+	button -e -en 0 iconsButton;
+}//end proc jpTurnPoseOptionsOff
+
+global proc jpTurnAnimOptionsOn()
+{
+	floatFieldGrp -e -en 1 animRange;
+	radioButtonGrp -e -en 1 animSaveType;
+	checkBoxGrp -e -en 1 tvOffsets;
+	button -e -en 1 refreshAnimRange;
+	//radioButtonGrp -e -en 1 addReplaceGrp;
+	radioButtonGrp -e -l1 "N/A" -l2 "N/A" -l3 "N/A" addReplaceGrp;
+}//end proc jpTurnAnimOptionsOn
+
+global proc jpTurnAnimOptionsOff()
+{
+	floatFieldGrp -e -en 0 animRange;
+	radioButtonGrp -e -en 0 animSaveType;
+	checkBoxGrp -e -en 0 tvOffsets;
+	button -e -en 0 refreshAnimRange;
+	//radioButtonGrp -e -en 0 addReplaceGrp;
+}//end proc jpTurnAnimOptionsOff
+
+global proc jpToggleRecursive()
+{
+	textFieldGrp -e -en (!`textFieldGrp -q -en recursiveText`) recursiveText;
+}//end proc jpToggleRecursive
+
+
+///////////////////////
+//Decide which kind of file to write
+///////////////////////
+global proc jpWriteAnimChoice()
+{
+global string $gChannelBoxName;
+	string $selected[];
+	string $initSelected[];
+	string $heirarchySelected[];
+
+	string $filter = `textFieldGrp -q -tx recursiveText`;
+
+	string $longNodeNames = `menuItem -q -rb longNodeNames`;
+
+	if(`checkBoxGrp -q -value1 recursiveCheckBox` == 1)
+	{
+		if($longNodeNames)
+			$initSelected = `ls -sl -l`;
+		else
+			$initSelected = `ls -sl`;
+
+		select -hi $initSelected;
+
+		if($longNodeNames)
+			$heirarchySelected = `ls -sl -l`;
+		else
+			$heirarchySelected = `ls -sl`;
+		$selected = jpFilterList($heirarchySelected, $filter);
+	}//end if
+	else
+	{
+		if($longNodeNames)
+			$selected = `ls -sl -l`;
+		else
+			$selected = `ls -sl`;
+	}//end else
+	string $name = `textFieldGrp -q -tx nameGrp`;
+	float $min = `floatFieldGrp -q -v1 animRange`;
+	float $max = `floatFieldGrp -q -v2 animRange`;
+	int $saveType = `radioButtonGrp -q -sl animSaveType`;
+
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			jpSaveSelectionToFile($name, $selected);
+			break;
+		case 2:
+			//check for references
+			int $refReTarget = `menuItem -q -cb refReTarget`;
+			if($refReTarget != 0)
+			{
+				string $prefix = `jpAmIaReference($selected[0])`;
+				if($prefix != "0")
+				{
+					string $confirm = `promptDialog -t "!!Saving from Reference!!" 
+						-ma "left"
+						-m "Is this the correct prefix?"
+						-tx $prefix 
+						-b "Confirm"
+						-b "Cancel"
+						-ds "" 
+						-db "Confirm"
+						-cb "Cancel"`;
+					if($confirm == "Cancel")
+					{
+						break;
+					}//end if
+					else
+					{
+						$gPrefix = `promptDialog -query -text`;
+					}//end else
+				}//end if
+			}//end if
+			string $pickedAttrs[] = `channelBox -q -sma $gChannelBoxName`;
+			jpSavePoseToFile($name, $selected, $pickedAttrs);
+			break;
+		case 3:
+			//check for references
+			int $refReTarget = `menuItem -q -cb refReTarget`;
+			if($refReTarget != 0)
+			{
+				string $prefix = `jpAmIaReference($selected[0])`;
+				if($prefix != "0")
+				{
+					string $confirm = `promptDialog -t "!!Saving from Reference!!" 
+						-ma "left"
+						-m "Is this the correct prefix?"
+						-tx $prefix 
+						-b "Confirm"
+						-b "Cancel"
+						-ds "" 
+						-db "Confirm"
+						-cb "Cancel"`;
+					if($confirm == "Cancel")
+					{
+						break;
+					}//end if
+					else
+					{
+						$gPrefix = `promptDialog -query -text`;
+					}//end else
+				}//end if
+			}//end if
+
+			//which method to use
+			string $pickedAttrs[] = `channelBox -q -sma $gChannelBoxName`;
+			if(`menuItem -q -rb bruteForce` == 1)
+				jpBruteForce_saveAnimationToFile($name, $min, $max, $saveType, $selected, $pickedAttrs);
+			else
+				jpElegant_saveAnimmationToFile($name, $min, $max, $saveType, $selected, $pickedAttrs);
+			break;
+		default:
+			warning "An error has occured: jpWriteAnimChoice";
+			break;
+	}//end switch
+	jpPopulateFileList();
+}//end proc jpWriteAnimChoice
+
+
+//////////////////////////
+//Learn what files exist in the SELS, POSES, and ANIMS folders
+//and put those files into the textScrollList
+//////////////////////////
+global proc jpPopulateFileList()
+{
+	textScrollList -e -ra writerFileList;
+
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder + "/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+
+	string $selFiles[] = `getFileList -fld $selsPath -fs "*.SEL"`;
+	string $poseFiles[] = `getFileList -fld $posesPath -fs "*.POSE"`;
+	string $animFiles[] = `getFileList -fld $animsPath -fs "*.ANIM"`;
+
+	int $listMethod = `menuItem -q -rb listAlpha`;
+	if($listMethod == 1)
+	{
+		$selfFiles = sort($selFiles);
+		$poseFiles = sort($poseFiles);
+		$animFiles = sort($animFiles);
+	}
+
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			for($sel in $selFiles)
+			{
+			textScrollList -e -append $sel writerFileList;
+			}
+			break;
+		case 2:
+			for($pose in $poseFiles)
+			{
+			textScrollList -e -append $pose writerFileList;
+			}
+			break;
+		case 3:
+			for($anim in $animFiles)
+			{
+			textScrollList -e -append $anim writerFileList;
+			}
+			break;
+		default:
+			//warning "An error has occured: jpPopulateFileList";
+			break;
+	}//end switch
+
+	textFieldGrp -e -tx $project currentProj;
+}//end proc jpPopulateFileList
+
+
+///////////////////////////
+//Apply the file that's been selected in the list
+///////////////////////////
+global proc jpApplyFile()
+{
+	global string $gPrefix;
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder +"/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+	int $addReplace = `radioButtonGrp -q -sl addReplaceGrp`;
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			if($addReplace == 2)
+			{
+				select -cl;
+			}//end if
+			else if($addReplace == 3)
+				print "FIX ME: Subtract Selection";
+			string $fullname = ("\"" + $selsPath +  $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			break;
+		case 2:
+			//prompt if a reference
+			int $refReTarget = `menuItem -q -cb refReTarget`;
+			if($refReTarget != 0)
+			{
+				string $curObj[] = `ls -sl`;
+				string $prefix = `jpAmIaReference($curObj[0])`;
+				if($prefix != "0")
+				{
+					string $confirm = `promptDialog -t "!!Applying to Referenced!!" 
+						-ma "left"
+						-m "Is this the correct prefix?"
+						-tx $prefix 
+						-b "Confirm"
+						-b "Cancel"
+						-ds "" 
+						-db "Confirm"
+						-cb "Cancel"`;
+					if($confirm == "Cancel")
+					break;
+				}//end if
+			}//end if
+			string $fullname = ("\"" + $posesPath + $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			$gPrefix = "";
+			break;
+		case 3: 
+			//prompt if a reference
+			int $refReTarget = `menuItem -q -cb refReTarget`;
+			if($refReTarget != 0)
+			{
+				string $curObj[] = `ls -sl`;
+				string $prefix = `jpAmIaReference($curObj[0])`;
+				if($prefix != "0")
+				{
+					string $confirm = `promptDialog -t "!!Applying to Referenced!!" 
+						-ma "left"
+						-m "Is this the correct prefix?"
+						-tx $prefix 
+						-b "Confirm"
+						-b "Cancel"
+						-ds "" 
+						-db "Confirm"
+						-cb "Cancel"`;
+					if($confirm == "Cancel")
+					break;
+				}//end if
+			}//end if
+			string $fullname = ("\"" + $animsPath +  $selFile[0] + "\"");
+			evalEcho("source "+ $fullname);
+			jpWriteAnim();
+			$gPrefix = "";
+			break;
+		default:
+			warning "An error has occured: jpApplyFile";
+			break;
+	}//end switch
+}//end proc jpApplyFile
+
+
+//////////////////
+//Make Directories
+//////////////////
+global proc jpMakeDirs()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+	string $posesIconsPath = ($project + "\/data\/POSES\/icons\/");
+
+	sysFile -md $selsPath;
+	sysFile -md $posesPath;
+	sysFile -md $animsPath;
+	sysFile -md $posesIconsPath;
+
+	print ("\nFolders Made: \n     " + $selsPath + "\n     " + $posesPath + "\n     " + $animsPath);
+}//end proc jpMakeDirs
+
+
+////////////////////////
+//Clean out directories of deleted files
+////////////////////////
+global proc jpCleanDirs()
+{
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder + "/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+
+	string $selFiles[] = `getFileList -fld $selsPath -fs "*.deleted"`;
+	string $poseFiles[] = `getFileList -fld $posesPath -fs "*.deleted"`;
+	string $animFiles[] = `getFileList -fld $animsPath -fs "*.deleted"`;
+
+	string $confirm = `confirmDialog 
+					-t "Clean Folders?" 
+					-ma "center" 
+					-m "This will PERMANENTLY remove all previously \ndeleted SELS, POSES, and ANIMS. Are you sure?" 
+					-b "Yes"
+					-b "No"
+					-db "No"`
+					;
+
+	if($confirm == "Yes")
+	{
+		for($file in $selFiles)
+		{
+			string $fullname = ($selsPath + "\/" + $file);
+			sysFile -del $fullname;
+		}//end for
+		for($file in $poseFiles)
+		{
+			string $fullname = ($posesPath + "\/" + $file);
+			sysFile -del $fullname;
+		}//end for
+		for($file in $animFiles)
+		{
+			string $fullname = ($animsPath + "\/" + $file);
+			sysFile -del $fullname;
+		}//end for
+		print ("\nFolders cleaned of *.deleted files: \n     " + $selsPath + "\n     " + $posesPath + "\n     " + $animsPath);
+
+	}//end if
+	else
+	{
+		print "\nClean folders aborted";
+	}//end else
+}//end proc jpCleanDirs
+
+
+//////////////////////////
+//Delete the selected file
+//////////////////////////
+global proc jpDeleteFile()
+{
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder + "/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+	switch($type)
+	{
+		case 1:
+			string $fullname = ($selsPath + "\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		case 2:
+			string $fullname = ($posesPath +"\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		case 3: 
+			string $fullname = ($animsPath +"\/" + $selFile[0]);
+			sysFile -ren ($fullname + ".deleted") $fullname;
+			break;
+		default:
+			warning "An error has occured: jpDeleteFile";
+			break;
+	}//end switch
+jpPopulateFileList();
+}//end proc jpDeleteFile
+
+
+/////////////////////////
+//Delete All Files in the fileList
+/////////////////////////
+global proc jpDeleteAllFiles()
+{
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder + "/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+
+	string $files[] = `textScrollList -q -ai writerFileList`;
+	int $type = `radioButtonGrp -q -sl saveAsType`;
+
+	string $confirm = `confirmDialog 
+					-t "Delete All in Folder?" 
+					-m "Delete All in Folder? Are you SURE?"
+					-ma "center" 
+					-b "Yes"
+					-b "No"
+					-db "No"`
+					;
+
+	if($confirm == "Yes")
+	{
+		for($file in $files)
+		{
+			switch($type)
+			{
+				case 1:
+					string $fullname = ($selsPath + "\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				case 2:
+					string $fullname = ($posesPath +"\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				case 3: 
+					string $fullname = ($animsPath +"\/" + $file);
+					sysFile -ren ($fullname + ".deleted") $fullname;
+					break;
+				default:
+					warning "An error has occured: jpDeleteAllFiles";
+					break;
+			}//end switch
+		}//end for: files
+	}//end if
+	else
+	{
+		print "\nDelete All aborted";
+	}//end else
+jpPopulateFileList();
+}//end proc jpDeleteAllFiles
+
+
+//////////////////////////
+//Rename the selected file
+//////////////////////////
+global proc jpRenameFile()
+{
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder + "/");
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder + "/");
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder + "/");
+
+	string $selFile[] = `textScrollList -q -si writerFileList`;
+	string $newFileName = `textFieldGrp -q -tx newFileNameGrp`;
+
+	if($newFileName != "")
+	{
+		int $type = `radioButtonGrp -q -sl saveAsType`;
+		switch($type)
+		{
+			case 1:
+				string $fullname = ($selsPath + "\/" + $selFile[0]);
+				string $newName = ($selsPath + "\/" + $newFileName + ".SEL");
+				sysFile -ren $newName $fullname;
+				break;
+			case 2:
+				string $fullname = ($posesPath +"\/" + $selFile[0]);
+				string $newName = ($posesPath + "\/" + $newFileName + ".POSE");
+				sysFile -ren $newName $fullname;
+				break;
+			case 3: 
+				string $fullname = ($animsPath + "\/" + $selFile[0]);
+				string $newName = ($animsPath + "\/" + $newFileName + ".ANIM");
+				sysFile -ren $newName $fullname;
+				break;
+			default:
+				warning "An error has occured: jpRenameFile";
+				break;
+		}//end switch
+	}
+	else
+	{
+		warning "Files must have a name";
+	}
+jpPopulateFileList();
+}//end proc jpRenameFile
+
+
+global proc jpRenameFileWin()
+{
+	string $winName = "AnimWriter_RenameWin";
+	string $currentFolder = jpGetCheckedFolder();
+
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t "Rename File" -wh 210 95 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+	string $tmpName[] = `textScrollList -q -si writerFileList`; 
+	string $tokName[];
+	tokenize $tmpName[0] "." $tokName;
+
+
+	columnLayout;
+		textFieldGrp 
+			-l "Old Name : "
+			-cal 1 "left" 
+			-cal 2 "left" 
+			-cw 1 75 
+			-cw 2 125 
+			-ed 0
+			-tx $tokName[0] 
+			oldFileNameGrp;
+		textFieldGrp 
+			-l "New Name : " 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cw 1 75 
+			-cw 2 125 
+			-tx $tokName[0] 
+			newFileNameGrp;
+		rowColumnLayout -nc 2;
+			button -l "Rename" -c ("jpRenameFile();deleteUI " + $winName);
+			button -l "Cancel" -c ("deleteUI " + $winName);
+
+	window -e -wh 210 95 $winName;
+	showWindow $winName;
+}//end proc jpRenameFileWin
+
+
+global proc jpBlendStoredPoseWin(string $pose)
+{
+if($pose != "")
+{
+	string $winName = "AnimWriter_BlendStoredPoseWin";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t "Blend Stored Pose" -wh 215 90 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+	columnLayout;
+		text -l $pose;
+		floatSliderGrp 
+			-cal 1 "left" 
+			-cal 2 "left" 
+			-cw 1 50 
+			-cw 2 100 
+			-cc ("select \"jpBlendPoseEXPR\"; expression -e -n jpBlendPoseEXPR")
+			-dc ("select \"jpBlendPoseEXPR\"; expression -e -n jpBlendPoseEXPR")
+			-f 1 -min -1 -max 1 -v 1 -pre 2
+			blendStoredPoseSliderGrp;
+		rowColumnLayout -nc 2;
+			button -l "Set" -c ("delete \"jpBlendPoseEXPR*\"; deleteUI " + $winName);
+			//button -l "Cancel" -c ("resetPose();deleteUI " + $winName);
+			button -l "Cancel" -c ("floatSliderGrp -e -v 0 blendStoredPoseSliderGrp; select \"jpBlendPoseEXPR\"; expression -e -n jpBlendPoseEXPR; delete \"jpBlendPoseEXPR*\"; deleteUI " + $winName);
+
+	window -e -wh 215 90 $winName;
+	showWindow $winName;
+}
+else
+{
+	warning "Must select a stored pose to blend to";
+}
+}//end proc blendStoredPose
+
+
+
+////////////////////////
+//Working with SubFolders
+////////////////////////
+
+//Find sub-folders
+global proc jpPopulateFolders()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+	string $allInFolder[] = `getFileList -folder $posesPath`;
+	string $subFolders[];
+
+	int $i = 0;
+	for($object in $allInFolder)
+	{
+		string $tokFolder[];
+		int $numOfTokens = `tokenize $object "_" $tokFolder`;
+		if($tokFolder[$numOfTokens - 1] == "Folder")
+		{
+			$subFolders[$i] = $object;
+			$i = $i + 1;
+		}//end if
+	}//end for: object
+
+	for($folder in $subFolders)
+	{
+		menuItem -l $folder -cl "selectedSubFolder" -c "jpPopulateFileList()" -rb 0 $folder;
+	}//end for: folder
+}//end proc jpPopulateFolders
+
+
+//Which subFolder is currently checked
+global proc string jpGetCheckedFolder()
+{
+	string $allMenuItems[] = `menu -q -ia subFoldersMenu`;
+	string $checkedMenuItem = "";
+	for($item in $allMenuItems)
+	{
+		int $isDivider = `menuItem -q -divider $item`;
+		if($isDivider == 0)
+		{
+			int $isRadioButton = `menuItem -q -irb $item`;
+			if($isRadioButton == 1)
+			{
+				int $isChecked = `menuItem -q -rb $item`;
+				if($isChecked == 1)
+				{
+					$checkedMenuItem = $item;
+				}//end if
+			}//end if
+		}//end if
+	}//end for
+	if($checkedMenuItem == "rootFold")
+		$checkedMenuItem = "";
+
+	return $checkedMenuItem;
+}//end proc jpGetCheckedFolder
+
+
+//create a subFolder
+global proc jpCreateSubFolder()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+
+	string $newFolderName = `textFieldGrp -q -tx newCharFolderGrp`;
+	sysFile -md ($selsPath + $newFolderName + "_Folder");
+	sysFile -md ($posesPath + $newFolderName + "_Folder");
+	sysFile -md ($animsPath + $newFolderName + "_Folder");
+	sysFile -md ($posesPath + $newFolderName + "_Folder\/icons\/");
+	
+jpPopulateFileList();
+}//end proc jpCreateSubFolder
+
+//Window to create a new subFolder
+global proc jpNewSubFolderWin()
+{
+	string $winName = "AnimWriter_NewSubFolderWin";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t "New Sub-Folder" -wh 210 70 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+	columnLayout;
+		textFieldGrp 
+			-l "Folder Name : " 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cw 1 90 
+			-cw 2 110 
+			-tx ""
+			newCharFolderGrp;
+		rowColumnLayout -nc 2;
+			button -l "Create" -c ("jpCreateSubFolder();deleteUI " + $winName + ";jpAnimWriter()");
+			button -l "Cancel" -c ("deleteUI " + $winName);
+
+	window -e -wh 210 70 $winName;
+	showWindow $winName;
+}//end proc jpNewSubFolderWin
+
+//Delete a subFolder
+global proc jpDeleteFolder()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+
+	$selsPath = toNativePath($selsPath);
+	$posesPath = toNativePath($posesPath);
+	$animsPath = toNativePath($animsPath);
+
+	string $currentFolder = jpGetCheckedFolder();
+
+	if($currentFolder != "")
+	{
+		string $confirm = `confirmDialog 
+			-t ("Delete SubFolder: " + $currentFolder) 
+			-m ("Delete SubFolder: " + $currentFolder + "? Are you SURE?")
+			-ma "center" 
+			-b "Yes"
+			-b "No"
+			-db "No"`
+			;
+
+		if($confirm == "Yes")
+		{
+			sysFile -del ($selsPath + $currentFolder);
+			sysFile -del ($posesPath + $currentFolder);
+			sysFile -del ($animsPath + $currentFolder);
+		}//end if
+	}//end if
+	else
+	{
+		error "Can not delete Root Folder";
+	}//end else
+//jpPopulateFolders();
+jpAnimWriter();
+}//end proc jpDeleteFolder
+
+//window to rename a subfolder
+global proc jpRenameSubFolderWin()
+{
+	string $winName = "AnimWriter_RenameSubFolder";
+	string $currentFolder = jpGetCheckedFolder();
+
+	if($currentFolder != "")
+	{
+		if (`window -exists $winName`) deleteUI $winName;
+		window -t "Rename File" -wh 210 95 -rtf 1 -mnb 0 -mxb 0 -menuBar 0 $winName;
+
+		columnLayout;
+			textFieldGrp 
+				-l "Old Name : "
+				-cal 1 "left" 
+				-cal 2 "left" 
+				-cw 1 75 
+				-cw 2 125 
+				-ed 0
+				-tx $currentFolder 
+				oldSubFolderNameGrp;
+			textFieldGrp 
+				-l "New Name : " 
+				-cal 1 "left" 
+				-cal 2 "left"
+				-cw 1 75 
+				-cw 2 125 
+				-tx $currentFolder 
+				newSubFolderNameGrp;
+			rowColumnLayout -nc 2;
+				button -l "Rename" -c ("jpRenameSubFolder();deleteUI " + $winName);
+				button -l "Cancel" -c ("deleteUI " + $winName);
+
+		window -e -wh 210 95 $winName;
+		showWindow $winName;
+	}//end if
+	else
+	{
+		error "Can not rename Root Folder";
+	}//end else
+//jpPopulateFolders();
+}//end proc jpRenameSubFolderWin
+
+global proc jpRenameSubFolder()
+{
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+
+	string $newFolderName = `textFieldGrp -q -tx newSubFolderNameGrp`;
+
+	string $currentFolder = jpGetCheckedFolder();
+	if($newFolderName != "")
+	{
+		if($currentFolder != "")
+		{
+			sysFile -ren ($selsPath + $newFolderName) ($selsPath + $currentFolder);
+			sysFile -ren ($posesPath + $newFolderName) ($posesPath + $currentFolder);
+			sysFile -ren ($animsPath + $newFolderName) ($animsPath + $currentFolder);
+		}//end if
+	}
+	else
+	{
+		warning "Folders must have a name";
+	}
+//jpPopulateFolders();
+jpAnimWriter();
+}//end proc jpRenameSubFolder
+
+
+//Explore the animWriter folders and subFolders based on what
+//operating system you are running
+global proc jpExploreFolders(int $type)
+{
+	string $project = `workspace -q -fn`;
+	string $currentFolder = jpGetCheckedFolder();
+	string $selsPath = ($project + "\/data\/SELS\/" + $currentFolder);
+	string $posesPath = ($project + "\/data\/POSES\/" + $currentFolder);
+	string $animsPath = ($project + "\/data\/ANIMS\/" + $currentFolder);
+
+	$selsPath = toNativePath($selsPath);
+	$posesPath = toNativePath($posesPath);
+	$animsPath = toNativePath($animsPath);
+
+	int $os = `menuItem -q -rb windows`;
+	
+	if($os == 1)
+	{
+		switch($type)
+		{
+			case 1:
+				system("explorer " + $selsPath);
+				break;
+			case 2:
+				system("explorer " + $posesPath);
+				break;
+			case 3:
+				system("explorer " + $animsPath);
+				break;
+			default:
+				warning "An error has occured: jpExploreFolders:Windows";
+				break;
+		}//end switch
+	}//end if
+	else if($os != 1)
+	{
+		switch($type)
+		{
+			case 1:
+				system("xterm " + $selsPath + "; ls;");
+				break;
+			case 2:
+				system("xterm " + $posesPath + "; ls;");
+				break;
+			case 3:
+				system("xterm " + $animsPath + "; ls;");
+				break;
+			default:
+				warning "An error has occured: jpExploreFolders:*nix";
+				break;
+		}//end switch
+	}//end else
+}//end proc jpExploreFolders
+
+global proc jpPopUpName()
+{
+string $tmpName[] = `textScrollList -q -si writerFileList`; 
+string $tokName[];
+tokenize $tmpName[0] "." $tokName;
+textFieldGrp -e -tx $tokName[0] nameGrp;
+}//end proc jpPopUpName
+
+
+////////////////////////
+//Basic Utility Functions
+////////////////////////
+
+//Change Project
+global proc jpChangeProj()
+{
+setProject "";
+jpPopulateFileList();
+string $project = `workspace -q -fn`;
+textFieldButtonGrp -e -tx $project currentProj;
+}//end proc jpChangeProj
+
+
+//Find out what OS this script is running under
+global proc int jpWhatOSAmI()
+{
+	int $intOS;
+	string $OpSys = `about -os`;
+
+	if($OpSys == "nt")
+		$intOS = 1;
+	if($OpSys == "mac")
+		$intOS = 2;
+	if($OpSys == "linux")
+		$intOS = 3;
+	if($OpSys == "irix")
+		$intOS = 4;
+
+	return $intOS;
+}//end proc jpWhatOSAmI
+
+
+///////////////////////
+//The actual jpAnimWriter GUI and controls and such
+///////////////////////
+global proc jpAnimWriter()
+{
+	global string $aWriterVerNum;
+
+	string $project = `workspace -q -fn`;
+	string $selsPath = ($project + "\/data\/SELS\/");
+	string $posesPath = ($project + "\/data\/POSES\/");
+	string $animsPath = ($project + "\/data\/ANIMS\/");
+	
+	int $os = `jpWhatOSAmI`;
+	int $win, $mac, $lin, $irix;
+	if($os == 1)
+	{
+		$win=1;
+		$mac=0;
+		$lin=0;
+		$irix=0;
+	}//end if
+	else if($os == 2)
+	{
+		$win=0;
+		$mac=1;
+		$lin=0;
+		$irix=0;
+	}//end if
+	else if($os == 3)
+	{
+		$win=0;
+		$mac=0;
+		$lin=1;
+		$irix=0;
+	}//end if
+	else if($os == 4)
+	{
+		$win=0;
+		$mac=0;
+		$lin=0;
+		$irix=1;
+	}//end if
+
+	string $winName = "AnimWriter";
+	if (`window -exists $winName`) deleteUI $winName;
+	window -t ("Animation Writer v" + $aWriterVerNum + "  --  James Parks") -wh 380 275 -rtf 0 -menuBar 1 $winName;
+
+	menu -l "Writer" writerMenu;
+		menuItem -l "Create Folders" -c "jpMakeDirs()" -p writerMenu createFoldersMenuItem;
+		menuItem -l "Clean Folders..." -c "jpCleanDirs()" -p writerMenu cleanFoldersMenuItem;
+		menuItem -l "Explore Folders" -sm 1 exploreFoldersSubMenu;
+			menuItem -l "SELS..." -c "jpExploreFolders(1)" -p exploreFoldersSubMenu exploreSels;
+			menuItem -l "POSES..." -c "jpExploreFolders(2)" -p exploreFoldersSubMenu explorePoses;
+			menuItem -l "ANIMS..." -c "jpExploreFolders(3)" -p exploreFoldersSubMenu exploreAnims;
+		menuItem -l "Refresh Window" -c "jpAnimWriter()" -p writerMenu refreshMenuItem; //"$project = `workspace -q -fn`;textFieldButtonGrp -e -tx $project currentProj;jpPopulateFileList();jpPopulateFolders();jpRecallAnimWriterSettings" -p writerMenu refreshMenuItem;
+		menuItem -divider 1 -p writerMenu divider_1;
+		menuItem -l "Pose Icons..." -p writerMenu poseIconsMenuItem;
+		menuItem -divider 1 -p writerMenu divider_2;
+		menuItem -l "Write New File" -c "jpWriteAnimChoice()" -p writerMenu writeNewFileMenuItem;
+		menuItem -l "Apply Selected" -c "jpApplyFile()" -p writerMenu applyFileMenuItem;
+		menuItem -l "Rename Selected..." -c "jpRenameFileWin()" -p writerMenu renameMenuItem;
+		menuItem -l "Delete Selected" -c "jpDeleteFile()" -p writerMenu deleteMenuItem;
+		menuItem -divider 1 -p writerMenu divider_3;
+		menuItem -l "Delete All in Folder" -c "jpDeleteAllFiles()" -p writerMenu deleteAllMenuItem;
+		menuItem -divider 1 -p writerMenu divider_4;
+		menuItem -l "Close" -c ("deleteUI " + $winName) -p writerMenu closeMenuItem;
+	menu -l "subFolders" -en 1 subFoldersMenu;
+		menuItem -l "New subFolder..." -c "jpNewSubFolderWin()" newSubMenuItem;
+		menuItem -l "Rename subFolder..." -c "jpRenameSubFolderWin()" renameSubMenuItem;
+		//menuItem -l "Delete Current" -c "jpDeleteFolder()" deleteSubMenuItem;
+		menuItem -divider 1 divider_5;
+		radioMenuItemCollection "selectedSubFolder";
+		jpPopulateFolders();
+		menuItem -divider 1 divider_6;
+		menuItem -l "Root Folder" -rb 1 -cl "selectedSubFolder" -c "jpPopulateFileList()" rootFold;
+	menu -l "Settings" settingsMenu;
+		menuItem -l "List Method" -sm 1 -p settingsMenu listMethodSubMenu;
+			radioMenuItemCollection "listMethod";
+			menuItem -l "Alpha" -rb 0 -cl "listMethod" -c "jpPopulateFileList()" -p listMethodSubMenu listAlpha;
+			menuItem -l "Creation" -rb 1 -cl "listMethod" -c "jpPopulateFileList()" -p listMethodSubMenu listCreation;
+		menuItem -l "Anim Save Method" -sm 1 -p settingsMenu animMethodSubMenu;
+			radioMenuItemCollection "animMethod";
+			menuItem -l "No Tangents" -rb 0 -cl "animMethod" -p animMethodSubMenu bruteForce;
+			menuItem -l "Tangents" -rb 1 -cl "animMethod" -en 1 -p animMethodSubMenu elegant;
+		menuItem -l "Node Names" -sm 1 -p settingsMenu nodeNamesSubMenu;
+			radioMenuItemCollection "nodeNames";
+			menuItem -l "Long Node Names" -rb 1 -cl "nodeNames" -p nodeNamesSubMenu longNodeNames;
+			menuItem -l "Short Node Names" -rb 0 -cl "nodeNames" -p nodeNamesSubMenu shortNodeNames;
+		menuItem -l "Operating System" -sm 1 -p settingsMenu OSsubMenu;
+			radioMenuItemCollection "OS";
+			menuItem -l "Windows" -rb $win -cl "OS" -p OSsubMenu windows;
+			menuItem -l "Mac" -rb $mac -cl "OS" -p OSsubMenu mac;
+			menuItem -l "Linux" -rb $lin -cl "OS" -p OSsubMenu linux;
+			menuItem -l "Irix" -rb $irix -cl "OS" -p OSsubMenu irix;
+		menuItem -l "Set Overwrite Password..." -p settingsMenu -c "jpSetPassword" setPassword;
+		menuItem -l "Overwrite Protection" -cb 1 -p settingsMenu overwrite;
+		menuItem -l "Reference ReTargeting" -cb 1 -p settingsMenu refReTarget;
+		menuItem -divider 1 -p settingsMenu divider_7;
+		menuItem -l "Save Settings" -p settingsMenu -c "jpSaveAnimWriterSettings()" saveSettings;
+	menu -l "Help" helpMenu;
+		menuItem -l "How To Use" -c ("showHelp -docs \"aWriter_docs/aWriter_use.html\"") howToUseMenuItem;
+		menuItem -l "File Structure" -c ("showHelp -docs \"aWriter_docs/aWriter_files.html\"") fileMenuItem;
+		menuItem -divider 1 divider_8;
+		menuItem -l "Notes" -c ("showHelp -docs \"aWriter_docs/aWriter_notes.html\"") notesMenuItem;
+
+	int $poMin = `playbackOptions -q -min`;
+    	int $poMax = `playbackOptions -q -max`;
+	string $project = `workspace -q -fn`;
+
+	string $aWriterForm = `formLayout -numberOfDivisions 100 animWriterForm`;
+setParent $aWriterForm;
+
+	radioButtonGrp
+		//-w 300
+		-h 25
+		-nrb 3
+		-cw 1 75
+		-cw 2 75
+		-cw 3 75
+		-cw 4 75 
+		-cal 1 "left" 
+		-cal 2 "left" 
+		-cal 3 "left" 
+		-cal 4 "left"
+		-label "File Type" 
+		-l1 "Selection"
+		-l2 "Pose" 
+		-l3 "Animation" 
+		-cc1 "jpTurnSelOptionsOn();jpTurnPoseOptionsOff();jpTurnAnimOptionsOff();jpPopulateFileList();" 
+		-cc2 "jpTurnSelOptionsOff();jpTurnPoseOptionsOn();jpTurnAnimOptionsOff();jpPopulateFileList();" 
+		-cc3 "jpTurnSelOptionsOff();jpTurnPoseOptionsOff();jpTurnAnimOptionsOn();jpPopulateFileList();" 
+		-sl 2
+		saveAsType;
+
+	string $fileList = `textScrollList 
+		-allowMultiSelection 0 
+		-w 165 
+		-dcc "jpApplyFile()" 
+		-dkc "jpDeleteFile()" 
+		writerFileList`;
+
+		popupMenu -b 3 -p "writerFileList";
+			menuItem -l "Apply Selected" -c "jpApplyFile()";
+			menuItem -l "Rename Selected..." -c "jpRenameFileWin()";
+			menuItem -l "Name --->" -c "jpPopUpName()";
+			menuItem -divider 1;
+			menuItem -l "Delete Selected" -c "jpDeleteFile()";
+	string $addReplace = `radioButtonGrp 
+				-nrb 3 
+				-h 25 
+				-cw 1 40 
+				-cw 2 60
+				-cw 3 60
+				-l1 "N/A" 
+				-l2 "N/A"
+				-l3 "N/A"
+				-en 0
+				-sl 2
+				addReplaceGrp`;
+
+//setParent ..;
+	string $controlsLayout = `rowColumnLayout 
+					//-w 200
+					-nr 10 
+					-rh 1 23 
+					-rh 2 23 
+					-rh 3 23
+					-rh 4 15 
+					-rh 5 23
+					-rh 6 23 
+					-rh 7 23
+					-rh 8 23
+					-rh 9 23
+					`;
+
+			text -fn "boldLabelFont" -al "left" "Write Options";
+
+			textFieldGrp 
+				-label "Name" 
+				-cal 1 "left" 
+				-tx "...File Name..." 
+				-cw 1 60
+				-cw 2 140 
+				nameGrp;
+			rowColumnLayout 
+				-nc 2
+				-cw 1 170
+				-cw 2 30
+				;
+				floatFieldGrp 
+    					-numberOfFields 2 
+					-en 0 
+   					-label "Start/End" 
+   					-value1 $poMin  
+					-value2 $poMax  
+					-cal 1 "left" 
+					-cw 1 60 
+					-cw 2 55 
+					-cw 3 55 
+					animRange;
+				button 
+					-l "<--" 
+					-ann "Refresh" 
+					-en 0 
+					-c ("int $poMin = `playbackOptions -q -min`;int $poMax = `playbackOptions -q -max`;floatFieldGrp -e -v1 $poMin -v2 $poMax animRange;")
+					refreshAnimRange;
+		setParent ..;
+			radioButtonGrp 
+				-w 200 
+				-h 15 
+				-en 0 
+				-nrb 2 
+				-cal 1 "left"
+				-cal 2 "left" 
+				-cal 3 "left"
+				-cw 1 80 
+				-cw 2 60
+				-cw 3 60
+				-l "Save Options"
+				-l1 "Keys" 
+				-l2 "Curves" 
+				-sl 1 
+				animSaveType;
+		rowColumnLayout -nc 2 -cw 1 80 -cw 2 120;
+			checkBoxGrp 
+				-ncb 1 
+				-cw 1 60 
+				-cw 2 80
+				-cal 1 "left" 
+				-cal 2 "left"
+				-label "Recursive"
+				-value1 0 
+				-cc "jpToggleRecursive()"
+				recursiveCheckBox;
+			textFieldGrp
+				-cw 1 120 
+				-cal 1 "left"
+				-en 0 
+				-tx "*" 
+				recursiveText;
+setParent ..;
+
+			rowColumnLayout -nc 2 -cw 1 100 -cw 2 100;
+				button 
+					-label "Write New File" 
+					-w 100 
+					-c "jpWriteAnimChoice()" ;
+				button 
+					-label "Delete File" 
+					-w 100
+					-c "jpDeleteFile()";
+setParent ..;
+			checkBoxGrp
+				-en 0
+				-label "Paste Curves at Current Values"
+				-ncb 1
+				-cal 1 "left"
+				-cal 2 "left"
+				-cw 1 160
+				-cw 2 20
+				-v1 0 
+				tvOffsets;
+			rowColumnLayout -nc 3 -cw 1 66 -cw 2 66 -cw 3 66;
+				button 
+					-label "Apply"
+					-w 66
+					-c "jpApplyFile()"
+					applyButton;
+				button 
+					-label "Blend" 
+					-w 66
+					-en 1 
+					-c "string $selFile[] = `textScrollList -q -si writerFileList`;jpBlendStoredPose($selFile[0])" 
+					blendButton;
+				button 
+					-label "Default"
+					-w 66 
+					-c "jpReturnToDefault()"
+					defaultButton;
+
+				text -l "";
+				button -l "Icons" -w 66 iconsButton;
+				text -l "";
+setParent ..;
+setParent ..;
+	
+	string $currentProjLayout = `rowColumnLayout -nr 1 currentProjRow`;
+
+		textFieldButtonGrp 
+			-l "Project :" 
+			-tx $project 
+			-bl "Change" 
+			-bc "jpChangeProj()" 
+			-cal 1 "left" 
+			-cal 2 "left"
+			-cal 3 "left" 
+			-cw 1 50 
+			-cw 2 275 
+			-cw 3 100 
+			//-adj 2 
+			-ed 0
+			-en 1 
+			currentProj;
+
+setParent $aWriterForm;
+
+	formLayout -edit 
+		-attachForm $fileList "top" 25 
+		-attachForm $fileList "left" 0 
+		-attachForm $fileList "bottom" 50 
+		//-attachForm $fileList "right" 250 
+
+		-attachForm $controlsLayout "top" 25 
+		//-attachForm $controlsLayout "left" 175 
+		-attachForm $controlsLayout "right" 5 
+		-attachForm $controlsLayout "bottom" 25 
+
+		-attachForm $currentProjLayout "left" 0 
+		-attachForm $currentProjLayout "right" 0 
+		-attachForm $currentProjLayout "bottom" 0 
+		//-attachForm $currentProjLayout "top" ?
+
+		//-attachForm $addReplace "top" ?
+		-attachForm $addReplace "left" 0 
+		//-attachForm $addReplace "right" ?
+		-attachForm $addReplace "bottom" 20 
+
+		$aWriterForm;
+
+	jpPopulateFileList();
+	//window -e -wh 395 275 $winName;
+	showWindow $winName;
+
+	//restore settings from saved file
+	jpRecallAnimWriterSettings();
+
+}//end proc jpAnimWriter

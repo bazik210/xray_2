@@ -1,0 +1,1 @@
+global proc float distanceToCamera(string $object){//$object = sel1();string $cam = currCam();float $camPos[] = `xform -q -ws -t $cam`;float $pos[] = `xform -q -ws -t $object`;float $distance = twoPointsDistance($camPos, $pos);return $distance;}

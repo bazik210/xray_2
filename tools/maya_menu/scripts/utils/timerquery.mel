@@ -1,0 +1,1 @@
+global proc float timerquery(){global float $GstartTime;$totalTime = `timerX -startTime $GstartTime`;//hideUvEditor "";return $totalTime;}

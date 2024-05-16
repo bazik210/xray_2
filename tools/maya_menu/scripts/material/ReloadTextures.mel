@@ -1,0 +1,52 @@
+global proc ReloadTextures()
+{
+source AEfileTemplate.mel;
+string $textures[];
+string $objects[] = selectedTransforms();
+if (`size $objects` > 0)
+	$textures = `listConnections -type file (getMaterialsOfObjects($objects))`;
+else
+	$textures = `ls -textures`;
+for ($texture in $textures)
+	AEfileTextureReloadCmd ($texture + ".fileTextureName");
+print ("Summary reload: " + `size $textures` + " textures");
+}
+
+global proc string[] getMaterialsOfObjects(string $objects[])
+{
+string $sel[] = $objects;
+string $polys[] = convertPoly ($sel, "tf");
+$shape = `listRelatives -s $sel`;
+string $connections[] = `listConnections -type "shadingEngine" $shape`;
+$connections = stringArrayRemoveDuplicates($connections);
+$connections2 = `listConnections $connections`;
+$connections2 = stringArrayRemoveDuplicates($connections2);
+$allMaterials = `ls -mat`;
+$mats = stringIntersect($connections2, $allMaterials);
+return $mats;
+}
+
+global proc string[] selObjs()
+{
+return `ls -sl -o`;
+}
+
+global proc string[] selectedTransforms()
+{
+string $objects[] = selObjs();
+string $transforms[];
+string $object;
+for ($object in $objects)
+	{
+//$object = $objects[0];
+	if (`objectType $object` == "mesh")
+		{
+		string $transf[] = `listRelatives -p $object`;
+		if (`size $transf` > 0)
+			$transforms[`size $transforms`] = $transf[0];
+		}
+	else
+		$transforms[`size $transforms`] = $object;
+	}
+return $transforms;
+}

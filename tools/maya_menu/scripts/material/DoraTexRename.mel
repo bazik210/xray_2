@@ -1,0 +1,327 @@
+global string $gDoraTexRename_fileList[];
+global string $gDoraTexRename_texNameList[];
+
+
+
+global string $gDoraTexRename_ver = "1.52";
+
+
+proc string DoraTexRename_stringSpace( string $text, int $len )
+	{
+	string $textNew;
+	$textNew= $text;
+
+	while( size($textNew)<$len )
+		{
+		$textNew= ( $textNew + " " );
+		}
+	return $textNew;
+	}
+
+
+proc int DoraTexRename_maxStringLen( string $list[] )
+	{
+	int $listN;
+	int $len;
+	int $i;
+
+	$listN= `size($list)`;
+
+	for( $i=0, $len=0 ; $i<$listN ; $i++ )
+		{
+		$len= max( $len, size($list[$i]));
+		}
+	return( $len );
+	}
+
+
+proc DoraTexRename_getTexNameList()
+	{
+	global string $gDoraTexRename_fileList[];
+	global string $gDoraTexRename_texNameList[];
+
+	string $texfileList[];
+
+
+	int $objListN;
+	int $i,$j;
+
+	clear( $gDoraTexRename_fileList );
+	clear( $gDoraTexRename_texNameList );
+
+	$texfileList= `ls -tex`;
+	$objListN= `size($texfileList)`;
+
+	if( $objListN>=1 )
+		{
+		for( $i=0,$j=0 ; $i<$objListN ; $i++ )
+			{
+			if (`attributeExists "fileTextureName" $texfileList[$i]`)
+				{
+
+				$gDoraTexRename_fileList[$j]= $texfileList[$i];
+				$gDoraTexRename_texNameList[$j]= `getAttr ($texfileList[$i] + ".fileTextureName" )`;
+				$j++;
+				}
+			}
+		}
+
+	}
+
+
+proc string DoraTexRename_maketextNameTSL()
+	{
+	global string $gDoraTexRename_fileList[];
+	global string $gDoraTexRename_texNameList[];
+
+	string $ret;
+	int $fLen;
+	int $nLen;
+	int $i,$n;
+
+	$fLen= DoraTexRename_maxStringLen($gDoraTexRename_fileList);
+	$nLen= DoraTexRename_maxStringLen($gDoraTexRename_texNameList);
+
+	$ret= "-allowMultiSelection true -fn \"smallFixedWidthFont\" -doubleClickCommand \"DoraTexRename_allSelect();\" ";
+
+	$n= size( $gDoraTexRename_fileList );
+	for( $i=0 ; $i<$n ; $i++ )
+		{
+		$ret= $ret + "-append \"" + "[ " + DoraTexRename_stringSpace( $gDoraTexRename_fileList[$i], $fLen ) + " ] " +  DoraTexRename_stringSpace( $gDoraTexRename_texNameList[$i], $nLen ) + "\" ";
+		}
+
+	return( $ret );
+
+	}
+
+
+
+global proc DoraTexRename_getTexName( string $tf )
+	{
+	global string $gDoraTexRename_texNameList[];
+	int $sii[];
+	$sii= `textScrollList -q -sii DoraTexRenameWindow|FL|TS_list`;
+
+	textField -e -text $gDoraTexRename_texNameList[$sii[0]-1] $tf;
+
+	}
+
+
+global proc DoraTexRename_updateTexNameList()
+	{
+	global string $gDoraTexRename_fileList[];
+	global string $gDoraTexRename_texNameList[];
+	string $texNameTSL;
+
+	int $sii[];
+	int $i,$n;
+
+	$sii=`textScrollList -q -sii DoraTexRenameWindow|FL|TS_list`;
+
+	DoraTexRename_getTexNameList();
+
+	textScrollList -e -ra DoraTexRenameWindow|FL|TS_list;
+
+	$texNameTSL= DoraTexRename_maketextNameTSL();
+
+	eval( "textScrollList -e " + $texNameTSL + "DoraTexRenameWindow|FL|TS_list;" );
+
+	$n= size( $gDoraTexRename_fileList );
+	for( $i in $sii)
+		{
+		if( $n>=$i )
+			{
+			textScrollList -e -sii $i DoraTexRenameWindow|FL|TS_list;
+			}
+		}
+	}
+
+
+
+global proc DoraTexRename_allSelect()
+	{
+	int $i;
+	int $n;
+
+	$n= `textScrollList -q -ni DoraTexRenameWindow|FL|TS_list`;
+
+
+	for( $i=0 ; $i<$n ; $i++ )
+		{
+		textScrollList -e -sii ($i+1) DoraTexRenameWindow|FL|TS_list;
+		}
+
+	}
+
+
+global proc int DoraTexRename_texNameSubstitute( string $beforeText, string $afterText )
+	{
+	global string $gDoraTexRename_fileList[];
+	global string $gDoraTexRename_texNameList[];
+
+	string $changeName;
+	int $n;
+	int $i;
+	int $ch;
+	int $sii[];
+
+
+	$sii= `textScrollList -q -sii DoraTexRenameWindow|FL|TS_list`;
+
+
+	$ch= 0;
+
+	if( $beforeText=="" ){return( $ch );}
+
+	$n= `size($sii)`;
+
+	if( $n <= 0 ){return( $ch );}
+
+	for( $i in $sii )
+		{
+		if (`attributeExists "fileTextureName" $gDoraTexRename_fileList[$i-1]`)
+			{
+			$changeName= `substitute $beforeText $gDoraTexRename_texNameList[$i-1] $afterText`;
+			if( $gDoraTexRename_texNameList[$i-1] != $changeName )
+				{
+				setAttr -type "string" ( $gDoraTexRename_fileList[$i-1] + ".fileTextureName" ) $changeName;
+				$ch++;
+				}
+			}
+		}
+
+	return( $ch );
+	}
+
+global proc DoraTexRename()
+	{
+	global string $gDoraTexRename_fileList[];
+	global string $gDoraTexRename_texNameList[];
+	global string $gDoraTexRename_ver;
+	string $texNameTSL;
+
+	int $os;
+
+	print ( "Dora Texture Rename " + $gDoraTexRename_ver + "\n");
+
+	DoraTexRename_getTexNameList();
+
+	if( `windowPref -ex DoraTexRenameWindow` == true )
+		{
+		windowPref -r DoraTexRenameWindow;
+		}
+
+	if( `window -ex DoraTexRenameWindow` == false )
+		{
+		window -wh 1000 600
+		       -t ( "Dora Texture Rename " + $gDoraTexRename_ver )
+		       -mnb on
+		       -s on
+		       -i on
+		       DoraTexRenameWindow;
+
+
+		scriptJob -uid "DoraTexRenameWindow" "clear($gDoraTexRename_fileList);clear($gDoraTexRename_texNameList);";
+
+
+		$os= 5;
+
+		formLayout -numberOfDivisions 100 FL;
+
+
+
+		$texNameTSL= DoraTexRename_maketextNameTSL();
+
+		eval( "textScrollList " + $texNameTSL + "TS_list;" );
+
+
+		text -label "Textures Node List" TXT_l;
+		text -label "SearchText" -al "left" TXT_s;
+		textField TF_search;
+		text -label "ChangeText" -al "left" TXT_c;
+		textField TF_change;
+		button -label "List Update" BTN_update;
+		button -label "<" BTN_s;
+		button -label "<" BTN_c;
+		button -label "Rename Selection" BTN_change;
+		button -label "Rename All" BTN_change2;
+		text -label "(C) 2002-2004 DoraYuki " -al "right" TXT_copy;
+
+
+		formLayout -edit
+		-af BTN_update "top" ($os)
+		-an BTN_update "left"
+		-an BTN_update "bottom"
+		-af BTN_update "right" ($os)
+
+		-ac TS_list "top" ($os) BTN_update
+		-af TS_list "left" ($os)
+		-ac TS_list "bottom" ($os) TXT_s
+		-af TS_list "right" ($os)
+
+		-an TXT_l "top"
+		-af TXT_l "left" ($os)
+		-ac TXT_l "bottom" ($os) TS_list
+		-an TXT_l "right"
+
+		-an TXT_s "top"
+		-af TXT_s "left" ($os)
+		-af TXT_s "bottom" ($os+118)
+		-af TXT_s "right" ($os)
+
+		-an BTN_s "top"
+		-an BTN_s "left"
+		-af BTN_s "bottom" ($os+94)
+		-af BTN_s "right" ($os)
+
+		-an TF_search "top"
+		-af TF_search "left" ($os)
+		-af TF_search "bottom" ($os+94)
+		-ac TF_search "right" ($os) BTN_s
+
+		-an TXT_c "top"
+		-af TXT_c "left" ($os)
+		-af TXT_c "bottom" ($os+72)
+		-af TXT_c "right" ($os)
+
+		-an BTN_c "top"
+		-an BTN_c "left"
+		-af BTN_c "bottom" ($os+48)
+		-af BTN_c "right" ($os)
+
+		-an TF_change "top"
+		-af TF_change "left" ($os)
+		-af TF_change "bottom" ($os+48)
+		-ac TF_change "right" ($os) BTN_c
+
+		-an BTN_change2 "top"
+		-af BTN_change2 "left" ($os)
+		-af BTN_change2 "bottom" ($os+12)
+		-ap BTN_change2 "right" ($os) 50
+
+		-an BTN_change "top"
+		-ap BTN_change "left" ($os) 50
+		-af BTN_change "bottom" ($os+12)
+		-af BTN_change "right" ($os)
+
+		-an TXT_copy "top"
+		-af TXT_copy "left" ($os)
+		-af TXT_copy "bottom" 0
+		-af TXT_copy "right" ($os)
+
+		FL;
+
+
+
+
+
+
+		button -edit -command "DoraTexRename_updateTexNameList();" DoraTexRenameWindow|FL|BTN_update;
+		button -edit -command "DoraTexRename_getTexName(\"TF_search\");" DoraTexRenameWindow|FL|BTN_s;
+		button -edit -command "DoraTexRename_getTexName(\"TF_change\");" DoraTexRenameWindow|FL|BTN_c;
+		button -edit -command "DoraTexRename_texNameSubstitute(`textField -q -text TF_search`, `textField -q -text TF_change`);DoraTexRename_updateTexNameList();" DoraTexRenameWindow|FL|BTN_change;
+		button -edit -command "DoraTexRename_allSelect();DoraTexRename_texNameSubstitute(`textField -q -text TF_search`, `textField -q -text TF_change`);DoraTexRename_updateTexNameList();" DoraTexRenameWindow|FL|BTN_change2;
+		showWindow DoraTexRenameWindow;
+		}
+
+	}

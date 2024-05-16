@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description></description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.plugins.disk__usage.DiskUsageProperty/>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers class="vector">
+    <hudson.triggers.TimerTrigger>
+      <spec>0 3  * * *</spec>
+    </hudson.triggers.TimerTrigger>
+  </triggers>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.BatchFile>
+      <command>@SETLOCAL   ENABLEDELAYEDEXPANSION
+
+@set designers_repository=http://filesophia/xr2-dsgn
+@set export_resources_scripts=d:/hudson/export_resources_scripts
+@set export_resources_stdout=%export_resources_scripts%/export_stdout.log
+@set export_resources_stderr=%export_resources_scripts%/export_stderr.log
+@set export_resources_log=C:\Users\Compilarius\Documents\maya\xrayMayaLog.txt
+@set export_resources_path=resources/exported
+
+@rmdir /S /Q &quot;%export_resources_path%&quot;
+
+@pushd !cd!
+@cd /D &quot;%export_resources_scripts%&quot;
+call &quot;exportXrayAll.bat&quot;
+@set export_error_level=%errorlevel%
+@popd
+
+type &quot;%export_resources_log%&quot;
+
+@if not &quot;!export_error_level!&quot;==&quot;0&quot; @(
+  @echo exportXrayAll.bat failed with error_code !export_error_level!
+  @if &quot;!export_error_level!&quot;==&quot;3&quot; @echo     can&apos;t open some files
+  @if &quot;!export_error_level!&quot;==&quot;4&quot; @echo     can&apos;t export some files
+  @echo         look above log for details  
+
+  @mkdir &quot;%export_resources_path%&quot;
+  cd /D &quot;%export_resources_path%&quot;
+  hg revert .
+  @exit /B !export_error_level!
+)
+
+@pushd !cd!
+@cd &quot;%export_resources_path%&quot;
+@if not &quot;%ERRORLEVEL%&quot;==&quot;0&quot; @(
+   @echo cannot cd to &quot;%export_resources_path%&quot;
+  @exit /B 9
+)
+hg commit --addremove -m &quot;ExportedResources #%BUILD_NUMBER%&quot;
+@popd
+
+:try_push
+hg push --new-branch &quot;%designers_repository%&quot;
+@set /a did_pushes+=1
+
+@if not &quot;%ERRORLEVEL%&quot;==&quot;0&quot; @(
+
+  @if &quot;!did_pushes!&quot;==&quot;10&quot; @(
+    @echo did already !did_pushes! tries to push and still cant, check for a problem
+    @exit /B 10
+  )
+
+  hg pull %designers_repository%
+  hg update
+  hg merge
+  hg commit -m merge
+  @goto:try_push
+)</command>
+    </hudson.tasks.BatchFile>
+  </builders>
+  <publishers>
+    <hudson.plugins.emailext.ExtendedEmailPublisher>
+      <recipientList>dummy@gsc-game.kiev.ua</recipientList>
+      <configuredTriggers>
+        <hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+          <email>
+            <recipientList>miron@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>false</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FailureTrigger>
+        <hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+          <email>
+            <recipientList>miron@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>true</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>false</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.SuccessTrigger>
+        <hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+          <email>
+            <recipientList>miron@gsc-game.kiev.ua</recipientList>
+            <subject>$PROJECT_DEFAULT_SUBJECT</subject>
+            <body>$PROJECT_DEFAULT_CONTENT</body>
+            <sendToDevelopers>true</sendToDevelopers>
+            <includeCulprits>false</includeCulprits>
+            <sendToRecipientList>true</sendToRecipientList>
+          </email>
+        </hudson.plugins.emailext.plugins.trigger.FixedTrigger>
+      </configuredTriggers>
+      <defaultSubject>$DEFAULT_SUBJECT</defaultSubject>
+      <defaultContent>$DEFAULT_CONTENT</defaultContent>
+    </hudson.plugins.emailext.ExtendedEmailPublisher>
+  </publishers>
+  <buildWrappers>
+    <hudson.plugins.locksandlatches.LockWrapper>
+      <locks>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Poll_Build_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Build_Publish_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>PostCommitHook_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+        <hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+          <name>Hudson_Restart_Lock</name>
+        </hudson.plugins.locksandlatches.LockWrapper_-LockWaitConfig>
+      </locks>
+    </hudson.plugins.locksandlatches.LockWrapper>
+  </buildWrappers>
+  <customWorkspace>D:\Hudson\jobs\Stalker_2-Polling\workspace</customWorkspace>
+</project>

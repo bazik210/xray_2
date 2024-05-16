@@ -1,0 +1,96 @@
+
+global proc SetColorToMeshInd(int $colIndex)
+{
+// =================================================//
+// if $colIndex == -1 than Reset all color settings //
+// ================================================ //
+if ($colIndex == -1)
+{
+	polyColorSet -delete;
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+		string $ControllerShape[] = `listRelatives -shapes`;
+		string $shape;
+		for ($shape in $ControllerShape)
+		{
+	     		setAttr ($shape + ".overrideEnabled") 0;
+			setAttr ($shape + ".displayColors") 0;
+		}
+	}
+}
+else
+{
+// =================================================//
+// if $colIndex == 0 than Set all color randomly    //
+// ================================================ //
+if ($colIndex == 0)
+{
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+	    	{
+			int $RandIndex = rand(17,31);
+			float $tmpColArr[] = `colorIndex -q $RandIndex`;
+			polyColorPerVertex -r $tmpColArr[0] -g $tmpColArr[1] -b $tmpColArr[2] -a 1 -cdo;
+		}
+	}
+	select -cl;
+}
+// ================================================ //
+else
+{
+	string $currentSelObjs[] = `ls -sl `;
+	int $SelObjSize = size($currentSelObjs);
+	int $i;
+	for ($i=0; $i<$SelObjSize; $i++)
+	{
+		select $currentSelObjs[$i];
+		string $ControllerShape[] = `listRelatives -shapes`;
+	    	{
+			float $tmpColArr[] = `colorIndex -q $colIndex`;
+			polyColorPerVertex -r $tmpColArr[0] -g $tmpColArr[1] -b $tmpColArr[2] -a 1 -cdo;
+		}
+	}
+}
+}
+select -cl;
+}
+
+global proc SetCustomPolygonFaceColor()
+{
+// Create Window //
+string $myWindow = "SetCustomPolygonFaceColor";
+if (`window -ex $myWindow`)
+        deleteUI $myWindow;
+window $myWindow;
+// Color index value is outside valid range of [1,31] //
+// ================================================== //
+columnLayout mainLayout;
+rowColumnLayout -nc 32 	-cw 1 22 -cw 2 22 -cw 3 22 -cw 4 22 -cw 5 22 -cw 6 22 -cw 7 22 -cw 8 22 -cw 9 22
+				-cw 10 22 -cw 11 22 -cw 12 22 -cw 13 22 -cw 14 22 -cw 15 22 -cw 16 22 -cw 17 22 -cw 18 22 -cw 19 22
+				-cw 20 22 -cw 21 22 -cw 22 22 -cw 23 22 -cw 24 22 -cw 25 22 -cw 26 22 -cw 27 22 -cw 28 22 -cw 29 22
+				-cw 30 22 -cw 31 50 -cw 32 50;
+
+for ( $j = 0; $j < 30; $j++ )
+{
+	int $i= $j + 1;
+	float $tmpColArr[] = `colorIndex -q $i`;
+	button -w 15 -l "" -bgc $tmpColArr[0] $tmpColArr[1] $tmpColArr[2] -c ("SetColorToMeshInd " + $i);
+
+}
+
+	button -w 15 -l "Rand" -c "SetColorToMeshInd(0);";
+	button -w 15 -l "Reset" -c "SetColorToMeshInd(-1);";
+
+setParent mainLayout;
+window -tlb true -title "Set Color to mesh component" -s 0 -e -wh 775 58 $myWindow;
+showWindow $myWindow;
+};
+

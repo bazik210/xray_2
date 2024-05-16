@@ -1,0 +1,113 @@
+global string $UIName = "AUV_WINDOW";
+global int	$CheckValue = 0;
+global int 	$AUV_JOB = -1;
+global int	$SEL_JOB = -1;
+
+global proc DoRelax()
+{
+	string $whichCtx = `currentCtx`;
+	setToolTo selectSuperContext;
+	int $mode = 0;
+
+	string $CurSel[] = `ls -sl`;
+
+	PolySelectConvert 4;
+
+	untangleUV -r harmonic -pb 1 -ps 0 -pu 1 -rt 0 -mri 10;
+
+	select -r $CurSel;
+
+	setToolTo $whichCtx;
+}
+//================================================================================
+global proc GetObjName()
+{
+	global int $AUV_JOB;
+	string $ObjSelName[] = `ls -type "mesh" -o -sl`;
+
+	if($ObjSelName[0] == "")
+	{
+		print ("NOT A MESH !!!\n");
+	}
+	else
+	{
+		print ($ObjSelName[0] + " MESH !!!\n");
+
+		if(`scriptJob -ex $AUV_JOB`)
+		{
+			scriptJob -kill $AUV_JOB;
+		}
+
+		$AUV_JOB = `scriptJob -ac ($ObjSelName[0] + ".pnts") DoRelax`;
+	}
+}
+
+//================================================================================
+global proc CheckON()
+{
+	global int	$CheckValue;
+	global	int	$SEL_JOB;
+
+	$SEL_JOB = `scriptJob -e "SelectionChanged" GetObjName`;
+
+	$CheckValue = 1;
+}
+
+//================================================================================
+global proc CheckOFF()
+{
+	global int	$CheckValue;
+	global	int	$SEL_JOB;
+	global int 	$AUV_JOB;
+
+	if(`scriptJob -ex $AUV_JOB`)
+	{
+		scriptJob -kill $AUV_JOB;
+	}
+
+	scriptJob -kill $SEL_JOB;
+
+	$CheckValue = 0;
+}
+
+//================================================================================
+global proc autoUVRelax ()
+{
+	global string $UIName;
+	global int	$CheckValue;
+
+	if(`window -q -exists $UIName`)
+	{
+		deleteUI -wnd $UIName;
+	}
+
+//================================================================================	
+	window
+	-maximizeButton 1
+	-menuBar 1
+	-menuBarVisible 1
+	-sizeable  0
+	-toolbox true
+	-title ("UV Relaxer - v0.1")
+	-widthHeight 180 60
+	$UIName;
+
+	string $frmMain = `formLayout -numberOfDivisions 100`;
+	string $chkOnOff = `checkBox -label "Enable" -v $CheckValue`;
+	string $btnOn = `button -l "Relax" -w 68 -h 16 -c DoRelax`;
+	
+		checkBox -e -onc "CheckON" $chkOnOff;
+		checkBox -e -ofc "CheckOFF" $chkOnOff;
+	   
+    		formLayout -edit
+			-attachForm     $chkOnOff 	"top" 0			
+			-attachForm     $chkOnOff 	"left" 0
+			-attachForm     $btnOn 		"top" 1			
+			-attachForm     $btnOn 		"left" 60
+		
+	$frmMain;
+
+    window -e -wh 140 42 $UIName;
+showWindow $UIName;
+}
+//autoUVRelax;

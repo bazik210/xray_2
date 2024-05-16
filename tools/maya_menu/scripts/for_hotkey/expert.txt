@@ -1,0 +1,7 @@
+global proc expert()
+{
+int $shsw = $shsw+1;
+if ($shsw == 3) $shsw = 1;
+if ($shsw == 1) setAllMainWindowComponentsVisible 0;
+if ($shsw == 2) restoreMainWindowComponents;
+}

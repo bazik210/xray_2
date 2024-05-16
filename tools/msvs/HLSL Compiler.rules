@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VisualStudioToolFile
+	Name="HLSL Compiler"
+	Version="8.00"
+	>
+	<Rules>
+		<CustomBuildRule
+			Name="HLSL Compiler"
+			DisplayName="HLSL Compiler"
+			CommandLine="&quot;$(SolutionDir)../resources/sources/shaders/shader_compiler_vs.exe&quot; &quot;$(InputPath)&quot; &quot;$(SolutionDir)../resources/sources/shaders/sm_4_0/defines_full.def&quot; -dx10 -shader_model=&quot;4.0&quot; -ext=&quot;ps,vs&quot; -vs_output=&quot;$(IntDir)\$(InputName)$(InputExt).obj&quot;"
+			Outputs="$(IntDir)\$(InputName)$(InputExt).obj"
+			FileExtensions="*.vs;*.ps"
+			ExecutionDescription="$(InputName)$(InputExt)"
+			ShowOnlyRuleProperties="false"
+			>
+			<Properties>
+			</Properties>
+		</CustomBuildRule>
+	</Rules>
+</VisualStudioToolFile>

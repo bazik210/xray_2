@@ -1,0 +1,67 @@
+/*
+//код для шелф-кнопки
+source skinEdit;
+if (keysPressed() != "Ctrl")
+	{
+	skinEdit;skinEdit;
+	print "geometryReassigned";
+	}
+else
+	skinEdit;
+*/
+
+global proc string skinEdit()
+{
+if (sizeSel() != 1)
+	return "select one object";
+if (`objectType (sel1())` == "mesh")
+	pickWalk -d up;
+string $object = stringSingle(`ls -sl -l`);
+$object = sel1();
+int $edit = 1;
+string $skinCluster = skinClusterFind($object);
+if (`size $skinCluster` == 0)
+	$edit = 0;
+
+if ($edit)
+{
+BindPoseWithFullDisable;
+string $duplicate = stringSingle(`duplicate`);
+rename $object "temporaryCachedSkinData";
+rename $duplicate $object;
+setAttr temporaryCachedSkinData.v 0;
+$attrToUnlock = {"tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz"};
+for ($attr in $attrToUnlock)
+	setAttr -lock false ($object + "." + $attr);
+//unbug many shapes
+$shapes = `listRelatives -f $object`;
+string $shape;
+for ($shape in $shapes)
+	if ((size (`listConnections $shape`)) == 0)
+		delete $shape;
+isolateAction 2;
+return "editing skin geometry begin.";
+}
+
+else
+{
+string $skin = "temporaryCachedSkinData";
+if (!`objExists $skin`)
+	return "can't found object \"temporaryCachedSkinData\" for loading skin back";
+string $influences[] = `skinCluster -q -inf $skin`;
+delete -ch $object;
+select $skin;
+BindPoseWithFullDisable;
+$dagPose = `dagPose -q -bindPose $influences[0]`;
+if (`size $dagPose` > 0)
+	delete $dagPose;
+select $object $influences;
+newSkinCluster "-tsb -omi 1 -dr 20";
+select $skin $object;
+CopySkinWeights;
+delete $skin;
+EnableAll;
+isolateAction 2;
+return "skin loaded back";
+}
+}
