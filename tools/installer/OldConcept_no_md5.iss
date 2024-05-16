@@ -1,10 +1,10 @@
 ;
-; S.T.A.L.K.E.R. - Lost Alpha
+; S.T.A.L.K.E.R. 2 Old Concept
 ; Script for Inno Setup 5 compiler
 ; First version: 2014.04.08
 ; First author to blame: utak3r
-; Last modification: 2017.12.20
-; Last modifier: utak3r
+; Last modification: 2024.05.16
+; Last modifier: loxotron
 ;
 ; put the game files in the [game_distrib_files] folder.
 ; after this, call prepare_archives.cmd script.
@@ -23,7 +23,7 @@
 ; [installer_images]
 ; installer_images\LAinstallerImage.bmp
 ; installer_images\LAinstallerSmallImage.bmp
-; installer_images\stalker.ico
+; installer_images\logo_stk2_v2.ico
 ;
 ; [Output\3rdparties] (additional software to be installed)
 ; Output\3rdparties\directx_Jun2010_redist.exe (from: http://www.microsoft.com/en-us/download/details.aspx?id=8109 )
@@ -48,20 +48,20 @@
 ; it cannot be determined by the installer itself,
 ; due to external archives used.
 ; It's in bytes!
-#define LA_disk_usage "12122854414"
+#define STK2OC_disk_usage "12122854414"
 
 ; dirs used:
-#define LA_game_files ".\game_distrib_files"
-#define LA_3rd_party_files ".\game_distrib_files\3rdparties"
-#define LA_installer_support_files "."
+#define STK2OC_game_files ".\game_distrib_files"
+#define STK2OC_3rd_party_files ".\game_distrib_files\3rdparties"
+#define STK2OC_installer_support_files "."
 
 ; versions, names etc.:
-#define LA_shortcut_name "S.T.A.L.K.E.R. 2 Old Concept"
-#define LA_app_name "S.T.A.L.K.E.R. 2 Old Concept 0.25"
-#define LA_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
-#define LA_copyright "dezowave"
-#define LA_version "1.0"
-#define LA_version_text "1.0"
+#define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 Old Concept"
+#define STK2OC_app_name "S.T.A.L.K.E.R. 2 Old Concept"
+#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
+#define STK2OC_copyright "dezowave"
+#define STK2OC_version "0.4"
+#define STK2OC_version_text "0.4"
 
 [Types]
 Name: "Full"; Description: "Patch installation"
@@ -72,26 +72,26 @@ Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.25"; Types:
 ;///////////////////////////////////////////////
 
 [Files]
-Source: "{#LA_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
+;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 #ifndef BundleRelease
-Source: "{#LA_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
+Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
 
 ;if other patches were installed already
-;Source: "{#LA_3rd_party_files}\oalinst.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#LA_3rd_party_files}\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#LA_3rd_party_files}\Xvid-1.3.3-20140407.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#LA_3rd_party_files}\DirectX_runtime\*"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion createallsubdirs recursesubdirs
+;Source: "{#STK2OC_3rd_party_files}\oalinst.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
+;Source: "{#STK2OC_3rd_party_files}\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
+;Source: "{#STK2OC_3rd_party_files}\Xvid-1.3.3-20140407.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
+;Source: "{#STK2OC_3rd_party_files}\DirectX_runtime\*"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion createallsubdirs recursesubdirs
 #endif
 
 [Run]
 ; unpack game files
-#ifdef BundleRelease
-Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\appdata"" ""{src}\game\appdata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingAppdata}"; StatusMsg: "{cm:msgInstallingAppdata}"
-Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\bins"" ""{src}\game\bins.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingBins}"; StatusMsg: "{cm:msgInstallingBins}"
-Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\gamedata"" ""{src}\game\gamedata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingGamedata}"; StatusMsg: "{cm:msgInstallingGamedata}"
-Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}"" ""{src}\game\maindir.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingMaindir}"; StatusMsg: "{cm:msgInstallingMaindir}"
-#endif
+;#ifdef BundleRelease
+;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\appdata"" ""{src}\game\appdata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingAppdata}"; StatusMsg: "{cm:msgInstallingAppdata}"
+;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\bins"" ""{src}\game\bins.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingBins}"; StatusMsg: "{cm:msgInstallingBins}"
+;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\gamedata"" ""{src}\game\gamedata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingGamedata}"; StatusMsg: "{cm:msgInstallingGamedata}"
+;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}"" ""{src}\game\maindir.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingMaindir}"; StatusMsg: "{cm:msgInstallingMaindir}"
+;#endif
 
 ; install prerequisities
 ;Filename: "{tmp}\vcredist_x86.exe"; Flags: hidewizard skipifdoesntexist; Description: "{cm:msgInstallingVcredist}"; StatusMsg: "{cm:msgInstallingVcredist}"; Check: VCRedistNeedsInstall
@@ -104,35 +104,40 @@ Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}"" ""{src}
 ;Type: files; Name: "{app}\appdata\user.ltx"
 
 [Icons]
-;Name: "{commonprograms}\{#LA_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
-;Name: "{commondesktop}\{#LA_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
+;Name: "{commonprograms}\{#STK2OC_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
+;Name: "{commondesktop}\{#STK2OC_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
 
 [Setup]
 PrivilegesRequired=admin
 #ifdef BundleRelease
-ExtraDiskSpaceRequired={#LA_disk_usage}
+ExtraDiskSpaceRequired={#STK2OC_disk_usage}
 #endif
-AppName={#LA_app_name}
-AppVersion={#LA_version_text}
-AppCopyright={#LA_copyright}
-DefaultDirName={pf}\{#LA_directory_name}
+AppName={#STK2OC_app_name}
+AppVersion={#STK2OC_version_text}
+AppCopyright={#STK2OC_copyright}
+DefaultDirName={pf}\{#STK2OC_directory_name}
 DisableDirPage=no
 DisableProgramGroupPage=yes
-AppPublisher={#LA_copyright}
-VersionInfoVersion={#LA_version}
-VersionInfoCompany={#LA_copyright}
-VersionInfoDescription={#LA_app_name}
-VersionInfoTextVersion={#LA_version_text}
-VersionInfoCopyright={#LA_copyright}
-VersionInfoProductName={#LA_app_name}
-VersionInfoProductVersion={#LA_version}
-VersionInfoProductTextVersion={#LA_version_text}
-MinVersion=0,5.01sp3
-WizardImageFile={#LA_installer_support_files}\installer_images\LAinstallerImage.bmp
-SetupIconFile={#LA_installer_support_files}\installer_images\stalker.ico
-WizardSmallImageFile={#LA_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
+AppPublisher={#STK2OC_copyright}
+VersionInfoVersion={#STK2OC_version}
+VersionInfoCompany={#STK2OC_copyright}
+VersionInfoDescription={#STK2OC_app_name}
+VersionInfoTextVersion={#STK2OC_version_text}
+VersionInfoCopyright={#STK2OC_copyright}
+VersionInfoProductName={#STK2OC_app_name}
+VersionInfoProductVersion={#STK2OC_version}
+VersionInfoProductTextVersion={#STK2OC_version_text}
+MinVersion=6.1sp1
+WizardImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerImage.bmp
+SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ico
+WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
 DiskSpanning = Yes
 DiskSliceSize = 2100000000
+OutputBaseFilename = old_concept
+Compression = lzma2/ultra64
+SolidCompression = yes
+LZMAUseSeparateProcess = yes
+LZMANumBlockThreads = 6
 
 [CustomMessages]
 msgInstallingBins=Installing binaries
@@ -149,7 +154,7 @@ msgDeletingUnwantedFiles=Deleting not needed files
 
 [Languages]
 Name: rus; MessagesFile: compiler:Languages\Russian.isl
-Name: eng; MessagesFile: compiler:Languages\English.isl
+Name: eng; MessagesFile: compiler:Default.isl
 
 [UninstallDelete]
 

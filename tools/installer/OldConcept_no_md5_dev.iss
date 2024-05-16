@@ -37,81 +37,57 @@
 ;
 ;
 
-; for a patch, comment out the below line.
-; uncomment it when releasing a bundle (with external 7z archives).
-;#define BundleRelease
-
-; password for 7z files!
-#define archpasswd "sdu28042elmd"
-
 ; this is an estimated disk usage
 ; it cannot be determined by the installer itself,
 ; due to external archives used.
 ; It's in bytes!
-#define STK2OC_disk_usage "78083341394"
+#define STK2OC_disk_usage "17510000000"
 
 ; dirs used:
-#define STK2OC_game_files ".\game_distrib_files"
-;#define STK2OC_3rd_party_files ".\game_distrib_files\3rdparties"
+#define STK2OC_game_files ".\xray"
 #define STK2OC_installer_support_files "."
 
 ; versions, names etc.:
-#define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 Old Concept"
-#define STK2OC_app_name "S.T.A.L.K.E.R. 2 Old Concept"
-#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
+#define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 OC Developer"
+#define STK2OC_app_name "S.T.A.L.K.E.R. 2 OC Developer"
+#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 OC Developer"
 #define STK2OC_copyright "dezowave"
 #define STK2OC_version "0.35"
 #define STK2OC_version_text "0.35"
 
 [Types]
 Name: "full"; Description: "Full installation"
-;Name: "custom"; Description: "Custom installation"; Flags: iscustom
+Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "OldConcept"; Description: "Stalker 2 Old Concept"; Types: full; Flags: fixed
+Name: "stk2oc"; Description: "Developer Components"; Types: full custom; Flags: fixed
+;///////////////////////////////////////////////
+Name: "xray"; Description: "Sources"; Types: full custom
+Name: "tools"; Description: "Tools and Scripts"; Types: full custom
+Name: "tests"; Description: "Tests"; Types: full custom
+Name: "docs"; Description: "Coders Docs"; Types: full custom
 ;///////////////////////////////////////////////
 
 [Files]
 ;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-
-#ifndef BundleRelease
-Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
-
-;if other patches were installed already
-;Source: "{#STK2OC_3rd_party_files}\oalinst.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#STK2OC_3rd_party_files}\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#STK2OC_3rd_party_files}\Xvid-1.3.3-20140407.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
-;Source: "{#STK2OC_3rd_party_files}\DirectX_runtime\*"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion createallsubdirs recursesubdirs
-#endif
+Source: "{#STK2OC_game_files}\xray\*"; DestDir: "{app}\xray\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
+Source: "{#STK2OC_game_files}\third_party\*"; DestDir: "{app}\third_party\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
+Source: "{#STK2OC_game_files}\build\*"; DestDir: "{app}\build\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
+Source: "{#STK2OC_game_files}\CMakeLists.txt"; DestDir: "{app}"; Components: xray
+Source: "{#STK2OC_game_files}\README.md"; DestDir: "{app}"; Components: xray
+Source: "{#STK2OC_game_files}\dependency_graph.pdf"; DestDir: "{app}"; Components: xray
+Source: "{#STK2OC_game_files}\tools\*"; DestDir: "{app}\tools\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tools
+Source: "{#STK2OC_game_files}\tests\*"; DestDir: "{app}\tests\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tests
+Source: "{#STK2OC_game_files}\3rd-party_wiki\*"; DestDir: "{app}\3rd-party_wiki\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: docs
 
 [Run]
-; unpack game files
-;#ifdef BundleRelease
-;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\appdata"" ""{src}\game\appdata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingAppdata}"; StatusMsg: "{cm:msgInstallingAppdata}"
-;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\bins"" ""{src}\game\bins.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingBins}"; StatusMsg: "{cm:msgInstallingBins}"
-;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}\gamedata"" ""{src}\game\gamedata.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingGamedata}"; StatusMsg: "{cm:msgInstallingGamedata}"
-;Filename: "{tmp}\7za.exe"; Parameters: "x -y -p{#archpasswd} -o""{app}"" ""{src}\game\maindir.7z*"""; Flags: runhidden; Description: "{cm:msgInstallingMaindir}"; StatusMsg: "{cm:msgInstallingMaindir}"
-;#endif
-
-; install prerequisities
-;Filename: "{tmp}\vcredist_x86.exe"; Flags: hidewizard skipifdoesntexist; Description: "{cm:msgInstallingVcredist}"; StatusMsg: "{cm:msgInstallingVcredist}"; Check: VCRedistNeedsInstall
-;Filename: "{tmp}\oalinst.exe"; Flags: hidewizard skipifdoesntexist; Description: "{cm:msgInstallingOAL}"; StatusMsg: "{cm:msgInstallingOAL}"
-;Filename: "{tmp}\Xvid-1.3.3-20140407.exe"; Flags: hidewizard skipifdoesntexist; Description: "{cm:msgInstallingXvid}"; StatusMsg: "{cm:msgInstallingXvid}"
-; include the unpacked version of DirectX runtimes:
-;Filename: "{tmp}\DXSETUP.exe"; Flags: hidewizard skipifdoesntexist; Description: "{cm:msgInstallingDXredist}"; StatusMsg: "{cm:msgInstallingDXredist}"
 
 [InstallDelete]
-;Type: files; Name: "{app}\appdata\user.ltx"
 
 [Icons]
-;Name: "{commonprograms}\{#LA_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
-;Name: "{commondesktop}\{#LA_shortcut_name}"; Filename: "{app}\xr2-dsgn\Launcher.exe"; WorkingDir: "{app}\xr2-dsgn";
 
 [Setup]
 PrivilegesRequired=admin
-#ifdef BundleRelease
-ExtraDiskSpaceRequired={#STK2OC_disk_usage}
-#endif
 AppName={#STK2OC_app_name}
 AppVersion={#STK2OC_version_text}
 AppCopyright={#STK2OC_copyright}
@@ -131,9 +107,9 @@ MinVersion=6.1sp1
 WizardImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerImage.bmp
 SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ico
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
-DiskSpanning = Yes
+DiskSpanning = no
 DiskSliceSize = 2100000000
-OutputBaseFilename = old_concept
+OutputBaseFilename = old_concept_dev
 Compression = lzma2/ultra64
 SolidCompression = yes
 LZMAUseSeparateProcess = yes
@@ -157,6 +133,12 @@ Name: rus; MessagesFile: compiler:Languages\Russian.isl
 Name: eng; MessagesFile: compiler:Default.isl
 
 [UninstallDelete]
+Type: filesandordirs; Name: "{app}\xray\*";
+Type: filesandordirs; Name: "{app}\third_party\*";
+Type: files; Name: "{app}\README.md";
+Type: files; Name: "{app}\dependency_graph.pdf";
+Type: filesandordirs; Name: "{app}\tools\*";
+Type: filesandordirs; Name: "{app}\3rd-party_wiki\*";
 
 [Code]
 #IFDEF UNICODE
