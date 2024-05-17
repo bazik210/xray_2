@@ -68,7 +68,7 @@ Name: "Full"; Description: "Patch installation"
 ;Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.25"; Types: full; Flags: fixed
+Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.4"; Types: full; Flags: fixed
 ;///////////////////////////////////////////////
 
 [Files]
@@ -157,6 +157,7 @@ Name: rus; MessagesFile: compiler:Languages\Russian.isl
 Name: eng; MessagesFile: compiler:Default.isl
 
 [UninstallDelete]
+Type: filesandordirs; Name: "{app}\binaries\*";
 
 [Code]
 #IFDEF UNICODE
