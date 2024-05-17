@@ -348,6 +348,7 @@ void process_patrol_path_behaviour( configs::lua_config_value const& patrol_conf
 					
 					configs::lua_config_value look_point_event_handler_config = current_look_point_behaviour_config["events"][(pcstr)event_handler_name.c_str()];
 					look_point_event_handler_config["event_name"] = "turn_end";
+					look_point_event_handler_config["is_global"] = false;
 					
 					configs::lua_config_value action_config = look_point_event_handler_config["actions"]["action0"];
 					action_config["action_type"]	= "raise_event";
@@ -368,6 +369,7 @@ void process_patrol_path_behaviour( configs::lua_config_value const& patrol_conf
 
 					configs::lua_config_value look_point_event_handler_config = current_look_point_behaviour_config["events"][(pcstr)event_handler_name.c_str()];
 					look_point_event_handler_config["event_name"] = "turn_end";
+					look_point_event_handler_config["is_global"] = false;
 
 					configs::lua_config_value action_config = look_point_event_handler_config["actions"]["action0"];
 					action_config["action_type"]	= switch_event;
@@ -378,7 +380,6 @@ void process_patrol_path_behaviour( configs::lua_config_value const& patrol_conf
 						continue; // look_points iterator
 					}
 				}
-		
 				
 				fixed_string<128> event_handler_name = "event";
 				event_handler_name.appendf("%d", current_look_point_behaviour_config["events"].size());
@@ -386,24 +387,11 @@ void process_patrol_path_behaviour( configs::lua_config_value const& patrol_conf
 				configs::lua_config_value look_point_event_handler_config = current_look_point_behaviour_config["events"][(pcstr)event_handler_name.c_str()];
 				look_point_event_handler_config["event_name"] = switch_event;
 
-				if (look_point_index == last_look_point_index) {
-					look_point_event_handler_config.assign_lua_value(switch_by_edges_event_handler_config.copy());
-					look_point_event_handler_config["event_name"] = switch_event;
-
-					look_point_event_handler_config["is_global"] = false;
-
-					configs::lua_config_value action_config = look_point_event_handler_config["actions"]["action0"];
-					action_config["action_type"]	= "switch_to_behaviour";
-
-					fixed_string<128> switch_to_behaviour_name		= behaviour_name;
-					switch_to_behaviour_name.appendf("look_point%d", look_point_index );
-
-					action_config["switching_to_behaviour"]		= switch_to_behaviour_name.c_str();
-				}
-				else if ( look_point_chooser_type == 0 )
+				if ( look_point_chooser_type == 0  || look_point_index == last_look_point_index )
 				{
 					look_point_event_handler_config.assign_lua_value(switch_by_edges_event_handler_config.copy());
 					look_point_event_handler_config["event_name"] = switch_event;
+					look_point_event_handler_config["is_global"] = false;
 				}
 				else if ( look_point_chooser_type == 1 )
 				{

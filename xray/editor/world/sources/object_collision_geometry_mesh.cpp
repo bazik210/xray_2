@@ -32,7 +32,7 @@ namespace editor{
 ////////////////			I N I T I A L I Z E				////////////////
 
 object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collision_geometry^ parent ):
-	m_matrix		( m_matrix->get_instance() ),
+	m_matrix		( NEW(float4x4) ),
 	m_primitive		( NEW(collision::primitive) ),
 	m_parent		( parent ),
 	m_is_anti_mesh	( false )
@@ -40,7 +40,7 @@ object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collisio
 }
 
 object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collision_geometry^ parent, Boolean is_anti_mesh ):
-	m_matrix		(m_matrix->get_instance()),
+	m_matrix		( NEW(float4x4) ),
 	m_primitive		( NEW(collision::primitive) ),
 	m_parent		( parent ),
 	m_is_anti_mesh	( is_anti_mesh )
@@ -50,7 +50,7 @@ object_collision_geometry_mesh::object_collision_geometry_mesh ( object_collisio
 object_collision_geometry_mesh::~object_collision_geometry_mesh ( )
 {
 	activate	( false );
-	delete		( m_matrix );
+	DELETE		( m_matrix );
 	DELETE		( m_primitive );
 }
 

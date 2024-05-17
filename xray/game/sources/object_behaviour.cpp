@@ -69,63 +69,71 @@ void object_behaviour::attach_to_object( object_controlled* o )
 
 	m_prev_time				= 0.0f;
 
-	if(m_data.value_exists("events"))
+	if (m_data.value_exists("events"))
 	{
 		configs::binary_config_value t_event_handlers = m_data["events"];
 		configs::binary_config_value::const_iterator it = t_event_handlers.begin();
 		configs::binary_config_value::const_iterator it_e = t_event_handlers.end();
 
-		for( ;it!=it_e; ++it)
+		for (; it != it_e; ++it)
 		{
-			pcstr event_name	= (*it)["event_name"];
-			bool bglobal		= (*it)["is_global"];
-			configs::binary_config_value::const_iterator action_it = (*it)["actions"].begin();
-			configs::binary_config_value::const_iterator action_it_e = (*it)["actions"].end();
+			pcstr event_name = (*it)["event_name"];
 
-			game_event e( event_name );
+			bool bglobal = (*it)["is_global"];
 
-			fixed_string<256> desc = "eh:";
-			desc.appendf( "behaviour[%s] event_name[%s]" , full_name().c_str(), event_name );
-
-			for( ;action_it!=action_it_e; ++action_it )
+			if ((*it).value_exists("actions")) 
 			{
-				logic_action_ptr a = NULL;			
-				
-				pcstr action_type = (*action_it)["action_type"];
+				configs::binary_config_value::const_iterator action_it = (*it)["actions"].begin();
+				configs::binary_config_value::const_iterator action_it_e = (*it)["actions"].end();
 
-				desc.appendf( " type[%s]" , action_type );
+				game_event e(event_name);
 
-				if(strings::equal(action_type, "switch_to_behaviour" ))
+				fixed_string<256> desc = "eh:";
+				desc.appendf("behaviour[%s] event_name[%s]", full_name().c_str(), event_name);
+
+				for (; action_it != action_it_e; ++action_it)
 				{
-					pcstr bevaviour_name		= (*action_it)["switching_to_behaviour"];
-					object_behaviour* behaviour	= m_owner->get_behaviour			( bevaviour_name );
-					a							= NEW(action_set_object_behaviour)( m_owner->get_event_manager(), o, behaviour, m_owner );
-					desc.appendf( " to_behaviour[%s]", bevaviour_name );									
-				}else
-				if(strings::equal(action_type, "filtered_switch_to_behaviour" ))
-				{
-					a							= NEW(action_filtered_set_object_behaviour)( m_owner->get_event_manager(), o, *action_it, m_owner );
-				}else
-				if(strings::equal(action_type, "raise_event" ))
-				{
-					pcstr raise_event_name		= (*action_it)["raised_event"];
-					game_event e( raise_event_name );
-					bool is_global =  ( *action_it ).value_exists("is_global") && (bool)(*action_it)["is_global"] == false;
-					if ( is_global )
-						a							= NEW(action_emit_event)( m_owner->get_event_manager(), e, m_controlled_object );
+					logic_action_ptr a = NULL;
+
+					pcstr action_type = (*action_it)["action_type"];
+
+					desc.appendf(" type[%s]", action_type);
+
+					if (strings::equal(action_type, "switch_to_behaviour"))
+					{
+						pcstr bevaviour_name = (*action_it)["switching_to_behaviour"];
+						object_behaviour* behaviour = m_owner->get_behaviour(bevaviour_name);
+						a = NEW(action_set_object_behaviour)(m_owner->get_event_manager(), o, behaviour, m_owner);
+						desc.appendf(" to_behaviour[%s]", bevaviour_name);
+					}
 					else
-						a							= NEW(action_emit_event)( m_owner->get_event_manager(), e );
+						if (strings::equal(action_type, "filtered_switch_to_behaviour"))
+						{
+							a = NEW(action_filtered_set_object_behaviour)(m_owner->get_event_manager(), o, *action_it, m_owner);
+						}
+						else
+							if (strings::equal(action_type, "raise_event"))
+							{
+								pcstr raise_event_name = (*action_it)["raised_event"];
+								game_event e(raise_event_name);
+								bool is_global = (*action_it).value_exists("is_global") && (bool)(*action_it)["is_global"] == false;
+								if (is_global)
+									a = NEW(action_emit_event)(m_owner->get_event_manager(), e, m_controlled_object);
+								else
+									a = NEW(action_emit_event)(m_owner->get_event_manager(), e);
 
-					desc.appendf( " raised_event [%s]", raise_event_name, is_global );
+								desc.appendf(" raised_event [%s]", raise_event_name, is_global);
 
-				}else
-				{
-					UNREACHABLE_CODE();
+							}
+							else
+							{
+								UNREACHABLE_CODE();
+							}
+					desc.appendf(" [%x]", a);
+					//	LOG_INFO( desc.c_str() );
+					m_owner->get_event_manager()->subscribe_event_handler(e, (bglobal) ? NULL : o, a, desc.c_str(), true);
+					m_actions.push_back(a);
 				}
-				desc.appendf( " [%x]", a );
-			//	LOG_INFO( desc.c_str() );
-				m_owner->get_event_manager()->subscribe_event_handler	( e, (bglobal) ? NULL : o, a, desc.c_str(), true );
-				m_actions.push_back										( a );
 			}
 		}
 	}
