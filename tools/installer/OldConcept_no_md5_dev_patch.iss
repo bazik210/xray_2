@@ -67,9 +67,9 @@ Name: "xray"; Description: "Sources"; Types: full custom
 ;///////////////////////////////////////////////
 
 [Files]
-;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
+Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: binaries
 Source: "{#STK2OC_game_files}\xray\*"; DestDir: "{app}\xray\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
+Source: "{#STK2OC_game_files}\tools\*"; DestDir: "{app}\tools\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 
 [Run]
 
@@ -100,7 +100,7 @@ SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ic
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
 DiskSpanning = no
 DiskSliceSize = 2100000000
-OutputBaseFilename = old_concept_dev
+OutputBaseFilename = old_concept_dev_patch_0_4
 Compression = lzma2/ultra64
 SolidCompression = yes
 LZMAUseSeparateProcess = yes
@@ -126,6 +126,7 @@ Name: eng; MessagesFile: compiler:Default.isl
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\binaries\*";
 Type: filesandordirs; Name: "{app}\xray\*";
+Type: filesandordirs; Name: "{app}\tools\*";
 
 [Code]
 #IFDEF UNICODE

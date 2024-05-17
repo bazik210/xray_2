@@ -70,12 +70,14 @@ Name: "Full"; Description: "Patch installation"
 [Components]
 Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.4"; Types: full; Flags: fixed
 ;///////////////////////////////////////////////
+Name: "binaries"; Description: "Binaries"; Types: full custom
 
 [Files]
 ;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
+Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: binaries
 
 #ifndef BundleRelease
-Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
+;Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
 
 ;if other patches were installed already
 ;Source: "{#STK2OC_3rd_party_files}\oalinst.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
@@ -133,7 +135,7 @@ SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ic
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
 DiskSpanning = Yes
 DiskSliceSize = 2100000000
-OutputBaseFilename = old_concept
+OutputBaseFilename = old_concept_patch_0_4
 Compression = lzma2/ultra64
 SolidCompression = yes
 LZMAUseSeparateProcess = yes
