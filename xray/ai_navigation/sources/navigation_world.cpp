@@ -46,6 +46,13 @@ navigation_world::~navigation_world			( )
 #endif // #if XRAY_DEBUG_ALLOCATOR
 }
 
+void navigation_world::set_scene( render::scene_ptr const& scene )
+{
+	ASSERT( scene );
+
+	m_graph_generator->m_scene = scene;
+}
+
 void navigation_world::clear_resources		( )
 {
 #if 1 //XRAY_DEBUG_ALLOCATOR

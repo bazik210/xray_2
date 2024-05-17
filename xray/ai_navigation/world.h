@@ -25,6 +25,7 @@ struct XRAY_NOVTABLE world {
 	virtual	void	clear_resources	( ) = 0;
 	virtual void	load_navmesh		( pcstr filename ) = 0;
 	virtual graph_generator* get_graph_generator ( ) = 0;
+	virtual void set_scene ( render::scene_ptr const& scene ) = 0;
 
 #ifdef DEBUG
 	virtual	void	debug_render		( input::world& input, float3 const& position, float3 const& direction, math::frustum const& frustum ) = 0;

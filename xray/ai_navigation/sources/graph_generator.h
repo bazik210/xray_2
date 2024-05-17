@@ -102,7 +102,11 @@ private:
 	math::float4x4	const			m_transform;
 	render::static_model_ptr		m_model;
 	render::debug::renderer&		m_renderer;
-	render::scene_ptr const&		m_scene;
+	
+public:
+	render::scene_ptr				m_scene;
+	
+private:
 	ai::navigation::engine&			m_engine;
 	collision::geometry*			m_geometry;
 
@@ -156,9 +160,11 @@ private:
 	math::frustum					m_frustum;
 	bool							m_show_processed_model;
 	bool							m_show_triangle_faces;
+	bool							m_show_editor_triangle_faces;
 	bool							m_show_navigation_mesh;
 	bool							m_show_path_channel;
 	bool							m_show_marked_triangles;
+	bool							m_show_path_find_agent_radius;
 	vertices_type					m_transformed_vertices;
 //	navigation_triangles_type		m_navigation_triangles;
 

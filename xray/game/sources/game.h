@@ -353,7 +353,7 @@ private:
 	// for sound test
 	bool									m_sound_test_allowed;
 
-	bool									m_rtp;
+	bool									m_scene;
 
 	bool									m_load_level;
 

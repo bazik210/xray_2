@@ -34,6 +34,7 @@ public:
 	virtual			~navigation_world			( );
 	virtual	void	tick						( );
 	virtual	void	clear_resources				( );
+	virtual	void	set_scene					( render::scene_ptr const& scene );
 
 	virtual void	load_navmesh				( pcstr project_name );
 	virtual u32		get_node_id_at				( float3 const& position );

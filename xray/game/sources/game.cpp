@@ -192,7 +192,7 @@ game::game(		xray::engine_user::engine& engine,
 	m_debug_window_type		( debug_window_none ),
 	m_debug_window			( NULL ),
 #endif
-	m_rtp					( 0 ),
+	m_scene					( 0 ),
 	m_scene_to_activate		( 0 ),
 	gload					( 0 ),
 	gunload					( 0 ),
@@ -273,8 +273,6 @@ bool game::check_level_exist(fixed_string512 &project_path)
 
 void game::on_render_scene_created( xray::resources::queries_result& data )
 {
-//	m_scene						= static_cast_resource_ptr< xray::render::scene_ptr >( data[0].get_unmanaged_resource() );
-//	m_scene_view				= static_cast_resource_ptr< xray::render::scene_view_ptr >( data[1].get_unmanaged_resource() );
 	m_render_output_window		= static_cast_resource_ptr< xray::render::render_output_window_ptr >( data[0].get_unmanaged_resource() );
 
 	m_timer.start				( );
@@ -633,14 +631,16 @@ void game::tick( u32 const current_frame_id )
 		}
 	}
 
-	if (!m_rtp) {
-		m_rtp = true;
+	if (!m_scene) {
+		m_scene = true;
+
+		R_ASSERT(m_ai_navigation_world);
+		ai_navigation_world().set_scene(get_active_scene());
 
 		R_ASSERT(m_rtp_world);
-
 		rtp().set_scene(get_active_scene());
 
-		//LOG_INFO("rtp is ready!");
+		//LOG_INFO("navigation and rtp is ready!");
 	}
 
 	if (m_active_scene && m_game_world->m_scenes_check)
@@ -874,6 +874,8 @@ void game::load( pcstr project_resource_name, pcstr project_resource_path )
 	if (gload)
 		return;
 
+	m_scene = false; //reload scenes for ai navigation and rtp
+
 	//if we had attached camera, disable on load
 	//game::unload doesn't work for level_load
 	get_game_world().m_cam_attached = false;
@@ -953,6 +955,8 @@ void game::unload( pcstr, bool destroy )
 
 	if(!destroy)
 		switch_to_scene					( m_main_menu );
+
+	m_scene = false;
 }
 
 void game::activate_lobby( )

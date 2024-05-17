@@ -62,10 +62,12 @@ graph_generator::graph_generator			(
 	m_min_agent_radius					( 0.3f ),
 	m_min_agent_height					( 0.5f ),
 	m_show_processed_model				( false ),
-	m_show_triangle_faces				( true ),
+	m_show_triangle_faces				( false ),
+	m_show_editor_triangle_faces		( true ),
 	m_show_navigation_mesh				( true ),
 	m_show_marked_triangles				( false ),
 	m_show_path_channel					( false ),
+	m_show_path_find_agent_radius		( false ),
 	m_start_node						( u32(-1) ),
 	m_goal_node							( u32(-1) )
 {
@@ -135,15 +137,15 @@ graph_generator::graph_generator			(
 	static xray::console_commands::cc_bool s_show_navigation_mesh_console_command(
 		"navigation_show_navigation_mesh",
 		m_show_navigation_mesh,
-		false,
-		console_commands::command_type_engine_internal
+		true,
+		console_commands::command_type_user_specific
 	);
 
 	static xray::console_commands::cc_bool s_show_path_channel_console_command(
 		"navigation_show_path_channel",
 		m_show_path_channel,
-		false,
-		console_commands::command_type_engine_internal
+		true,
+		console_commands::command_type_user_specific
 	);
 
 	static xray::console_commands::cc_delegate s_merger_operation_id_console_command(
@@ -155,22 +157,36 @@ graph_generator::graph_generator			(
 	static xray::console_commands::cc_bool s_show_processed_model_console_command(
 		"navigation_show_processed_model",
 		m_show_processed_model,
-		false,
-		console_commands::command_type_engine_internal
+		true,
+		console_commands::command_type_user_specific
 	);
 
 	static xray::console_commands::cc_bool s_show_marked_triangles_console_command(
 		"navigation_show_marked_triangles",
 		m_show_marked_triangles,
-		false,
-		console_commands::command_type_engine_internal
+		true,
+		console_commands::command_type_user_specific
 	);
 
 	static xray::console_commands::cc_bool s_show_triangle_faces_console_command(
 		"navigation_show_triangle_faces",
 		m_show_triangle_faces,
-		false,
-		console_commands::command_type_engine_internal
+		true,
+		console_commands::command_type_user_specific
+	);
+
+	static xray::console_commands::cc_bool s_show_editor_triangle_faces_console_command(
+		"navigation_show_editor_triangle_faces",
+		m_show_editor_triangle_faces,
+		true,
+		console_commands::command_type_user_specific
+	);
+
+	static xray::console_commands::cc_bool m_show_path_find_agent_radius_command(
+		"navigation_show_path_find_agent_radius",
+		m_show_path_find_agent_radius,
+		true,
+		console_commands::command_type_user_specific
 	);
 
 	static xray::console_commands::cc_delegate s_change_draw_range_console_command(
@@ -609,11 +625,13 @@ void graph_generator::tick					( )
 	//	m_renderer.debug().draw_sphere ( m_scene, v0, .1f, math::color(255,   0, 255));
 	//	m_renderer.debug().draw_sphere ( m_scene, v1, .1f, math::color(255,   0, 255));
 	}
-
-
-	m_renderer.draw_sphere ( m_scene, m_start_position, m_path_finder_agent_radius, math::color( 255, 128, 128 ) );
-	m_renderer.draw_sphere ( m_scene, m_goal_position, m_path_finder_agent_radius, math::color( 128, 128, 255 ) );
 	*/
+
+	if ( m_show_path_find_agent_radius ) {
+		m_renderer.draw_sphere(m_scene, m_start_position, m_path_finder_agent_radius, math::color(255, 128, 128), true);
+		m_renderer.draw_sphere(m_scene, m_goal_position, m_path_finder_agent_radius, math::color(128, 128, 255), true);
+	}
+
 	if ( m_show_path_channel ) {
 		u32 channel_triangles_count = m_channel.size();
 		for ( u32 i = 0 ; i < channel_triangles_count; ++i ) {
@@ -663,14 +681,27 @@ void graph_generator::tick					( )
 		if ( m_show_triangle_id == (i->triangle_id) )
 			continue;
 		
-		if (m_engine.get_editor()) {
-			if (m_show_triangle_faces)
-				m_renderer.draw_triangle(m_scene, v0, v1, v2, m_input_triangles.data[(i->triangle_id)].color);
 
-			static const math::color obstruction_color(255, 0, 0);
-			m_renderer.draw_line(m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color(0, 255, 0));
-			m_renderer.draw_line(m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color(0, 255, 0));
-			m_renderer.draw_line(m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color(0, 255, 0));
+		if (m_engine.get_editor()) {
+			if (m_show_editor_triangle_faces) {
+				m_renderer.draw_triangle(m_scene, v0, v1, v2, m_input_triangles.data[(i->triangle_id)].color, true);
+
+				static const math::color obstruction_color(255, 0, 0);
+				m_renderer.draw_line(m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+				m_renderer.draw_line(m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+				m_renderer.draw_line(m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+			}
+		}
+		else {
+			if (m_show_triangle_faces)
+			{
+				m_renderer.draw_triangle(m_scene, v0, v1, v2, m_input_triangles.data[(i->triangle_id)].color, true);
+
+				static const math::color obstruction_color(255, 0, 0);
+				m_renderer.draw_line(m_scene, v0, v1, m_input_triangles.data[(i->triangle_id)].is_obstructed(0) || m_input_triangles.data[(i->triangle_id)].neighbours[0] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+				m_renderer.draw_line(m_scene, v1, v2, m_input_triangles.data[(i->triangle_id)].is_obstructed(1) || m_input_triangles.data[(i->triangle_id)].neighbours[1] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+				m_renderer.draw_line(m_scene, v2, v0, m_input_triangles.data[(i->triangle_id)].is_obstructed(2) || m_input_triangles.data[(i->triangle_id)].neighbours[2] == u32(-1) ? obstruction_color : math::color(0, 255, 0), true);
+			}
 		}
 	}
 
