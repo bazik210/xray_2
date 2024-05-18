@@ -24,6 +24,7 @@ START /B /WAIT cmake --fresh -G "Visual Studio 17 2022" .. > "CreateSln_Log.txt"
 	CALL SetupTools.bat
 	CALL SetupWPF_Controls.bat
 ::	CALL SetupMasterGold.bat
+	CALL MaxOptimizations.bat
 	echo Cleaning up...
 	CALL RemoveTempFiles.bat
 	echo Done!

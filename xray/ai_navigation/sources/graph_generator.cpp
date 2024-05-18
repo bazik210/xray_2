@@ -681,7 +681,6 @@ void graph_generator::tick					( )
 		if ( m_show_triangle_id == (i->triangle_id) )
 			continue;
 		
-
 		if (m_engine.get_editor()) {
 			if (m_show_editor_triangle_faces) {
 				m_renderer.draw_triangle(m_scene, v0, v1, v2, m_input_triangles.data[(i->triangle_id)].color, true);

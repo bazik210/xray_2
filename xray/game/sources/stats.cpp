@@ -29,11 +29,7 @@ void stats::draw(render::ui::renderer& w, render::scene_view_ptr const& scene_vi
 void stats::set_fps_stats(float fps)
 {
 	string64		buff;
-#ifdef MASTER_GOLD
-	xray::sprintf	(buff, "fps: %3.2f", fps);
-#else
-	xray::sprintf	(buff, "%3.2f", fps);
-#endif
+	xray::sprintf	(buff, "FPS: %3.2f", fps);
 	m_fps->set_text	(buff);
 }
 
@@ -47,10 +43,10 @@ void stats::set_active_scene( pcstr scene_name )
 void stats::set_camera_stats(float3 const& pos, float3 const& dir)
 {
 	string64		buff;
-	xray::sprintf	(buff, "cam pos:%3.2f %3.2f %3.2f", pos.x, pos.y, pos.z);
+	xray::sprintf	(buff, "camera position: %3.2f %3.2f %3.2f", pos.x, pos.y, pos.z);
 	m_camera_position->set_text	(buff);
 
-	xray::sprintf	(buff, "cam dir:%3.2f %3.2f %3.2f", dir.x, dir.y, dir.z);
+	xray::sprintf	(buff, "camera direction: %3.2f %3.2f %3.2f", dir.x, dir.y, dir.z);
 	m_camera_direction->set_text	(buff);
 }
 
@@ -77,7 +73,7 @@ void stats::create()
 	m_fps->w()->set_size				(float2(50.0f, 20.0f));
 	m_fps->set_font						(xray::ui::fnt_arial);
 	m_fps->set_text_mode				(xray::ui::tm_default);
-	m_fps->set_color					(0xffffffff);
+	m_fps->set_color					(xray::math::color(128, 255, 255).m_value);	// (xray::math::color(255, 255, 128).m_value); ofc it's the other way, this is blue, yellow is the other one...
 	m_main_window->add_child			(m_fps->w(), true);
 
 	m_camera_position					= m_ui_world.create_text();
@@ -86,7 +82,7 @@ void stats::create()
 	m_camera_position->w()->set_size	(float2(100.0f, 20.0f));
 	m_camera_position->set_font			(xray::ui::fnt_arial);
 	m_camera_position->set_text_mode	(xray::ui::tm_default);
-	m_camera_position->set_color		(0xffffffff);
+	m_camera_position->set_color		(xray::math::color(255, 255, 128).m_value);
 	m_main_window->add_child			(m_camera_position->w(), true);
 
 	m_camera_direction					= m_ui_world.create_text();
@@ -95,7 +91,7 @@ void stats::create()
 	m_camera_direction->w()->set_size	(float2(100.0f, 20.0f));
 	m_camera_direction->set_font		(xray::ui::fnt_arial);
 	m_camera_direction->set_text_mode	(xray::ui::tm_default);
-	m_camera_direction->set_color		(0xffffffff);
+	m_camera_direction->set_color		(xray::math::color(128, 255, 255).m_value);
 	m_main_window->add_child			(m_camera_direction->w(), true);
 
 	m_resources_activity					= m_ui_world.create_text();
@@ -104,7 +100,7 @@ void stats::create()
 	m_resources_activity->w()->set_size	(float2(100.0f, 20.0f));
 	m_resources_activity->set_font		(xray::ui::fnt_arial);
 	m_resources_activity->set_text_mode	(xray::ui::tm_default);
-	m_resources_activity->set_color		(0xffffffff);
+	m_resources_activity->set_color		(xray::math::color(128, 255, 255).m_value);
 	m_main_window->add_child			(m_resources_activity->w(), true);
 
 	
@@ -114,7 +110,7 @@ void stats::create()
 	m_active_scene_info->w()->set_size		(float2(300.0f, 40.0f));
 	m_active_scene_info->set_font			(xray::ui::fnt_arial);
 	m_active_scene_info->set_text_mode		(xray::ui::tm_multiline);
-	m_active_scene_info->set_color			(0xffffffff);
+	m_active_scene_info->set_color			(xray::math::color(255, 255, 128).m_value);
 	m_main_window->add_child				(m_active_scene_info->w(), true);
 
 	m_navmesh_info							= m_ui_world.create_text();
@@ -123,6 +119,6 @@ void stats::create()
 	m_navmesh_info->w()->set_size			(float2(300.0f, 40.0f));
 	m_navmesh_info->set_font				(xray::ui::fnt_arial);
 	m_navmesh_info->set_text_mode			(xray::ui::tm_multiline);
-	m_navmesh_info->set_color				(0xffffffff);
+	m_navmesh_info->set_color				(xray::math::color(128, 255, 255).m_value);
 	m_main_window->add_child			(m_navmesh_info->w(), true);
 }

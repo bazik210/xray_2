@@ -50,17 +50,17 @@
 ; versions, names etc.:
 #define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 OC Developer"
 #define STK2OC_app_name "S.T.A.L.K.E.R. 2 OC Developer Patch"
-#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 OC Developer"
+#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_copyright "dezowave"
-#define STK2OC_version "0.4"
-#define STK2OC_version_text "0.4"
+#define STK2OC_version "0.41"
+#define STK2OC_version_text "0.41"
 
 [Types]
 Name: "full"; Description: "Full installation"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "stk2oc"; Description: "Stalker 2 Old Concept Patch 0.4"; Types: full custom; Flags: fixed
+Name: "stk2oc"; Description: "Stalker 2 Old Concept Patch 0.41"; Types: full custom; Flags: fixed
 ;///////////////////////////////////////////////
 Name: "binaries"; Description: "Binaries"; Types: full custom
 Name: "xray"; Description: "Sources"; Types: full custom
@@ -100,7 +100,7 @@ SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ic
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
 DiskSpanning = no
 DiskSliceSize = 2100000000
-OutputBaseFilename = old_concept_dev_patch_0_4
+OutputBaseFilename = old_concept_dev_patch_0_41
 Compression = lzma2/ultra64
 SolidCompression = yes
 LZMAUseSeparateProcess = yes

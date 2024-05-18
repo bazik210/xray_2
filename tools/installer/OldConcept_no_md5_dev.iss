@@ -50,7 +50,7 @@
 ; versions, names etc.:
 #define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 OC Developer"
 #define STK2OC_app_name "S.T.A.L.K.E.R. 2 OC Developer"
-#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 OC Developer"
+#define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_copyright "dezowave"
 #define STK2OC_version "0.35"
 #define STK2OC_version_text "0.35"

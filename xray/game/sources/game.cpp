@@ -761,7 +761,7 @@ void game::update_stats				( u32 const current_frame_id )
 		//m_stats->set_camera_stats	( m_inverted_view_matrix.c.xyz(), m_inverted_view_matrix.k.xyz() );
 #ifndef MASTER_GOLD
 		string64					buff;
-		xray::sprintf				( buff, "Q: %d", xray::resources::pending_queries_count() );
+		xray::sprintf				( buff, "pending queries: %d", xray::resources::pending_queries_count() );
 		m_stats->set_resources_stats( buff );
 #endif
 		m_stats->draw				( ui_world().get_renderer(), get_active_scene_view() );
