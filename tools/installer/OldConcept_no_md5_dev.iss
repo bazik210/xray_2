@@ -44,7 +44,7 @@
 #define STK2OC_disk_usage "17510000000"
 
 ; dirs used:
-#define STK2OC_game_files ".\xray"
+#define STK2OC_game_files ".\game_distrib_files"
 #define STK2OC_installer_support_files "."
 
 ; versions, names etc.:
@@ -52,8 +52,8 @@
 #define STK2OC_app_name "S.T.A.L.K.E.R. 2 OC Developer"
 #define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_copyright "dezowave"
-#define STK2OC_version "0.35"
-#define STK2OC_version_text "0.35"
+#define STK2OC_version "0.42"
+#define STK2OC_version_text "0.42"
 
 [Types]
 Name: "full"; Description: "Full installation"
@@ -62,9 +62,10 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
 Name: "stk2oc"; Description: "Developer Components"; Types: full custom; Flags: fixed
 ;///////////////////////////////////////////////
-Name: "xray"; Description: "Sources"; Types: full custom
+Name: "xray"; Description: "Engine sources"; Types: full custom
+Name: "textures"; Description: "Textures Sources"; Types: full custom
 Name: "tools"; Description: "Tools and Scripts"; Types: full custom
-Name: "tests"; Description: "Tests"; Types: full custom
+Name: "tests"; Description: "Coders Tests"; Types: full custom
 Name: "docs"; Description: "Coders Docs"; Types: full custom
 ;///////////////////////////////////////////////
 
@@ -79,6 +80,7 @@ Source: "{#STK2OC_game_files}\dependency_graph.pdf"; DestDir: "{app}"; Component
 Source: "{#STK2OC_game_files}\tools\*"; DestDir: "{app}\tools\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tools
 Source: "{#STK2OC_game_files}\tests\*"; DestDir: "{app}\tests\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tests
 Source: "{#STK2OC_game_files}\3rd-party_wiki\*"; DestDir: "{app}\3rd-party_wiki\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: docs
+Source: "{#STK2OC_game_files}\resources\*.psd"; DestDir: "{app}\resources\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: textures
 
 [Run]
 
@@ -91,7 +93,7 @@ PrivilegesRequired=admin
 AppName={#STK2OC_app_name}
 AppVersion={#STK2OC_version_text}
 AppCopyright={#STK2OC_copyright}
-DefaultDirName={pf}\{#STK2OC_directory_name}
+DefaultDirName={commonpf}\{#STK2OC_directory_name}
 DisableDirPage=no
 DisableProgramGroupPage=yes
 AppPublisher={#STK2OC_copyright}
@@ -133,12 +135,6 @@ Name: rus; MessagesFile: compiler:Languages\Russian.isl
 Name: eng; MessagesFile: compiler:Default.isl
 
 [UninstallDelete]
-Type: filesandordirs; Name: "{app}\xray\*";
-Type: filesandordirs; Name: "{app}\third_party\*";
-Type: files; Name: "{app}\README.md";
-Type: files; Name: "{app}\dependency_graph.pdf";
-Type: filesandordirs; Name: "{app}\tools\*";
-Type: filesandordirs; Name: "{app}\3rd-party_wiki\*";
 
 [Code]
 #IFDEF UNICODE

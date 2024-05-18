@@ -60,8 +60,8 @@
 #define STK2OC_app_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_copyright "dezowave"
-#define STK2OC_version "0.35"
-#define STK2OC_version_text "0.35"
+#define STK2OC_version "0.42"
+#define STK2OC_version_text "0.42"
 
 [Types]
 Name: "full"; Description: "Full installation"
@@ -75,7 +75,7 @@ Name: "OldConcept"; Description: "Stalker 2 Old Concept"; Types: full; Flags: fi
 ;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 #ifndef BundleRelease
-Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
+Source: "{#STK2OC_game_files}\*"; Excludes: "*.psd,*.pdb,\resources\platforms"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
 
 ;if other patches were installed already
 ;Source: "{#STK2OC_3rd_party_files}\oalinst.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
@@ -115,7 +115,7 @@ ExtraDiskSpaceRequired={#STK2OC_disk_usage}
 AppName={#STK2OC_app_name}
 AppVersion={#STK2OC_version_text}
 AppCopyright={#STK2OC_copyright}
-DefaultDirName={pf}\{#STK2OC_directory_name}
+DefaultDirName={commonpf}\{#STK2OC_directory_name}
 DisableDirPage=no
 DisableProgramGroupPage=yes
 AppPublisher={#STK2OC_copyright}
