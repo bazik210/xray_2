@@ -312,7 +312,7 @@ void level_editor::register_actions( )
 	a								= gcnew action_delegate(action_name, gcnew execute_delegate_managed(this, &level_editor::toggle_culling_view) );
 	a->set_checked					(gcnew checked_delegate_managed(this, &level_editor::get_culling_view));
 	get_input_engine()->register_action( a, "Ctrl+U(View)");
-	gui_binder->register_image		( "base", action_name,	xray::editor_base::show_render_statistics );
+	gui_binder->register_image		( "base", action_name,	xray::editor_base::show_culling_view );
 	ide()->add_action_button_item	( gui_binder, action_name, "RenderOptionsStrip", 3);
 
 	action_name		= "discrete modify +X axis";

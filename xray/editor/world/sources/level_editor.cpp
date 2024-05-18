@@ -126,7 +126,7 @@ void level_editor::initialize( )
 	m_object_tools.Add			( p_tool_particle );
 
 	tool_speedtree^ tool_st		= gcnew tool_speedtree(this);
-	m_tools_tab->add_tab		( "speedtree", tool_st->ui()->frame() );
+	m_tools_tab->add_tab		( "vegetation", tool_st->ui()->frame() ); // speedtree
 	m_object_tools.Add			( tool_st );
 
 	tool_misc^ p_tool_misc		= gcnew tool_misc(this);
@@ -146,8 +146,8 @@ void level_editor::initialize( )
 
 	tool_animations^ p_tool_animations = gcnew tool_animations( this );
 
-	//m_object_painter_tool_tab	= gcnew object_painter_tool_tab( this );
-	//m_tools_tab->add_tab		( "object painter", m_object_painter_tool_tab );
+//	m_object_painter_tool_tab	= gcnew object_painter_tool_tab( this );
+//	m_tools_tab->add_tab		( "object painter", m_object_painter_tool_tab );
 	xray::editor_base::resource_chooser::register_chooser( gcnew library_class_chooser(tool_sv) );// static
 
 	xray::editor_base::resource_chooser::register_chooser( gcnew library_class_chooser(p_tool_light) );

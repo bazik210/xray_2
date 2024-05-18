@@ -34,7 +34,9 @@ void about_dialog::about_dialog_Load	(System::Object^  sender, System::EventArgs
 		build_station_build_id + ", " + gcnew System::String( xray::build::build_date() ) +
 		"\r\n"
 		"\r\n"
-		"Copyright(C) GSC Game World - 2011";
+		"Copyright(C) GSC Game World - 2011,"
+		"\r\n"
+		"                 Dezowave - 2024";
 }
 
 } // namespace editor 

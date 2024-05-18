@@ -37,12 +37,6 @@
 ;
 ;
 
-; this is an estimated disk usage
-; it cannot be determined by the installer itself,
-; due to external archives used.
-; It's in bytes!
-#define STK2OC_disk_usage "17510000000"
-
 ; dirs used:
 #define STK2OC_game_files ".\game_distrib_files"
 #define STK2OC_installer_support_files "."
@@ -70,7 +64,6 @@ Name: "docs"; Description: "Coders Docs"; Types: full custom
 ;///////////////////////////////////////////////
 
 [Files]
-;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "{#STK2OC_game_files}\xray\*"; DestDir: "{app}\xray\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 Source: "{#STK2OC_game_files}\third_party\*"; DestDir: "{app}\third_party\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 Source: "{#STK2OC_game_files}\build\*"; DestDir: "{app}\build\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray

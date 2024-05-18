@@ -99,6 +99,11 @@ enum images16x16 {
 	generate_portals,
 	bsp_tree_edge_mode,
 	node_group_locked,
+	show_culling_view,
+	draw_lod_auto,
+	draw_lod_0,
+	draw_lod_1,
+	draw_lod_2,
 	images16x16_count,
 }; // enum images16x16
 

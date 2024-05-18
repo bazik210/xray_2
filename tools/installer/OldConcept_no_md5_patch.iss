@@ -48,7 +48,7 @@
 ; it cannot be determined by the installer itself,
 ; due to external archives used.
 ; It's in bytes!
-#define STK2OC_disk_usage "12122854414"
+; #define STK2OC_disk_usage "12122854414"
 
 ; dirs used:
 #define STK2OC_game_files ".\game_distrib_files"
@@ -76,7 +76,7 @@ Name: "binaries"; Description: "Binaries"; Types: full custom
 ;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: binaries
 
-#ifndef BundleRelease
+;#ifndef BundleRelease
 ;Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
 
 ;if other patches were installed already
@@ -84,7 +84,7 @@ Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ig
 ;Source: "{#STK2OC_3rd_party_files}\vcredist_x86.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
 ;Source: "{#STK2OC_3rd_party_files}\Xvid-1.3.3-20140407.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion
 ;Source: "{#STK2OC_3rd_party_files}\DirectX_runtime\*"; DestDir: "{tmp}"; Flags: deleteafterinstall skipifsourcedoesntexist ignoreversion createallsubdirs recursesubdirs
-#endif
+;#endif
 
 [Run]
 ; unpack game files
@@ -111,9 +111,9 @@ Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ig
 
 [Setup]
 PrivilegesRequired=admin
-#ifdef BundleRelease
-ExtraDiskSpaceRequired={#STK2OC_disk_usage}
-#endif
+;#ifdef BundleRelease
+;ExtraDiskSpaceRequired={#STK2OC_disk_usage}
+;#endif
 AppName={#STK2OC_app_name}
 AppVersion={#STK2OC_version_text}
 AppCopyright={#STK2OC_copyright}

@@ -193,9 +193,9 @@ void editor_world::load_settings( )
 	editor_key->Close			();
 	product_key->Close			();
 	
-	m_window_ide->get_menu_strip()->Items->Add	(gcnew System::Windows::Forms::ToolStripLabel("Render config:"));
+	m_window_ide->get_menu_strip()->Items->Add	(gcnew System::Windows::Forms::ToolStripLabel("Graphics quality:")); // "Render config:"
 	m_render_options_button						= gcnew render_mode_strip_button( *this );
-	m_render_options_button->ToolTipText		= "Select render configuration";
+	m_render_options_button->ToolTipText		= "Select graphics quality"; // Select render configuration
 	m_window_ide->get_menu_strip()->Items->Add	(m_render_options_button);
 	
 	updated_render_options_list					();
