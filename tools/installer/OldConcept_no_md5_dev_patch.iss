@@ -63,6 +63,7 @@ Name: "xray"; Description: "Sources"; Types: full custom
 [Files]
 Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: bins_res
 Source: "{#STK2OC_game_files}\resources\*"; DestDir: "{app}\resources\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: bins_res
+Source: "{#STK2OC_game_files}\changelog.txt"; DestDir: "{app}\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: bins_res
 Source: "{#STK2OC_game_files}\xray\*"; DestDir: "{app}\xray\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 Source: "{#STK2OC_game_files}\tools\*"; DestDir: "{app}\tools\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 
