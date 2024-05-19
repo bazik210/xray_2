@@ -56,10 +56,10 @@
 #define STK2OC_installer_support_files "."
 
 ;Developer build
-#define STK2OC_excludes "*.psd,*.lib,resources\platforms,binaries\x64,binaries\Win32,Debug\lib,MiniSizeRel\lib,RelWithDebInfo\lib,Release\lib"
+#define STK2OC_excludes "*.psd,*.lib,*.exp,*.map,*.orig,resources\sources\scenes,resources\platforms\pc_dx11\shaders,binaries\x64,binaries\Win32,Debug\lib,MiniSizeRel\lib,RelWithDebInfo\lib,Release\lib"
 
 ;Release build
-;#define STK2OC_excludes "*.psd,*.lib,*.pdb,resources\platforms,binaries\x64,binaries\Win32,Debug,MiniSizeRel,RelWithDebInfo,Release\lib"
+;#define STK2OC_excludes "*.psd,*.lib,*.exp,*.map,*.pdb,*.orig,resources\sources\scenes,resources\platforms,mounts\platforms,binaries\x64,binaries\Win32,Debug,MiniSizeRel,RelWithDebInfo,Release\lib"
 
 ; versions, names etc.:
 #define STK2OC_shortcut_name "S.T.A.L.K.E.R. 2 Old Concept"
@@ -163,6 +163,8 @@ Name: rus; MessagesFile: compiler:Languages\Russian.isl
 Name: eng; MessagesFile: compiler:Default.isl
 
 [UninstallDelete]
+Type: filesandordirs; Name: "{app}\resources\platforms\*";
+Type: filesandordirs; Name: "{app}\user_data\*";
 
 [Code]
 #IFDEF UNICODE

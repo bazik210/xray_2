@@ -60,21 +60,23 @@
 #define STK2OC_app_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_directory_name "S.T.A.L.K.E.R. 2 Old Concept"
 #define STK2OC_copyright "dezowave"
-#define STK2OC_version "0.42"
-#define STK2OC_version_text "0.42"
+#define STK2OC_version "0.421"
+#define STK2OC_version_text "0.421"
 
 [Types]
 Name: "Full"; Description: "Patch installation"
 ;Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.42"; Types: full; Flags: fixed
+Name: "OldConceptPatch"; Description: "Stalker 2 Old Concept Patch 0.421"; Types: full; Flags: fixed
 ;///////////////////////////////////////////////
-Name: "binaries"; Description: "Binaries"; Types: full custom
+;Name: "binaries"; Description: "Binaries"; Types: full; Flags: fixed
 
 [Files]
 ;Source: "{#STK2OC_installer_support_files}\7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
-Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: binaries
+Source: "{#STK2OC_game_files}\binaries\*"; DestDir: "{app}\binaries\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
+Source: "{#STK2OC_game_files}\resources\*"; DestDir: "{app}\resources\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
+Source: "{#STK2OC_game_files}\changelog.txt"; DestDir: "{app}\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
 
 ;#ifndef BundleRelease
 ;Source: "{#STK2OC_game_files}\*"; DestDir: "{app}"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist
@@ -135,7 +137,7 @@ SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ic
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
 DiskSpanning = Yes
 DiskSliceSize = 2100000000
-OutputBaseFilename = old_concept_patch_0_42
+OutputBaseFilename = old_concept_patch_0_421
 Compression = lzma2/ultra64
 SolidCompression = yes
 LZMAUseSeparateProcess = yes

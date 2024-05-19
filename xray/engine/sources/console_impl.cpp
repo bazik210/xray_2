@@ -188,14 +188,16 @@ bool console_impl::get_active()	const
 
 static u32 string_color(pcstr str)
 {
-	//A-R-G-B
+	//A-R-G-B - I think it is actually A-B-G-R
 	if(strstr(str, "<info>"))
-		return 0xffffffff;
+		return 0xffffffff;  // white - 0xffffffff
 	if(strstr(str, "<Warning>"))
-		return 0xffff7088;
+		return 0xff00ffff;  // new color is yellow, original 0xffff7088 - cornflower blue, according to google
 	if(strstr(str, "<ERROR>"))
-		return 0xffff0000;
-	
+		return 0xff0000ff;  // new color is red, original 0xffff0000 - blue
+	if (strstr(str, "<debug>"))
+		return 0xffff7088;  // debug string added by me (lol123), uses cornflower blue
+
 	return 0xffffffff;
 }
 

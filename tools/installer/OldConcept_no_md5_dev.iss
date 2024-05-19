@@ -56,11 +56,14 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Components]
 Name: "stk2oc"; Description: "Developer Components"; Types: full custom; Flags: fixed
 ;///////////////////////////////////////////////
+Name: "docs"; Description: "Developer Docs"; Types: full custom
 Name: "xray"; Description: "Engine sources"; Types: full custom
+Name: "scenes"; Description: "Scenes sources"; Types: full custom
 Name: "textures"; Description: "Textures Sources"; Types: full custom
 Name: "tools"; Description: "Tools and Scripts"; Types: full custom
-Name: "tests"; Description: "Coders Tests"; Types: full custom
-Name: "docs"; Description: "Coders Docs"; Types: full custom
+Name: "extra"; Description: "Extra Content"; Types: full custom
+Name: "tests"; Description: "Coder Tests"; Types: full custom
+Name: "wiki"; Description: "Coder Wiki"; Types: full custom
 ;///////////////////////////////////////////////
 
 [Files]
@@ -69,11 +72,15 @@ Source: "{#STK2OC_game_files}\third_party\*"; DestDir: "{app}\third_party\"; Fla
 Source: "{#STK2OC_game_files}\build\*"; DestDir: "{app}\build\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: xray
 Source: "{#STK2OC_game_files}\CMakeLists.txt"; DestDir: "{app}"; Components: xray
 Source: "{#STK2OC_game_files}\README.md"; DestDir: "{app}"; Components: xray
+Source: "{#STK2OC_game_files}\versions.txt"; DestDir: "{app}"; Components: xray
 Source: "{#STK2OC_game_files}\dependency_graph.pdf"; DestDir: "{app}"; Components: xray
+Source: "{#STK2OC_game_files}\resources\sources\scenes\*"; DestDir: "{app}\resources\sources\scenes\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: scenes
+Source: "{#STK2OC_game_files}\resources\sources\textures\*.psd"; DestDir: "{app}\resources\sources\textures\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: textures
+Source: "{#STK2OC_game_files}\documents\*"; DestDir: "{app}\documents\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: docs
 Source: "{#STK2OC_game_files}\tools\*"; DestDir: "{app}\tools\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tools
 Source: "{#STK2OC_game_files}\tests\*"; DestDir: "{app}\tests\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: tests
-Source: "{#STK2OC_game_files}\3rd-party_wiki\*"; DestDir: "{app}\3rd-party_wiki\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: docs
-Source: "{#STK2OC_game_files}\resources\*.psd"; DestDir: "{app}\resources\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: textures
+Source: "{#STK2OC_game_files}\3rd-party_wiki\*"; DestDir: "{app}\3rd-party_wiki\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: wiki
+Source: "{#STK2OC_game_files}\Stuff\*"; DestDir: "{app}\Stuff\"; Flags: ignoreversion createallsubdirs recursesubdirs skipifsourcedoesntexist; Components: extra
 
 [Run]
 
@@ -102,7 +109,7 @@ MinVersion=6.1sp1
 WizardImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerImage.bmp
 SetupIconFile={#STK2OC_installer_support_files}\installer_images\logo_stk2_v2.ico
 WizardSmallImageFile={#STK2OC_installer_support_files}\installer_images\LAinstallerSmallImage.bmp
-DiskSpanning = no
+DiskSpanning = yes
 DiskSliceSize = 2100000000
 OutputBaseFilename = old_concept_dev
 Compression = lzma2/ultra64
