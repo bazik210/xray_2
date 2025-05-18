@@ -3,3 +3,6 @@ xray/maya/maya2012_lib_x64/** filter=lfs diff=lfs merge=lfs -text
 xray/maya/maya2018_lib_x64/** filter=lfs diff=lfs merge=lfs -text
 xray/maya/maya2019_lib_x64/** filter=lfs diff=lfs merge=lfs -text
 xray/maya/maya2023_lib_x64/** filter=lfs diff=lfs merge=lfs -text
+xray/maya/sources/* !text !filter !merge !diff
+xray/maya/sources/** !text !filter !merge !diff
+xray/maya/CMakeLists.txt !text !filter !merge !diff
