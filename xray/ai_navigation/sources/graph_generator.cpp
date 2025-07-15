@@ -48,6 +48,7 @@ graph_generator::graph_generator			(
 	m_channel							( vectora< u32 > (g_allocator) ),
 	m_transformed_vertices				( vectora< math::float3 > ( g_allocator ) ),
 	m_restricted_areas					( vectora<cuboid_type> ( g_allocator ) ),
+	m_geometry_vector					( vectora<xray::collision::geometry_instance*>( g_allocator )),
 #endif
 	m_subdivision_max_operation_id		( u32(-1) ),
 	m_tessellation_max_operation_id		( u32(-1) ),
@@ -259,6 +260,186 @@ graph_generator::graph_generator			(
 
 	//test_delaunay();
 
+}
+
+void graph_generator::generate_navmesh_in_chunks(const std::vector<xray::collision::geometry_instance*>& geometries)
+{
+    size_t chunk_size = 50; // chunk size
+    size_t total_geometries = geometries.size();
+
+    for (size_t i = 0; i < total_geometries; i += chunk_size) {
+        // Создаём чанк как вектор указателей
+        std::vector<xray::collision::geometry_instance*> chunk(
+            geometries.begin() + i,
+            geometries.begin() + std::min(i + chunk_size, total_geometries)
+        );
+
+        try {
+            // Проверяем доступную память
+  //          u64 available_memory =
+  //    #ifndef MASTER_GOLD
+  //              xray::debug::g_mt_allocator.get_available_memory();
+  //    #else
+  //              xray::memory::g_mt_allocator.get_available_memory();
+  //    #endif
+  //          if (available_memory < required_memory) {
+  //              LOG_ERROR("Not enough memory to process chunk: %llu bytes available, %llu bytes required",
+  //                        available_memory, required_memory);
+  //              throw std::runtime_error("Not enough memory to add geometry");
+  //          }
+
+            // Генерируем навигационную сетку для чанка
+            generate_navmesh_for_chunk(chunk);
+
+            // Очищаем чанк для освобождения памяти
+            //chunk.clear();
+            //chunk.shrink_to_fit(); // Уменьшаем емкость вектора
+
+            // Очищаем временные данные в m_input_triangles
+            //m_input_triangles.data.clear();
+            //m_input_triangles.indices.clear();
+            //m_input_triangles.vertices.clear();
+            //m_input_triangles.data.shrink_to_fit();
+            //m_input_triangles.indices.shrink_to_fit();
+            //m_input_triangles.vertices.shrink_to_fit();
+
+            // Очищаем m_geometry_vector
+            //m_geometry_vector.clear();
+            //m_geometry_vector.shrink_to_fit();
+
+        } catch (const std::exception& e) {
+            LOG_ERROR("Error generating navmesh for chunk: %s", e.what());
+            // Можно добавить логику восстановления или пропуска чанка
+        }
+    }
+}
+
+void graph_generator::generate_navmesh_for_chunk(const std::vector<xray::collision::geometry_instance*>& chunk)
+{
+    // Add geometry logic here
+    // Ensure that the vector does not exceed a certain size
+    m_geometry_vector.clear();
+    m_geometry_vector.reserve(std::min(chunk.size(), max_vector_size));
+
+    // Add geometry to the vector
+    for (const auto& gi : chunk) {
+        if (m_geometry_vector.size() >= max_vector_size) {
+            LOG_WARNING("Geometry vector reached maximum size: %u", max_vector_size);
+            break;
+        }
+        m_geometry_vector.push_back(gi);
+    }
+
+    // Добавляем геометрию в навигационную сетку
+    for (const auto& gi : m_geometry_vector) {
+          // Проверяем доступную память перед добавлением
+ //       u64 available_memory =
+//    #ifndef MASTER_GOLD
+//            xray::debug::g_mt_allocator.get_available_memory();
+//	  #else
+ //           xray::memory::g_mt_allocator.get_available_memory();
+//	  #endif
+ //       if (available_memory < required_memory) {
+ //           LOG_ERROR("Not enough memory to add geometry: %llu bytes available, %llu bytes required",
+ //                     available_memory, required_memory);
+ //           continue; // Пропускаем геометрию, чтобы избежать падения
+ //       }
+
+        // Логируем размер геометрии
+        LOG_INFO("Processing geometry_instance: index_count=%u, vertex_count=%u",
+                 gi->index_count(), gi->vertex_count());
+
+        // Используем add_geometry напрямую с geometry_instance
+         add_geometry(gi, gi->get_matrix());
+    }
+
+    // Генерируем навигационную сетку
+    generate();
+
+    // Очищаем m_geometry_vector после обработки
+    //m_geometry_vector.clear();
+    //m_geometry_vector.shrink_to_fit();
+}
+
+void graph_generator::generate_navmesh_for_chunk(const std::vector<std::pair<xray::collision::geometry*, float4x4>>& chunk)
+{
+    for (const auto& pair : chunk)
+    {
+        xray::collision::geometry* geom = pair.first;
+        const float4x4& transform = pair.second;
+
+    //    u64 available_memory =
+    //#ifndef MASTER_GOLD
+    //        xray::debug::g_mt_allocator.get_available_memory();
+    //#else
+    //        xray::memory::g_mt_allocator.get_available_memory();
+    //#endif
+
+    //    if (available_memory < required_memory)
+    //    {
+    //        LOG_ERROR("Not enough memory to add geometry: %llu bytes available, %llu bytes required",
+    //                  available_memory, required_memory);
+    //        continue;
+    //    }
+
+        LOG_INFO("Processing geometry: index_count=%u, vertex_count=%u",
+                 geom->index_count(), geom->vertex_count());
+
+        add_geometry(geom, transform);
+    }
+
+    generate();
+}
+
+void graph_generator::generate_navmesh_in_chunks(const std::vector<std::pair<xray::collision::geometry*, float4x4>>& geometries)
+{
+    size_t chunk_size = 50;
+    size_t total_geometries = geometries.size();
+
+    for (size_t i = 0; i < total_geometries; i += chunk_size)
+    {
+        std::vector<std::pair<xray::collision::geometry*, float4x4>> chunk(
+            geometries.begin() + i,
+            geometries.begin() + std::min(i + chunk_size, total_geometries)
+        );
+
+        try
+        {
+        //    u64 available_memory =
+        //#ifndef MASTER_GOLD
+        //        xray::debug::g_mt_allocator.get_available_memory();
+        //#else
+        //        xray::memory::g_mt_allocator.get_available_memory();
+        //#endif
+
+        //    if (available_memory < required_memory)
+        //    {
+        //        LOG_ERROR("Not enough memory to process chunk: %llu bytes available, %llu bytes required",
+        //                  available_memory, required_memory);
+        //        throw std::runtime_error("Not enough memory to add geometry");
+        //    }
+
+            generate_navmesh_for_chunk(chunk);
+
+            //chunk.clear();
+            //chunk.shrink_to_fit();
+
+            //m_input_triangles.data.clear();
+            //m_input_triangles.indices.clear();
+            //m_input_triangles.vertices.clear();
+            //m_input_triangles.data.shrink_to_fit();
+            //m_input_triangles.indices.shrink_to_fit();
+            //m_input_triangles.vertices.shrink_to_fit();
+
+            //m_geometry_vector.clear();
+            //m_geometry_vector.shrink_to_fit();
+
+        }
+        catch (const std::exception& e)
+        {
+            LOG_ERROR("Error generating navmesh for chunk: %s", e.what());
+        }
+    }
 }
 
 void graph_generator::reset_channel( ) 
@@ -735,6 +916,49 @@ void graph_generator::add_geometry(
 	for ( u32 i = vertex_count_old; i < vertex_count; ++i ) {
 		m_input_triangles.vertices.push_back( transform.transform ( vertices[i-vertex_count_old] ) );
 	}
+}
+
+void xray::ai::navigation::graph_generator::add_geometry(xray::collision::geometry_instance const* geometry, float4x4 const& transform)
+{
+    u32 const index_count_old = m_input_triangles.indices.size();
+    u32 const index_count = index_count_old + geometry->index_count();
+    R_ASSERT_CMP(index_count % 3, ==, 0, "index count is not dividable by 3: %d", index_count);
+    u32 const triangle_count = index_count / 3;
+
+    // Резервируем с коэффициентом 2 для оптимизации памяти
+    m_input_triangles.data.reserve(triangle_count * 2);
+    m_input_triangles.data.resize(triangle_count);
+
+    m_input_triangles.indices.reserve(index_count * 2);
+
+    u32 const vertex_count_old = m_input_triangles.vertices.size();
+    u32 const vertex_count = vertex_count_old + geometry->vertex_count();
+    m_input_triangles.vertices.reserve(vertex_count * 2);
+
+    // Логируем объем памяти перед аллокацией
+    u64 available_memory =
+#ifndef MASTER_GOLD
+        xray::debug::g_mt_allocator.get_available_memory();
+#else
+        xray::memory::g_mt_allocator.get_available_memory();
+#endif
+    LOG_INFO("Adding geometry_instance: triangles=%u, indices=%u, vertices=%u, available memory=%llu bytes",
+             triangle_count, index_count - index_count_old, vertex_count - vertex_count_old, available_memory);
+
+    u32 const* const indices = geometry->indices();
+    for (u32 i = index_count_old; i < index_count; ++i)
+        m_input_triangles.indices.push_back(indices[i - index_count_old] + vertex_count_old);
+
+    float3 const* vertices = geometry->vertices();
+    for (u32 i = vertex_count_old; i < vertex_count; ++i) {
+        // Применяем трансформацию из аргумента
+        m_input_triangles.vertices.push_back(transform.transform(vertices[i - vertex_count_old]));
+    }
+
+    // Очищаем временные данные
+    m_input_triangles.data.shrink_to_fit();
+    m_input_triangles.indices.shrink_to_fit();
+    m_input_triangles.vertices.shrink_to_fit();
 }
 
 void graph_generator::add_geometry_triangle( 

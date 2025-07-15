@@ -434,3 +434,11 @@ void xray::memory::iterate_allocators		( allocator_predicate_type const& predica
 	for ( u32 j = 0; i != e; ++i, ++j )
 		predicate				( *(*i).allocator, j, (*i).arena_address, (*i).arena_size, (*i).arena_id );
 }
+
+u64 xray::memory::get_available_memory_in_arena(pcstr arena_name)
+{
+    if (arena_name && strcmp(arena_name, "global multithreaded") == 0) {
+        return g_mt_allocator.get_available_memory();
+    }
+    return 0;
+}

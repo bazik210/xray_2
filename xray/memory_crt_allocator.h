@@ -25,6 +25,7 @@ public:
 			void	free_impl			( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION );
 	virtual	size_t	total_size			( )	 const    override;
 	virtual	size_t	allocated_size      ( )	 const    override;
+	virtual	u64 	get_available_memory() const { return 0; }
 
 private:
 	typedef	base_allocator				super;

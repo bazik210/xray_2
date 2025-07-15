@@ -230,4 +230,13 @@ size_t doug_lea_allocator::allocated_size( ) const
 	return						( result );
 }
 
+u64 doug_lea_allocator::get_available_memory() const
+{
+    if (!initialized())
+        return 0;
+
+    struct mallinfo info = xray_mspace_mallinfo(m_arena);
+    return info.fordblks;
+}
+
 #endif // #if !XRAY_USE_CRT_MEMORY_ALLOCATOR

@@ -36,6 +36,8 @@ public:
 			void	free_impl			( pvoid pointer XRAY_CORE_DEBUG_PARAMETERS_DECLARATION );
 	inline	size_t	usable_size			( pvoid pointer ) const { return m_use_guards ? base_allocator::usable_size(pointer) : doug_lea_allocator::usable_size_impl(pointer);}
 
+			u64 get_available_memory() const;
+
 private:
 	inline	pvoid	on_malloc			( pvoid buffer, size_t buffer_size, size_t previous_size, pcstr description ) const { return m_use_guards ? base_allocator::on_malloc(buffer, buffer_size, previous_size,description) : buffer; }
 	inline	void	on_free				( pvoid& buffer, bool clear_with_magic = true ) const { if ( m_use_guards ) base_allocator::on_free( buffer, clear_with_magic ); }

@@ -85,7 +85,7 @@ engine_world::engine_world				(
 	bool const is_command_line_editor	= command_line_editor( );
 	if ( is_command_line_editor ) {
 		// reserve memory for .NET stuff
-		m_editor_allocator.do_register	( 8*Mb,	"editor"	);
+		m_editor_allocator.do_register	( 16*Mb,	"editor"	);
 	}
 
 	if (additional_memory_size) {

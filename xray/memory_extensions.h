@@ -141,6 +141,9 @@ inline pvoid fill_uninitialized( pvoid buffer, u32 const buffer_size )
 	return				buffer;
 }
 
+	// Получить свободную память в арене
+	u64 get_available_memory_in_arena(pcstr arena_name);
+
 } // namespace memory
 } // namespace xray
 

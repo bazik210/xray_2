@@ -301,76 +301,111 @@ void terrain_tool_tab::on_deactivate()
 	m_tool->get_level_editor()->set_active_tool( nullptr );
 }
 
-
-void terrain_tool_tab::button5_Click( System::Object^ , System::EventArgs^)
+void terrain_tool_tab::button5_Click(System::Object^, System::EventArgs^)
 {
-	button5->Enabled		= false;
+    button5->Enabled = false;
 	//System::Windows::Forms::Cursor^ cursor		= m_tool->get_level_editor()->ide()->Cursor;
 	//m_tool->get_level_editor()->ide()->Cursor	= Cursors::WaitCursor;
-	bool use_wait_cursor_value	= m_tool->get_level_editor()->ide()->UseWaitCursor;
-	m_tool->get_level_editor()->ide()->UseWaitCursor	= true;
-	Application::DoEvents	( );
+    bool use_wait_cursor_value = m_tool->get_level_editor()->ide()->UseWaitCursor;
+    m_tool->get_level_editor()->ide()->UseWaitCursor = true;
+    Application::DoEvents();
 
-	xray::ai::navigation::graph_generator* graph_generator = m_tool->get_level_editor()->get_editor_world().get_ai_navigation_world().get_graph_generator();
-	graph_generator->clear_geometry();
+    xray::ai::navigation::graph_generator* graph_generator = m_tool->get_level_editor()->get_editor_world().get_ai_navigation_world().get_graph_generator();
+    graph_generator->clear_geometry();
 
-	cells_storage^ storage = m_tool->get_level_editor()->get_project()->m_editor_cell_manager->get_cells_storage();
+    cells_storage^ storage = m_tool->get_level_editor()->get_project()->m_editor_cell_manager->get_cells_storage();
 
-	for each( cell_objects^ c in storage->Values ) 
-	{
-		for each ( object_base^ obj in c->m_objects_list ) 
-		{
-			object_solid_visual^ solid_obj = dynamic_cast<object_solid_visual^>(obj);
-			if ( solid_obj )
-			{
-				graph_generator->add_geometry( &(*(*solid_obj->m_hq_collision)), solid_obj->get_transform() );
-			}
-		}
-		terrain_node^ node = c->m_terrain_node;
-		if ( node ) 
-		{
-			for ( int x = 0; x < 64; ++x ) 
-			{
-				for ( int z = 0; z < 64; ++z ) 
-				{
-					float h0, h1, h2, h3;
-					h0 = node->m_vertices.m_vertices[ node->vertex_id( x    , z     ) ].height;
-					h1 = node->m_vertices.m_vertices[ node->vertex_id( x + 1, z     ) ].height;
-					h2 = node->m_vertices.m_vertices[ node->vertex_id( x + 1, z + 1 ) ].height;
-					h3 = node->m_vertices.m_vertices[ node->vertex_id( x    , z + 1 ) ].height;
-					
-					float4x4 const& transform = node->get_transform();
-					float3 v0 = transform.transform( float3( float(x)  , h0, float(0-z) ) );
-					float3 v1 = transform.transform( float3( float(x+1), h1, float(0-z) ) );
-					float3 v2 = transform.transform( float3( float(x+1), h2, float(0-z-1) ) );
-					float3 v3 = transform.transform( float3( float(x)  , h3, float(0-z-1) ) );
+    u32 object_count = 0;
+    u32 triangle_count = 0;
+    for each (cell_objects^ c in storage->Values)
+    {
+        for each (object_base^ obj in c->m_objects_list)
+        {
+            object_solid_visual^ solid_obj = dynamic_cast<object_solid_visual^>(obj);
+            if (solid_obj)
+            {
+                xray::collision::geometry_ptr* geom_ptr = solid_obj->m_hq_collision;
+                if (geom_ptr && *geom_ptr)
+                {
+                    xray::collision::geometry* geom = &(**geom_ptr);
+                    if (geom)
+                    {
+                        u32 indices = geom->index_count();
+                        u32 vertices = geom->vertex_count();
+                        LOG_INFO("Adding solid visual #%u: index_count=%u, vertex_count=%u",
+                                 object_count, indices, vertices);
+                        graph_generator->add_geometry(geom, solid_obj->get_transform());
+                        object_count++;
+                        triangle_count += indices / 3;
+                    }
+                    else
+                    {
+                        LOG_WARNING("Invalid geometry for object_solid_visual");
+                    }
+                }
+                else
+                {
+                    LOG_WARNING("Skipping invalid m_hq_collision for object");
+                }
+            }
+        }
 
-					graph_generator->add_geometry_triangle( v0, v1, v3 );
-					graph_generator->add_geometry_triangle( v1, v2, v3 );
-				}
-			}
-		}
-	}
+        terrain_node^ node = c->m_terrain_node;
+        if (node)
+        {
+            for (int x = 0; x < 64; ++x)
+            {
+                for (int z = 0; z < 64; ++z)
+                {
+                    float h0, h1, h2, h3;
+                    h0 = node->m_vertices.m_vertices[node->vertex_id(x, z)].height;
+                    h1 = node->m_vertices.m_vertices[node->vertex_id(x + 1, z)].height;
+                    h2 = node->m_vertices.m_vertices[node->vertex_id(x + 1, z + 1)].height;
+                    h3 = node->m_vertices.m_vertices[node->vertex_id(x, z + 1)].height;
 
-	//xray::ai::navigation::graph_generator::cuboid_type cuboid;
-	//cuboid.push_back( float3( 10, 10, -10 ) );
-	//cuboid.push_back( float3( 20, 10, -10 ) );
-	//cuboid.push_back( float3( 20, 10, -20 ) );
-	//cuboid.push_back( float3( 10, 10, -20 ) );
+                    float4x4 const& transform = node->get_transform();
+                    float3 v0 = transform.transform(float3(float(x), h0, float(0 - z)));
+                    float3 v1 = transform.transform(float3(float(x + 1), h1, float(0 - z)));
+                    float3 v2 = transform.transform(float3(float(x + 1), h2, float(0 - z - 1)));
+                    float3 v3 = transform.transform(float3(float(x), h3, float(0 - z - 1)));
 
-	//cuboid.push_back( float3( 10, -1, -10 ) );
-	//cuboid.push_back( float3( 20, -1, -10 ) );
-	//cuboid.push_back( float3( 20, -1, -20 ) );
-	//cuboid.push_back( float3( 10, -1, -20 ) );
+                    graph_generator->add_geometry_triangle(v0, v1, v3);
+                    graph_generator->add_geometry_triangle(v1, v2, v3);
+                    triangle_count += 2;
+                }
+            }
+        }
+    }
 
-	//graph_generator->add_restricted_area( cuboid );
-	graph_generator->generate();
-	m_tool->get_level_editor()->get_project()->set_changed();
+    LOG_INFO("Total objects processed: %u, total triangles: %u", object_count, triangle_count);
 
-	button5->Enabled		= true;
+    try {
+	    //xray::ai::navigation::graph_generator::cuboid_type cuboid;
+	    //cuboid.push_back( float3( 10, 10, -10 ) );
+	    //cuboid.push_back( float3( 20, 10, -10 ) );
+	    //cuboid.push_back( float3( 20, 10, -20 ) );
+	    //cuboid.push_back( float3( 10, 10, -20 ) );
+
+	    //cuboid.push_back( float3( 10, -1, -10 ) );
+	    //cuboid.push_back( float3( 20, -1, -10 ) );
+	    //cuboid.push_back( float3( 20, -1, -20 ) );
+	    //cuboid.push_back( float3( 10, -1, -20 ) );
+
+	    //graph_generator->add_restricted_area( cuboid );
+        graph_generator->generate();
+        m_tool->get_level_editor()->get_project()->set_changed();
+    }
+    catch (System::Exception^ e) {
+        m_tool->get_level_editor()->ShowMessageBox(
+            "Failed to generate navmesh: " + e->Message,
+            MessageBoxButtons::OK,
+            MessageBoxIcon::Error);
+    }
+
+    button5->Enabled = true;
 //	m_tool->get_level_editor()->ide()->Cursor	= cursor;
-	m_tool->get_level_editor()->ide()->UseWaitCursor	= use_wait_cursor_value;
-	Application::DoEvents	( );
+    m_tool->get_level_editor()->ide()->UseWaitCursor = use_wait_cursor_value;
+    Application::DoEvents();
 }
 
 } //namespace xray

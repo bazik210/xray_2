@@ -35,9 +35,6 @@
 #	include <xray/memory_doug_lea_mt_allocator.h>
 
 namespace xray {
-
-#if XRAY_DEBUG_ALLOCATOR
-
 namespace memory {
 	typedef doug_lea_mt_allocator					doug_lea_mt_allocator_type;
 } // namespace memory
@@ -50,9 +47,6 @@ namespace debug {
 	extern XRAY_CORE_API memory::crt_allocator g_mt_allocator;
 #endif
 } // namespace debug
-
-#endif // #if XRAY_DEBUG_ALLOCATOR
-
 } // namespace xray
 
 #define DEBUG_NEW( type )							XRAY_NEW_IMPL(		::xray::debug::g_mt_allocator, type )

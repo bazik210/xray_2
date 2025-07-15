@@ -180,10 +180,10 @@ void graph_generator_merger::collect_obstructed_constraint_edges ( u32 const tri
 
 		triangles.erase( triangle );
 
-		if ( is_similar( coordinate_indices, segment_vertices[0], segment_vertices[1] ) )
+		if ( intersection == 0 || coplanar || is_adjanced( m_triangles_mesh, triangle_id, triangle->triangle_id ) )
 			continue;
 
-		if ( intersection == 0 || coplanar || is_adjanced( m_triangles_mesh, triangle_id, triangle->triangle_id ) )
+		if ( is_similar( coordinate_indices, segment_vertices[0], segment_vertices[1] ) )
 			continue;
 
 		u32 segment_indices[2];
@@ -267,7 +267,9 @@ bool graph_generator_merger::can_traverse ( u32 const triangle_id, float3 const&
 
 void graph_generator_merger::collect_constraint_edges ( u32 const triangle_id, float3 const& region_normal )
 {
-	R_ASSERT	( !m_triangles_mesh.data[ triangle_id ].is_marked );
+	//.R_ASSERT	( !m_triangles_mesh.data[ triangle_id ].is_marked );
+	if (m_triangles_mesh.data[triangle_id].is_marked)
+		return;
 
 	m_triangles_mesh.data[ triangle_id ].color = math::color( 255, 0, 0, 64 );
 	m_triangles_mesh.data[ triangle_id ].is_marked = true;

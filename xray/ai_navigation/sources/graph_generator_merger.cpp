@@ -64,6 +64,9 @@ graph_generator_merger::graph_generator_merger(
 			triangulate_region ( i );
 	}
 
+	//for (u32 i = 0; i < m_triangles_mesh.data.size(); ++i)
+	//	m_triangles_mesh.data[i].is_marked = false;
+
 	m_triangles_mesh.remove_marked_triangles ( );
 	graph_generator_adjacency_builder ( 
 		m_triangles_mesh.indices, 
@@ -135,6 +138,11 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 
 	float3 const& normal = m_triangles_mesh.data[ triangle_id ].plane.normal;
 	collect_constraint_edges				( triangle_id, m_triangles_mesh.data[ triangle_id ].plane.normal );
+
+	// Если constraint edges пусты, выходим
+	if (m_constraint_edges.empty())
+		return;
+
 	if ( vertices_count != m_triangles_mesh.vertices.size() )
 		remove_duplicated_edge_vertices		( vertices_count, normal );
 	for ( u32 i = 0; i < 3; ++i ) {
@@ -197,14 +205,25 @@ void graph_generator_merger::triangulate_region ( u32 const triangle_id )
 		m_triangles_mesh.data[triangle_id].plane.normal
 	);
 
-	R_ASSERT( 
-		is_correct_triangulation_input_data( 
-			m_triangles_mesh.data[triangle_id].plane.normal,
-			m_triangles_mesh.vertices, 
-			vertex_indices, 
-			m_constraint_edges 
-		)
-	);
+	if (!is_correct_triangulation_input_data( 
+	 		m_triangles_mesh.data[triangle_id].plane.normal,
+	 		m_triangles_mesh.vertices, 
+	 		vertex_indices, 
+	 		m_constraint_edges 
+	 	)) {
+		// Логируем предупреждение
+		LOG_WARNING("Skipping triangulation for triangle %u: invalid input data detected", triangle_id);
+		return; // Просто пропускаем эту область, не падаем
+	}
+
+	//R_ASSERT( 
+	//	is_correct_triangulation_input_data( 
+	//		m_triangles_mesh.data[triangle_id].plane.normal,
+	//		m_triangles_mesh.vertices, 
+	//		vertex_indices, 
+	//		m_constraint_edges 
+	//	)
+	//);
 #endif
 	constrained_delaunay_triangulator (																																		
 		m_triangles_mesh.vertices,

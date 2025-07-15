@@ -17,6 +17,7 @@
 #include "triangles_mesh.h"
 #include "navigation_mesh_types.h"
 #include "path_finder_funnel.h"
+#include <xray/collision/geometry_instance.h>
 
 namespace xray {
 
@@ -66,11 +67,20 @@ public:
 			bool	check_adjacency				( u32 const triangle_id0, u32 const triangle_id1 );
 
 			void	add_geometry				( xray::collision::geometry* geometry, float4x4 const& transform );
+			void	add_geometry				(xray::collision::geometry_instance const* geometry, float4x4 const& transform);
 			void	add_geometry_triangle		( float3 const& v0, float3 const& v1, float3 const& v2 );
 #ifndef MASTER_GOLD
 			void	save_geometry				( pcstr filename );
 #endif
 			void	clear_geometry				( );
+
+			// New methods for chunked generation
+			void generate_navmesh_for_chunk(const std::vector<xray::collision::geometry_instance*>& chunk);
+			void generate_navmesh_in_chunks(const std::vector<xray::collision::geometry_instance*>& geometries);
+
+			void generate_navmesh_for_chunk(const std::vector<std::pair<xray::collision::geometry*, float4x4>>& chunk);
+			void generate_navmesh_in_chunks(const std::vector<std::pair<xray::collision::geometry*, float4x4>>& geometries);
+
 
 			typedef fixed_vector< float3, 8 >	cuboid_type;
 			void	add_restricted_area			( const cuboid_type cuboid);
@@ -94,8 +104,10 @@ private:
 	typedef buffer_vector< collision::triangle_result >	buffer_triangles_type;
 #ifndef MASTER_GOLD
 	typedef debug::vector< math::float3 >		vertices_type;
+	typedef debug::vector<xray::collision::geometry_instance*> geometry_vector_type;
 #else
 	typedef vectora< math::float3 >				vertices_type;
+	typedef vectora<xray::collision::geometry_instance*> geometry_vector_type;
 #endif
 
 private:
@@ -199,6 +211,10 @@ private:
 
 	static	void		remove_restricted_areas			( triangles_mesh_type& triangles_mesh, restricted_areas_type& areas );
 	static	void		remove_areas_in_cuboid			( triangles_mesh_type& triangles_mesh, triangles_type& triangles, cuboid_type& cuboid );
+
+    geometry_vector_type m_geometry_vector;
+    static const size_t max_vector_size = 1000;
+    static const size_t required_memory = 100 * 1024 * 1024;
 
 public:
 #ifndef MASTER_GOLD
